@@ -19,6 +19,7 @@ typedef struct Primitive
     VertexAttribute aNormal;
 
     uint32_t draw_mode;
+    uint32_t draw_type;
 } Primitive;
 
 #ifdef __cplusplus
