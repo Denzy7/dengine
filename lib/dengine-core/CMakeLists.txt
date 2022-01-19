@@ -13,7 +13,7 @@ src/framebuffer.c
 )
 
 set(dengine-core-hdr
-${CMAKE_BINARY_DIR}/dengine_config.h
+#${PROJECT_BINARY_DIR}/dengine_config.h
 include/dengine/window.h
 include/dengine/loadgl.h
 include/dengine/checkgl.h

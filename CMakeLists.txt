@@ -33,14 +33,14 @@ else()
 endif()
 
 include_directories(
-        ${CMAKE_SOURCE_DIR}/deps/stb
-        ${CMAKE_SOURCE_DIR}/deps/glad4.6/include
-        ${CMAKE_SOURCE_DIR}/deps/cglm/include
-        ${CMAKE_BINARY_DIR} #dengine_config.h
-        ${CMAKE_SOURCE_DIR}/lib/dengine-core/include
-        ${CMAKE_SOURCE_DIR}/lib/dengine-core/include/dengine
-        ${CMAKE_SOURCE_DIR}/lib/dengine-utils/include
-        ${CMAKE_SOURCE_DIR}/lib/dengine-utils/include/dengine-utils
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/stb
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/glad4.6/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/cglm/include
+        ${PROJECT_BINARY_DIR} #dengine_config.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-core/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-core/include/dengine
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-utils/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-utils/include/dengine-utils
         )
 
 if(NOT ANDROID)

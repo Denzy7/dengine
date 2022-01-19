@@ -14,7 +14,7 @@ include/dengine-utils/filesys.h
 include/dengine-utils/vtor.h
 include/dengine-utils/os.h
 include/dengine-utils/rng.h
-${CMAKE_BINARY_DIR}/dengine_config.h
+#${PROJECT_BINARY_DIR}/dengine_config.h
 include/dengine-utils/timer.h
 )
 

@@ -5,6 +5,7 @@
 #include <dirent.h> //opendir
 #include <stdio.h> //fopen, remove
 #include <string.h>//strdup, strlen
+#include <stdlib.h>//malloc
 
 //Will this work on Win32?
 #define PATH_SEP "/"
