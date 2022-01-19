@@ -14,6 +14,10 @@
 #error "Plz define at least one Windowing Framework"
 #endif // defined
 
+#ifdef DENGINE_ANDROID
+#include <android/window.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -64,6 +68,9 @@ int dengine_window_glfw_context_gladloadgl();
 
 #endif // DENGINE_WIN_GLFW
 
+#ifdef DENGINE_ANDROID
+void dengine_window_android_set_nativewindow(struct ANativeWindow* window);
+#endif
 
 #ifdef __cplusplus
 }
