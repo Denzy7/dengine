@@ -28,19 +28,14 @@ int main(int argc, char** argv)
 
     shader.vertex_code =
             "attribute vec3 aPos;"
-            "attribute vec2 aTexCoord;"
-            "varying vec2 TexCoord;"
             "void main()"
             "{"
                 "gl_Position = vec4(aPos, 1.0);"
-                "TexCoord = aTexCoord;"
             "}";
     shader.fragment_code =
-            "uniform sampler2D texture;"
-            "varying vec2 TexCoord;"
             "void main()"
             "{"
-                "gl_FragColor = texture2D(texture, TexCoord) + vec4(1.0, 0.0, 1.0, 1.0);"
+                "gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);"
             "}";
     dengine_shader_create(&shader);
     dengine_shader_setup(&shader);
