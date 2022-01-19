@@ -1,6 +1,6 @@
 #include "rng.h"
 
-#include <stdlib.h> //rand_r()
+#include <stdlib.h> //rand()
 #include <time.h> //time_t, time()
 
 void dengineutils_rng_set_seed(unsigned int seed)
