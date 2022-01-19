@@ -1,0 +1,2 @@
+rootProject.name = "Dengine Androidss"
+include ':app'
