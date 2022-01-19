@@ -1,0 +1,26 @@
+#include <stdio.h>
+
+#include <dengine-utils/confserialize.h>
+#include <dengine/logging.h>
+int main(int argc, char** argv)
+{
+    if(argc < 3)
+    {
+        dengine_logging_log("ERROR::argv[1] = *.conf file, argv[2] = key to find");
+    }
+    Conf conf;
+    conf.file = argv[1];
+    conf.separator = '=';
+
+    if(dengineutils_confserialize_load(&conf))
+    {
+        char* asset = dengineutils_confserialize_get(argv[2], &conf);
+
+        if(asset)
+            printf("%s -> %s", argv[2], asset);
+        else
+            dengine_logging_log("ERROR::%s key not found!", argv[2]);
+
+        dengineutils_confserialize_free(&conf);
+    }
+}
