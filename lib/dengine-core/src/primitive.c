@@ -2,8 +2,6 @@
 
 #include "loadgl.h" //gltypes
 
-
-
 static float quad_array[]=
 {
     //Vert              //TexCoord
@@ -46,10 +44,14 @@ void dengine_primitive_gen_quad(Primitive* primitive, Shader* shader)
     primitive->aPos.stride = 5 * sizeof(float);
     primitive->aPos.type = GL_FLOAT;
     primitive->aPos.ptr = NULL;
+
     dengine_vertex_attribute_indexfromshader(shader, &primitive->aPos, "aPos");
-    dengine_vertex_attribute_setup(&primitive->aPos);
-    if(primitive->aPos.index)
+    if(primitive->aPos.index != -1)
+    {
+        dengine_vertex_attribute_setup(&primitive->aPos);
         dengine_vertex_attribute_enable(&primitive->aPos);
+    }
+
 
     //aTexCoord
     primitive->aTexCoord.size = 2;
@@ -57,9 +59,14 @@ void dengine_primitive_gen_quad(Primitive* primitive, Shader* shader)
     primitive->aTexCoord.type = GL_FLOAT;
     primitive->aTexCoord.ptr = (void*)(3 * sizeof(float));
     dengine_vertex_attribute_indexfromshader(shader, &primitive->aTexCoord, "aTexCoord");
-    dengine_vertex_attribute_setup(&primitive->aTexCoord);
-    if(primitive->aTexCoord.index)
+
+    if(primitive->aTexCoord.index != -1)
+    {
+        dengine_vertex_attribute_setup(&primitive->aTexCoord);
         dengine_vertex_attribute_enable(&primitive->aTexCoord);
+    }
+
+
 
     dengine_buffer_bind(GL_ELEMENT_ARRAY_BUFFER, NULL);
     dengine_buffer_bind(GL_ARRAY_BUFFER, NULL);
