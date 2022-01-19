@@ -25,6 +25,8 @@ if(NOT ANDROID)
         message("Using System GLFW")
     else()
         message("Compile GLFW source")
+	add_subdirectory(deps/glfw)
+	include_directories(deps/glfw/include)
     endif()
 endif()
 
