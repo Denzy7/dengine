@@ -24,6 +24,10 @@ if(GTK3_LIBRARIES)
     target_link_libraries(dengine-utils ${GTK3_LIBRARIES})
 endif()
 
+if(ANDROID)
+    target_link_libraries(dengine-utils log)
+endif()
+
 set_property(TARGET dengine-utils PROPERTY C_STANDARD 99)
 
 
