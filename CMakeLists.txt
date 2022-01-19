@@ -24,7 +24,7 @@ if(PkgConfig_FOUND)
             link_directories(${GLFW3_LIBRARY_DIRS})
         else()
             message(">>> Compile GLFW3 sources")
-            add_subdirectory(deps/glfw)
+            add_subdirectory(deps/glfw "glfw3-build")
             include_directories(deps/glfw/include)
         endif()
     endif()
@@ -44,14 +44,14 @@ include_directories(
         )
 
 if(NOT ANDROID)
-    add_subdirectory(deps/glad4.6)
+    add_subdirectory(deps/glad4.6 "glad-build")
 endif()
 
 configure_file(dengine_config.h.in dengine_config.h)
 
-add_subdirectory(lib/dengine-utils)
-add_subdirectory(lib/dengine-core)
+add_subdirectory(lib/dengine-utils "dengine-utils-build")
+add_subdirectory(lib/dengine-core "dengine-core-build")
 
-add_subdirectory(tests)
+add_subdirectory(tests "tests-build")
 
 
