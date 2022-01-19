@@ -117,6 +117,17 @@ void dengine_window_terminate()
 {
     #if defined (DENGINE_WIN_GLFW)
     glfwTerminate();
+    #elif defined(DENGINE_WIN_EGL)
+    if (_egl_display != EGL_NO_DISPLAY) {
+        eglMakeCurrent(_egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        if (_egl_context != EGL_NO_CONTEXT) {
+            eglDestroyContext(_egl_display, _egl_context);
+        }
+        if (_egl_surface != EGL_NO_SURFACE) {
+            eglDestroySurface(_egl_display, _egl_surface);
+        }
+        eglTerminate(_egl_display);
+    }
     #endif // defined
 }
 
