@@ -7,6 +7,8 @@
 #include <string.h>//strdup, strlen
 #include <stdlib.h>//malloc
 
+#include "window.h"
+
 //Will this work on Win32?
 #define PATH_SEP "/"
 #if defined (DENGINE_LINUX)
