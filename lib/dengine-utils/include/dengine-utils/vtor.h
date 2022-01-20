@@ -1,44 +1,77 @@
+/*
+ * Simple C++ std::vector like implementation
+ *
+ * #define VTOR_IMPLEMENTATION before
+ * including this file
+ *
+ * If you get multiple definition errors
+ * ensure you have defined VTOR_IMPLEMENTATION
+ * only once in the code base
+ *
+ * Optionally define VTOR_VERBOSE
+ * before VTOR_IMPLEMENTATION to print
+ * memory allocations
+ */
+
 #ifndef VTOR_H
 #define VTOR_H
 
-#include <stdlib.h>
+#include <stddef.h> //size_t
 
+typedef struct vtor
+{
+    void* data;
+    size_t count;
+    size_t capacity;
+    size_t type_sz;
+} vtor;
+
+void vtor_create_alloc(vtor* vtor, size_t type_sz, size_t num);
+
+void vtor_create(vtor* vtor, size_t type_sz);
+
+void vtor_pushback(vtor* vtor, void* val);
+
+void vtor_popback(vtor* vtor);
+
+void vtor_free(vtor* vtor);
+
+#endif // VTOR_H
+
+#ifdef VTOR_IMPLEMENTATION
+
+#include <stdlib.h>  //malloc, free
+#include <string.h>  //memcpy
 #ifdef VTOR_VERBOSE
 #include <stdio.h>
 #endif
 
-typedef struct vtor
-{
-    void* dat;
-    size_t cnt;
-    size_t cap;
-    size_t type_sz;
-} vtor;
-
 void vtor_create_alloc(vtor* vtor, size_t type_sz, size_t num)
 {
-    vtor->dat = malloc(num * type_sz);
-    vtor->cap = num;
+    vtor->data = malloc(num * type_sz);
+    vtor->capacity = num;
     vtor->type_sz = type_sz;
+    vtor->count = 0;
 
 #ifdef VTOR_VERBOSE
-    printf("create_alloc vec type_sz : %zu, cap : %zu\n", vtor->type_sz, vtor->cap);
+    printf("create_alloc vec type_sz : %zu, capacity : %zu\n", vtor->type_sz, vtor->capacity);
 #endif // VTOR_VERBOSE
 }
 
 void vtor_create(vtor* vtor, size_t type_sz)
 {
-    vtor->dat = malloc(2 * type_sz);
-    vtor->cap = 2;
+    vtor->data = malloc(2 * type_sz);
+    vtor->capacity = 2;
     vtor->type_sz = type_sz;
+    vtor->count = 0;
 
 #ifdef VTOR_VERBOSE
-    if(vtor->dat)
+    if(vtor->data)
     {
-        printf("create vec type_sz : %zu, cap : %zu\n", vtor->type_sz, vtor->cap);
+        printf("create vec type_sz : %zu, capacity : %zu\n", vtor->type_sz, vtor->capacity);
     }else
     {
-        printf("error cannot create vec. null vtor->dat\n");
+        printf("error cannot create vec. null vtor->data\n");
     }
 
 #endif // VTOR_VERBOSE
@@ -46,45 +79,45 @@ void vtor_create(vtor* vtor, size_t type_sz)
 
 void vtor_pushback(vtor* vtor, void* val)
 {
-    unsigned int cap = vtor->cap;
+    unsigned int capacity = vtor->capacity;
     size_t type_sz = vtor->type_sz;
 
-    if(vtor->cnt == vtor->cap && type_sz > 0)
+    if(vtor->count == vtor->capacity && type_sz > 0)
     {
         //temp buffer
-        void* tmp = malloc(cap * type_sz);
-        memcpy(tmp, vtor->dat, cap * type_sz);
+        void* tmp = malloc(capacity * type_sz);
+        memcpy(tmp, vtor->data, capacity * type_sz);
 
         //free old
-        free(vtor->dat);
+        free(vtor->data);
 
         //realloc
-        vtor->dat = malloc(type_sz * cap * 2);
+        vtor->data = malloc(type_sz * capacity * 2);
 
         //copy back
-        memcpy(vtor->dat, tmp, type_sz * cap);
+        memcpy(vtor->data, tmp, type_sz * capacity);
 
         //free temp
         free(tmp);
 
-        //set cap
-        vtor->cap = cap * 2;
+        //set capacity
+        vtor->capacity = capacity * 2;
 
 #ifdef VTOR_VERBOSE
-        printf("realloc vec type_sz : %zu, cap : %zu\n", vtor->type_sz, vtor->cap);
+        printf("realloc vec type_sz : %zu, capacity : %zu\n", vtor->type_sz, vtor->capacity);
 #endif // VTOR_VERBOSE
     }
 
-    if(vtor->dat)
+    if(vtor->data)
     {
-        void* new_loc = vtor->dat + (vtor->type_sz * vtor->cnt);
+        void* new_loc = vtor->data + (vtor->type_sz * vtor->count);
         memcpy(new_loc, val, type_sz);
-        vtor->cnt++;
+        vtor->count++;
 
 #ifdef VTOR_VERBOSE
-        printf("pushback vec type_sz : %zu, cap : %zu, cnt : %zu\n", vtor->type_sz, vtor->cap, vtor->cnt);
+        printf("pushback vec type_sz : %zu, capacity : %zu, count : %zu\n", vtor->type_sz, vtor->capacity, vtor->count);
     }else{
-        printf("cannot pushback. null vtor->dat\n");
+        printf("cannot pushback. null vtor->data\n");
 #endif // VTOR_VERBOSE
 
     }
@@ -92,32 +125,33 @@ void vtor_pushback(vtor* vtor, void* val)
 
 void vtor_free(vtor* vtor)
 {
-    if(vtor->dat)
+    if(vtor->data)
     {
-        free(vtor->dat);
+        free(vtor->data);
 
-        vtor->dat = NULL;
+        vtor->data = NULL;
 
 #ifdef VTOR_VERBOSE
-        printf("free vec type_sz : %zu, cap : %zu, cnt : %zu\n", vtor->type_sz, vtor->cap, vtor->cnt);
+        printf("free vec type_sz : %zu, capacity : %zu, count : %zu\n", vtor->type_sz, vtor->capacity, vtor->count);
     }else{
-        printf("cannot free. null vtor->dat\n");
+        printf("cannot free. null vtor->data\n");
 #endif // VTOR_VERBOSE
     }
 }
 
 void vtor_popback(vtor* vtor)
 {
-    if(vtor->dat && vtor->cnt > 0)
+    if(vtor->data && vtor->count > 0)
     {
 
-        vtor->cnt--;
+        vtor->count--;
 #ifdef VTOR_VERBOSE
-        printf("popback vec type_sz : %zu, cap : %zu, cnt : %zu\n", vtor->type_sz, vtor->cap, vtor->cnt);
+        printf("popback vec type_sz : %zu, capacity : %zu, count : %zu\n", vtor->type_sz, vtor->capacity, vtor->count);
     }else{
-        printf("cannot popback. null vtor->dat\n");
+        printf("cannot popback. null vtor->data\n");
 #endif // VTOR_VERBOSE
     }
 }
 
-#endif // VTOR_H
+#endif
+
