@@ -34,6 +34,15 @@ target_link_libraries(testdengine-util-rng
         dengine-utils)
 set_property(TARGET testdengine-util-rng PROPERTY C_STANDARD 99)
 
+#timer util
+add_executable(testdengine-util-timer
+        src/testdengine-utils/util-timer.c
+    )
+target_link_libraries(testdengine-util-timer
+        dengine-utils)
+set_property(TARGET testdengine-util-timer PROPERTY C_STANDARD 99)
+
+
 #executables for desktop
 if(NOT ANDROID)
 #core
