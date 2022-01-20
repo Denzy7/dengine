@@ -1,5 +1,5 @@
 /*
- * Simple C++ std::vector like implementation
+ * Simple C++ vector like implementation
  *
  * #define VTOR_IMPLEMENTATION before
  * including this file
