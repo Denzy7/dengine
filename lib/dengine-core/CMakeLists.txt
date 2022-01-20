@@ -34,7 +34,7 @@ add_library(dengine-core ${dengine-core-hdr} ${dengine-core-src})
 target_link_libraries(dengine-core dengine-utils)
 
 if(NOT ANDROID)
-    target_link_libraries(dengine-core glfw glad)
+    target_link_libraries(dengine-core ${GLFW3_LIBRARIES} glad)
 endif()
 
 if(UNIX)

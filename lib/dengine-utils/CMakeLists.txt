@@ -20,7 +20,7 @@ include/dengine-utils/timer.h
 
 add_library(dengine-utils ${dengine-utils-hdr} ${dengine-utils-src})
 
-if(GTK3_LIBRARIES)
+if(GTK3_LIBRARIES AND UNIX)
     target_link_libraries(dengine-utils ${GTK3_LIBRARIES})
 endif()
 
