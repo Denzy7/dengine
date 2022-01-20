@@ -37,7 +37,7 @@ void dengineutils_os_init(int argc, char** argv)
 void _dengineutils_os_init_null()
 {
     dengineutils_os_init(0, NULL);
-    dengineutils_logging_log("%s::was not init before using GUI. Init with NULL", WARNING_TAG);
+    //dengineutils_logging_log("%s::was not init before using GUI. Init with NULL", WARNING_TAG);
     init = 1;
 }
 
