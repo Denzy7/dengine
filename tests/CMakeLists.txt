@@ -93,6 +93,14 @@ target_link_libraries(testdengine-2d-quad-textured
 set_property(TARGET testdengine-2d-quad-textured PROPERTY C_STANDARD 99)
 
 
+#a 3d plane
+add_executable(testdengine-3d-plane
+        src/testdengine-plane/3d-plane.c
+        )
+target_link_libraries(testdengine-3d-plane
+        dengine-core dengine-utils)
+set_property(TARGET testdengine-3d-plane PROPERTY C_STANDARD 99)
+
 endif()
 
 
