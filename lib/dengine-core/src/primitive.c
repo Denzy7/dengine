@@ -165,3 +165,61 @@ void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader)
 
         vtor_free(&plane_array);
 }
+
+void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
+{
+    vtor cube_array;
+    vtor_create(&cube_array, sizeof(float));
+
+    for(int i = -1; i <= 1; i += 2)
+    {
+        for(int j = -1; j <= 1; j += 2)
+        {
+            for(int k = -1; k <= 1; k += 2)
+            {
+                float x = (float)i;
+                float y = (float)j;
+                float z = (float)k;
+
+                vtor_pushback(&cube_array, &x);
+                vtor_pushback(&cube_array, &y);
+                vtor_pushback(&cube_array, &z);
+            }
+        }
+    }
+
+    static uint16_t cube_index[]=
+    {
+        0, 1, 2, 1, 2, 3,//-x
+        4, 5, 6, 5, 6, 7,//+x
+        0, 4, 2, 4, 2, 6,//-z
+        1, 5, 3, 5, 3, 7,//+z
+        0, 4, 1, 4, 1, 5,//-y
+        2, 6, 3, 6, 3, 7,//+y
+    };
+
+    primitive->draw_mode = GL_TRIANGLES;
+    primitive->draw_type = GL_UNSIGNED_SHORT;
+
+    //ARRAY
+    primitive->array.data = cube_array.data;
+    primitive->array.size = sizeof(float) * cube_array.count;
+    primitive->array.usage = GL_STATIC_DRAW;
+
+    //INDEX
+    primitive->index.data = cube_index;
+    primitive->index.size = sizeof(cube_index);
+    primitive->index.usage = GL_STATIC_DRAW;
+    primitive->index_count = sizeof(cube_index) / sizeof(cube_index[0]);
+
+    //aPos
+    primitive->aPos.size = 3;
+    primitive->aPos.stride = 3 * sizeof(float);
+    primitive->aPos.type = GL_FLOAT;
+    primitive->aPos.ptr = NULL;
+
+    _dengine_primitive_setup(primitive, shader);
+
+    vtor_free(&cube_array);
+
+}

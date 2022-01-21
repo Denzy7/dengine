@@ -30,6 +30,8 @@ void dengine_primitive_gen_quad(Primitive* primitive, Shader* shader);
 
 void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader);
 
+void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader);
+
 #ifdef __cplusplus
 }
 #endif
