@@ -5,6 +5,7 @@
 #define VTOR_IMPLEMENTATION
 #include "vtor.h"
 
+#include <stdio.h>//
 void _dengine_primitive_setup(Primitive* primitive, Shader* shader)
 {
     dengine_buffer_gen(1, &primitive->array);
@@ -171,6 +172,8 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
     vtor cube_array;
     vtor_create(&cube_array, sizeof(float));
 
+    vtor cube_vertices;
+    vtor_create(&cube_vertices, sizeof(float));
     for(int i = -1; i <= 1; i += 2)
     {
         for(int j = -1; j <= 1; j += 2)
@@ -181,15 +184,9 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
                 float y = (float)j;
                 float z = (float)k;
 
-                vtor_pushback(&cube_array, &x);
-                vtor_pushback(&cube_array, &y);
-                vtor_pushback(&cube_array, &z);
-
-                float s = x < 0.0f ? 0.0f : 1.0f;
-                float t = z < 0.0f ? 0.0f : 1.0f;
-
-                vtor_pushback(&cube_array, &s);
-                vtor_pushback(&cube_array, &t);
+                vtor_pushback(&cube_vertices, &x);
+                vtor_pushback(&cube_vertices, &y);
+                vtor_pushback(&cube_vertices, &z);
             }
         }
     }
@@ -198,11 +195,63 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
     {
         0, 1, 2, 2, 1, 3,//-x
         7, 5, 6, 6, 5, 4,//+x
-        2, 3, 7, 7, 6, 2,//+y
         0, 4, 5, 5, 1, 0,//-y
+        2, 3, 7, 7, 6, 2,//+y
         0, 2, 6, 6, 4, 0,//-z
         1, 5, 7, 7, 3, 1,//+z
     };
+
+    int index_sz = sizeof(cube_index) / (sizeof(cube_index[0]));
+
+    //Normalize index buffer. but first place its values in array buffer
+    for(int i = 0; i < index_sz; i++)
+    {
+        float* vertices = cube_vertices.data;
+        int index = cube_index[i];
+
+        float x = vertices[(3 * index)];
+        float y = vertices[(3 * index) + 1];
+        float z = vertices[(3 * index) + 2];
+
+        float s;
+        float t;
+
+        if(i >= 0 && i < 12)
+        {
+            s = y < 0.0f ? 0.0f : 1.0f;
+            t = z < 0.0f ? 0.0f : 1.0f;
+        }
+        if(i >= 12 && i < 24)
+        {
+            s = x < 0.0f ? 0.0f : 1.0f;
+            t = z < 0.0f ? 0.0f : 1.0f;
+        }
+        if(i >= 24 && i < 36)
+        {
+            s = x < 0.0f ? 0.0f : 1.0f;
+            t = y < 0.0f ? 0.0f : 1.0f;
+        }
+
+        vtor_pushback(&cube_array, &x);
+        vtor_pushback(&cube_array, &y);
+        vtor_pushback(&cube_array, &z);
+
+        vtor_pushback(&cube_array, &s);
+        vtor_pushback(&cube_array, &t);
+
+        //now normalize
+        cube_index[i] = i;
+    }
+
+    for(size_t i = 0; i < cube_array.count; i++)
+    {
+        if(i % 5 == 0 && i != 0)
+        {
+            printf("\n");
+        }
+        float* array = cube_array.data;
+        printf("%5.1f, ",array[i]);
+    }
 
     primitive->draw_mode = GL_TRIANGLES;
     primitive->draw_type = GL_UNSIGNED_SHORT;
@@ -233,5 +282,5 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
     _dengine_primitive_setup(primitive, shader);
 
     vtor_free(&cube_array);
-
+    vtor_free(&cube_vertices);
 }

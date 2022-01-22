@@ -98,6 +98,9 @@ int main(int argc, char** argv)
     mat4 model;
     glm_mat4_identity(model);
 
+    vec3 axis = {1.0, 1.0, 0.0};
+    glm_rotate(model, glm_rad(45.0), axis);
+
     dengine_shader_set_mat4(&shader, "projection", camera.projection_mat);
     dengine_shader_set_mat4(&shader, "view", camera.view_mat);
     dengine_shader_set_mat4(&shader, "model", model[0]);
