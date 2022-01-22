@@ -48,7 +48,7 @@ void dengine_primitive_gen_quad(Primitive* primitive, Shader* shader)
 
     static uint16_t quad_index[]=
     {
-        0, 1, 2, 2, 3, 0
+        0, 1, 2, 2, 0, 3
     };
 
     primitive->draw_mode = GL_TRIANGLES;
@@ -131,7 +131,7 @@ void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader)
 
         static uint16_t plane_index[] =
         {
-          0, 1, 2, 1, 2 , 3
+          0, 1, 2, 2, 1, 3
         };
 
         primitive->draw_mode = GL_TRIANGLES;
@@ -196,15 +196,13 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
 
     static uint16_t cube_index[]=
     {
-        0, 1, 2, 1, 2, 3,//-x
-        4, 5, 6, 5, 6, 7,//+x
-        0, 4, 2, 4, 2, 6,//-z
-        1, 5, 3, 5, 3, 7,//+z
-        0, 4, 1, 4, 1, 5,//-y
-        2, 6, 3, 6, 3, 7,//+y
+        0, 1, 2, 2, 1, 3,//-x
+        7, 5, 6, 6, 5, 4,//+x
+        2, 3, 7, 7, 6, 2,//+y
+        0, 4, 5, 5, 1, 0,//-y
+        0, 2, 6, 6, 4, 0,//-z
+        1, 5, 7, 7, 3, 1,//+z
     };
-
-
 
     primitive->draw_mode = GL_TRIANGLES;
     primitive->draw_type = GL_UNSIGNED_SHORT;

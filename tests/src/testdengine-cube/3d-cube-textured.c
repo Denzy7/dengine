@@ -108,6 +108,9 @@ int main(int argc, char** argv)
     //3d depth
     glEnable(GL_DEPTH_TEST);
 
+    //face culling
+    glEnable(GL_CULL_FACE);
+
     while(dengine_window_isrunning())
     {
         glClearColor(1.0, 0.5, 0.3, 1.0);

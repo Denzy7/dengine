@@ -105,6 +105,8 @@ int main(int argc, char** argv)
     dengine_shader_set_mat4(&shader, "view", camera.view_mat);
     dengine_shader_set_mat4(&shader, "model", model[0]);
 
+    glEnable(GL_CULL_FACE);
+
     while(dengine_window_isrunning())
     {
         glClearColor(1.0, 0.5, 0.3, 1.0);
