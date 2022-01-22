@@ -29,6 +29,12 @@ void _dengine_primitive_setup(Primitive* primitive, Shader* shader)
         dengine_vertex_attribute_enable(&primitive->aTexCoord);
     }
 
+    dengine_vertex_attribute_indexfromshader(shader, &primitive->aNormal, "aNormal");
+    if(primitive->aNormal.index != -1)
+    {
+        dengine_vertex_attribute_setup(&primitive->aNormal);
+        dengine_vertex_attribute_enable(&primitive->aNormal);
+    }
 
     dengine_buffer_bind(GL_ELEMENT_ARRAY_BUFFER, NULL);
     dengine_buffer_bind(GL_ARRAY_BUFFER, NULL);
@@ -101,9 +107,13 @@ void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader)
                 vtor_pushback(&plane_array, &s);
                 vtor_pushback(&plane_array, &t);
 
-                // float x_n = 0.0f;
-                // float y_n = 1.0f;
-                // float z_n = 0.0f;
+                float x_n = 0.0f;
+                float y_n = 1.0f;
+                float z_n = 0.0f;
+
+                vtor_pushback(&plane_array, &x_n);
+                vtor_pushback(&plane_array, &y_n);
+                vtor_pushback(&plane_array, &z_n);
 
                 // float x_tan = 0.0f;
                 // float y_tan = 0.0f;
@@ -151,15 +161,22 @@ void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader)
 
         //aPos
         primitive->aPos.size = 3;
-        primitive->aPos.stride = 5 * sizeof(float);
+        primitive->aPos.stride = 8 * sizeof(float);
         primitive->aPos.type = GL_FLOAT;
         primitive->aPos.ptr = NULL;
 
         //aTexCoord
         primitive->aTexCoord.size = 2;
-        primitive->aTexCoord.stride = 5 * sizeof(float);
+        primitive->aTexCoord.stride = 8 * sizeof(float);
         primitive->aTexCoord.type = GL_FLOAT;
         primitive->aTexCoord.ptr = (void*)(3 * sizeof(float));
+
+        //aNormal
+        primitive->aNormal.size = 3;
+        primitive->aNormal.stride = 8 * sizeof(float);
+        primitive->aNormal.type = GL_FLOAT;
+        primitive->aNormal.ptr = (void*)(5 * sizeof(float));
+
 
         _dengine_primitive_setup(primitive, shader);
 
@@ -231,12 +248,52 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
             t = y < 0.0f ? 0.0f : 1.0f;
         }
 
+        float x_n;
+        float y_n;
+        float z_n;
+
+        if(i >= 0 && i < 6)
+        {
+            x_n = -1.0f;
+            y_n = 0.0f;
+            z_n = 0.0f;
+        }else if(i >= 6 && i < 12)
+        {
+            x_n = 1.0f;
+            y_n = 0.0f;
+            z_n = 0.0f;
+        }else if(i >= 12 && i < 18)
+        {
+            x_n = 0.0f;
+            y_n = -1.0f;
+            z_n = 0.0f;
+        }else if(i >= 18 && i < 24)
+        {
+            x_n = 0.0f;
+            y_n = 1.0f;
+            z_n = 0.0f;
+        }else if(i >= 24 && i < 30)
+        {
+            x_n = 0.0f;
+            y_n = 0.0f;
+            z_n = -1.0f;
+        }else if(i >= 30 && i < 36)
+        {
+            x_n = 0.0f;
+            y_n = 0.0f;
+            z_n = 1.0f;
+        }
+
         vtor_pushback(&cube_array, &x);
         vtor_pushback(&cube_array, &y);
         vtor_pushback(&cube_array, &z);
 
         vtor_pushback(&cube_array, &s);
         vtor_pushback(&cube_array, &t);
+
+        vtor_pushback(&cube_array, &x_n);
+        vtor_pushback(&cube_array, &y_n);
+        vtor_pushback(&cube_array, &z_n);
 
         //now normalize
         cube_index[i] = i;
@@ -258,15 +315,21 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
 
     //aPos
     primitive->aPos.size = 3;
-    primitive->aPos.stride = 5 * sizeof(float);
+    primitive->aPos.stride = 8 * sizeof(float);
     primitive->aPos.type = GL_FLOAT;
     primitive->aPos.ptr = NULL;
 
     //aTexCoord
     primitive->aTexCoord.size = 2;
-    primitive->aTexCoord.stride = 5 * sizeof(float);
+    primitive->aTexCoord.stride = 8 * sizeof(float);
     primitive->aTexCoord.type = GL_FLOAT;
     primitive->aTexCoord.ptr = (void*)(3 * sizeof(float));
+
+    //aNormal
+    primitive->aNormal.size = 3;
+    primitive->aNormal.stride = 8 * sizeof(float);
+    primitive->aNormal.type = GL_FLOAT;
+    primitive->aNormal.ptr = (void*)(5 * sizeof(float));
 
     _dengine_primitive_setup(primitive, shader);
 
