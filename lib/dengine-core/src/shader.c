@@ -121,8 +121,25 @@ void dengine_shader_set_mat4(const Shader* shader, const char* name, float* valu
     glUniformMatrix4fv(location, 1, GL_FALSE, value); DENGINE_CHECKGL
 }
 
-void dengine_shader_set_vec4(const Shader* shader, const char* name, float* value);
+void dengine_shader_set_vec3(const Shader* shader, const char* name, float* value)
+{
+    dengine_shader_use(shader);
+    int location = glGetUniformLocation(shader->program_id, name); DENGINE_CHECKGL
+    glUniform3fv(location, 1, value); DENGINE_CHECKGL
+}
 
-void dengine_shader_set_float(const Shader* shader, const char* name, float value);
+void dengine_shader_set_vec4(const Shader* shader, const char* name, float* value)
+{
+    dengine_shader_use(shader);
+    int location = glGetUniformLocation(shader->program_id, name); DENGINE_CHECKGL
+    glUniform4fv(location, 1, value); DENGINE_CHECKGL
+}
+
+void dengine_shader_set_float(const Shader* shader, const char* name, float value)
+{
+    dengine_shader_use(shader);
+    int location = glGetUniformLocation(shader->program_id, name); DENGINE_CHECKGL
+    glUniform1f(location, value); DENGINE_CHECKGL
+}
 
 
