@@ -184,6 +184,12 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
                 vtor_pushback(&cube_array, &x);
                 vtor_pushback(&cube_array, &y);
                 vtor_pushback(&cube_array, &z);
+
+                float s = x < 0.0f ? 0.0f : 1.0f;
+                float t = z < 0.0f ? 0.0f : 1.0f;
+
+                vtor_pushback(&cube_array, &s);
+                vtor_pushback(&cube_array, &t);
             }
         }
     }
@@ -197,6 +203,8 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
         0, 4, 1, 4, 1, 5,//-y
         2, 6, 3, 6, 3, 7,//+y
     };
+
+
 
     primitive->draw_mode = GL_TRIANGLES;
     primitive->draw_type = GL_UNSIGNED_SHORT;
@@ -214,9 +222,15 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
 
     //aPos
     primitive->aPos.size = 3;
-    primitive->aPos.stride = 3 * sizeof(float);
+    primitive->aPos.stride = 5 * sizeof(float);
     primitive->aPos.type = GL_FLOAT;
     primitive->aPos.ptr = NULL;
+
+    //aTexCoord
+    primitive->aTexCoord.size = 2;
+    primitive->aTexCoord.stride = 5 * sizeof(float);
+    primitive->aTexCoord.type = GL_FLOAT;
+    primitive->aTexCoord.ptr = (void*)(3 * sizeof(float));
 
     _dengine_primitive_setup(primitive, shader);
 
