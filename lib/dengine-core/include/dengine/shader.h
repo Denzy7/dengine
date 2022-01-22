@@ -34,6 +34,8 @@ void dengine_shader_use(const Shader* shader);
 
 void dengine_shader_set_mat4(const Shader* shader, const char* name, float* value);
 
+void dengine_shader_set_vec3(const Shader* shader, const char* name, float* value);
+
 void dengine_shader_set_vec4(const Shader* shader, const char* name, float* value);
 
 void dengine_shader_set_float(const Shader* shader, const char* name, float value);

@@ -134,6 +134,14 @@ target_link_libraries(testdengine-3d-cube-textured
         dengine-core dengine-utils)
 set_property(TARGET testdengine-3d-cube-textured PROPERTY C_STANDARD 99)
 
+
+#a scene lit with normals only
+add_executable(testdengine-lighting-normals
+        src/testdengine-lighting/lighting-normals.c
+        )
+target_link_libraries(testdengine-lighting-normals
+        dengine-core dengine-utils)
+set_property(TARGET testdengine-lighting-normals PROPERTY C_STANDARD 99)
 endif()
 
 
