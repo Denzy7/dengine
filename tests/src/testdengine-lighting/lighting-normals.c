@@ -35,9 +35,8 @@ int main(int argc, char** argv)
     //dengine_window_glfw_set_monitor(glfwGetPrimaryMonitor(), 0, 0, 60);
 
     dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
-
-    Shader shader;
-    shader.vertex_code =
+    Shader cube_shader;
+    cube_shader.vertex_code =
             "attribute vec3 aPos;"
             "attribute vec2 aTexCoord;"
             "attribute vec3 aNormal;"
@@ -48,26 +47,49 @@ int main(int argc, char** argv)
 
             "varying vec2 TexCoord;"
             "varying vec3 Normal;"
+            "varying vec3 FragPos;"
 
             "void main()"
             "{"
                 "gl_Position =  projection * view * model * vec4(aPos, 1.0);"
                 "TexCoord = aTexCoord;"
                 "Normal = aNormal;"
+                "FragPos = vec3(model * vec4(aPos, 1.0));"
             "}";
-    shader.fragment_code =
+    cube_shader.fragment_code =
             "varying vec2 TexCoord;"
             "varying vec3 Normal;"
+            "varying vec3 FragPos;"
+
+            "uniform vec3 ViewPos;"
+
             "uniform sampler2D texture;"
-            "uniform vec4 ViewPos;"
+
+            "vec3 dirLight(vec3 dir, vec3 nNormal, vec3 viewDir){"
+            "   float diff = max(dot(nNormal, -dir), 0.0);"
+            "   vec3 diffuse = diff * vec3( texture2D(texture, TexCoord));"
+            "   return diffuse;"
+            "}"
+
             "void main()"
             "{"
-                "float diffuse = 0.0;"
-                ""
-                "gl_FragColor = texture2D(texture, TexCoord);"
+                "vec3 nNormal = normalize(Normal);"
+                "vec3 viewDir = normalize(ViewPos - FragPos);"
+                "vec3 FragColor = vec3(0.0);"
+                "vec3 lightDir = vec3(4.0, 5.0, 6.0);"
+                "FragColor += dirLight(-normalize(lightDir), nNormal, viewDir);"
+                "gl_FragColor = vec4(FragColor, 1.0);"
             "}";
-    dengine_shader_create(&shader);
-    dengine_shader_setup(&shader);
+
+    Shader plane_shader;
+    plane_shader.fragment_code = cube_shader.fragment_code;
+    plane_shader.vertex_code = cube_shader.vertex_code;
+
+    dengine_shader_create(&cube_shader);
+    dengine_shader_setup(&cube_shader);
+
+    dengine_shader_create(&plane_shader);
+    dengine_shader_setup(&plane_shader);
 
     Texture texture;
     memset(&texture, 0, sizeof(Texture));
@@ -85,16 +107,19 @@ int main(int argc, char** argv)
     dengine_texture_set_params(GL_TEXTURE_2D, &texture);
     dengine_texture_free_data(&texture);
 
-
     Primitive cube;
-    dengine_primitive_gen_cube(&cube, &shader);
+    dengine_primitive_gen_cube(&cube, &cube_shader);
+
+    Primitive plane;
+    dengine_primitive_gen_plane(&plane, &plane_shader);
 
     Camera camera;
     camera.near = 0.01f;
     camera.far = 100.0f;
     camera.fov = 60.0f;
-    float position[] = {3.0f, 3.0f, 3.0f};
-    float target[] = {0.0f, 0.0f, 0.0f};
+    float distance = 7.0f;
+    float position[] = {distance, distance, distance};
+    float target[] = {0.0f, 1.0f, 0.0f};
 
     memcpy(camera.position, position, sizeof(position));
 
@@ -104,10 +129,22 @@ int main(int argc, char** argv)
 
     mat4 model;
     glm_mat4_identity(model);
+    vec3 pos = {0.0, 1.0, 0.0};
+    glm_translate(model, pos);
 
-    dengine_shader_set_mat4(&shader, "projection", camera.projection_mat);
-    dengine_shader_set_mat4(&shader, "view", camera.view_mat);
-    dengine_shader_set_mat4(&shader, "model", model[0]);
+    dengine_shader_set_mat4(&cube_shader, "projection", camera.projection_mat);
+    dengine_shader_set_mat4(&cube_shader, "view", camera.view_mat);
+    dengine_shader_set_mat4(&cube_shader, "model", model[0]);
+    dengine_shader_set_vec3(&cube_shader, "ViewPos", camera.position);
+
+    glm_mat4_identity(model);
+    vec3 scale = {5.0, 5.0, 5.0};
+    glm_scale(model, scale);
+
+    dengine_shader_set_mat4(&plane_shader, "projection", camera.projection_mat);
+    dengine_shader_set_mat4(&plane_shader, "view", camera.view_mat);
+    dengine_shader_set_mat4(&plane_shader, "model", model[0]);
+    dengine_shader_set_vec3(&plane_shader, "ViewPos", camera.position);
 
     //"wirframe" mode
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -124,7 +161,8 @@ int main(int argc, char** argv)
         //clear depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        dengine_draw_primitive(&cube, &shader);
+        dengine_draw_primitive(&plane, &plane_shader);
+        dengine_draw_primitive(&cube, &cube_shader);
 
         dengine_window_swapbuffers();
         dengine_window_glfw_pollevents();
