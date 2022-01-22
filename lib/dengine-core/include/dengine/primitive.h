@@ -9,6 +9,8 @@
 
 typedef struct Primitive
 {
+    uint32_t vao;
+
     Buffer array;
     Buffer index;
 
