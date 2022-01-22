@@ -5,7 +5,6 @@
 #define VTOR_IMPLEMENTATION
 #include "vtor.h"
 
-#include <stdio.h>//
 void _dengine_primitive_setup(Primitive* primitive, Shader* shader)
 {
     dengine_buffer_gen(1, &primitive->array);
@@ -241,16 +240,6 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
 
         //now normalize
         cube_index[i] = i;
-    }
-
-    for(size_t i = 0; i < cube_array.count; i++)
-    {
-        if(i % 5 == 0 && i != 0)
-        {
-            printf("\n");
-        }
-        float* array = cube_array.data;
-        printf("%5.1f, ",array[i]);
     }
 
     primitive->draw_mode = GL_TRIANGLES;
