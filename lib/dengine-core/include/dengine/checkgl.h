@@ -11,6 +11,6 @@ int dengine_checkgl(const char* file, const int line);
 }
 #endif
 
-#define DENGINE_CHECKGL dengine_checkgl(__FILE__, __LINE__);
+#define DENGINE_CHECKGL dengine_checkgl(__FILE__, __LINE__)
 
 #endif // CHECKGL_H

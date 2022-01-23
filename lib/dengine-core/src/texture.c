@@ -12,7 +12,7 @@
 void dengine_texture_gen(size_t count, Texture* textures)
 {
     for(size_t i = 0; i < count; i++)
-        glGenTextures(1, &textures[i].texture_id); DENGINE_CHECKGL
+        glGenTextures(1, &textures[i].texture_id); DENGINE_CHECKGL;
 }
 
 void dengine_texture_bind(uint32_t target, Texture* texture)
@@ -21,14 +21,14 @@ void dengine_texture_bind(uint32_t target, Texture* texture)
         glBindTexture(target, texture->texture_id);
     else
         glBindTexture(target, 0);
-    DENGINE_CHECKGL
+    DENGINE_CHECKGL;
 }
 
 void dengine_texture_data(uint32_t target, Texture* texture)
 {
     glTexImage2D(target, 0, texture->internal_format, texture->width, texture->height, 0,
                  texture->format, texture->type, texture->data);
-    DENGINE_CHECKGL
+    DENGINE_CHECKGL;
 }
 
 int dengine_texture_load_mem(void* mem, size_t size, int flip, Texture* texture)
@@ -102,24 +102,24 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture)
 
 void dengine_texture_set_params(uint32_t target, Texture* texture)
 {
-    glGenerateMipmap(target); DENGINE_CHECKGL
+    glGenerateMipmap(target); DENGINE_CHECKGL;
 
     if(texture->filter_mag)
-        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, texture->filter_mag); DENGINE_CHECKGL
+        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, texture->filter_mag); DENGINE_CHECKGL;
 
     if(texture->filter_min)
-        glTexParameteri(target,GL_TEXTURE_MIN_FILTER,texture->filter_min); DENGINE_CHECKGL
+        glTexParameteri(target,GL_TEXTURE_MIN_FILTER,texture->filter_min); DENGINE_CHECKGL;
 
     if(texture->wrap)
     {
-        glTexParameteri(target, GL_TEXTURE_WRAP_S, texture->wrap); DENGINE_CHECKGL
-        glTexParameteri(target, GL_TEXTURE_WRAP_T, texture->wrap); DENGINE_CHECKGL
+        glTexParameteri(target, GL_TEXTURE_WRAP_S, texture->wrap); DENGINE_CHECKGL;
+        glTexParameteri(target, GL_TEXTURE_WRAP_T, texture->wrap); DENGINE_CHECKGL;
 
 //ES 3.0+
 #if defined(DENGINE_GL_GLAD) || !defined(DENGINE_GL_GLES2)
         //HACK : R for cubemaps
         if(target == GL_TEXTURE_CUBE_MAP)
-            glTexParameteri(target, GL_TEXTURE_WRAP_R, texture->wrap); DENGINE_CHECKGL
+            glTexParameteri(target, GL_TEXTURE_WRAP_R, texture->wrap); DENGINE_CHECKGL;
 #endif
     }
 }
@@ -133,6 +133,6 @@ void dengine_texture_free_data(Texture* texture)
 void dengine_texture_destroy(size_t count, Texture* textures)
 {
     for(size_t i = 0; i < count; i++)
-        glDeleteTextures(1, &textures[i].texture_id); DENGINE_CHECKGL
+        glDeleteTextures(1, &textures[i].texture_id); DENGINE_CHECKGL;
 }
 

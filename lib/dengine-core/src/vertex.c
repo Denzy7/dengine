@@ -10,16 +10,16 @@ void dengine_vertex_attribute_setup(VertexAttribute* attribute)
                            attribute->normalize,
                            attribute->stride,
                            attribute->ptr);
-    DENGINE_CHECKGL
+    DENGINE_CHECKGL;
 }
 
 void dengine_vertex_attribute_enable(VertexAttribute* attribute)
 {
-    glEnableVertexAttribArray(attribute->index); DENGINE_CHECKGL
+    glEnableVertexAttribArray(attribute->index); DENGINE_CHECKGL;
 }
 
 void dengine_vertex_attribute_indexfromshader(Shader* shader, VertexAttribute* attribute, const char* attribute_name)
 {
-    int location = glGetAttribLocation(shader->program_id, attribute_name); DENGINE_CHECKGL
+    int location = glGetAttribLocation(shader->program_id, attribute_name); DENGINE_CHECKGL;
     attribute->index = location;
 }
