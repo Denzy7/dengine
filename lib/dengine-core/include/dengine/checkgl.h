@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-void dengine_checkgl(const char* file, const int line);
+int dengine_checkgl(const char* file, const int line);
 
 #ifdef __cplusplus
 }

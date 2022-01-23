@@ -1,7 +1,7 @@
 #include "logging.h"//log
 
 #include "loadgl.h" //glGetError (incl. checkgl.h
-void dengine_checkgl(const char* file, const int line)
+int dengine_checkgl(const char* file, const int line)
 {
     GLenum error = glGetError();
     if(error)
@@ -24,4 +24,5 @@ void dengine_checkgl(const char* file, const int line)
 #endif
         dengineutils_logging_log("ERROR::GL::FILE::%s::LINE::%d\n%s", file, line, type_str);
     }
+    return error;
 }
