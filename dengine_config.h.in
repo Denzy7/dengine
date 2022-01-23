@@ -8,7 +8,7 @@
 #elif defined(__ANDROID__)
     #define DENGINE_ANDROID
     #define DENGINE_WIN_EGL
-    #define DENGINE_GL_GLES2
+    #define DENGINE_GL_GLES3
     //Android is Linux
     #define DENGINE_LINUX
     #define DENGINE_ANDROID_LOG_TAG "Dengine-Android"
