@@ -10,6 +10,7 @@ src/primitive.c
 src/input.c
 src/draw.c
 src/framebuffer.c
+src/material.c
 )
 
 set(dengine-core-hdr
@@ -26,6 +27,7 @@ include/dengine/primitive.h
 include/dengine/input.h
 include/dengine/draw.h
 include/dengine/framebuffer.h
+include/dengine/material.h
 )
 
 add_library(dengine-core ${dengine-core-hdr} ${dengine-core-src})
