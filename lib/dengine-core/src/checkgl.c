@@ -16,7 +16,7 @@ int dengine_checkgl(const char* file, const int line)
         else if (error == GL_OUT_OF_MEMORY)
             type_str = "GL_OUT_OF_MEMORY\nThere is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded.";
 //ES3.2+
-#if defined(DENGINE_GL_GLAD) || !defined(DENGINE_GL_GLES2)
+#if defined(DENGINE_GL_GLAD) || defined(DENGINE_GL_GLES32)
         else if (error == GL_STACK_UNDERFLOW)
             type_str = "GL_STACK_UNDERFLOW\nAn attempt has been made to perform an operation that would cause an internal stack to underflow.";
         else if (error == GL_STACK_OVERFLOW)
