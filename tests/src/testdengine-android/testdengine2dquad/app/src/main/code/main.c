@@ -9,6 +9,9 @@
 #include <dengine/primitive.h>
 #include <dengine/draw.h>
 #include <dengine/shader.h>
+#include <string.h>
+#include <dengine/camera.h>
+#include <cglm/cglm.h>
 double elapsed;
 
 
