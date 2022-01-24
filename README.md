@@ -11,14 +11,13 @@ Lightweight Renderer and Engine
 	
 		 If this is too much for you or takes an insanely long time, follow Linux users to the next step
 
-		 On Linux and its derivatives, refer to [README.md](deps/README.md) to install all needed dependencies:
+		 On Linux and its derivatives, refer to [deps/README.md](deps/README.md) to install all needed dependencies:
 
 	- Configure cmake:
 	`cmake -S . -B build/desktop`
 
 	**MinGW Note:**
-	- Pass a [toolchain file](tools/mingw) to build
-	`cmake -S . -B build/desktop -DCMAKE_TOOLCHAIN_FILE=<toolchain.cmake>`
+	See [tools/mingw/README.md](tools/mingw/README.md)
 
 	- Build the tree:
 `cmake --build build/desktop`
