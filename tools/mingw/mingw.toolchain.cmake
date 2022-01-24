@@ -6,9 +6,6 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 
 set(BUILD_SHARED_LIBS ON)
 
-message(STATUS "Please specify an existing installation of MinGW (-DMINGW_DIR)")
-message(STATUS "Please specify an Architecture of the MinGW (-DMINGW_ARCH) . (i686, x86_64...)")
-
 # the name of the target operating system
 set(CMAKE_SYSTEM_NAME Windows)
 set(CMAKE_SYSTEM_PROCESSOR ${MINGW_ARCH})
@@ -32,7 +29,7 @@ set(RC_COMPILERS
 	/usr/local/bin/${MINGW_ARCH}-w64-mingw32-windres
 	${MINGW_DIR}/bin/${MINGW_ARCH}-w64-mingw32-windres.exe
 )
-
+set(CMAKE_MAKE_PROGRAM ${MINGW_DIR}/bin/mingw32-make)
 foreach(C_COMPILER IN LISTS C_COMPILERS)
 	if(EXISTS ${C_COMPILER})
 		message(">>> Found C Compiler : " ${C_COMPILER})
