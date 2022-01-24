@@ -6,24 +6,8 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 
 set(BUILD_SHARED_LIBS ON)
 
-# CMake invokes the toolchain file twice during the first build, but only once
-# during subsequent rebuilds. 
-if(MINGW_TOOLCHAIN_INCLUDED)
-  return()
-endif(MINGW_TOOLCHAIN_INCLUDED)
-set(MINGW_TOOLCHAIN_INCLUDED true)
-
-if(DEFINED MINGW_DIR AND MINGW_TOOLCHAIN_INCLUDED)
-	message(STATUS "MinGW dir : ${MINGW_DIR}")
-else()
-	message(WARNING "Please specify an existing installation of MinGW (-DMINGW_DIR)")
-endif()
-
-if(DEFINED MINGW_ARCH AND MINGW_TOOLCHAIN_INCLUDED)
-	message(STATUS "MinGW arch : ${MINGW_ARCH}")
-else()
-	message(WARNING "Please specify an Architecture of the MinGW (-DMINGW_ARCH) . (i686, x86_64...)")
-endif()
+message(STATUS "Please specify an existing installation of MinGW (-DMINGW_DIR)")
+message(STATUS "Please specify an Architecture of the MinGW (-DMINGW_ARCH) . (i686, x86_64...)")
 
 # the name of the target operating system
 set(CMAKE_SYSTEM_NAME Windows)
