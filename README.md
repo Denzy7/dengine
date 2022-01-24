@@ -2,5 +2,30 @@
 Lightweight Renderer and Engine
 
 # building
-Build with CMake. For Windows, MinGW is highly recommended  
-Haven't tested on MSVC
+- **Desktop** (Linux, Windows) : Build with CMake. For Windows, MinGW is highly recommended. *Haven't tested on MSVC*
+
+Clone recursive:
+`git clone --recursive https://github.com/Denzy7/dengine`
+`cd dengine`
+
+Configure cmake:
+`cmake -S . -B build/desktop`
+
+**MinGW Note:**
+- Pass a [toolchain file](tools/mingw) to build
+`cmake -S . -B build/desktop -DCMAKE_TOOLCHAIN_FILE=<toolchain.cmake>`
+
+Build the tree
+`cmake --build build/desktop`
+
+- **Android** : Run `./gradlew` (Linux) or `gradlew.bat` (Windows). Install a JDK if don't have one
+
+By default, this builds an APK which you can run on a Physical Device or Emulator.
+
+To build the tests, run regular cmake. Use the toolchain in the NDK
+`cmake -S . -B build/android -DCMAKE_TOOLCHAIN_FILE='<NDK_DIR>/build/cmake/android.toolchain.cmake' -DANDROID_API=24`
+
+See other options at [Android docs](https://developer.android.com/studio/projects/configure-cmake#call-cmake-cli)
+
+Run the tests with a terminal emulator like [Termux](https://f-droid.org/en/packages/com.termux/)
+
