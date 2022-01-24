@@ -9,7 +9,7 @@ Locate the installation folder. It typically has directories like `bin`, `includ
 On Linux, its usually located in `/usr/<arch>-w64-mingw` or `/usr/local/<arch>-w64-mingw`
 
 With that, run:
-`cmake -S . -B build/desktop -DCMAKE_TOOLCHAIN_FILE=tools/mingw/toolchain.cmake -DMINGW_DIR=<location-of-mingw> -DMINGW_ARCH=<architecture>`
+`cmake -S . -B build/desktop -DCMAKE_TOOLCHAIN_FILE=tools/mingw/mingw.toolchain.cmake -DMINGW_DIR=<location-of-mingw> -DMINGW_ARCH=<architecture>`
 
 If you get a warning, run it again to clear it as cmake runs twice on a toolchain file
 
