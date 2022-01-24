@@ -24,11 +24,11 @@ Get default deps
 `git submodule update deps/glfw`
 
 # debian & ubuntu
-`# apt install libglfw3-dev`
+`# apt install libglfw3-dev libgtk-3-dev `
 **Substitute libglfw3 for libglfw3-wayland if on wayland**
 
 # arch
-`# pacman -S glfw-x11`
+`# pacman -S glfw-x11 gtk3`
 **Substitute glfw-x11 for glfw3-wayland if on wayland**
 
 # others
