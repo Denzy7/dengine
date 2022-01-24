@@ -3,6 +3,8 @@ Ensure you have an existing installation of MinGW. If not, go ahead and download
 
 Once done, locate the install location. Proceed to add `<install-folder/bin` to `PATH`. There are many ways to do this like control panel and the like.
 
+The installer may put MinGW in another sub folder `mingw32`
+
 # linux
 See [MinGW Downloads](https://www.mingw-w64.org/downloads/) for Linux dev packages
 In a nutshell, install:
@@ -21,7 +23,7 @@ With that, run:
 
 (Windows users pass) `-G "MinGW Makefiles"`
 
-If you are getting an error `CMAKE_MAKE_PROGRAM not set`, did you add the `bin` folder to path?
+If you are getting an error `CMAKE_MAKE_PROGRAM not set`, did you add the `bin` folder to `PATH`?
 
 Proceed with build
 
