@@ -20,7 +20,7 @@ if(NOT ANDROID)
         message(WARNING ">>> Could not find pkg-config. Will compile From sources")
     endif()
 
-    find_package(glfw3)
+    find_package(glfw3 QUIET)
     if(glfw3_FOUND)
         message(">>> Using system GLFW3")
     else()
