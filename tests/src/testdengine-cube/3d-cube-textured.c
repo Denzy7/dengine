@@ -10,6 +10,8 @@
 #include <string.h> //memset, memcpy
 #include <cglm/cglm.h>      //mat4
 
+#include <dengine-utils/os.h> //dialogopen
+#include <stdlib.h> //free
 int main(int argc, char** argv)
 {
     if(!dengine_window_init() || !dengine_window_glfw_create(1280, 720, "testdengine-3dplane"))
@@ -65,7 +67,9 @@ int main(int argc, char** argv)
     Texture texture;
     memset(&texture, 0, sizeof(Texture));
     texture.interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
-    dengine_texture_load_file(argv[1], 1, &texture);
+    char* tex_file = dengineutils_os_dialog_fileopen("Select a 3 or 4 channel png or jpg");
+    dengine_texture_load_file(tex_file, 1, &texture);
+    free(tex_file);
     uint32_t fmt = texture.channels == 3 ? GL_RGB : GL_RGBA;
     texture.internal_format = fmt;
     texture.format = fmt;

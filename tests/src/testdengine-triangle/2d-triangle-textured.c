@@ -7,13 +7,10 @@
 #include <dengine/texture.h>//texture
 
 #include <string.h> //memset
+#include <dengine-utils/os.h> //dialogopen
+#include <stdlib.h> //free
 int main(int argc, char** argv)
 {
-    if(argc == 1)
-    {
-        dengineutils_logging_log("ERROR::Enter any 3 channel jpg or png as a texture to argv[1]");
-    }
-
     if(!dengine_window_init() || !dengine_window_glfw_create(1280, 720, "testdengine-2dtriangle"))
     {
         dengineutils_logging_log("ERROR::cannot create window\n");
@@ -102,7 +99,9 @@ int main(int argc, char** argv)
 
     dengine_texture_gen(1, &brickwall);
     dengine_texture_bind(GL_TEXTURE_2D, &brickwall);
-    dengine_texture_load_file(argv[1], 1, &brickwall);
+    char* tex_file = dengineutils_os_dialog_fileopen("Select a 3 or 4 channel png or jpg");
+    dengine_texture_load_file(tex_file, 1, &brickwall);
+    free(tex_file);
     dengine_texture_data(GL_TEXTURE_2D, &brickwall);
     dengine_texture_set_params(GL_TEXTURE_2D, &brickwall);
     dengine_texture_free_data(&brickwall);
