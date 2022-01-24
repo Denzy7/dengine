@@ -66,7 +66,7 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture)
 {
     stbi_set_flip_vertically_on_load(flip);
 
-    FILE* fp = fopen(file, "r");
+    FILE* fp = fopen(file, "rb");
     if(!fp)
     {
         dengineutils_logging_log("ERROR::TEXTURE::CANNOT_FIND_FILE::%s", file);
