@@ -1,6 +1,11 @@
 # original: https://gist.github.com/take-cheeze/2850831#file-toolchain-mingw-cmake
 cmake_minimum_required(VERSION 3.6.0)
 
+set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -O2 -pipe -fno-plt -fexceptions --param=ssp-buffer-size=4 -Wformat -Werror=format-security -fcf-protection")
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+
+set(BUILD_SHARED_LIBS ON)
+
 # CMake invokes the toolchain file twice during the first build, but only once
 # during subsequent rebuilds. 
 if(MINGW_TOOLCHAIN_INCLUDED)
@@ -37,6 +42,12 @@ set(CXX_COMPILERS
 	/usr/local/bin/${MINGW_ARCH}-w64-mingw32-g++
 	${MINGW_DIR}/bin/${MINGW_ARCH}-w64-mingw32-g++.exe
 	)
+	
+set(RC_COMPILERS
+	/usr/bin/${MINGW_ARCH}-w64-mingw32-windres
+	/usr/local/bin/${MINGW_ARCH}-w64-mingw32-windres
+	${MINGW_DIR}/bin/${MINGW_ARCH}-w64-mingw32-windres.exe
+)
 
 foreach(C_COMPILER IN LISTS C_COMPILERS)
 	if(EXISTS ${C_COMPILER})
@@ -53,6 +64,20 @@ foreach(CXX_COMPILER IN LISTS CXX_COMPILERS)
 		break()
 	endif()
 endforeach()
+
+foreach(RC_COMPILER IN LISTS RC_COMPILERS)
+	if(EXISTS ${RC_COMPILER})
+		message(">>> Found RC Compiler : " ${RC_COMPILER})
+		set(CMAKE_RC_COMPILER ${RC_COMPILER})
+		break()
+	endif()
+endforeach()
+
+# set the resource compiler (RHBZ #652435)
+set (CMAKE_RC_COMPILER i686-w64-mingw32-windres)
+set (CMAKE_MC_COMPILER i686-w64-mingw32-windmc)
+
+
 
 # here is the target environment located
 set(CMAKE_FIND_ROOT_PATH ${CMAKE_SYSROOT} ${MINGW_DIR}/${MINGW_ARCH}-w64-mingw32)
