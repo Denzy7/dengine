@@ -127,13 +127,13 @@ void dengineutils_os_dialog_messagebox(const char* title, const char* message, i
     //https://github.com/demuyan/AndroidNDKbook/blob/master/ch02/JniToast/jni/jnitoast.c
 }
 
-char* dengineutils_os_dialog_fileopen()
+char* dengineutils_os_dialog_fileopen(const char* title)
 {
     if(!init)
         _dengineutils_os_init_null();
     char *filename = NULL;
 #if defined(DENGINE_HAS_GTK3)
-    GtkWidget* dialog = gtk_file_chooser_dialog_new("Choose File",NULL,
+    GtkWidget* dialog = gtk_file_chooser_dialog_new(title,NULL,
                                                     GTK_FILE_CHOOSER_ACTION_OPEN,
                                                     "_Cancel", GTK_RESPONSE_CANCEL,
                                                     "_Open", GTK_RESPONSE_ACCEPT,
@@ -152,6 +152,7 @@ char* dengineutils_os_dialog_fileopen()
         ZeroMemory(&ofn, sizeof(ofn));
         ofn.lStructSize = sizeof(ofn);
         ofn.hwndOwner = NULL;
+        ofn.lpstrTitle = title;
         ofn.lpstrFile = filename;
         ofn.lpstrFile[0] = 0;
         ofn.nMaxFile = 1024;
@@ -173,14 +174,14 @@ char* dengineutils_os_dialog_fileopen()
     return filename;
 }
 
-char* dengineutils_os_dialog_filesave()
+char* dengineutils_os_dialog_filesave(const char* title)
 {
     if(!init)
         _dengineutils_os_init_null();
 
     char* filename = NULL;
 #if defined(DENGINE_HAS_GTK3)
-    GtkWidget* dialog = gtk_file_chooser_dialog_new("Save File",NULL,
+    GtkWidget* dialog = gtk_file_chooser_dialog_new(title,NULL,
                                                     GTK_FILE_CHOOSER_ACTION_SAVE,
                                                     "_Cancel", GTK_RESPONSE_CANCEL,
                                                     "_Save", GTK_RESPONSE_ACCEPT,
@@ -201,6 +202,7 @@ char* dengineutils_os_dialog_filesave()
         ZeroMemory(&ofn, sizeof(ofn));
         ofn.lStructSize = sizeof(ofn);
         ofn.hwndOwner = NULL;
+        ofn.lpstrTitle = title;
         ofn.lpstrFile = filename;
         ofn.lpstrFile[0] = 0;
         ofn.nMaxFile = 1024;

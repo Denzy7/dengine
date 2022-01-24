@@ -21,14 +21,14 @@ int main(int argc, char** argv)
     dengineutils_os_dialog_messagebox("this is", "an error!", 1);
 
     //Open/Save file dialog
-    char* openfile = dengineutils_os_dialog_fileopen();
+    char* openfile = dengineutils_os_dialog_fileopen("Open any file...");
     if(openfile)
     {
         dengineutils_os_dialog_messagebox("you tried opening", openfile, 0);
         free(openfile);
     }
 
-    char* savefile = dengineutils_os_dialog_filesave();
+    char* savefile = dengineutils_os_dialog_filesave("Type any filename...");
     if(savefile)
     {
         dengineutils_os_dialog_messagebox("you tried saving", savefile, 0);

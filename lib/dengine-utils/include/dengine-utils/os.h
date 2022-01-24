@@ -11,9 +11,9 @@ int dengineutils_os_mkdir(const char* directory);
 
 void dengineutils_os_dialog_messagebox(const char* title , const char* message, int error);
 
-char* dengineutils_os_dialog_fileopen();
+char* dengineutils_os_dialog_fileopen(const char* title);
 
-char* dengineutils_os_dialog_filesave();
+char* dengineutils_os_dialog_filesave(const char* title);
 
 #ifdef __cplusplus
 }
