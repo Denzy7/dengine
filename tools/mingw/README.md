@@ -1,6 +1,9 @@
 Ensure you have an existing installation of MinGW. If not, go ahead and download its [installer](http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download) for Windows.
 
 See [MinGW Downloads](https://www.mingw-w64.org/downloads/) for Linux dev packages
+In a nutshell, install:
+Ubuntu/Debian : `mingw-w64`
+Arch : `mingw-w64-gcc` 
 
 **Take note of the architechture you select when installing. It's usually x86_64 or i686**
 
