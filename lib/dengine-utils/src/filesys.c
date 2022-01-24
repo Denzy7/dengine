@@ -12,7 +12,7 @@
 int dengineutils_filesys_file2mem_load(File2Mem* file2mem)
 {
     file2mem->size = 0;
-    FILE* fp = fopen(file2mem->file, "r");
+    FILE* fp = fopen(file2mem->file, "rb");
     if(!fp)
     {
         dengineutils_logging_log("ERROR::DENGINE_UTILS_FILE2MEM::CANNOT_READ::%s", file2mem->file);
