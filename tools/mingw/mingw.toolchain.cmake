@@ -73,12 +73,6 @@ foreach(RC_COMPILER IN LISTS RC_COMPILERS)
 	endif()
 endforeach()
 
-# set the resource compiler (RHBZ #652435)
-set (CMAKE_RC_COMPILER i686-w64-mingw32-windres)
-set (CMAKE_MC_COMPILER i686-w64-mingw32-windmc)
-
-
-
 # here is the target environment located
 set(CMAKE_FIND_ROOT_PATH ${CMAKE_SYSROOT} ${MINGW_DIR}/${MINGW_ARCH}-w64-mingw32)
 
