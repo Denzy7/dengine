@@ -61,6 +61,14 @@ target_link_libraries(testdengine-window-colored
         dengine-core dengine-utils)
 set_property(TARGET testdengine-window-colored PROPERTY C_STANDARD 99)
 
+#input basics
+add_executable(testdengine-input
+        src/testdengine-input/input-basic.c
+        )
+target_link_libraries(testdengine-input
+        dengine-core dengine-utils)
+set_property(TARGET testdengine-input PROPERTY C_STANDARD 99)
+
 #an isosceles triangle
 add_executable(testdengine-2d-triangle
         src/testdengine-triangle/2d-triangle.c
