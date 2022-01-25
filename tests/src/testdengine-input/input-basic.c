@@ -33,7 +33,8 @@ int main()
 
     printf("GL : %s\n", glGetString(GL_VERSION));
     printf("mouse mouse around to change color based on position\n");
-
+    printf("press w, x, lmb or rmb\n");
+    printf("drag scroll wheel\n");
     while(dengine_window_isrunning())
     {
         //most important function
