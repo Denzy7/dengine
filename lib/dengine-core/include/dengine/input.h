@@ -38,6 +38,10 @@ int dengine_input_gamepad_get_btn(int pad, int btn);
 
 float dengine_input_gamepad_get_axis(int pad, int axis);
 
+int dengine_input_gamepad_vibration_set_basic(int pad, float leftmotor, float rightmotor);
+
+const char* dengine_input_gamepad_vibration_get_error();
+
 //GLFW callbacks
 #ifdef DENGINE_WIN_GLFW
 
