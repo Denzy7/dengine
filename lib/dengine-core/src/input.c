@@ -1,6 +1,7 @@
 #include "input.h"
 #include "window.h" //glfw_current
 
+#include <string.h> //memset
 typedef struct key
 {
     int key;
@@ -12,7 +13,12 @@ key keys[DENGINE_INPUT_MAXKEYPRESS];
 int mousebtns[3] = {-1, -1, -1};
 double mousescrollx = 0.0, mousescrolly = 0.0;
 double mouseposx = 0.0,mouseposy = 0.0;
-int padjid = 0;
+int padjid[16];
+
+#include <stdio.h>
+
+void _dengine_input_validate_gamepads();
+
 void dengine_input_init()
 {
 #ifdef DENGINE_WIN_GLFW
@@ -25,6 +31,9 @@ void dengine_input_init()
         glfwSetCursorPosCallback(current, dengine_input_glfw_callback_mousepos);
     }
     glfwSetJoystickCallback(dengine_input_glfw_callback_joystick);
+
+    _dengine_input_validate_gamepads();
+
 #endif
 }
 
@@ -175,8 +184,8 @@ void dengine_input_glfw_callback_joystick(int jid, int event)
 {
     if(event == GLFW_CONNECTED)
     {
-        //printf("Connected : %s\n", glfwGetJoystickName(jid));
-        padjid = jid;
+        printf("Connected : %s\n", glfwGetJoystickName(jid));
+
     }else
     {
         //printf("Disconnected : %s\n", glfwGetJoystickName(jid));
@@ -184,3 +193,56 @@ void dengine_input_glfw_callback_joystick(int jid, int event)
 }
 
 #endif
+
+void _dengine_input_validate_gamepads()
+{
+    memset(padjid, -1, sizeof(padjid));
+#ifdef DENGINE_WIN_GLFW
+    //Validate connected gamepads
+    for(int i = 0; i < 16; i++)
+    {
+        if(glfwJoystickIsGamepad(i))
+        {
+            padjid[i] = i;
+            printf("validate jid %d\n", padjid[i]);
+        }
+    }
+#endif
+}
+
+int dengine_input_gamepad_get_btn(int pad, int btn)
+{
+    #ifdef DENGINE_WIN_GLFW
+    GLFWgamepadstate state;
+    if(glfwGetGamepadState(pad, &state) && btn < 15)
+        return state.buttons[btn];
+    else
+        return 0;
+    #endif
+}
+
+float dengine_input_gamepad_get_axis(int pad, int axis)
+{
+    #ifdef DENGINE_WIN_GLFW
+    GLFWgamepadstate state;
+    if(glfwGetGamepadState(pad, &state) && axis < 6)
+        return (state.axes[axis] + 1.0f) / 2.0f;
+    else
+        return 0.0f;
+    #endif
+}
+
+int dengine_input_gamepad_get_isconnected(int pad)
+{
+    #ifdef DENGINE_WIN_GLFW
+    return glfwJoystickIsGamepad(pad);
+    #endif
+}
+
+const char* dengine_input_gamepad_get_name(int pad)
+{
+    #ifdef DENGINE_WIN_GLFW
+    return glfwGetJoystickName(pad);
+    #endif
+}
+

@@ -4,6 +4,7 @@
 #include <dengine/loadgl.h>
 
 #include <dengine/input.h>
+int padhint;
 int main()
 {
     if(!dengine_window_init() || !dengine_window_glfw_create(1280, 720, "testdengine-windowcolored"))
@@ -35,8 +36,16 @@ int main()
     printf("mouse mouse around to change color based on position\n");
     printf("press w, x, lmb or rmb\n");
     printf("drag scroll wheel\n");
+
     while(dengine_window_isrunning())
     {
+        if(dengine_input_gamepad_get_isconnected(0) && !padhint)
+        {
+            printf("connected : %s\n", dengine_input_gamepad_get_name(0));
+            printf("hold left trigger and right trigger to print their values\n");
+            padhint = 1;
+        }
+
         //most important function
         dengine_window_glfw_pollevents();
 
@@ -68,6 +77,22 @@ int main()
 
         if(dengine_input_get_mousebtn_once(1))
             printf("pressing rmb once\n");
+
+        if(dengine_input_gamepad_get_isconnected(0))
+        {
+            if(dengine_input_gamepad_get_btn(0, 0))
+            {
+                printf("pressing btn 0 (A)\n");
+            }
+
+            //4 = lt, 5 = rt
+            float lt = dengine_input_gamepad_get_axis(0, 4);
+            float rt = dengine_input_gamepad_get_axis(0, 5);
+            if(lt > 0.0f || rt > 0.0f)
+            {
+                printf("LT : %f, RT : %f\n", lt, rt);
+            }
+        }
     }
 
     dengine_window_terminate();

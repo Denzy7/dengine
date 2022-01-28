@@ -30,6 +30,14 @@ double dengine_input_get_mousepos_x();
 
 double dengine_input_get_mousepos_y();
 
+const char* dengine_input_gamepad_get_name(int pad);
+
+int dengine_input_gamepad_get_isconnected(int pad);
+
+int dengine_input_gamepad_get_btn(int pad, int btn);
+
+float dengine_input_gamepad_get_axis(int pad, int axis);
+
 //GLFW callbacks
 #ifdef DENGINE_WIN_GLFW
 
