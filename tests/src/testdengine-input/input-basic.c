@@ -42,7 +42,7 @@ int main()
         if(dengine_input_gamepad_get_isconnected(0) && !padhint)
         {
             printf("connected : %s\n", dengine_input_gamepad_get_name(0));
-            printf("hold left trigger and right trigger to print their values\n");
+            printf("hold left trigger and right trigger to print their values and control vibration\n");
             padhint = 1;
         }
 
@@ -91,6 +91,9 @@ int main()
             if(lt > 0.0f || rt > 0.0f)
             {
                 printf("LT : %f, RT : %f\n", lt, rt);
+                dengine_input_gamepad_vibration_set_basic(0, lt, rt);
+            }else{
+                dengine_input_gamepad_vibration_set_basic(0, 0.0f, 0.0f);
             }
         }
     }
