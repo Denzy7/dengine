@@ -3,7 +3,7 @@
 
 #include <string.h> //memset
 
-#include <stdio.h> // DEBUG
+#include <stdio.h> // snprintf
 
 #ifdef DENGINE_WIN32
 #include <windows.h>
@@ -53,6 +53,7 @@ int _dengine_input_gamepad_linux_init()
     memset(linux_pads, -1, sizeof(linux_pads));
     while((entry = readdir(dir)))
     {
+        memset(path, 0, sizeof(path));
         //only load eventXX
         if(!strncmp("event", entry->d_name, strlen("event")))
         {
@@ -126,7 +127,6 @@ int _dengine_input_gamepad_linux_init()
         }
     }
     closedir(dir);
-    printf("fetch %d pads\n", count);
 
     return 1;
 }
