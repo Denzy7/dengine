@@ -43,6 +43,12 @@ if(UNIX)
     target_link_libraries(dengine-core dl m)
 endif()
 
+#xinput basic vibration
+if(WIN32)
+    target_link_libraries(dengine-core xinput)
+endif()
+
+
 set_property(TARGET dengine-core PROPERTY C_STANDARD 99)
 
 
