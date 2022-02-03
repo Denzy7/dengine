@@ -170,6 +170,15 @@ void dengine_window_get_window_height(int* height)
     #endif // defined
 }
 
+void dengine_window_get_window_dim(int* width, int* height)
+{
+    if(height)
+        dengine_window_get_window_height(height);
+
+    if(width)
+        dengine_window_get_window_width(width);
+}
+
 void dengine_window_set_viewport(int width, int height)
 {
     #if !defined (DENGINE_GL_NONE)
