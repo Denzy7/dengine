@@ -39,6 +39,8 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-core/include/dengine
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-utils/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-utils/include/dengine-utils
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-gui/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-gui/include/dengine-gui
         )
 
 if(NOT ANDROID)
@@ -49,6 +51,7 @@ configure_file(dengine_config.h.in dengine_config.h)
 
 add_subdirectory(lib/dengine-utils "dengine-utils-build")
 add_subdirectory(lib/dengine-core "dengine-core-build")
+add_subdirectory(lib/dengine-gui "dengine-gui-build")
 
 add_subdirectory(tests "tests-build")
 
