@@ -150,6 +150,14 @@ add_executable(testdengine-lighting-normals
 target_link_libraries(testdengine-lighting-normals
         dengine-core dengine-utils)
 set_property(TARGET testdengine-lighting-normals PROPERTY C_STANDARD 99)
+
+
+add_executable(testdengine-gui-textwindow
+        src/testdengine-gui/textwindow.c
+        )
+target_link_libraries(testdengine-gui-textwindow
+        dengine-core dengine-utils dengine-gui)
+set_property(TARGET testdengine-gui-textwindow PROPERTY C_STANDARD 99)
 endif()
 
 
