@@ -28,6 +28,8 @@ typedef struct Primitive
 extern "C" {
 #endif
 
+void dengine_primitive_setup(Primitive* primitive, Shader* shader);
+
 void dengine_primitive_gen_quad(Primitive* primitive, Shader* shader);
 
 void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader);

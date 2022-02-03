@@ -5,7 +5,7 @@
 #define VTOR_IMPLEMENTATION
 #include "vtor.h"
 
-void _dengine_primitive_setup(Primitive* primitive, Shader* shader)
+void dengine_primitive_setup(Primitive* primitive, Shader* shader)
 {
     glGenVertexArrays(1, &primitive->vao);
     glBindVertexArray(primitive->vao);
@@ -87,7 +87,7 @@ void dengine_primitive_gen_quad(Primitive* primitive, Shader* shader)
     primitive->aTexCoord.type = GL_FLOAT;
     primitive->aTexCoord.ptr = (void*)(3 * sizeof(float));
 
-    _dengine_primitive_setup(primitive, shader);
+    dengine_primitive_setup(primitive, shader);
 }
 
 void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader)
@@ -183,7 +183,7 @@ void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader)
         primitive->aNormal.ptr = (void*)(5 * sizeof(float));
 
 
-        _dengine_primitive_setup(primitive, shader);
+        dengine_primitive_setup(primitive, shader);
 
         vtor_free(&plane_array);
 }
@@ -336,7 +336,7 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
     primitive->aNormal.type = GL_FLOAT;
     primitive->aNormal.ptr = (void*)(5 * sizeof(float));
 
-    _dengine_primitive_setup(primitive, shader);
+    dengine_primitive_setup(primitive, shader);
 
     vtor_free(&cube_array);
     vtor_free(&cube_vertices);
