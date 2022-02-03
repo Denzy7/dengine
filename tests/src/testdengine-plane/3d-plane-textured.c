@@ -73,6 +73,7 @@ int main(int argc, char** argv)
     texture.internal_format = fmt;
     texture.format = fmt;
     texture.type = GL_UNSIGNED_BYTE;
+    texture.mipmap = 1;
 
     dengine_texture_gen(1, &texture);
     //Dont unbind

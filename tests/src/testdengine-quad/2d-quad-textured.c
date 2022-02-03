@@ -68,6 +68,7 @@ int main(int argc, char** argv)
     texture.internal_format = fmt;
     texture.format = fmt;
     texture.type = GL_UNSIGNED_BYTE;
+    texture.mipmap = 1;
 
     //resize to texture size
     if(texture.width > 0)
