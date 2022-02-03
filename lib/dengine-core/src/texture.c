@@ -102,7 +102,8 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture)
 
 void dengine_texture_set_params(uint32_t target, Texture* texture)
 {
-    glGenerateMipmap(target); DENGINE_CHECKGL;
+    if(texture->mipmap)
+        glGenerateMipmap(target); DENGINE_CHECKGL;
 
     if(texture->filter_mag)
         glTexParameteri(target, GL_TEXTURE_MAG_FILTER, texture->filter_mag); DENGINE_CHECKGL;

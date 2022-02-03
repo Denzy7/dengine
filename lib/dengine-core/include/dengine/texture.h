@@ -21,6 +21,7 @@ typedef struct Texture
     uint32_t type;
     uint32_t filter_mag, filter_min;
     uint32_t wrap;
+    int mipmap;
 
     char* name;
 } Texture;
