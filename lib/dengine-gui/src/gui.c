@@ -60,6 +60,7 @@ int denginegui_init()
     quad.aTexCoord.ptr = (void*)(2 * sizeof(float));
 
     shader.vertex_code =
+            "#version 100\n"
             "attribute vec2 aPos;"
             "attribute vec2 aTexCoord;"
             "varying vec2 TexCoord;"
@@ -70,6 +71,8 @@ int denginegui_init()
                 "TexCoord = aTexCoord;"
             "}";
     shader.fragment_code =
+            "#version 100\n"
+            "precision mediump float;"
             "varying vec2 TexCoord;"
             "uniform sampler2D tex;"
             "uniform vec3 col;"
@@ -205,8 +208,8 @@ void denginegui_text(float x, float y, const char* text, float* rgb)
 
             //return previous src, dst alpha and blend
             int srcalpha, dstalpha;
-            glGetIntegerv(GL_BLEND_SRC, &srcalpha); DENGINE_CHECKGL;
-            glGetIntegerv(GL_BLEND_DST, &dstalpha); DENGINE_CHECKGL;
+            glGetIntegerv(GL_BLEND_SRC_ALPHA, &srcalpha); DENGINE_CHECKGL;
+            glGetIntegerv(GL_BLEND_DST_ALPHA, &dstalpha); DENGINE_CHECKGL;
             int blnd;
             glGetIntegerv(GL_BLEND, &blnd); DENGINE_CHECKGL;
 
