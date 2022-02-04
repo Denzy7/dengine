@@ -55,11 +55,14 @@ int main(int argc, char** argv)
         glClearColor(0.1, 0.1, 0.1, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        float rgb[] = {1.0, 1.0, 0.0};
+        float yellow[] = {1.0, 1.0, 0.0, 1.0};
 
         denginegui_text(40.0, 40.0, "textwindow abcgy ABCGY !.:/\\ 1234", NULL);
 
-        denginegui_text(100.0, 100.0, "coloured text", rgb);
+        denginegui_text(100.0, 100.0, "coloured text", yellow);
+
+        float red_trans[] = {1.0, 0.0, 0.0, 0.6};
+        denginegui_text(150.0, 100.0, "coloured tranparent text", red_trans);
 
         int h;
         dengine_window_get_window_height(&h);

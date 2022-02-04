@@ -75,11 +75,11 @@ int denginegui_init()
             "precision mediump float;"
             "varying vec2 TexCoord;"
             "uniform sampler2D tex;"
-            "uniform vec3 col;"
+            "uniform vec4 col;"
             "void main()"
             "{"
                 "vec4 a = vec4(1.0, 1.0, 1.0, texture2D(tex, TexCoord).a);"
-                "gl_FragColor = a * vec4(col, 1.0);"
+                "gl_FragColor = a * col;"
             "}";
 
     dengine_shader_create(&shader);
@@ -148,7 +148,7 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
 
     return 1;
 }
-void denginegui_text(float x, float y, const char* text, float* rgb)
+void denginegui_text(float x, float y, const char* text, float* rgba)
 {
     if(!initgui || !initfont)
         return;
@@ -189,12 +189,12 @@ void denginegui_text(float x, float y, const char* text, float* rgb)
                 q.x0 + w, q.y1 + h - y_off, q.s0 + ds, q.t0,
                 q.x0 + w, q.y1 - y_off, q.s0 + ds, q.t0 + dt
             };
-            float white[3] = {1.0f, 1.0f, 1.0f};
+            float white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
-            if(!rgb)
-                dengine_shader_set_vec3(&shader, "col", white);
+            if(!rgba)
+                dengine_shader_set_vec4(&shader, "col", white);
             else
-                dengine_shader_set_vec3(&shader, "col", rgb);
+                dengine_shader_set_vec4(&shader, "col", rgba);
 
 
             quad.array.data = vertices;
