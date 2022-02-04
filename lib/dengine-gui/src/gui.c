@@ -76,10 +76,15 @@ int denginegui_init()
             "varying vec2 TexCoord;"
             "uniform sampler2D tex;"
             "uniform vec4 col;"
+            "uniform int istext;"
             "void main()"
             "{"
-                "vec4 a = vec4(1.0, 1.0, 1.0, texture2D(tex, TexCoord).a);"
-                "gl_FragColor = a * col;"
+                "vec4 a = vec4(0.0);"
+                "if(istext == 1)"
+                "   a = vec4(1.0, 1.0, 1.0, texture2D(tex, TexCoord).a) * col;"
+                "else"
+                "   a = vec4( texture2D(tex, TexCoord).rgb + col.rgb, col.a);"
+                "gl_FragColor = a;"
             "}";
 
     dengine_shader_create(&shader);
@@ -148,17 +153,49 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
 
     return 1;
 }
-void denginegui_text(float x, float y, const char* text, float* rgba)
-{
-    if(!initgui || !initfont)
-        return;
 
+void _denginegui_projectquad()
+{
     mat4 projection;
     int w, h;
     dengine_window_get_window_height(&h);
     dengine_window_get_window_width(&w);
     glm_ortho(0.0, w, 0.0, h, -1.0f, 1.0f, projection);
     dengine_shader_set_mat4(&shader, "projection", projection[0]);
+}
+
+void _denginegui_drawquad()
+{
+    dengine_shader_use(&shader);
+
+    //return previous src, dst alpha and blend
+    int srcalpha, dstalpha;
+    glGetIntegerv(GL_BLEND_SRC_ALPHA, &srcalpha); DENGINE_CHECKGL;
+    glGetIntegerv(GL_BLEND_DST_ALPHA, &dstalpha); DENGINE_CHECKGL;
+    int blnd;
+    glGetIntegerv(GL_BLEND, &blnd); DENGINE_CHECKGL;
+
+    if(!blnd)
+        glEnable(GL_BLEND); DENGINE_CHECKGL;
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); DENGINE_CHECKGL;
+
+    dengine_draw_primitive(&quad, &shader);
+
+    glBlendFunc(srcalpha, dstalpha); DENGINE_CHECKGL;
+
+    if(!blnd)
+        glDisable(GL_BLEND); DENGINE_CHECKGL;
+
+    dengine_shader_use(NULL);
+}
+
+void denginegui_text(float x, float y, const char* text, float* rgba)
+{
+    if(!initgui || !initfont)
+        return;
+
+    _denginegui_projectquad();
 
     for(size_t i = 0; i < strlen(text); i++)
     {
@@ -191,6 +228,8 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
             };
             float white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
+            dengine_shader_set_int(&shader, "istext", 1);
+
             if(!rgba)
                 dengine_shader_set_vec4(&shader, "col", white);
             else
@@ -204,29 +243,52 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
             dengine_buffer_bind(GL_ARRAY_BUFFER, NULL);
 
             dengine_texture_bind(GL_TEXTURE_2D, &fontmap);
-            dengine_shader_use(&shader);
 
-            //return previous src, dst alpha and blend
-            int srcalpha, dstalpha;
-            glGetIntegerv(GL_BLEND_SRC_ALPHA, &srcalpha); DENGINE_CHECKGL;
-            glGetIntegerv(GL_BLEND_DST_ALPHA, &dstalpha); DENGINE_CHECKGL;
-            int blnd;
-            glGetIntegerv(GL_BLEND, &blnd); DENGINE_CHECKGL;
-
-            if(!blnd)
-                glEnable(GL_BLEND); DENGINE_CHECKGL;
-
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); DENGINE_CHECKGL;
-
-            dengine_draw_primitive(&quad, &shader);
-
-            glBlendFunc(srcalpha, dstalpha); DENGINE_CHECKGL;
-
-            if(!blnd)
-                glDisable(GL_BLEND); DENGINE_CHECKGL;
+            _denginegui_drawquad();
 
             dengine_texture_bind(GL_TEXTURE_2D, NULL);
-            dengine_shader_use(NULL);
         }
     }
+}
+
+void denginegui_panel(float x, float y, float width, float height, Texture* texture, float* uv, float* rgba)
+{
+    if(!initgui || !initfont)
+        return;
+
+    _denginegui_projectquad();
+
+
+
+    float vertices[]=
+    {
+                         //Vert //TexCoord
+                x,           y, 0.0f, 0.0f,
+                x,  y + height, 0.0f, 1.0f,
+        x + width,  y + height, 1.0f, 1.0f,
+        x + width,           y, 1.0f, 0.0f,
+    };
+
+    quad.array.data = vertices;
+
+    dengine_buffer_bind(GL_ARRAY_BUFFER, &quad.array);
+    dengine_buffer_data(GL_ARRAY_BUFFER, &quad.array);
+    dengine_buffer_bind(GL_ARRAY_BUFFER, NULL);
+
+    float white[4] = {0.0f, 0.0f, 0.0f, 0.4f};
+
+    if(!rgba)
+        dengine_shader_set_vec4(&shader, "col", white);
+    else
+        dengine_shader_set_vec4(&shader, "col", rgba);
+
+    dengine_shader_set_int(&shader, "istext", 0);
+
+    if(texture)
+        dengine_texture_bind(GL_TEXTURE_2D, texture);
+
+    _denginegui_drawquad();
+
+    dengine_texture_bind(GL_TEXTURE_2D, NULL);
+
 }
