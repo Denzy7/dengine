@@ -32,15 +32,15 @@ int main(int argc, char** argv)
     dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
     File2Mem fontmem;
 
-//    char* ttf = dengineutils_os_dialog_fileopen("Select a .ttf font file");
-//    if(!ttf)
-//    {
-//        dengineutils_logging_log("ERROR::no file selected");
-//        return 1;
-//    }
-    fontmem.file = "/home/denzy/dengine/assets/fonts/OpenSans-Regular.ttf";
+    char* ttf = dengineutils_os_dialog_fileopen("Select a .ttf font file");
+    if(!ttf)
+    {
+        dengineutils_logging_log("ERROR::no file selected");
+        return 1;
+    }
+    fontmem.file = ttf;
     dengineutils_filesys_file2mem_load(&fontmem);
-    //free(ttf);
+    free(ttf);
     if(!denginegui_set_font(fontmem.mem, fontsz, 512))
         dengineutils_logging_log("ERROR::cannot load font");
 
@@ -52,10 +52,18 @@ int main(int argc, char** argv)
     glEnable(GL_CULL_FACE );
     //glEnable(GL_DEPTH_TEST);
 
+    char* paneltex = dengineutils_os_dialog_fileopen("Choose a 3 or 4 channel image...");
+    if(!paneltex)
+    {
+        dengineutils_logging_log("ERROR::no file selected");
+        return 1;
+    }
+
     Texture texture;
     memset(&texture, 0, sizeof(Texture));
     texture.interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
-    dengine_texture_load_file("/home/denzy/aur/renderdoc/src/renderdoc-1.17/docs/imgs/icons/checkerboard.png", 1, &texture);
+    dengine_texture_load_file(paneltex, 1, &texture);
+    free(paneltex);
     uint32_t fmt = texture.channels == 3 ? GL_RGB : GL_RGBA;
     texture.internal_format = fmt;
     texture.format = fmt;
