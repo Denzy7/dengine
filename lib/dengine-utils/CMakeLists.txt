@@ -5,6 +5,7 @@ src/filesys.c
 src/os.c
 src/rng.c
 src/timer.c
+src/vtor.c
 )
 
 set(dengine-utils-hdr

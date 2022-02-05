@@ -2,7 +2,6 @@
 
 #include "loadgl.h" //gltypes
 
-#define VTOR_IMPLEMENTATION
 #include "vtor.h"
 
 void dengine_primitive_setup(Primitive* primitive, Shader* shader)

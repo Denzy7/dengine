@@ -8,6 +8,8 @@
  * ensure you have defined VTOR_IMPLEMENTATION
  * only once in the code base
  *
+ * Prefferably, define it in its own seperate file
+ *
  * Optionally define VTOR_VERBOSE
  * before VTOR_IMPLEMENTATION to print
  * memory allocations
