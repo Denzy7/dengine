@@ -6,6 +6,7 @@
 #include "dengine/shader.h"
 #include "dengine/draw.h"
 #include "dengine/window.h"
+#include "dengine/input.h"
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h> //stbtt
@@ -17,17 +18,21 @@
 #include <stdio.h>  //printf
 
 stbtt_packedchar packedchar_data[96];
-
+stbtt_fontinfo info;
 //baked fontmap
 Texture fontmap;
 unsigned int _bmp_sz = 0;
 int initfont = 0;
+float _fontsz = 0.0f;
 
 //the standard gui quad
 Primitive quad;
 Shader shader;
 
 int initgui = 0;
+int waitingrelease = 0;
+#define PANEL_ALPHA 0.4f
+
 int denginegui_init()
 {
     static float vertices[16];
@@ -103,7 +108,6 @@ int denginegui_init()
 
 int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_size)
 {
-    stbtt_fontinfo info;
     if(!stbtt_InitFont(&info, ttf, 0))
     {
         printf("failed to init font\n");
@@ -150,6 +154,8 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
     dengine_texture_data(GL_TEXTURE_2D, &fontmap);
     dengine_texture_set_params(GL_TEXTURE_2D, &fontmap);
     dengine_texture_bind(GL_TEXTURE_2D, NULL);
+
+    _fontsz = fontsize;
 
     return 1;
 }
@@ -275,7 +281,7 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
     dengine_buffer_data(GL_ARRAY_BUFFER, &quad.array);
     dengine_buffer_bind(GL_ARRAY_BUFFER, NULL);
 
-    float white[4] = {0.0f, 0.0f, 0.0f, 0.4f};
+    float white[4] = {0.0f, 0.0f, 0.0f, PANEL_ALPHA};
 
     if(!rgba)
         dengine_shader_set_vec4(&shader, "col", white);
@@ -291,4 +297,63 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
 
     dengine_texture_bind(GL_TEXTURE_2D, NULL);
 
+}
+
+int denginegui_button(float x,float y, float width, float height, const char* text, float* rgba)
+{
+    //glfw reads top to bottom?
+    int h;
+    dengine_window_get_window_height(&h);
+
+    double mx = dengine_input_get_mousepos_x();
+    double my = h - dengine_input_get_mousepos_y();
+
+    if(mx >= x && mx <= (x + width) &&
+            my >= y && my <= (y + height) )
+    {
+        float hover[4] = {0.2f, 0.2f, 0.2f, PANEL_ALPHA};
+        float press[4] = {0.02f, 0.02f, 0.02f, PANEL_ALPHA};
+        if(rgba)
+        {
+            for(int i = 0; i < 3; i++)
+                hover[i] += rgba[i];
+            hover[3] = rgba[3];
+        }else
+        {
+            for(int i = 0; i < 3; i++)
+                hover[i] += 0.01f;
+        }
+
+        if(dengine_input_get_mousebtn(0))
+        {
+            if(rgba)
+            {
+                for(int i = 0; i < 3; i++)
+                    press[i] += rgba[i];
+                press[3] = rgba[3];
+            }else
+            {
+                for(int i = 0; i < 3; i++)
+                    press[i] += 0.005f;
+            }
+            denginegui_panel(x, y, width, height, NULL, NULL, press);
+
+            waitingrelease = 1;
+        }else{
+            denginegui_panel(x, y, width, height, NULL, NULL, hover);
+        }
+    }else
+    {
+        denginegui_panel(x, y, width, height, NULL, NULL, rgba);
+    }
+    float txtoffst = (height / 2) - (_fontsz / 4);
+    denginegui_text(x + (txtoffst / 2), y + txtoffst, text, NULL);
+
+    if(waitingrelease && !dengine_input_get_mousebtn(0))
+    {
+        waitingrelease = 0;
+        return 1;
+    }
+
+    return 0;
 }
