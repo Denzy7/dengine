@@ -30,7 +30,6 @@ Primitive quad;
 Shader shader;
 
 int initgui = 0;
-int waitingrelease = 0;
 #define PANEL_ALPHA 0.4f
 
 int denginegui_init()
@@ -301,6 +300,7 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
 
 int denginegui_button(float x,float y, float width, float height, const char* text, float* rgba)
 {
+    int down = 0;
     //glfw reads top to bottom?
     int h;
     dengine_window_get_window_height(&h);
@@ -337,11 +337,12 @@ int denginegui_button(float x,float y, float width, float height, const char* te
                     press[i] += 0.005f;
             }
             denginegui_panel(x, y, width, height, NULL, NULL, press);
-
-            waitingrelease = 1;
         }else{
             denginegui_panel(x, y, width, height, NULL, NULL, hover);
         }
+
+        if(dengine_input_get_mousebtn_once(0))
+            down = 1;
     }else
     {
         denginegui_panel(x, y, width, height, NULL, NULL, rgba);
@@ -349,11 +350,5 @@ int denginegui_button(float x,float y, float width, float height, const char* te
     float txtoffst = (height / 2) - (_fontsz / 4);
     denginegui_text(x + (txtoffst / 2), y + txtoffst, text, NULL);
 
-    if(waitingrelease && !dengine_input_get_mousebtn(0))
-    {
-        waitingrelease = 0;
-        return 1;
-    }
-
-    return 0;
+    return down;
 }

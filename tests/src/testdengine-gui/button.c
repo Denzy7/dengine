@@ -76,6 +76,11 @@ int main(int argc, char** argv)
             dengineutils_logging_log("INFO::Clicked!");
             dengineutils_os_dialog_messagebox("clicked button", "ok", 0);
         }
+        float red[4] = {1.0, 0.0, 0.0, 0.4};
+        if(denginegui_button(300.0, 100.0, 200.0, 50.0, "Don't click me!", red))
+        {
+            dengineutils_logging_log("ERROR::Don't click me!!");
+        }
 
         dengine_window_swapbuffers();
         dengine_window_glfw_pollevents();
