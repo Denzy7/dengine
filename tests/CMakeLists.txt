@@ -167,6 +167,13 @@ target_link_libraries(testdengine-gui-panel
         dengine-core dengine-utils dengine-gui)
 set_property(TARGET testdengine-gui-panel PROPERTY C_STANDARD 99)
 
+#its a panel with text and input checks
+add_executable(testdengine-gui-button
+        src/testdengine-gui/button.c
+        )
+target_link_libraries(testdengine-gui-button
+        dengine-core dengine-utils dengine-gui)
+set_property(TARGET testdengine-gui-button PROPERTY C_STANDARD 99)
 
 endif()
 
