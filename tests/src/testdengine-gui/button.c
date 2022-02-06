@@ -32,14 +32,15 @@ int main(int argc, char** argv)
     dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
     File2Mem fontmem;
 
-//    char* ttf = dengineutils_os_dialog_fileopen("Select a .ttf font file");
-//    if(!ttf)
-//    {
-//        dengineutils_logging_log("ERROR::no file selected");
-//        return 1;
-//    }
-    fontmem.file = "/home/denzy/dengine/assets/fonts/OpenSans-Regular.ttf";
+    char* ttf = dengineutils_os_dialog_fileopen("Select a .ttf font file");
+    if(!ttf)
+    {
+        dengineutils_logging_log("ERROR::no file selected");
+        return 1;
+    }
+    fontmem.file = ttf;
     dengineutils_filesys_file2mem_load(&fontmem);
+    free(ttf);
     if(!denginegui_set_font(fontmem.mem, fontsz, 512))
         dengineutils_logging_log("ERROR::cannot load font");
 
@@ -71,7 +72,10 @@ int main(int argc, char** argv)
         }
 
         if(denginegui_button(100.0, 100.0, 140.0, 50.0, "Click Here", NULL))
+        {
             dengineutils_logging_log("INFO::Clicked!");
+            dengineutils_os_dialog_messagebox("clicked button", "ok", 0);
+        }
 
         dengine_window_swapbuffers();
         dengine_window_glfw_pollevents();
