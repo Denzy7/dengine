@@ -301,12 +301,8 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
 int denginegui_button(float x,float y, float width, float height, const char* text, float* rgba)
 {
     int down = 0;
-    //glfw reads top to bottom?
-    int h;
-    dengine_window_get_window_height(&h);
-
     double mx = dengine_input_get_mousepos_x();
-    double my = h - dengine_input_get_mousepos_y();
+    double my = dengine_input_get_mousepos_y();
 
     if(mx >= x && mx <= (x + width) &&
             my >= y && my <= (y + height) )

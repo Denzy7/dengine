@@ -349,7 +349,10 @@ void dengine_input_glfw_callback_mousescroll(GLFWwindow* window, double x, doubl
 void dengine_input_glfw_callback_mousepos(GLFWwindow* window, double x, double y)
 {
     mouseposx = x;
-    mouseposy = y;
+    //flip y, glfw reads top to bottom
+    int h;
+    dengine_window_get_window_height(&h);
+    mouseposy = h - y;
     //printf("mousepos, x : %f, y : %f\n", x, y);
 }
 
