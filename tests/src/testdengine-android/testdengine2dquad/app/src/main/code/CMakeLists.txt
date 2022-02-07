@@ -30,5 +30,5 @@ target_include_directories(GFX PUBLIC
 		)
 
 
-target_link_libraries(GFX PUBLIC log EGL GLESv2 android dengine-core dengine-utils)
+target_link_libraries(GFX PUBLIC log EGL GLESv3 android dengine-core dengine-utils)
 
