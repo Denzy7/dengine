@@ -77,7 +77,7 @@ static void draw()
     denginegui_text(10.0f, 10.0f, "HELLLO WORLD! ANDROID?", NULL);
 
     float rgba[] = {1.0f, 1.0f, 0.0f, 1.0f};
-    denginegui_text(50.0f, 50.0f, "Colored Text...~", rgb);
+    denginegui_text(50.0f, 50.0f, "Colored Text...~", rgba);
 
     dengine_window_swapbuffers();
 }
