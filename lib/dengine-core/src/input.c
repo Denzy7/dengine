@@ -399,6 +399,8 @@ int dengine_input_gamepad_get_btn(int pad, int btn)
         return state.buttons[btn];
     else
         return 0;
+    #else
+    return 0;
     #endif
 }
 
@@ -410,6 +412,8 @@ float dengine_input_gamepad_get_axis(int pad, int axis)
         return (state.axes[axis] + 1.0f) / 2.0f;
     else
         return 0.0f;
+    #else
+    return 0.0f;
     #endif
 }
 
@@ -417,6 +421,8 @@ int dengine_input_gamepad_get_isconnected(int pad)
 {
     #ifdef DENGINE_WIN_GLFW
     return glfwJoystickIsGamepad(pad);
+    #else
+    return 0;
     #endif
 }
 
@@ -424,6 +430,8 @@ const char* dengine_input_gamepad_get_name(int pad)
 {
     #ifdef DENGINE_WIN_GLFW
     return glfwGetJoystickName(pad);
+    #else
+    return NULL;
     #endif
 }
 
