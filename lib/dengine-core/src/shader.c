@@ -3,7 +3,7 @@
 
 #include <stdio.h>  //printf
 #include <stdlib.h> //malloc
-
+#include <string.h> //strlen
 #include "logging.h"//log
 
 void dengine_shader_create(Shader* shader)
@@ -41,8 +41,43 @@ int dengine_shader_compile_shader(const uint32_t shader, const char* code)
         {
             type_str = "FRAGMENT";
         }
+        size_t line, column, zero;
+        sscanf(info_log, "%zu:%zu(%zu)", &zero, &line, &column);
 
-        dengineutils_logging_log("ERROR::SHADER::COMPILE::%s::%s", type_str, info_log);
+        size_t findline = 0;
+        char* stacktrace = NULL;
+        for(size_t i = 0; i < strlen(code); i++)
+        {
+            if(code[i] == '\n')
+            {
+                findline++;
+                if(findline == line - 1)
+                {
+                    /* +1 skip '\n' */
+                    size_t sz = strlen(code + i + 1);
+
+                    const char* after = strchr(code + i + 1, '\n');
+                    if(after)
+                    {
+                        size_t sz_after = strlen(after);
+                        size_t sz_stacktrace = sz - sz_after;
+                        // +2 = null-term and newline
+                        stacktrace = malloc(sz_stacktrace + column + 1);
+                        memset(stacktrace, 0, sz_stacktrace + column + 1);
+                        char arrows[column];
+                        memset(arrows, '-', column);
+                        arrows[column] = '\0';
+                        arrows[column - 1] = '^';
+                        sprintf(stacktrace, "%.*s\n%s", (int)sz_stacktrace, code + i + 1, arrows);
+                    }
+                }
+            }
+
+        }
+
+        dengineutils_logging_log("ERROR::SHADER::COMPILE::%s::%s\nTRACE:\n%s", type_str, info_log, stacktrace ? stacktrace : "...");
+        if(stacktrace)
+            free(stacktrace);
 
         free(info_log);
     }
