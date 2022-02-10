@@ -258,12 +258,10 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
 
 void denginegui_panel(float x, float y, float width, float height, Texture* texture, float* uv, float* rgba)
 {
-    if(!initgui || !initfont)
+    if(!initgui)
         return;
 
     _denginegui_projectquad();
-
-
 
     float vertices[]=
     {
