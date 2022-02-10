@@ -17,7 +17,7 @@ typedef struct Framebuffer
 {
     uint32_t framebuffer_id;
 
-    Texture* color;
+    Texture color[8];
     uint32_t n_color;
 
     Texture depth;
