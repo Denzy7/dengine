@@ -12,7 +12,7 @@
 
 int main(int argc, char** argv)
 {
-    if(!dengine_window_init() || !dengine_window_glfw_create(1280, 720, "testdengine-3dplane"))
+    if(!dengine_window_init() || !dengine_window_glfw_create(1280, 720, "testdengine-lightingnormal"))
     {
         dengineutils_logging_log("ERROR::cannot create window\n");
         return 1;
@@ -35,8 +35,8 @@ int main(int argc, char** argv)
     //dengine_window_glfw_set_monitor(glfwGetPrimaryMonitor(), 0, 0, 60);
 
     dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
-    Shader cube_shader;
-    cube_shader.vertex_code =
+    Shader shader;
+    shader.vertex_code =
             "attribute vec3 aPos;"
             "attribute vec2 aTexCoord;"
             "attribute vec3 aNormal;"
@@ -56,7 +56,7 @@ int main(int argc, char** argv)
                 "Normal = aNormal;"
                 "FragPos = vec3(model * vec4(aPos, 1.0));"
             "}";
-    cube_shader.fragment_code =
+    shader.fragment_code =
             "varying vec2 TexCoord;"
             "varying vec3 Normal;"
             "varying vec3 FragPos;"
@@ -81,15 +81,8 @@ int main(int argc, char** argv)
                 "gl_FragColor = vec4(FragColor, 1.0);"
             "}";
 
-    Shader plane_shader;
-    plane_shader.fragment_code = cube_shader.fragment_code;
-    plane_shader.vertex_code = cube_shader.vertex_code;
-
-    dengine_shader_create(&cube_shader);
-    dengine_shader_setup(&cube_shader);
-
-    dengine_shader_create(&plane_shader);
-    dengine_shader_setup(&plane_shader);
+    dengine_shader_create(&shader);
+    dengine_shader_setup(&shader);
 
     Texture texture;
     memset(&texture, 0, sizeof(Texture));
@@ -99,6 +92,7 @@ int main(int argc, char** argv)
     texture.internal_format = fmt;
     texture.format = fmt;
     texture.type = GL_UNSIGNED_BYTE;
+    texture.mipmap = 1;
 
     dengine_texture_gen(1, &texture);
     //Dont unbind
@@ -108,10 +102,10 @@ int main(int argc, char** argv)
     dengine_texture_free_data(&texture);
 
     Primitive cube;
-    dengine_primitive_gen_cube(&cube, &cube_shader);
+    dengine_primitive_gen_cube(&cube, &shader);
 
     Primitive plane;
-    dengine_primitive_gen_plane(&plane, &plane_shader);
+    dengine_primitive_gen_plane(&plane, &shader);
 
     Camera camera;
     camera.near = 0.01f;
@@ -127,24 +121,9 @@ int main(int argc, char** argv)
     dengine_camera_project_perspective((float)w / (float)h, &camera);
     dengine_camera_lookat(target, &camera);
 
-    mat4 model;
-    glm_mat4_identity(model);
-    vec3 pos = {0.0, 1.0, 0.0};
-    glm_translate(model, pos);
-
-    dengine_shader_set_mat4(&cube_shader, "projection", camera.projection_mat);
-    dengine_shader_set_mat4(&cube_shader, "view", camera.view_mat);
-    dengine_shader_set_mat4(&cube_shader, "model", model[0]);
-    dengine_shader_set_vec3(&cube_shader, "ViewPos", camera.position);
-
-    glm_mat4_identity(model);
-    vec3 scale = {5.0, 5.0, 5.0};
-    glm_scale(model, scale);
-
-    dengine_shader_set_mat4(&plane_shader, "projection", camera.projection_mat);
-    dengine_shader_set_mat4(&plane_shader, "view", camera.view_mat);
-    dengine_shader_set_mat4(&plane_shader, "model", model[0]);
-    dengine_shader_set_vec3(&plane_shader, "ViewPos", camera.position);
+    dengine_shader_set_mat4(&shader, "projection", camera.projection_mat);
+    dengine_shader_set_mat4(&shader, "view", camera.view_mat);
+    dengine_shader_set_vec3(&shader, "ViewPos", camera.position);
 
     //"wirframe" mode
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -161,8 +140,19 @@ int main(int argc, char** argv)
         //clear depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        dengine_draw_primitive(&plane, &plane_shader);
-        dengine_draw_primitive(&cube, &cube_shader);
+        mat4 model;
+
+        vec3 scale = {5.0, 5.0, 5.0};
+        glm_mat4_identity(model);
+        glm_scale(model, scale);
+        dengine_shader_set_mat4(&shader, "model", model[0]);
+        dengine_draw_primitive(&plane, &shader);
+
+        vec3 pos = {0.0, 1.0, 0.0};
+        glm_mat4_identity(model);
+        glm_translate(model, pos);
+        dengine_shader_set_mat4(&shader, "model", model[0]);
+        dengine_draw_primitive(&cube, &shader);
 
         dengine_window_swapbuffers();
         dengine_window_glfw_pollevents();
