@@ -287,6 +287,7 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
 
     dengine_shader_set_int(&shader, "istext", 0);
 
+    glActiveTexture(GL_TEXTURE0);
     if(texture)
         dengine_texture_bind(GL_TEXTURE_2D, texture);
 
