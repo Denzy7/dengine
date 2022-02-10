@@ -6,6 +6,7 @@ src/os.c
 src/rng.c
 src/timer.c
 src/vtor.c
+src/strpatch.c
 )
 
 set(dengine-utils-hdr
@@ -17,6 +18,7 @@ include/dengine-utils/os.h
 include/dengine-utils/rng.h
 #${PROJECT_BINARY_DIR}/dengine_config.h
 include/dengine-utils/timer.h
+include/dengine-utils/strpatch.h
 )
 
 add_library(dengine-utils ${dengine-utils-hdr} ${dengine-utils-src})

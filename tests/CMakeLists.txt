@@ -42,6 +42,14 @@ target_link_libraries(testdengine-util-timer
         dengine-utils m)
 set_property(TARGET testdengine-util-timer PROPERTY C_STANDARD 99)
 
+#strpatch util
+add_executable(testdengine-util-strpatch
+        src/testdengine-utils/util-strpatch.c
+    )
+target_link_libraries(testdengine-util-strpatch
+        dengine-utils)
+set_property(TARGET testdengine-util-strpatch PROPERTY C_STANDARD 99)
+
 
 #executables for desktop
 if(NOT ANDROID)
@@ -142,15 +150,6 @@ target_link_libraries(testdengine-3d-cube-textured
         dengine-core dengine-utils)
 set_property(TARGET testdengine-3d-cube-textured PROPERTY C_STANDARD 99)
 
-
-#a scene lit with normals only
-add_executable(testdengine-lighting-normals
-        src/testdengine-lighting/lighting-normals.c
-        )
-target_link_libraries(testdengine-lighting-normals
-        dengine-core dengine-utils)
-set_property(TARGET testdengine-lighting-normals PROPERTY C_STANDARD 99)
-
 #text w/ window coordinates
 add_executable(testdengine-gui-textwindow
         src/testdengine-gui/textwindow.c
@@ -174,6 +173,23 @@ add_executable(testdengine-gui-button
 target_link_libraries(testdengine-gui-button
         dengine-core dengine-utils dengine-gui)
 set_property(TARGET testdengine-gui-button PROPERTY C_STANDARD 99)
+
+
+#a scene lit with normals only
+add_executable(testdengine-lighting-normals
+        src/testdengine-lighting/lighting-normals.c
+        )
+target_link_libraries(testdengine-lighting-normals
+        dengine-core dengine-utils)
+set_property(TARGET testdengine-lighting-normals PROPERTY C_STANDARD 99)
+
+#a scene lit with normals + dirlight and shadow
+add_executable(testdengine-lighting-dirlight
+        src/testdengine-lighting/lighting-dirlight.c
+        )
+target_link_libraries(testdengine-lighting-dirlight
+        dengine-core dengine-utils)
+set_property(TARGET testdengine-lighting-dirlight PROPERTY C_STANDARD 99)
 
 endif()
 
