@@ -29,12 +29,21 @@ void dengine_framebuffer_attach(FramebufferAttachmentType attachment, Texture* t
         //on GL/ES 3.2+
         glFramebufferTexture(GL_FRAMEBUFFER, attachment + framebuffer->n_color, texture->texture_id, 0);
         if(!DENGINE_CHECKGL)
+        {
+            framebuffer->color[framebuffer->n_color] = *texture;
             framebuffer->n_color++;
+        }
     }
     else{
         //on GL/ES 3.2+
         glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->texture_id, 0);
-        DENGINE_CHECKGL;
+        if(!DENGINE_CHECKGL)
+        {
+            if(attachment == DENGINE_FRAMEBUFFER_DEPTH)
+                framebuffer->depth = *texture;
+            else if(attachment == DENGINE_FRAMEBUFFER_STENCIL)
+                framebuffer->stencil = *texture;
+        }
     }
 #endif
 }
@@ -44,12 +53,20 @@ void dengine_framebuffer_attach2D(FramebufferAttachmentType attachment, Texture*
     if(attachment == DENGINE_FRAMEBUFFER_COLOR){
         //on GL 3.0 / ES 2.0+
         glFramebufferTexture2D(GL_FRAMEBUFFER, attachment + framebuffer->n_color, GL_TEXTURE_2D, texture->texture_id, 0);
-        if(!DENGINE_CHECKGL)
+        if(!DENGINE_CHECKGL){
+            framebuffer->color[framebuffer->n_color] = *texture;
             framebuffer->n_color++;
+        }
     }
     else{
         //on GL 3.0 / ES 2.0+
         glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->texture_id, 0);
-        DENGINE_CHECKGL;
+        if(!DENGINE_CHECKGL)
+        {
+            if(attachment == DENGINE_FRAMEBUFFER_DEPTH)
+                framebuffer->depth = *texture;
+            else if(attachment == DENGINE_FRAMEBUFFER_STENCIL)
+                framebuffer->stencil = *texture;
+        }
     }
 }
