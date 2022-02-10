@@ -7,6 +7,9 @@
 #include <dengine/camera.h> //camera
 #include <dengine/texture.h>
 
+#include <dengine-utils/os.h>//filedialog
+
+#include <stdlib.h> //free
 #include <string.h> //memset, memcpy
 #include <cglm/cglm.h>      //mat4
 
@@ -87,7 +90,17 @@ int main(int argc, char** argv)
     Texture texture;
     memset(&texture, 0, sizeof(Texture));
     texture.interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
-    dengine_texture_load_file(argv[1], 1, &texture);
+
+    char* texfile = dengineutils_os_dialog_fileopen("Select a 3/4 channel png or jpg");
+    if(!texfile)
+    {
+        dengineutils_logging_log("ERROR::No file selected!");
+        return 1;
+    }
+
+    dengine_texture_load_file(texfile, 1, &texture);
+    free(texfile);
+
     uint32_t fmt = texture.channels == 3 ? GL_RGB : GL_RGBA;
     texture.internal_format = fmt;
     texture.format = fmt;
