@@ -21,3 +21,10 @@ void dengine_camera_lookat(float* target, Camera* camera)
     memcpy(camera->view_mat, view, sizeof(camera->view_mat));
     memcpy(camera->uview_mat, view, sizeof(camera->uview_mat));
 }
+
+void dengine_camera_apply(Shader* shader, Camera* camera)
+{
+    dengine_shader_set_mat4(shader, "projection", camera->projection_mat);
+    dengine_shader_set_mat4(shader, "view", camera->view_mat);
+    dengine_shader_set_vec3(shader, "ViewPos", camera->position);
+}
