@@ -184,12 +184,12 @@ target_link_libraries(testdengine-lighting-normals
 set_property(TARGET testdengine-lighting-normals PROPERTY C_STANDARD 99)
 
 #a scene lit with normals + dirlight and shadow
-add_executable(testdengine-lighting-dirlight
-        src/testdengine-lighting/lighting-dirlight.c
-        )
-target_link_libraries(testdengine-lighting-dirlight
-        dengine-core dengine-utils)
-set_property(TARGET testdengine-lighting-dirlight PROPERTY C_STANDARD 99)
+#add_executable(testdengine-lighting-dirlight
+#        src/testdengine-lighting/lighting-dirlight.c
+#        )
+#target_link_libraries(testdengine-lighting-dirlight
+#        dengine-core dengine-utils)
+#set_property(TARGET testdengine-lighting-dirlight PROPERTY C_STANDARD 99)
 
 endif()
 
