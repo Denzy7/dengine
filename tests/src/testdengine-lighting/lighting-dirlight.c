@@ -125,7 +125,7 @@ int main(int argc, char** argv)
             "void main()"
             "{"
                 "gl_Position = projview * model * vec4(aPos, 1.0);"
-            "};";
+            "}";
     shadow.fragment_code=
             "#version 100\n"
             "precision mediump float;"
