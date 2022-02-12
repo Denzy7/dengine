@@ -11,7 +11,7 @@
 #include <dengine-gui/gui.h> //panel
 
 #include <dengine-utils/os.h> //filedialogopen
-
+#include <dengine/input.h>
 #include <string.h> //memset, memcpy
 #include <cglm/cglm.h>      //mat4
 
@@ -191,11 +191,6 @@ int main(int argc, char** argv)
 
     memcpy(camera.position, position, sizeof(position));
 
-    //FIXME : Break on resize window framebuffer
-    dengine_camera_project_perspective((float)w / (float)h, &camera);
-    dengine_camera_lookat(target, &camera);
-    dengine_camera_apply(&shader, &camera);
-
     //"wirframe" mode
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -205,9 +200,21 @@ int main(int argc, char** argv)
     //face culling
     glEnable(GL_CULL_FACE);
     denginegui_init();
-
+    dengine_input_init();
     while(dengine_window_isrunning())
     {
+        //FIXME : Break on resize window framebuffer
+        dengine_camera_project_perspective((float)w / (float)h, &camera);
+        dengine_camera_lookat(target, &camera);
+        dengine_camera_apply(&shader, &camera);
+
+        double srcl = dengine_input_get_mousescroll_y();
+
+        if(srcl > 0)
+            camera.fov-=1;
+        else if (srcl < 0)
+            camera.fov+=1;
+
         glClearColor(1.0, 0.5, 0.3, 1.0);
         //clear depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
