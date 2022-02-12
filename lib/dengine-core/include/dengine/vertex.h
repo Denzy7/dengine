@@ -17,13 +17,6 @@ typedef struct VertexAttribute
     void* ptr;
 }VertexAttribute;
 
-typedef struct VertexArray
-{
-    uint32_t vao_id;
-    uint32_t* attributes;
-    size_t attributes_len;
-}VertexArray;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
