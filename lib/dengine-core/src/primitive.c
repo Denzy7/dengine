@@ -398,7 +398,7 @@ void dengine_primitive_gen_grid(uint16_t slice, Primitive* primitive, Shader* sh
     primitive->index.data = grid_indices.data;
     primitive->index.size = sizeof(uint16_t) * grid_indices.count;
     primitive->index.usage = GL_STATIC_DRAW;
-    primitive->index_count = grid_indices.count * 4;
+    primitive->index_count = grid_indices.count;
 
     //aPos
     primitive->aPos.size = 3;
