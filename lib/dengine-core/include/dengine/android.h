@@ -7,6 +7,10 @@
 
 typedef void (*DengineAndroidAppFunc)(struct android_app*);
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void dengine_android_set_app(struct android_app* app);
 
 void dengine_android_set_initfunc(DengineAndroidAppFunc func);
@@ -16,5 +20,9 @@ void dengine_android_set_terminatefunc(DengineAndroidAppFunc func);
 void dengine_android_pollevents();
 
 int dengine_android_asset2file2mem(File2Mem* f2m);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANDROID_H
