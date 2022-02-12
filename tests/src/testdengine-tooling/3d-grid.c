@@ -69,14 +69,12 @@ int main()
     //FIXME : Break on resize window framebuffer
     dengine_camera_project_perspective((float)w / (float)h, &camera);
     dengine_camera_lookat(target, &camera);
+    dengine_camera_apply(&shader, &camera);
 
     mat4 model;
     glm_mat4_identity(model);
     vec3 scale = {3.0f, 3.0f, 3.0f};
     glm_scale(model, scale);
-
-    dengine_shader_set_mat4(&shader, "projection", camera.projection_mat);
-    dengine_shader_set_mat4(&shader, "view", camera.view_mat);
     dengine_shader_set_mat4(&shader, "model", model[0]);
 
     Primitive grid;
