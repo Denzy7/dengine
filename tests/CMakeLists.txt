@@ -191,11 +191,19 @@ target_link_libraries(testdengine-lighting-dirlight
         dengine-core dengine-utils dengine-gui)
 set_property(TARGET testdengine-lighting-dirlight PROPERTY C_STANDARD 99)
 
+# sliced 3d grid
 add_executable(testdengine-tooling-3dgrid
         src/testdengine-tooling/3d-grid.c)
 target_link_libraries(testdengine-tooling-3dgrid
         dengine-core dengine-utils)
 set_property(TARGET testdengine-tooling-3dgrid PROPERTY C_STANDARD 99)
+
+# 3d axis at 0,0,0
+add_executable(testdengine-tooling-3daxis
+        src/testdengine-tooling/3d-axis.c)
+target_link_libraries(testdengine-tooling-3daxis
+        dengine-core dengine-utils)
+set_property(TARGET testdengine-tooling-3daxis PROPERTY C_STANDARD 99)
 
 endif()
 
