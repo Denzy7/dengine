@@ -462,3 +462,15 @@ const char* dengine_input_gamepad_vibration_get_error()
     return "";
     #endif
 }
+
+void dengine_input_set_mousepos(double x, double y)
+{
+    mouseposx = x;
+    mouseposy = y;
+}
+
+void dengine_input_set_mousebtn(int btn, int val)
+{
+    mousebtns[btn] = val;
+}
+
