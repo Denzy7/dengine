@@ -52,7 +52,7 @@ set_property(TARGET testdengine-util-strpatch PROPERTY C_STANDARD 99)
 
 
 #executables for desktop
-if(NOT ANDROID)
+if(NOT ANDROID)    
 #core
 #basic window
 add_executable(testdengine-window-basic
@@ -190,6 +190,12 @@ add_executable(testdengine-lighting-dirlight
 target_link_libraries(testdengine-lighting-dirlight
         dengine-core dengine-utils dengine-gui)
 set_property(TARGET testdengine-lighting-dirlight PROPERTY C_STANDARD 99)
+
+add_executable(testdengine-tooling-3dgrid
+        src/testdengine-tooling/3d-grid.c)
+target_link_libraries(testdengine-tooling-3dgrid
+        dengine-core dengine-utils)
+set_property(TARGET testdengine-tooling-3dgrid PROPERTY C_STANDARD 99)
 
 endif()
 

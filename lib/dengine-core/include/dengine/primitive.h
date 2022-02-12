@@ -36,6 +36,8 @@ void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader);
 
 void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader);
 
+void dengine_primitive_gen_grid(uint16_t slice, Primitive* primitive, Shader* shader);
+
 #ifdef __cplusplus
 }
 #endif

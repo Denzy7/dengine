@@ -340,3 +340,74 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
     vtor_free(&cube_array);
     vtor_free(&cube_vertices);
 }
+
+void dengine_primitive_gen_grid(uint16_t slice, Primitive* primitive, Shader* shader)
+{
+    vtor grid_vertices, grid_indices;
+    vtor_create(&grid_vertices, sizeof(float));
+    vtor_create(&grid_indices, sizeof(uint16_t));
+
+    for(int i = -slice; i <= slice; i++)
+    {
+        for(int j = -slice; j <= slice; j++)
+        {
+            float x = (float)i / (float)slice;
+            float y = 0.0f;
+            float z = (float)j / (float)slice;
+
+            vtor_pushback(&grid_vertices, &x);
+            vtor_pushback(&grid_vertices, &y);
+            vtor_pushback(&grid_vertices, &z);
+        }
+    }
+
+    for(int i = 0; i < 2 * slice; i++)
+    {
+        for(int j = 0; j < 2 * slice; j++)
+        {
+            uint16_t row1 = i * ((2 * slice) + 1); //0
+            uint16_t row2 = (i + 1) * ((2 * slice) + 1); //4
+
+            uint16_t row1off = row1 + j;
+            uint16_t row1off1 = row1off + 1;
+
+            uint16_t row2off = row2 + j;
+            uint16_t row2off1 = row2off + 1;
+
+            vtor_pushback(&grid_indices, &row1off);
+            vtor_pushback(&grid_indices, &row1off1);
+            vtor_pushback(&grid_indices, &row1off1);
+            vtor_pushback(&grid_indices, &row2off1);
+
+            vtor_pushback(&grid_indices, &row2off1);
+            vtor_pushback(&grid_indices, &row2off);
+            vtor_pushback(&grid_indices, &row2off);
+            vtor_pushback(&grid_indices, &row1off);
+        }
+    }
+
+    primitive->draw_mode = GL_LINES;
+    primitive->draw_type = GL_UNSIGNED_SHORT;
+
+    //ARRAY
+    primitive->array.data = grid_vertices.data;
+    primitive->array.size = sizeof(float) * grid_vertices.count;
+    primitive->array.usage = GL_STATIC_DRAW;
+
+    //INDEX
+    primitive->index.data = grid_indices.data;
+    primitive->index.size = sizeof(uint16_t) * grid_indices.count;
+    primitive->index.usage = GL_STATIC_DRAW;
+    primitive->index_count = grid_indices.count * 4;
+
+    //aPos
+    primitive->aPos.size = 3;
+    primitive->aPos.stride = 3 * sizeof(float);
+    primitive->aPos.type = GL_FLOAT;
+    primitive->aPos.ptr = NULL;
+
+    dengine_primitive_setup(primitive, shader);
+
+    vtor_free(&grid_vertices);
+    vtor_free(&grid_indices);
+}
