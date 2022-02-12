@@ -15,7 +15,7 @@ void dengine_draw_primitive(Primitive* primitive, Shader* shader)
 
     dengine_shader_use(shader);
 
-    glDrawElements(primitive->draw_mode, primitive->index_count, primitive->draw_type, 0);
+    glDrawElements(primitive->draw_mode, primitive->index_count, primitive->draw_type, primitive->offset);
     DENGINE_CHECKGL;
 
     dengine_buffer_bind(GL_ARRAY_BUFFER, NULL);

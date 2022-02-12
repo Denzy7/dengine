@@ -22,6 +22,7 @@ typedef struct Primitive
 
     uint32_t draw_mode;
     uint32_t draw_type;
+    void* offset;
 } Primitive;
 
 #ifdef __cplusplus
@@ -37,6 +38,8 @@ void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader);
 void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader);
 
 void dengine_primitive_gen_grid(uint16_t slice, Primitive* primitive, Shader* shader);
+
+void dengine_primitive_gen_axis(Primitive* primitive, Shader* shader);
 
 #ifdef __cplusplus
 }

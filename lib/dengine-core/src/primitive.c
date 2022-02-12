@@ -42,6 +42,8 @@ void dengine_primitive_setup(Primitive* primitive, Shader* shader)
     dengine_buffer_bind(GL_ARRAY_BUFFER, NULL);
 
     glBindVertexArray(0);
+
+    primitive->offset = NULL;
 }
 
 
@@ -410,4 +412,44 @@ void dengine_primitive_gen_grid(uint16_t slice, Primitive* primitive, Shader* sh
 
     vtor_free(&grid_vertices);
     vtor_free(&grid_indices);
+}
+
+void dengine_primitive_gen_axis(Primitive* primitive, Shader* shader)
+{
+    const float letteroff = 0.1f;
+    static float axis_vertices[]=
+    {
+        //Lines
+        0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+    };
+
+    static uint16_t axis_indices[]=
+    {
+      0, 1, 0, 2, 0, 3,
+    };
+
+    primitive->draw_mode = GL_LINES;
+    primitive->draw_type = GL_UNSIGNED_SHORT;
+
+    //ARRAY
+    primitive->array.data = axis_vertices;
+    primitive->array.size = sizeof(axis_vertices);
+    primitive->array.usage = GL_STATIC_DRAW;
+
+    //INDEX
+    primitive->index.data = axis_indices;
+    primitive->index.size = sizeof(axis_vertices);
+    primitive->index.usage = GL_STATIC_DRAW;
+    primitive->index_count = sizeof(axis_vertices) / sizeof(axis_vertices[0]);
+
+    //aPos
+    primitive->aPos.size = 3;
+    primitive->aPos.stride = 3 * sizeof(float);
+    primitive->aPos.type = GL_FLOAT;
+    primitive->aPos.ptr = NULL;
+
+    dengine_primitive_setup(primitive, shader);
 }
