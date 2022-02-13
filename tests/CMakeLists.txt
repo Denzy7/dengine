@@ -205,6 +205,13 @@ target_link_libraries(testdengine-tooling-3daxis
         dengine-core dengine-utils)
 set_property(TARGET testdengine-tooling-3daxis PROPERTY C_STANDARD 99)
 
+# pick something with framebuffer
+add_executable(testdengine-tooling-fbpick
+        src/testdengine-tooling/fbpick.c)
+target_link_libraries(testdengine-tooling-fbpick
+        dengine-core dengine-utils dengine-gui)
+set_property(TARGET testdengine-tooling-fbpick PROPERTY C_STANDARD 99)
+
 endif()
 
 
