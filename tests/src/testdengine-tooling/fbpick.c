@@ -11,6 +11,9 @@
 #include <dengine/input.h> //mousepos
 #include <dengine-gui/gui.h>//text
 #include <dengine-utils/filesys.h> //f2m
+#include <dengine-utils/os.h> //filedialog
+
+#include <stdlib.h> //free
 #include <stdio.h> //snprintf
 #include <math.h> //round
 int main(int argc, char** argv)
@@ -70,11 +73,23 @@ int main(int argc, char** argv)
     dengine_input_init();
     denginegui_init();
 
+    char* fontfile = dengineutils_os_dialog_fileopen("Open a .tff or .otf font file...");
+    if(!fontfile)
+    {
+        dengineutils_logging_log("ERROR::Please pick a font!");
+        return 1;
+    }
+
     File2Mem ttf;
-    ttf.file = "/home/denzy/dengine/assets/fonts/OpenSans-Regular.ttf";
+    ttf.file = fontfile;
     dengineutils_filesys_file2mem_load(&ttf);
+    free(fontfile);
     float fontsz = 32.0f;
-    denginegui_set_font(ttf.mem, fontsz, 512);
+    if(!denginegui_set_font(ttf.mem, fontsz, 512))
+    {
+        dengineutils_logging_log("ERROR::cannot load that font!");
+        return 1;
+    }
 
     char txtbuf[150];
 
