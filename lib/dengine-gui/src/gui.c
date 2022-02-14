@@ -132,6 +132,7 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
     if(!initfont)
         memset(&fontmap, 0, sizeof(Texture));
 
+    //TODO : Use GL_RED for Core and Compat GL
     fontmap.format = GL_ALPHA;
     fontmap.internal_format = GL_ALPHA;
     fontmap.type = GL_UNSIGNED_BYTE;
