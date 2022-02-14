@@ -83,14 +83,23 @@ int dengine_lighting_init(const uint32_t n_PL, const uint32_t n_SL);
 void dengine_lighting_terminate();
 
 
+void dengine_lighting_shadowop_clear(ShadowOp* shadowop);
+
+//DirLight
+
 void dengine_lighting_setup_dirlight(DirLight* dirLight);
 
 void dengine_lighting_apply_dirlight(DirLight* dirLight, Shader* shader);
 
 void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, Shader* shader, Primitive* primitive, float* modelmtx);
 
-void dengine_lighting_shadow_dirlight_clear(DirLight* dirLight);
+//PointLight
 
+void dengine_lighting_setup_pointlight(PointLight* pointLight);
+
+void dengine_lighting_apply_pointlight(PointLight* pointLight, Shader* shader);
+
+void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, Shader* shader, Primitive* primitive, float* modelmtx);
 
 int dengine_lighting_patch(Shader* shader);
 
