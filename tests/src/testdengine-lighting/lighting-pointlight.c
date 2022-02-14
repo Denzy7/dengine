@@ -17,6 +17,7 @@
 #include <dengine-utils/filesys.h> //f2m
 int main(int argc, char** argv)
 {
+	int ctx32 = 1;
     dengine_window_init();
     //we need at least a 3.2 context for glFramebufferTexture (and GLSL 150 for GEOM shader)...
     //for shadow cubemap.
@@ -24,8 +25,18 @@ int main(int argc, char** argv)
     dengine_window_request_GL(3, 2, 0);
     if(!dengine_window_glfw_create(1280, 720, "testdengine-pointlight"))
     {
-        dengineutils_logging_log("ERROR::cannot request an OpenGL 3.3 window\n");
-        return 1;
+        dengineutils_logging_log("WARNING::cannot request an OpenGL 3.2 window. Shadows disabled\n");
+		
+		//Too bad we can't have 3.2
+		//Use 3.0 then without shadows
+		dengine_window_request_GL(3, 0, 0);
+		ctx32 = 0;
+		
+		if(!dengine_window_glfw_create(1280, 720, "testdengine-pointlight(noshadow)"))
+		{
+			dengineutils_logging_log("WARNING::cannot request an OpenGL 3.0 window!");
+			return 1;
+		}
     }
 
     GLFWwindow* current = dengine_window_glfw_get_currentwindow();
@@ -75,7 +86,9 @@ int main(int argc, char** argv)
             "varying vec2 TexCoord;"
             "varying vec3 Normal;"
             "varying vec3 FragPos;"
-
+			
+			"uniform int ctx32;"
+			
             //Pointlight
             "uniform float constant, linear, quadratic;"
             "uniform vec3 lightPos;"
@@ -109,7 +122,10 @@ int main(int argc, char** argv)
                 "vec3 diffuse = diffuseCol * diff * vec3( texture2D(texture, TexCoord));"
                 "float shadow = 0.0;"
                 "shadow_bias = max(0.01 * (1.0 - dot(nNormal, dir)), 0.005);"
-                "shadow = shadowCalc3D(pos);"
+				"if(ctx32 == 1)"
+				"{"
+					"shadow = shadowCalc3D(pos);"
+				"}"
                 "float distance = length(pos - FragPos);"
                 "float atten = 1.0 / (constant + linear * distance + quadratic * (distance * distance));"
                 "return atten * diffuse * (1.0 - shadow);"
@@ -173,14 +189,15 @@ int main(int argc, char** argv)
                 "gl_FragDepth = distance;"
             "}";
 
-
-    dengine_shader_setup(&shadow);
+	if(ctx32)
+		dengine_shader_setup(&shadow);
 
     dengine_shader_create(&shader);
     dengine_shader_setup(&shader);
-
+	
+	dengine_shader_set_int(&shader, "ctx32", ctx32);
     dengine_shader_set_int(&shader, "texture", 0);
-    dengine_shader_set_int(&shader, "shadowmap", 1);
+	dengine_shader_set_int(&shader, "shadowmap", 1);
 
     Shader pLightGizmo;
     pLightGizmo.vertex_code=
@@ -208,7 +225,7 @@ int main(int argc, char** argv)
 
     PointLight pLight;
     memset(&pLight, 0, sizeof(PointLight));
-    pLight.shadow.enable = 1;
+	pLight.shadow.enable = 1;
     pLight.shadow.shadow_map_size = 512;
     pLight.position[0] = 0.5f;
     pLight.position[1] = 2.5f;
@@ -338,13 +355,14 @@ int main(int argc, char** argv)
         //clear depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        dengine_lighting_shadowop_clear(&pLight.shadow);
+		if(ctx32)
+			dengine_lighting_shadowop_clear(&pLight.shadow);
 
         glActiveTexture(GL_TEXTURE0);
         dengine_texture_bind(GL_TEXTURE_2D, &texture);
-
-        glActiveTexture(GL_TEXTURE1);
-        dengine_texture_bind(GL_TEXTURE_CUBE_MAP, &pLight.shadow.shadow_map.depth);
+		
+		glActiveTexture(GL_TEXTURE1);
+		dengine_texture_bind(GL_TEXTURE_CUBE_MAP, &pLight.shadow.shadow_map.depth);		
 
         mat4 model, ivTpModel;
 
@@ -358,7 +376,9 @@ int main(int argc, char** argv)
         dengine_shader_set_mat4(&shader, "model", model[0]);
         dengine_shader_set_mat4(&shader, "ivTpModel", ivTpModel[0]);
         dengine_draw_primitive(&cube, &shader);
-        dengine_lighting_shadow_pointlight_draw(&pLight, &shadow, &cube, model[0]);
+		
+		if(ctx32)
+			dengine_lighting_shadow_pointlight_draw(&pLight, &shadow, &cube, model[0]);
 
         vec3 scale = {5.0, 5.0, 5.0};
         glm_mat4_identity(model);
@@ -368,7 +388,9 @@ int main(int argc, char** argv)
         dengine_shader_set_mat4(&shader, "model", model[0]);
         dengine_shader_set_mat4(&shader, "ivTpModel", ivTpModel[0]);
         dengine_draw_primitive(&plane, &shader);
-        dengine_lighting_shadow_pointlight_draw(&pLight, &shadow, &cube, model[0]);
+		
+		if(ctx32)
+			dengine_lighting_shadow_pointlight_draw(&pLight, &shadow, &cube, model[0]);
 
         glm_mat4_identity(model);
         glm_translate(model, pLight.position);
