@@ -219,7 +219,7 @@ int main(int argc, char** argv)
         //clear depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        dengine_lighting_shadow_dirlight_clear(&dLight);
+        dengine_lighting_shadowop_clear(&dLight.shadow);
 
         glActiveTexture(GL_TEXTURE0);
         dengine_texture_bind(GL_TEXTURE_2D, &texture);
