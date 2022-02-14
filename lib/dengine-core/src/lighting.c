@@ -38,7 +38,18 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
 
     dengine_texture_gen(1, &depth);
     dengine_texture_bind(shadowmap_target, &depth);
-    dengine_texture_data(shadowmap_target, &depth);
+
+    if(shadowmap_target == GL_TEXTURE_2D){
+        dengine_texture_data(shadowmap_target, &depth);
+    }else if (shadowmap_target == GL_TEXTURE_CUBE_MAP)
+    {
+        for(uint32_t i = 0; i < 6; i++)
+        {
+            uint32_t face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
+            dengine_texture_data(face, &depth);
+        }
+    }
+
     dengine_texture_set_params(shadowmap_target, &depth);
 
     dengine_framebuffer_gen(1, &shadowop->shadow_map);
@@ -48,8 +59,8 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
     else
         dengine_framebuffer_attach(DENGINE_FRAMEBUFFER_DEPTH, &depth, &shadowop->shadow_map);
     
-    glReadBuffer(GL_NONE);
-    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE); DENGINE_CHECKGL;
+    glDrawBuffer(GL_NONE); DENGINE_CHECKGL;
 
     dengine_texture_bind(shadowmap_target, NULL);
     dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
@@ -77,6 +88,13 @@ int dengine_lighting_init(const uint32_t n_PL, const uint32_t n_SL)
 Lighting* dengine_lighting_get()
 {
     return &lighting;
+}
+
+void dengine_lighting_shadowop_clear(ShadowOp* shadowop)
+{
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, &shadowop->shadow_map);
+    glClear(GL_DEPTH_BUFFER_BIT); DENGINE_CHECKGL;
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
 }
 
 void dengine_lighting_setup_dirlight(DirLight* dirLight)
@@ -129,19 +147,147 @@ void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, Shader* shader, P
     memcpy(dirLight->shadow_projview, projview[0], sizeof(mat4));
 }
 
-void dengine_lighting_shadow_dirlight_clear(DirLight* dirLight)
-{
-    dengine_framebuffer_bind(GL_FRAMEBUFFER, &dirLight->shadow.shadow_map);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
-}
-
 void dengine_lighting_apply_dirlight(DirLight* dirLight, Shader* shader)
 {
     if(dirLight->shadow.enable)
     {
 
     }
+}
+
+void dengine_lighting_setup_pointlight(PointLight* pointLight)
+{
+    if(pointLight->shadow.enable)
+    {
+        _dengine_lighting_shadowop_setup(GL_TEXTURE_CUBE_MAP, &pointLight->shadow);
+    }
+
+    pointLight->constant = 1.0f;
+    pointLight->linear  = 0.09f;
+    pointLight->quadratic = 0.032f;
+
+    pointLight->light.strength = 1;
+
+    float diff[3] = {1.0f, 1.0f, 1.0f};
+    memcpy(pointLight->light.diffuse, diff, sizeof(diff));
+
+    pointLight->shadow.far_shadow = 30.0f;
+    pointLight->shadow.near_shadow = 0.1f;
+}
+
+void dengine_lighting_apply_pointlight(PointLight* pointLight, Shader* shader)
+{
+    dengine_shader_set_vec3(shader, "lightPos", pointLight->position);
+    float diffStrength[3];
+    memcpy(diffStrength, pointLight->light.diffuse, sizeof(diffStrength));;
+
+    for(int i = 0; i < 3; i++)
+        diffStrength[i]*=pointLight->light.strength;
+
+    dengine_shader_set_vec3(shader, "diffuseCol", diffStrength);
+    dengine_shader_set_float(shader, "constant", pointLight->constant);
+    dengine_shader_set_float(shader, "linear", pointLight->linear);
+    dengine_shader_set_float(shader, "quadratic", pointLight->quadratic);
+    dengine_shader_set_float(shader, "shadowfar", pointLight->shadow.far_shadow);
+}
+
+void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, Shader* shader, Primitive* primitive, float* modelmtx)
+{
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, &pointLight->shadow.shadow_map);
+
+    //Guard for no shadow
+    if(!pointLight->shadow.enable)
+    {
+        dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
+        return;
+    }
+
+    vec3 xp = {1.0f, 0.0f, 0.0f};
+    vec3 xn = {-1.0f, 0.0f, 0.0f};
+
+    vec3 yp = {0.0f, 1.0f, 0.0f};
+    vec3 yn = {0.0f, -1.0f, 0.0f};
+
+    vec3 zp = {0.0f, 0.0f, 1.0f};
+    vec3 zn = {0.0f, 0.0f, -1.0f};
+
+    mat4 proj, view;
+    mat4 projviews[6];
+
+    vec3 pos, posdir;
+    memcpy(pos, pointLight->position, sizeof(vec3));
+
+    int shadow_map_size = pointLight->shadow.shadow_map_size;
+    float aspect = (float)shadow_map_size / (float)shadow_map_size;
+    float near = pointLight->shadow.near_shadow;
+    float far = pointLight->shadow.far_shadow;
+
+    glm_perspective(glm_rad(90.0f), aspect, near, far, proj);
+
+    //xp
+    glm_mat4_zero(view);
+    glm_vec3_zero(posdir);
+    glm_vec3_add(pos, xp, posdir);
+    glm_lookat(pos, posdir, yn, view);
+    glm_mat4_mul(proj, view, projviews[0]);
+
+    //xn
+    glm_mat4_zero(view);
+    glm_vec3_zero(posdir);
+    glm_vec3_add(pos, xn, posdir);
+    glm_lookat(pos, posdir, yn, view);
+    glm_mat4_mul(proj, view, projviews[1]);
+
+    //yp
+    glm_mat4_zero(view);
+    glm_vec3_zero(posdir);
+    glm_vec3_add(pos, yp, posdir);
+    glm_lookat(pos, posdir, zp, view);
+    glm_mat4_mul(proj, view, projviews[2]);
+
+    //yn
+    glm_mat4_zero(view);
+    glm_vec3_zero(posdir);
+    glm_vec3_add(pos, yn, posdir);
+    glm_lookat(pos, posdir, zn, view);
+    glm_mat4_mul(proj, view, projviews[3]);
+
+    //zp
+    glm_mat4_zero(view);
+    glm_vec3_zero(posdir);
+    glm_vec3_add(pos, zp, posdir);
+    glm_lookat(pos, posdir, yn, view);
+    glm_mat4_mul(proj, view, projviews[4]);
+
+    //zn
+    glm_mat4_zero(view);
+    glm_vec3_zero(posdir);
+    glm_vec3_add(pos, zn, posdir);
+    glm_lookat(pos, posdir, yn, view);
+    glm_mat4_mul(proj, view, projviews[5]);
+
+    dengine_shader_set_mat4(shader, "model", modelmtx);
+
+    //char matrix_str[strlen("matrices[00]")];
+    char matrix_str[32];
+    for(int i = 0; i < 6; i++)
+    {
+        snprintf(matrix_str, sizeof(matrix_str), "matrices[%d]", i);
+        dengine_shader_set_mat4(shader, matrix_str, projviews[i][0]);
+    }
+
+    dengine_shader_set_vec3(shader, "pos", pos);
+    dengine_shader_set_float(shader, "far", far);
+
+    //printf("%d %u\n", dirLight->shadow.shadow_map_size, dirLight->shadow.shadow_map.depth.texture_id);
+    glViewport(0, 0, shadow_map_size, shadow_map_size);
+
+    dengine_draw_primitive(primitive, shader);
+
+    int h, w;
+    dengine_window_get_window_dim(&w, &h);
+    glViewport(0, 0, w, h);
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
 }
 
 int dengine_lighting_patch(Shader* shader)
