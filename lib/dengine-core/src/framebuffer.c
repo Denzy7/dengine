@@ -36,6 +36,12 @@ void dengine_framebuffer_attach(FramebufferAttachmentType attachment, Texture* t
     }
     else{
         //on GL/ES 3.2+
+		//Guard against this dangerous call
+		#ifdef DENGINE_GL_GLAD
+		if(!glad_glFramebufferTexture)
+			return;
+		#endif
+		
         glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->texture_id, 0);
         if(!DENGINE_CHECKGL)
         {
