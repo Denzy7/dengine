@@ -60,7 +60,7 @@ void dengine_primitive_gen_quad(Primitive* primitive, Shader* shader)
 
     static uint16_t quad_index[]=
     {
-        0, 1, 2, 2, 0, 3
+        0, 1, 2, 2, 3, 0
     };
 
     primitive->draw_mode = GL_TRIANGLES;
