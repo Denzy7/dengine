@@ -8,13 +8,19 @@
 
 void dengine_shader_create(Shader* shader)
 {
-
+    shader->geometry_code= NULL;
 }
 
 void dengine_shader_destroy(Shader* shader)
 {
     glDeleteShader(shader->fragment_id); DENGINE_CHECKGL;
     glDeleteShader(shader->vertex_id); DENGINE_CHECKGL;
+
+#if defined(DENGINE_GL_GLAD) || defined(DENGINE_GL_GLES32)
+    if(shader->geometry_code)
+        glDeleteShader(shader->geometry_id); DENGINE_CHECKGL;
+#endif
+
     glDeleteProgram(shader->program_id); DENGINE_CHECKGL;
 }
 
@@ -23,7 +29,6 @@ int dengine_shader_compile_shader(const uint32_t shader, const char* code)
     glShaderSource(shader, 1, &code, NULL); DENGINE_CHECKGL;
     glCompileShader(shader); DENGINE_CHECKGL;
     int ok;
-
 
     glGetShaderiv(shader, GL_COMPILE_STATUS, &ok); DENGINE_CHECKGL;
     if(!ok)
@@ -41,6 +46,12 @@ int dengine_shader_compile_shader(const uint32_t shader, const char* code)
         {
             type_str = "FRAGMENT";
         }
+#if defined(DENGINE_GL_GLAD) || defined(DENGINE_GL_GLES32)
+        else if(type == GL_GEOMETRY_SHADER)
+        {
+            type_str = "GEOMETRY";
+        }
+#endif
         size_t line, column, zero;
         sscanf(info_log, "%zu:%zu(%zu)", &zero, &line, &column);
 
@@ -98,6 +109,17 @@ int dengine_shader_setup(Shader* shader)
     {
         glAttachShader(shader->program_id, shader->vertex_id); DENGINE_CHECKGL;
         glAttachShader(shader->program_id, shader->fragment_id); DENGINE_CHECKGL;
+
+#if defined(DENGINE_GL_GLAD) || defined(DENGINE_GL_GLES32)
+        if(shader->geometry_code)
+        {
+            shader->geometry_id =glCreateShader(GL_GEOMETRY_SHADER); DENGINE_CHECKGL;
+            if(dengine_shader_compile_shader(shader->geometry_id, shader->geometry_code))
+            {
+                glAttachShader(shader->program_id, shader->geometry_id); DENGINE_CHECKGL;
+            }
+        }
+#endif
 
         return dengine_shader_link(shader);
     }else
