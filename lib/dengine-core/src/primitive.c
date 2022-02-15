@@ -6,8 +6,8 @@
 
 void dengine_primitive_setup(Primitive* primitive, Shader* shader)
 {
-    glGenVertexArrays(1, &primitive->vao);
-    glBindVertexArray(primitive->vao);
+    dengine_vao_gen(1, &primitive->vao);
+    dengine_vao_bind(&primitive->vao);
 
     dengine_buffer_gen(1, &primitive->array);
     dengine_buffer_bind(GL_ARRAY_BUFFER, &primitive->array);
@@ -41,7 +41,7 @@ void dengine_primitive_setup(Primitive* primitive, Shader* shader)
     dengine_buffer_bind(GL_ELEMENT_ARRAY_BUFFER, NULL);
     dengine_buffer_bind(GL_ARRAY_BUFFER, NULL);
 
-    glBindVertexArray(0);
+    dengine_vao_bind(NULL);
 
     primitive->offset = NULL;
 }

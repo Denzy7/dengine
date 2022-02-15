@@ -3,13 +3,15 @@
 
 #include "buffer.h"
 #include "vertex.h"
+#include "dengine/vao.h"
 
 #include <stdint.h> //uint32
 //#include <stddef.h> //size_t
 
+
 typedef struct Primitive
 {
-    uint32_t vao;
+    VAO vao;
 
     Buffer array;
     Buffer index;
