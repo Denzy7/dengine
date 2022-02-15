@@ -42,6 +42,8 @@ void dengine_window_swapbuffers();
 
 int dengine_window_isrunning();
 
+int dengine_window_loadgl();
+
 //GLFW Specific Calls
 #if defined(DENGINE_WIN_GLFW)
 
@@ -72,6 +74,8 @@ int dengine_window_glfw_context_gladloadgl();
 
 #ifdef DENGINE_ANDROID
 void dengine_window_android_set_nativewindow(struct ANativeWindow* window);
+
+int dengine_window_android_egl_context_gladloadgl();
 #endif
 
 #ifdef __cplusplus

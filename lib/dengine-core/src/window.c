@@ -202,6 +202,17 @@ int dengine_window_isrunning()
     return isrunning;
 }
 
+int dengine_window_loadgl()
+{
+#if defined(DENGINE_WIN_GLFW)
+    return dengine_window_glfw_context_gladloadgl();
+#elif defined(DENGINE_WIN_EGL)
+    return dengine_window_android_egl_context_gladloadgl();
+#else
+    return 0;
+#endif
+}
+
 //GLFW Specific Calls
 #if defined(DENGINE_WIN_GLFW)
 
@@ -270,8 +281,7 @@ void dengine_window_glfw_context_makecurrent(GLFWwindow* window)
 int dengine_window_glfw_context_gladloadgl()
 {
     #ifdef DENGINE_GL_GLAD
-    glinit = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    return glinit;
+    return gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     #else
     return 0;
     #endif // DENGINE_GL_GLAD
@@ -282,5 +292,10 @@ int dengine_window_glfw_context_gladloadgl()
 void dengine_window_android_set_nativewindow(struct ANativeWindow* window)
 {
     _android_current = window;
+}
+
+int dengine_window_android_egl_context_gladloadgl()
+{
+    return gladLoadGLES2Loader((GLADloadproc)eglGetProcAddress);
 }
 #endif
