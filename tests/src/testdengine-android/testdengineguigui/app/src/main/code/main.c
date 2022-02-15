@@ -20,6 +20,8 @@ static void init(struct android_app* app)
     if(dengine_window_init())
     {
         window_init = 1;
+		
+		dengine_window_loadgl();
 
         dengineutils_logging_log("init window success");
 

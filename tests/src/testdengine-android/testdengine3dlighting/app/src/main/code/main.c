@@ -1,16 +1,12 @@
-#include <android_native_app_glue.h>
-#include <jni.h>
-#include <android/asset_manager.h>
-
+#include <dengine/android.h>
 #include <dengine/window.h>
-#include <dengine-utils/logging.h>
 #include <dengine/loadgl.h>
+
+#include <dengine-utils/logging.h>
 #include <dengine-utils/timer.h>
 
 #include <dengine/primitive.h>
 #include <dengine/draw.h>
-#include <dengine/shader.h>
-
 #include <dengine/texture.h>
 
 #include <dengine/camera.h>
@@ -19,33 +15,18 @@
 #include <string.h> //memset
 #include <stdlib.h> //malloc
 #include <dengine-utils/filesys.h>
+
 double elapsed;
 
+int window_init = 0;
 
 Primitive cube;
 Primitive plane;
 
-Shader shader_cube;
-Shader shader_plane;
-AAssetManager* asset_mgr;
+mat4 model;
 
-void* a2m(const char* file, size_t* sz)
-{
-    if(!asset_mgr)
-        return NULL;
-    AAsset* asset = AAssetManager_open(asset_mgr, file, AASSET_MODE_BUFFER);
-    if(!asset)
-        return NULL;
+Shader shader;
 
-    *sz = AAsset_getLength(asset);
-
-    //nullterm for txt
-    void* mem = malloc(*sz + 1);
-    memset(mem, 0, *sz + 1);
-    AAsset_read(asset, mem, *sz);
-    AAsset_close(asset);
-    return mem;
-}
 
 static void init(struct android_app* app)
 {
@@ -57,6 +38,11 @@ static void init(struct android_app* app)
 
     if(dengine_window_init())
     {
+		
+		dengine_window_loadgl();
+		
+		window_init = 1;
+		
         int w, h;
         dengine_window_get_window_width(&w);
         dengine_window_get_window_height(&h);
@@ -66,7 +52,7 @@ static void init(struct android_app* app)
         //dengine_window_glfw_set_monitor(glfwGetPrimaryMonitor(), 0, 0, 60);
 
         dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
-        shader_cube.vertex_code =
+        shader.vertex_code =
                 "attribute vec3 aPos;"
                 "attribute vec2 aTexCoord;"
                 "attribute vec3 aNormal;"
@@ -86,7 +72,7 @@ static void init(struct android_app* app)
                 "Normal = aNormal;"
                 "FragPos = vec3(model * vec4(aPos, 1.0));"
                 "}";
-        shader_cube.fragment_code =
+        shader.fragment_code =
                 "precision mediump float;"
                 "varying vec2 TexCoord;"
                 "varying vec3 Normal;"
@@ -111,17 +97,13 @@ static void init(struct android_app* app)
                 "FragColor += dirLight(-normalize(lightDir), nNormal, viewDir);"
                 "gl_FragColor = vec4(FragColor, 1.0);"
                 "}";
-        shader_plane.fragment_code = shader_cube.fragment_code;
-        shader_plane.vertex_code = shader_cube.vertex_code;
+        
 
-        dengine_shader_create(&shader_cube);
-        dengine_shader_setup(&shader_cube);
+        dengine_shader_create(&shader);
+        dengine_shader_setup(&shader);
 
-        dengine_shader_create(&shader_plane);
-        dengine_shader_setup(&shader_plane);
-
-        dengine_primitive_gen_cube(&cube, &shader_cube);
-        dengine_primitive_gen_plane(&plane, &shader_plane);
+        dengine_primitive_gen_cube(&cube, &shader);
+        dengine_primitive_gen_plane(&plane, &shader);
 
         Camera camera;
         camera.near = 0.01f;
@@ -136,48 +118,35 @@ static void init(struct android_app* app)
         //FIXME : Break on resize window framebuffer
         dengine_camera_project_perspective((float)w / (float)h, &camera);
         dengine_camera_lookat(target, &camera);
-
-        mat4 model;
-        glm_mat4_identity(model);
-        vec3 cube_pos = {0.0f, 1.0f, 0.0f};
-        glm_translate(model, cube_pos);
-
-        dengine_shader_set_mat4(&shader_cube, "projection", camera.projection_mat);
-        dengine_shader_set_mat4(&shader_cube, "view", camera.view_mat);
-        dengine_shader_set_mat4(&shader_cube, "model", model[0]);
-        dengine_shader_set_mat4(&shader_cube, "ViewPos", position);
-
-        glm_mat4_identity(model);
-        vec3 plane_scale = {5.0f, 5.0f, 5.0f};
-        glm_scale(model, plane_scale);
-        dengine_shader_set_mat4(&shader_plane, "projection", camera.projection_mat);
-        dengine_shader_set_mat4(&shader_plane, "view", camera.view_mat);
-        dengine_shader_set_mat4(&shader_plane, "model", model[0]);
-        dengine_shader_set_mat4(&shader_plane, "ViewPos", position);
-
-        size_t tex_sz;
-        void* tex_mem = a2m("brickwall.jpg", &tex_sz);
-
+		dengine_camera_apply(&shader, &camera);
+        
         Texture texture;
         memset(&texture, 0, sizeof(Texture));
         texture.interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
-
-        dengine_texture_load_mem(tex_mem, tex_sz, 1, &texture);
+		
+		File2Mem f2m;
+        f2m.file = "brickwall.jpg";
+        dengine_android_asset2file2mem(&f2m);
+        dengine_texture_load_mem(f2m.mem, f2m.size, 1, &texture);
+		
         uint32_t fmt = texture.channels == 3 ? GL_RGB : GL_RGBA;
         texture.internal_format = fmt;
         texture.format = fmt;
         texture.type = GL_UNSIGNED_BYTE;
+		texture.mipmap = 1;
 
         dengine_texture_gen(1, &texture);
         //Dont unbind
         glActiveTexture(GL_TEXTURE0);
         dengine_texture_bind(GL_TEXTURE_2D, &texture);
         dengine_texture_data(GL_TEXTURE_2D, &texture);
+		
         dengine_texture_set_params(GL_TEXTURE_2D, &texture);
         dengine_texture_free_data(&texture);
+		dengineutils_filesys_file2mem_free(&f2m);
 
-        dengine_shader_set_int(&shader_plane, "texture", 0);
-        dengine_shader_set_int(&shader_cube, "texture", 0);
+        dengine_shader_set_int(&shader, "texture", 0);
+		glActiveTexture(GL_TEXTURE0);
 
         //depth
         glEnable(GL_DEPTH_TEST);
@@ -187,11 +156,11 @@ static void init(struct android_app* app)
     }
 }
 
-static void destroy(struct android_app* app)
+static void term(struct  android_app* app)
 {
     dengine_window_terminate();
-
     ANativeWindow_release(app->window);
+    ANativeActivity_finish(app->activity);
 }
 
 static void draw()
@@ -199,58 +168,26 @@ static void draw()
     glClearColor(0.3, 0.2, 0.1, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    dengine_draw_primitive(&cube, &shader_cube);
-    dengine_draw_primitive(&plane, &shader_plane);
+	glm_mat4_identity(model);
+	vec3 cube_pos = {0.0f, 1.0f, 0.0f};
+	glm_translate(model, cube_pos);
+	dengine_shader_set_mat4(&shader, "model", model[0]);
+	dengine_draw_primitive(&cube, &shader);
+
+	glm_mat4_identity(model);
+	vec3 plane_scale = {5.0f, 5.0f, 5.0f};
+	glm_scale(model, plane_scale);
+	dengine_shader_set_mat4(&shader, "model", model[0]);
+    dengine_draw_primitive(&plane, &shader);
 
     dengine_window_swapbuffers();
 }
 
-static void cmd_handle(struct android_app* app, int32_t cmd)
-{
-    switch (cmd) {
-        case APP_CMD_SAVE_STATE:
-            dengineutils_logging_log("Saving state...");
-            break;
-
-        case APP_CMD_INIT_WINDOW:
-            dengineutils_logging_log("Getting window ready...");
-            init(app);
-            //Buggy fullscreen
-            //ANativeActivity_setWindowFlags(app->activity, AWINDOW_FLAG_FULLSCREEN, 0);
-            break;
-
-        case APP_CMD_TERM_WINDOW:
-            dengineutils_logging_log("Term window");
-            destroy(app);
-            break;
-
-        case APP_CMD_GAINED_FOCUS:
-            dengineutils_logging_log("Gained focus");
-            break;
-
-        case APP_CMD_LOST_FOCUS:
-            dengineutils_logging_log("Lost focus");
-            break;
-
-        case APP_CMD_PAUSE:
-            dengineutils_logging_log("Paused");
-            break;
-
-        case APP_CMD_RESUME:
-            dengineutils_logging_log("Resumed");
-            break;
-
-        case APP_CMD_DESTROY:
-            dengineutils_logging_log("Destroy");
-            break;
-    }
-}
-
 void android_main(struct android_app* state)
 {
-    //Set app callbacks
-    state->onAppCmd = cmd_handle;
-    asset_mgr = state->activity->assetManager;
+    dengine_android_set_app(state);
+    dengine_android_set_initfunc(init);
+    dengine_android_set_terminatefunc(term);
 
     if(state->savedState)
     {
@@ -259,27 +196,12 @@ void android_main(struct android_app* state)
 
     while(1)
     {
-        //Read events
-        int events;
-        struct android_poll_source* source;
-
-        while((ALooper_pollAll(1 ? 0 : -1, NULL, &events, (void**)&source)) >= 0)
-        {
-            //Process event
-            if(source != NULL)
-            {
-                source->process(state, source);
-            }
-        }
-
+        dengine_android_pollevents();
+		
         //Quit and detach
         if(state->destroyRequested != 0)
         {
             dengineutils_logging_log("Destroy Requested");
-            ANativeActivity_finish(state->activity);
-
-            //state->activity->vm->DetachCurrentThread();
-
             dengineutils_logging_log("Goodbye!");
             return;
         }
@@ -293,7 +215,7 @@ void android_main(struct android_app* state)
             dengineutils_logging_log("step");
             elapsed = 0;
         }
-
-        draw();
+		if(window_init)
+        	draw();
     }
 }

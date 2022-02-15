@@ -18,7 +18,6 @@ ${DENGINE_DIR}  ${DENGINE_BUILD}
 # now build app's shared lib
 add_library(GFX SHARED
 	main.c
-	${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c #native glue
 )
 
 target_include_directories(GFX PUBLIC
@@ -27,8 +26,9 @@ target_include_directories(GFX PUBLIC
 		${DENGINE_DIR}/lib/dengine-core/include
 		${DENGINE_DIR}/lib/dengine-utils/include
 		${DENGINE_DIR}/deps/cglm/include
+		${DENGINE_DIR}/deps/glad/include
 		)
 
 
-target_link_libraries(GFX PUBLIC log EGL GLESv3 android dengine-core dengine-utils)
+target_link_libraries(GFX PUBLIC log EGL glad android dengine-core dengine-utils)
 
