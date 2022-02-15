@@ -52,14 +52,14 @@ if(ANDROID)
 endif()
 
 #link everything here to avoid cmake link errors
-target_link_libraries(dengine-core dengine-utils)
+target_link_libraries(dengine-core dengine-utils glad)
 
 if(NOT ANDROID)
-    target_link_libraries(dengine-core glfw glad)
+    target_link_libraries(dengine-core glfw)
 endif()
 
 if(UNIX)
-    target_link_libraries(dengine-core dl m)
+    target_link_libraries(dengine-core m)
 endif()
 
 #xinput basic vibration

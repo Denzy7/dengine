@@ -116,12 +116,9 @@ void dengine_texture_set_params(uint32_t target, Texture* texture)
         glTexParameteri(target, GL_TEXTURE_WRAP_S, texture->wrap); DENGINE_CHECKGL;
         glTexParameteri(target, GL_TEXTURE_WRAP_T, texture->wrap); DENGINE_CHECKGL;
 
-//ES 3.0+
-#if defined(DENGINE_GL_GLAD) || !defined(DENGINE_GL_GLES2)
-        //HACK : R for cubemaps
+        //GL_TEXTURE_WRAP_R_OES for GLES2?
         if(target == GL_TEXTURE_CUBE_MAP)
             glTexParameteri(target, GL_TEXTURE_WRAP_R, texture->wrap); DENGINE_CHECKGL;
-#endif
     }
 }
 

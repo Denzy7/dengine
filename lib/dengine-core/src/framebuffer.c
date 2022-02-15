@@ -24,7 +24,12 @@ void dengine_framebuffer_bind(uint32_t target, Framebuffer* framebuffer)
 
 void dengine_framebuffer_attach(FramebufferAttachmentType attachment, Texture* texture, Framebuffer* framebuffer)
 {
-#if defined(DENGINE_GL_GLAD) || defined(DENGINE_GL_GLES32)
+    //Guard against this dangerous call
+    #ifdef DENGINE_GL_GLAD
+    if(!glad_glFramebufferTexture)
+        return;
+    #endif
+
     if(attachment == DENGINE_FRAMEBUFFER_COLOR){
         //on GL/ES 3.2+
         glFramebufferTexture(GL_FRAMEBUFFER, attachment + framebuffer->n_color, texture->texture_id, 0);
@@ -35,13 +40,6 @@ void dengine_framebuffer_attach(FramebufferAttachmentType attachment, Texture* t
         }
     }
     else{
-        //on GL/ES 3.2+
-		//Guard against this dangerous call
-		#ifdef DENGINE_GL_GLAD
-		if(!glad_glFramebufferTexture)
-			return;
-		#endif
-		
         glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->texture_id, 0);
         if(!DENGINE_CHECKGL)
         {
@@ -51,7 +49,6 @@ void dengine_framebuffer_attach(FramebufferAttachmentType attachment, Texture* t
                 framebuffer->stencil = *texture;
         }
     }
-#endif
 }
 
 void dengine_framebuffer_attach2D(FramebufferAttachmentType attachment, Texture* texture, Framebuffer* framebuffer)

@@ -32,8 +32,8 @@ endif()
 
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/stb
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/glad4.6/include
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/cglm/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/glad/include
         ${PROJECT_BINARY_DIR} #dengine_config.h
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-core/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-core/include/dengine
@@ -43,12 +43,9 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-gui/include/dengine-gui
         )
 
-if(NOT ANDROID)
-    add_subdirectory(deps/glad4.6 "glad-build")
-endif()
-
 configure_file(dengine_config.h.in dengine_config.h)
 
+add_subdirectory(deps/glad "glad-build")
 add_subdirectory(lib/dengine-utils "dengine-utils-build")
 add_subdirectory(lib/dengine-core "dengine-core-build")
 add_subdirectory(lib/dengine-gui "dengine-gui-build")

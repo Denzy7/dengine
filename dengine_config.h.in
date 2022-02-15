@@ -1,21 +1,19 @@
 #ifndef DENGINE_CONFIG_H_INCLUDED
 #define DENGINE_CONFIG_H_INCLUDED
 
+#define DENGINE_GL_GLAD
 #if defined(_WIN32) || defined (__MINGW32__)
     #define DENGINE_WIN32
     #define DENGINE_WIN_GLFW
-    #define DENGINE_GL_GLAD
 #elif defined(__ANDROID__)
     #define DENGINE_ANDROID
     #define DENGINE_WIN_EGL
-    #define DENGINE_GL_GLES3
     //Android is Linux
     #define DENGINE_LINUX
     #define DENGINE_ANDROID_LOG_TAG "Dengine-Android"
 #elif defined(__linux__)
     #define DENGINE_LINUX
     #define DENGINE_WIN_GLFW
-    #define DENGINE_GL_GLAD
     #cmakedefine DENGINE_HAS_GTK3 @DENGINE_HAS_GTK3@
 #endif // defined
 
