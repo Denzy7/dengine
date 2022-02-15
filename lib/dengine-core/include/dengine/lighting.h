@@ -78,6 +78,10 @@ typedef struct Lighting
     uint32_t n_pLights, n_sLights;
 }Lighting;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int dengine_lighting_init(const uint32_t n_PL, const uint32_t n_SL);
 
 void dengine_lighting_terminate();
@@ -107,5 +111,8 @@ int dengine_lighting_patch(Shader* shader);
 
 Lighting* dengine_lighting_get();
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif // LIGHTING_H
