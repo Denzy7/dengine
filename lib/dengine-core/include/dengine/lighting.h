@@ -58,12 +58,8 @@ typedef struct PointLight
 
 typedef struct SpotLight
 {
-    float position[4];
-
-    LightOp light;
-    ShadowOp shadow;
-
-    float constant, linear, quadratic;
+    float direction[4];
+    PointLight pointLight;
     float innerCutOff, outerCutOff;
 
     float __std140_padding[1];
@@ -105,9 +101,17 @@ void dengine_lighting_apply_pointlight(PointLight* pointLight, Shader* shader);
 
 void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, Shader* shader, Primitive* primitive, float* modelmtx);
 
+//Spotlight
+
+void dengine_lighting_setup_spotlight(SpotLight* spotLight);
+
+void dengine_lighting_apply_spotlight(SpotLight* spotLight, Shader* shader);
+
+void dengine_lighting_shadow_spotlight_draw(SpotLight* spotLight, Shader* shader, Primitive* primitive, float* modelmtx);
+
+//Shader patch
+
 int dengine_lighting_patch(Shader* shader);
-
-
 
 Lighting* dengine_lighting_get();
 
