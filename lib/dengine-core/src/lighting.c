@@ -280,7 +280,6 @@ void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, Shader* sha
     dengine_shader_set_vec3(shader, "pos", pos);
     dengine_shader_set_float(shader, "far", far);
 
-    //printf("%d %u\n", dirLight->shadow.shadow_map_size, dirLight->shadow.shadow_map.depth.texture_id);
     glViewport(0, 0, shadow_map_size, shadow_map_size);
 
     dengine_draw_primitive(primitive, shader);
@@ -290,6 +289,51 @@ void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, Shader* sha
     glViewport(0, 0, w, h);
     dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
 }
+
+void dengine_lighting_setup_spotlight(SpotLight* spotLight)
+{
+    dengine_lighting_setup_pointlight(&spotLight->pointLight);
+
+    spotLight->innerCutOff = 2.0f;
+    spotLight->outerCutOff = 3.0f;
+
+    spotLight->pointLight.light.strength = 1.f;
+
+    float diff[3] = {1.0f, 1.0f, 1.0f};
+    memcpy(spotLight->pointLight.light.diffuse, diff, sizeof(diff));
+
+    spotLight->pointLight.shadow.far_shadow = 30.0f;
+    spotLight->pointLight.shadow.near_shadow = 0.1f;
+}
+
+void dengine_lighting_apply_spotlight(SpotLight* spotLight, Shader* shader)
+{
+    dengine_shader_set_vec3(shader, "lightPos", spotLight->pointLight.position);
+    dengine_shader_set_vec3(shader, "lightDir", spotLight->direction);
+    float diffStrength[3];
+    memcpy(diffStrength, spotLight->pointLight.light.diffuse, sizeof(diffStrength));;
+
+    for(int i = 0; i < 3; i++)
+        diffStrength[i]*=spotLight->pointLight.light.strength;
+
+    dengine_shader_set_vec3(shader, "diffuseCol", diffStrength);
+    dengine_shader_set_float(shader, "constant", spotLight->pointLight.constant);
+    dengine_shader_set_float(shader, "linear", spotLight->pointLight.linear);
+    dengine_shader_set_float(shader, "quadratic", spotLight->pointLight.quadratic);
+    dengine_shader_set_float(shader, "shadowfar", spotLight->pointLight.shadow.far_shadow);
+
+    float oCut_rad = glm_rad(45.0f - glm_clamp(spotLight->outerCutOff, 0.0f, 45.0f));
+    float iCut_rad = glm_rad(45.0f - glm_clamp(spotLight->innerCutOff, 0.0f, spotLight->outerCutOff));
+
+    dengine_shader_set_float(shader, "oCut", oCut_rad);
+    dengine_shader_set_float(shader, "iCut", iCut_rad);
+}
+
+void dengine_lighting_shadow_spotlight_draw(SpotLight* spotLight, Shader* shader, Primitive* primitive, float* modelmtx)
+{
+    dengine_lighting_shadow_pointlight_draw(&spotLight->pointLight, shader, primitive, modelmtx);
+}
+
 
 int dengine_lighting_patch(Shader* shader)
 {
