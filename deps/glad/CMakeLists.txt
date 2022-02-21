@@ -11,3 +11,8 @@ if(NOT WIN32)
 	target_link_libraries(glad dl)
 endif()
 
+#remove lib prefix
+if(WIN32)
+    set_target_properties(glad PROPERTIES PREFIX "")
+endif()
+
