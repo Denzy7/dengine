@@ -199,6 +199,14 @@ target_link_libraries(testdengine-lighting-pointlight
         dengine-core dengine-utils dengine-gui)
 set_property(TARGET testdengine-lighting-pointlight PROPERTY C_STANDARD 99)
 
+#a scene lit with normals + spotlight and shadow, gui debugs shadowmap?
+add_executable(testdengine-lighting-spotlight
+        src/testdengine-lighting/lighting-spotlight.c
+        )
+target_link_libraries(testdengine-lighting-spotlight
+        dengine-core dengine-utils dengine-gui)
+set_property(TARGET testdengine-lighting-spotlight PROPERTY C_STANDARD 99)
+
 # sliced 3d grid
 add_executable(testdengine-tooling-3dgrid
         src/testdengine-tooling/3d-grid.c)

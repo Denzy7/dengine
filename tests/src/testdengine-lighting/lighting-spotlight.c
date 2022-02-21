@@ -17,26 +17,26 @@
 #include <dengine-utils/filesys.h> //f2m
 int main(int argc, char** argv)
 {
-	int ctx32 = 1;
+    int ctx32 = 1;
     dengine_window_init();
     //we need at least a 3.2 context for glFramebufferTexture (and GLSL 150 for GEOM shader)...
     //for shadow cubemap.
     //a core context is not a must AFAIK, but set to 1 if crash
     dengine_window_request_GL(3, 2, 0);
-    if(!dengine_window_glfw_create(1280, 720, "testdengine-pointlight"))
+    if(!dengine_window_glfw_create(1280, 720, "testdengine-spotlight"))
     {
         dengineutils_logging_log("WARNING::cannot request an OpenGL 3.2 window. Shadows disabled\n");
-		
-		//Too bad we can't have 3.2
-		//Use 3.0 then without shadows
-		dengine_window_request_GL(3, 0, 0);
-		ctx32 = 0;
-		
-		if(!dengine_window_glfw_create(1280, 720, "testdengine-pointlight(noshadow)"))
-		{
-			dengineutils_logging_log("WARNING::cannot request an OpenGL 3.0 window!");
-			return 1;
-		}
+
+        //Too bad we can't have 3.2
+        //Use 3.0 then without shadows
+        dengine_window_request_GL(3, 0, 0);
+        ctx32 = 0;
+
+        if(!dengine_window_glfw_create(1280, 720, "testdengine-pointlight(noshadow)"))
+        {
+            dengineutils_logging_log("WARNING::cannot request an OpenGL 3.0 window!");
+            return 1;
+        }
     }
 
     GLFWwindow* current = dengine_window_glfw_get_currentwindow();
@@ -55,7 +55,6 @@ int main(int argc, char** argv)
 
     //use fullscreen 60Hz on primary monitor
     //dengine_window_glfw_set_monitor(glfwGetPrimaryMonitor(), 0, 0, 60);
-
     dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
     Shader shader;
     shader.vertex_code =
@@ -86,12 +85,15 @@ int main(int argc, char** argv)
             "varying vec2 TexCoord;"
             "varying vec3 Normal;"
             "varying vec3 FragPos;"
-			
-			"uniform int ctx32;"
-			
-            //Pointlight
+
+            "uniform int ctx32;"
+
+            //Spotlight
             "uniform float constant, linear, quadratic;"
             "uniform vec3 lightPos;"
+            "uniform vec3 lightDir;"
+            "uniform float oCut;"
+            "uniform float iCut;"
             "uniform vec3 diffuseCol;"
             "uniform samplerCube shadowmap;"
             "uniform float shadowfar;"
@@ -116,16 +118,20 @@ int main(int argc, char** argv)
                 "return shadow;"
             "}"
 
-            "vec3 pointLight(vec3 pos, vec3 nNormal, vec3 viewDir){"
+            "vec3 spotLight(vec3 pos, vec3 dir_u, vec3 nNormal, vec3 viewDir){"
                 "vec3 dir = normalize(pos - FragPos);"
                 "float diff = max(dot(nNormal, dir), 0.0);"
                 "vec3 diffuse = diffuseCol * diff * vec3( texture2D(texture, TexCoord));"
+                "float theta = dot(dir, normalize(-dir_u));"
+                "float epsilon = iCut - oCut;"
+                "float intensity = clamp( (theta - oCut) / epsilon, 0.0, 1.0);"
+                "diffuse*=intensity;"
                 "float shadow = 0.0;"
                 "shadow_bias = max(0.01 * (1.0 - dot(nNormal, dir)), 0.005);"
-				"if(ctx32 == 1)"
-				"{"
-					"shadow = shadowCalc3D(pos);"
-				"}"
+                "if(ctx32 == 1)"
+                "{"
+                    "shadow = shadowCalc3D(pos);"
+                "}"
                 "float distance = length(pos - FragPos);"
                 "float atten = 1.0 / (constant + linear * distance + quadratic * (distance * distance));"
                 "return atten * diffuse * (1.0 - shadow);"
@@ -137,7 +143,7 @@ int main(int argc, char** argv)
                 "vec3 viewDir = normalize(ViewPos - FragPos);"
 
                 "vec3 FragColor = vec3(0.0);"
-                "FragColor += pointLight(lightPos, nNormal, viewDir);"
+                "FragColor += spotLight(lightPos, lightDir, nNormal, viewDir);"
                 "gl_FragColor = vec4(FragColor, 1.0);"
             "}";
 
@@ -189,18 +195,18 @@ int main(int argc, char** argv)
                 "gl_FragDepth = distance;"
             "}";
 
-	if(ctx32)
-		dengine_shader_setup(&shadow);
+    if(ctx32)
+        dengine_shader_setup(&shadow);
 
     dengine_shader_create(&shader);
     dengine_shader_setup(&shader);
-	
-	dengine_shader_set_int(&shader, "ctx32", ctx32);
-    dengine_shader_set_int(&shader, "texture", 0);
-	dengine_shader_set_int(&shader, "shadowmap", 1);
 
-    Shader pLightGizmo;
-    pLightGizmo.vertex_code=
+    dengine_shader_set_int(&shader, "ctx32", ctx32);
+    dengine_shader_set_int(&shader, "texture", 0);
+    dengine_shader_set_int(&shader, "shadowmap", 1);
+
+    Shader sLightGizmo;
+    sLightGizmo.vertex_code=
             "#version 100\n"
             "attribute vec3 aPos;"
             "uniform mat4 projection;"
@@ -210,7 +216,7 @@ int main(int argc, char** argv)
             "{"
                 "gl_Position = projection * view * model * vec4(aPos, 1.0);"
             "}";
-    pLightGizmo.fragment_code =
+    sLightGizmo.fragment_code =
             "#version 100\n"
             "precision mediump float;"
             "uniform vec3 color;"
@@ -219,31 +225,34 @@ int main(int argc, char** argv)
                 "gl_FragColor = vec4(color, 1.0);"
             "}";
 
-    dengine_shader_create(&pLightGizmo);
-    dengine_shader_setup(&pLightGizmo);
+    dengine_shader_create(&sLightGizmo);
+    dengine_shader_setup(&sLightGizmo);
 
+    SpotLight sLight;
+    memset(&sLight, 0, sizeof(SpotLight));
+    sLight.pointLight.shadow.enable = 1;
+    sLight.pointLight.shadow.shadow_map_size = 512;
+    float x = 0.f, y = 5.f, z = 2.5f;
+    sLight.pointLight.position[0] = x;
+    sLight.pointLight.position[1] = y;
+    sLight.pointLight.position[2] = z;
 
-    PointLight pLight;
-    memset(&pLight, 0, sizeof(PointLight));
-	pLight.shadow.enable = 1;
-    pLight.shadow.shadow_map_size = 512;
-    pLight.position[0] = 0.5f;
-    pLight.position[1] = 2.5f;
-    pLight.position[2] = 1.5f;
-    dengine_lighting_setup_pointlight(&pLight);
-    pLight.light.strength = 1.0f;
+    float tgt[3] = {1.5f,0.3f,0.f};
+
+    dengine_lighting_setup_spotlight(&sLight);
+    sLight.pointLight.light.strength = 1.0f;
 
     Texture texture;
     memset(&texture, 0, sizeof(Texture));
     texture.interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
-    char* texfile = dengineutils_os_dialog_fileopen("Open a 3/4 channel image(png, jpg)");
-    if(!texfile)
-    {
-        dengineutils_logging_log("ERROR::no file selected!");
-        return 1;
-    }
-    dengine_texture_load_file(texfile, 1, &texture);
-    free(texfile);
+//    char* texfile = dengineutils_os_dialog_fileopen("Open a 3/4 channel image(png, jpg)");
+//    if(!texfile)
+//    {
+//        dengineutils_logging_log("ERROR::no file selected!");
+//        return 1;
+//    }
+    dengine_texture_load_file(argv[1], 1, &texture);
+//    free(texfile);
     uint32_t fmt = texture.channels == 3 ? GL_RGB : GL_RGBA;
     texture.internal_format = fmt;
     texture.format = fmt;
@@ -257,7 +266,6 @@ int main(int argc, char** argv)
     dengine_texture_free_data(&texture);
     dengine_texture_bind(GL_TEXTURE_2D, NULL);
 
-
     Primitive cube;
     dengine_primitive_gen_cube(&cube, &shader);
 
@@ -265,8 +273,8 @@ int main(int argc, char** argv)
     dengine_primitive_gen_plane(&plane, &shader);
 
     Primitive axis, quad;
-    dengine_primitive_gen_quad(&quad, &pLightGizmo);
-    dengine_primitive_gen_axis(&axis, &pLightGizmo);
+    dengine_primitive_gen_quad(&quad, &sLightGizmo);
+    dengine_primitive_gen_axis(&axis, &sLightGizmo);
     axis.index_count = 2;
 
     Camera camera;
@@ -285,17 +293,18 @@ int main(int argc, char** argv)
     //3d depth
     glEnable(GL_DEPTH_TEST);
 
-    //no face culling for quad
-    //glEnable(GL_CULL_FACE);
     dengine_input_init();
 
     //Change line size
     glLineWidth(4.0f);
     float color[3];
     float scale_fac = 0.4f;
-    vec3 scale_gizmo = {scale_fac , scale_fac , scale_fac };
+    vec3 scale_gizmo = {scale_fac , scale_fac , scale_fac }, up = {0.f,1.f,0.f};
 
-    dengineutils_logging_log("INFO::Use 1-6 to change RGB, WASD-move, EC - up/down");
+    dengineutils_logging_log("INFO::Use 1-6 to change RGB, WASD - move light, EC - up/down");
+    dengineutils_logging_log("INFO::Use YGHJ-move target, UM - up/down");
+    dengineutils_logging_log("INFO::Use [ or ] inner cone, - or = inner cone");
+    mat4 view;
 
     while(dengine_window_isrunning())
     {
@@ -303,7 +312,7 @@ int main(int argc, char** argv)
         dengine_camera_lookat(target, &camera);
 
         dengine_camera_apply(&shader, &camera);
-        dengine_camera_apply(&pLightGizmo, &camera);
+        dengine_camera_apply(&sLightGizmo, &camera);
 
         double srcl = dengine_input_get_mousescroll_y();
 
@@ -315,58 +324,97 @@ int main(int argc, char** argv)
         //Change position
 
         if(dengine_input_get_key('D'))
-            pLight.position[0] += 0.1f;
+            sLight.pointLight.position[0] += 0.1f;
 
         if(dengine_input_get_key('A'))
-            pLight.position[0] -= 0.1f;
+            sLight.pointLight.position[0] -= 0.1f;
 
         if(dengine_input_get_key('W'))
-            pLight.position[2] -= 0.1f;
+            sLight.pointLight.position[2] -= 0.1f;
 
         if(dengine_input_get_key('S'))
-            pLight.position[2] += 0.1f;
+            sLight.pointLight.position[2] += 0.1f;
 
         if(dengine_input_get_key('E'))
-            pLight.position[1] += 0.1f;
+            sLight.pointLight.position[1] += 0.1f;
 
         if(dengine_input_get_key('C'))
-            pLight.position[1] -= 0.1f;
+            sLight.pointLight.position[1] -= 0.1f;
 
         //Change diffuse, r, g, b
         if(dengine_input_get_key('1'))
-            pLight.light.diffuse[0] += 0.01f;
+            sLight.pointLight.light.diffuse[0] += 0.01f;
 
         if(dengine_input_get_key('2'))
-            pLight.light.diffuse[0] -= 0.01f;
+            sLight.pointLight.light.diffuse[0] -= 0.01f;
 
         if(dengine_input_get_key('3'))
-            pLight.light.diffuse[1] += 0.01f;
+            sLight.pointLight.light.diffuse[1] += 0.01f;
 
         if(dengine_input_get_key('4'))
-            pLight.light.diffuse[1] -= 0.01f;
+            sLight.pointLight.light.diffuse[1] -= 0.01f;
 
         if(dengine_input_get_key('5'))
-            pLight.light.diffuse[2] += 0.01f;
+            sLight.pointLight.light.diffuse[2] += 0.01f;
 
         if(dengine_input_get_key('6'))
-            pLight.light.diffuse[2] -= 0.01f;
+            sLight.pointLight.light.diffuse[2] -= 0.01f;
+
+
+        //Target positioning
+        if(dengine_input_get_key('Y'))
+            tgt[2] -= 0.1f;
+
+        if(dengine_input_get_key('H'))
+            tgt[2] += 0.1f;
+
+        if(dengine_input_get_key('G'))
+            tgt[0] -= 0.1f;
+
+        if(dengine_input_get_key('J'))
+            tgt[0] += 0.1f;
+
+        if(dengine_input_get_key('U'))
+            tgt[1] += 0.1f;
+
+        if(dengine_input_get_key('M'))
+            tgt[1] -= 0.1f;
+
+        if(dengine_input_get_key('='))
+            sLight.innerCutOff += .1f;
+
+        if(dengine_input_get_key('-'))
+            sLight.innerCutOff -= .1f;
+
+        if(dengine_input_get_key('['))
+            sLight.outerCutOff -= .1f;
+
+        if(dengine_input_get_key(']'))
+            sLight.outerCutOff += .1f;
+
+        sLight.direction[0] = (tgt[0] - sLight.pointLight.position[0]);
+        sLight.direction[1] = (tgt[1] - sLight.pointLight.position[1]);
+        sLight.direction[2] = (tgt[2] - sLight.pointLight.position[2]);
 
         glClearColor(0.1, 0.1, 0.1, 0.1);
         //clear depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		if(ctx32)
-			dengine_lighting_shadowop_clear(&pLight.shadow);
+        if(ctx32)
+            dengine_lighting_shadowop_clear(&sLight.pointLight.shadow);
 
         glActiveTexture(GL_TEXTURE0);
         dengine_texture_bind(GL_TEXTURE_2D, &texture);
-		
-		glActiveTexture(GL_TEXTURE1);
-		dengine_texture_bind(GL_TEXTURE_CUBE_MAP, &pLight.shadow.shadow_map.depth);		
+
+        glActiveTexture(GL_TEXTURE1);
+        dengine_texture_bind(GL_TEXTURE_CUBE_MAP, &sLight.pointLight.shadow.shadow_map.depth);
 
         mat4 model, ivTpModel;
 
-        dengine_lighting_apply_pointlight(&pLight, &shader);
+        dengine_lighting_apply_spotlight(&sLight, &shader);
+
+        //Cull faces for meshes
+        glEnable(GL_CULL_FACE);
 
         glm_mat4_identity(model);
         vec3 pos = {0.0, 1.0, 0.0};
@@ -376,9 +424,9 @@ int main(int argc, char** argv)
         dengine_shader_set_mat4(&shader, "model", model[0]);
         dengine_shader_set_mat4(&shader, "ivTpModel", ivTpModel[0]);
         dengine_draw_primitive(&cube, &shader);
-		
-		if(ctx32)
-			dengine_lighting_shadow_pointlight_draw(&pLight, &shadow, &cube, model[0]);
+
+        if(ctx32)
+            dengine_lighting_shadow_spotlight_draw(&sLight, &shadow, &cube, model[0]);
 
         vec3 scale = {5.0, 5.0, 5.0};
         glm_mat4_identity(model);
@@ -388,26 +436,45 @@ int main(int argc, char** argv)
         dengine_shader_set_mat4(&shader, "model", model[0]);
         dengine_shader_set_mat4(&shader, "ivTpModel", ivTpModel[0]);
         dengine_draw_primitive(&plane, &shader);
-		
-		if(ctx32)
-			dengine_lighting_shadow_pointlight_draw(&pLight, &shadow, &cube, model[0]);
 
+        if(ctx32)
+            dengine_lighting_shadow_spotlight_draw(&sLight, &shadow, &cube, model[0]);
+
+        //GIZMOS
+        //Disable for gizmos
+        glDisable(GL_CULL_FACE);
         glm_mat4_identity(model);
-        glm_translate(model, pLight.position);
-        glm_scale(model, scale_gizmo);
-        dengine_shader_set_mat4(&pLightGizmo, "model", model[0]);
+        glm_mat4_zero(view);
+        glm_look(sLight.pointLight.position, sLight.direction, up, view);
+        glm_mat4_inv(view, view);
+        glm_mat4_mul(model, view, model);
 
-        //GRID
+        glm_scale(model, scale_gizmo);
+        dengine_shader_set_mat4(&sLightGizmo, "model", model[0]);
+
+        //AXIS
         for (int i = 0; i < 3; i++) {
             color[0] = i == 0 ? 1.0f : 0.0f, color[1] = i == 1 ? 1.0f : 0.0f, color[2] = i == 2 ? 1.0f : 0.0f;
             axis.offset = (void*)(i*2*sizeof (uint16_t));
-            dengine_shader_set_vec3(&pLightGizmo, "color", color);
-            dengine_draw_primitive(&axis, &pLightGizmo);
+            dengine_shader_set_vec3(&sLightGizmo, "color", color);
+            dengine_draw_primitive(&axis, &sLightGizmo);
         }
 
         //Quad
-        dengine_shader_set_vec3(&pLightGizmo, "color", pLight.light.diffuse);
-        dengine_draw_primitive(&quad, &pLightGizmo);
+        dengine_shader_set_vec3(&sLightGizmo, "color", sLight.pointLight.light.diffuse);
+        dengine_draw_primitive(&quad, &sLightGizmo);
+
+        //Target
+        glm_mat4_identity(model);
+        glm_translate(model, tgt);
+        glm_scale(model, scale_gizmo);
+        dengine_shader_set_mat4(&sLightGizmo, "model", model[0]);
+        for (int i = 0; i < 3; i++) {
+            color[0] = i == 0 ? 1.0f : 0.0f, color[1] = i == 1 ? 1.0f : 0.0f, color[2] = i == 2 ? 1.0f : 0.0f;
+            axis.offset = (void*)(i*2*sizeof (uint16_t));
+            dengine_shader_set_vec3(&sLightGizmo, "color", color);
+            dengine_draw_primitive(&axis, &sLightGizmo);
+        }
 
         dengine_window_swapbuffers();
         dengine_window_glfw_pollevents();
