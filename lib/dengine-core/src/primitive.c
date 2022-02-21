@@ -421,8 +421,8 @@ void dengine_primitive_gen_axis(Primitive* primitive, Shader* shader)
     {
         //Lines
         0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f,
         1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 1.0f,
     };
 
