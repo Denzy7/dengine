@@ -33,4 +33,7 @@ endif()
 
 set_property(TARGET dengine-utils PROPERTY C_STANDARD 99)
 
-
+#remove lib prefix
+if(WIN32)
+    set_target_properties(dengine-utils PROPERTIES PREFIX "")
+endif()

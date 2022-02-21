@@ -74,3 +74,8 @@ if(ANDROID)
 endif()
 
 set_property(TARGET dengine-core PROPERTY C_STANDARD 99)
+
+#remove lib prefix
+if(WIN32)
+    set_target_properties(dengine-core PROPERTIES PREFIX "")
+endif()
