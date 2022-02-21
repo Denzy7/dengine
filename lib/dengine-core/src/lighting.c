@@ -11,6 +11,25 @@ Lighting lighting;
 #include <assert.h> //assert =
 
 #include <cglm/cglm.h> //mat, proj
+
+static vec3 centers_3d[] = {
+    {1.0f, 0.0f, 0.0f},
+    {-1.0f, 0.0f, 0.0f},
+    {0.0f, 1.0f, 0.0f},
+    {0.0f, -1.0f, 0.0f},
+    {0.0f, 0.0f, 1.0f},
+    {0.0f, 0.0f, -1.0f}
+};
+
+static vec3 ups_3d[] = {
+    {0.0f, -1.0f, 0.0f},
+    {0.0f, -1.0f, 0.0f},
+    {0.0f, 0.0f, 1.0f},
+    {0.0f, 0.0f, -1.0f},
+    {0.0f, -1.0f, 0.0f},
+    {0.0f, -1.0f, 0.0f},
+};
+
 const char* LightOpShaderStr=
         "int enable;\n"
 
@@ -203,15 +222,6 @@ void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, Shader* sha
         return;
     }
 
-    vec3 xp = {1.0f, 0.0f, 0.0f};
-    vec3 xn = {-1.0f, 0.0f, 0.0f};
-
-    vec3 yp = {0.0f, 1.0f, 0.0f};
-    vec3 yn = {0.0f, -1.0f, 0.0f};
-
-    vec3 zp = {0.0f, 0.0f, 1.0f};
-    vec3 zn = {0.0f, 0.0f, -1.0f};
-
     mat4 proj, view;
     mat4 projviews[6];
 
@@ -224,55 +234,18 @@ void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, Shader* sha
     float far = pointLight->shadow.far_shadow;
 
     glm_perspective(glm_rad(90.0f), aspect, near, far, proj);
-
-    //xp
-    glm_mat4_zero(view);
-    glm_vec3_zero(posdir);
-    glm_vec3_add(pos, xp, posdir);
-    glm_lookat(pos, posdir, yn, view);
-    glm_mat4_mul(proj, view, projviews[0]);
-
-    //xn
-    glm_mat4_zero(view);
-    glm_vec3_zero(posdir);
-    glm_vec3_add(pos, xn, posdir);
-    glm_lookat(pos, posdir, yn, view);
-    glm_mat4_mul(proj, view, projviews[1]);
-
-    //yp
-    glm_mat4_zero(view);
-    glm_vec3_zero(posdir);
-    glm_vec3_add(pos, yp, posdir);
-    glm_lookat(pos, posdir, zp, view);
-    glm_mat4_mul(proj, view, projviews[2]);
-
-    //yn
-    glm_mat4_zero(view);
-    glm_vec3_zero(posdir);
-    glm_vec3_add(pos, yn, posdir);
-    glm_lookat(pos, posdir, zn, view);
-    glm_mat4_mul(proj, view, projviews[3]);
-
-    //zp
-    glm_mat4_zero(view);
-    glm_vec3_zero(posdir);
-    glm_vec3_add(pos, zp, posdir);
-    glm_lookat(pos, posdir, yn, view);
-    glm_mat4_mul(proj, view, projviews[4]);
-
-    //zn
-    glm_mat4_zero(view);
-    glm_vec3_zero(posdir);
-    glm_vec3_add(pos, zn, posdir);
-    glm_lookat(pos, posdir, yn, view);
-    glm_mat4_mul(proj, view, projviews[5]);
-
     dengine_shader_set_mat4(shader, "model", modelmtx);
 
     //char matrix_str[strlen("matrices[00]")];
     char matrix_str[32];
     for(int i = 0; i < 6; i++)
     {
+        glm_mat4_zero(view);
+        glm_vec3_zero(posdir);
+        glm_vec3_add(pos, centers_3d[i], posdir);
+        glm_lookat(pos, posdir, ups_3d[i], view);
+        glm_mat4_mul(proj, view, projviews[i]);
+
         snprintf(matrix_str, sizeof(matrix_str), "matrices[%d]", i);
         dengine_shader_set_mat4(shader, matrix_str, projviews[i][0]);
     }
