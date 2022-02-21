@@ -245,14 +245,14 @@ int main(int argc, char** argv)
     Texture texture;
     memset(&texture, 0, sizeof(Texture));
     texture.interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
-//    char* texfile = dengineutils_os_dialog_fileopen("Open a 3/4 channel image(png, jpg)");
-//    if(!texfile)
-//    {
-//        dengineutils_logging_log("ERROR::no file selected!");
-//        return 1;
-//    }
-    dengine_texture_load_file(argv[1], 1, &texture);
-//    free(texfile);
+    char* texfile = dengineutils_os_dialog_fileopen("Open a 3/4 channel image(png, jpg)");
+    if(!texfile)
+    {
+        dengineutils_logging_log("ERROR::no file selected!");
+        return 1;
+    }
+    dengine_texture_load_file(texfile, 1, &texture);
+    free(texfile);
     uint32_t fmt = texture.channels == 3 ? GL_RGB : GL_RGBA;
     texture.internal_format = fmt;
     texture.format = fmt;
