@@ -8,7 +8,7 @@
 
 # modules/libs
 
-1. **dengine-core** – Contains the basic functions to create context, textures, buffers and drawing
+1. **dengine-core** – Contains the basic functions to create context, textures, buffers and drawing  
 	**HEADERS**  
 	- dengine_config.h – Compile defines for compiling
 	- window.h – Creates context
@@ -32,7 +32,7 @@
 	- EGL – Context creation for GLES
 	- STB – stb_image.h to read texture files
       
-2. **dengine-utils** – Various misc. utilities 
+2. **dengine-utils** – Various misc. utilities  
 	**HEADERS**  
 	- filesys.h – File functions like read to a memory block
 	- os.h – OS specifics like mkdir, dialogs
@@ -45,18 +45,18 @@
 	**DEPENDS**  
 	- GTK3 – For dialogs on Linux
                    
-3. **dengine-model** – Loads various model formats (*Wavefront OBJ’s*)
+3. **dengine-model** – Loads various model formats (*Wavefront OBJ’s*)  
 	**HEADERS**  
 	- model.h – Loads model formats
                       
-4. **dengine-scene** – Scene creation. Serializes JSON 
+4. **dengine-scene** – Scene creation. Serializes JSON  
 	**HEADERS**  
 	- scene.h – Parses json to various scene constructs
 
 	**DEPENDS**  
 	- Any JSON library can do. Use JSON-C
       
-5. **dengine-script** – Scripting using Python 3
+5. **dengine-script** – Scripting using Python 3  
 	**HEADERS**  
 	- scripting.h – Creates an initialize Python Interpreter. Loads .py scripts
 	- py_modules.h – Initializes Python modules
@@ -64,7 +64,7 @@
 
 	**DEPENDS**  
 	- PYTHON 3 – Very nice library :)
-6. **dengine-gui** -    Render GUI items immediatly with no hidden state. GUI items are rendered immediately and have no state
+6. **dengine-gui** -    Render GUI items immediatly with no hidden state. GUI items are rendered immediately and have no state  
 	**HEADERS**  
 	- gui.h – All gui init and drawing operations and “widgets”
 
