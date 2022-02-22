@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 
 project(dengine VERSION 0.1 LANGUAGES C)
 
-
 if(NOT ANDROID)
     find_package(PkgConfig QUIET)
     if(PkgConfig_FOUND)
@@ -49,6 +48,7 @@ add_subdirectory(deps/glad "glad-build")
 add_subdirectory(lib/dengine-utils "dengine-utils-build")
 add_subdirectory(lib/dengine-core "dengine-core-build")
 add_subdirectory(lib/dengine-gui "dengine-gui-build")
+add_subdirectory(lib/dengine-model "dengine-model-build")
 
 add_subdirectory(tests "tests-build")
 
