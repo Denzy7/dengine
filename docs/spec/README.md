@@ -73,7 +73,7 @@
 
 # programs
 1. **dengitor** – Scene editor for dengine-scene and dengine project manager. Incorporates most if not all libraries
-2. **dengibuild** – Compile and package a project to a platform
+2. **dengibuild** – Compile and package a project to a platform  
 	**DEPENDS**  
 	- A fast compression algo like LZ4
 	- Working C compiler. 
