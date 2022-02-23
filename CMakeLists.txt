@@ -40,6 +40,8 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-utils/include/dengine-utils
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-gui/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-gui/include/dengine-gui
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-model/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-model/include/dengine-model
         )
 
 configure_file(dengine_config.h.in dengine_config.h)
