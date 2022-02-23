@@ -99,7 +99,6 @@ void dengineutils_timer_set_current(double time)
 
 void dengineutils_timer_update()
 {
-
     clock_gettime(CLOCK_REALTIME, &spec);
 
     double time = 1000.0 * spec.tv_sec + (double)spec.tv_nsec / 1e6;
@@ -111,4 +110,9 @@ void dengineutils_timer_update()
 double dengineutils_timer_get_delta()
 {
     return _delta;
+}
+
+double dengineutils_timer_get_current()
+{
+    return _current;
 }
