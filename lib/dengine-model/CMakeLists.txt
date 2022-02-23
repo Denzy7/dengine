@@ -8,7 +8,7 @@ include/dengine-model/model.h
 
 add_library(dengine-model ${dengine-model-hdr} ${dengine-model-src})
 
-target_link_libraries(dengine-model dengine-core)
+target_link_libraries(dengine-model dengine-core dengine-utils)
 set_property(TARGET dengine-model PROPERTY C_STANDARD 99)
 
 #remove lib prefix
