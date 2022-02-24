@@ -16,6 +16,7 @@
 
 #include <dengine-utils/filesys.h> //f2m
 #include <dengine-gui/gui.h> //text
+#include <dengine-utils/timer.h> //delta
 int main(int argc, char** argv)
 {
     int ctx32 = 1;
@@ -297,7 +298,12 @@ int main(int argc, char** argv)
     vec3 scale_gizmo = {scale_fac , scale_fac , scale_fac };
 
     denginegui_init();
-    denginegui_set_font(NULL, 32, 512);
+    float fontsz = 32.f;
+    denginegui_set_font(NULL, fontsz, 512);
+
+    char fps[20];
+    double elapsed = 0;
+    snprintf(fps, sizeof (fps), "FPS : ...");
 
     while(dengine_window_isrunning())
     {
@@ -412,6 +418,17 @@ int main(int argc, char** argv)
         dengine_draw_primitive(&quad, &pLightGizmo);
 
         denginegui_text(10, 10, "Use 1-6 to change RGB, WASD-move, EC - up/down", NULL);
+
+
+        dengineutils_timer_update();
+        double delta = dengineutils_timer_get_delta();
+        elapsed+=delta;
+        if (elapsed > 1000) {
+            snprintf(fps, sizeof (fps), "FPS : %.1f", 1 / delta * 1000);
+            elapsed = 0;
+        }
+
+        denginegui_text(sizeof (fps), h - fontsz, fps, NULL);
 
         dengine_window_swapbuffers();
         dengine_window_glfw_pollevents();
