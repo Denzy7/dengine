@@ -144,6 +144,7 @@ int denginegui_init()
 int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_size)
 {
     void* mem = ttf;
+    int use_sysfont = 0;
     if (!ttf) {
         const char* file = _denginegui_get_defaultfont();
         FILE* f = fopen(file, "rb");
@@ -159,6 +160,7 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
             fread(rdmem, sz, 1, f);
             fclose(f);
             mem = rdmem;
+            use_sysfont = 1;
         }
     }
 
@@ -210,6 +212,9 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
     dengine_texture_bind(GL_TEXTURE_2D, NULL);
 
     _fontsz = fontsize;
+
+    if(use_sysfont)
+        free(mem);
 
     return 1;
 }
@@ -302,6 +307,7 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
             dengine_buffer_data(GL_ARRAY_BUFFER, &quad.array);
             dengine_buffer_bind(GL_ARRAY_BUFFER, NULL);
 
+            glActiveTexture(GL_TEXTURE0);
             dengine_texture_bind(GL_TEXTURE_2D, &fontmap);
 
             _denginegui_drawquad();
