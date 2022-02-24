@@ -85,7 +85,7 @@ int denginegui_init()
             "{"
                 "vec4 a = vec4(0.0);"
                 "if(istext == 1)"
-                "   a = vec4(1.0, 1.0, 1.0, texture2D(tex, TexCoord).a) * col;"
+                "   a = vec4(1.0, 1.0, 1.0, texture2D(tex, TexCoord).r) * col;"
                 "else"
                 "   a = vec4( texture2D(tex, TexCoord).rgb + col.rgb, col.a);"
                 "gl_FragColor = a;"
@@ -132,9 +132,8 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
     if(!initfont)
         memset(&fontmap, 0, sizeof(Texture));
 
-    //TODO : Use GL_RED for Core and Compat GL
-    fontmap.format = GL_ALPHA;
-    fontmap.internal_format = GL_ALPHA;
+    fontmap.format = GL_RED;
+    fontmap.internal_format = GL_RED;
     fontmap.type = GL_UNSIGNED_BYTE;
 
     fontmap.data = baked_bmp;
