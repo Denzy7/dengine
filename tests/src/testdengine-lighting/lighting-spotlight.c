@@ -15,6 +15,7 @@
 #include <cglm/cglm.h>      //mat4
 
 #include <dengine-utils/filesys.h> //f2m
+#include <dengine-gui/gui.h> //text
 int main(int argc, char** argv)
 {
     int ctx32 = 1;
@@ -301,10 +302,11 @@ int main(int argc, char** argv)
     float scale_fac = 0.4f;
     vec3 scale_gizmo = {scale_fac , scale_fac , scale_fac }, up = {0.f,1.f,0.f};
 
-    dengineutils_logging_log("INFO::Use 1-6 to change RGB, WASD - move light, EC - up/down");
-    dengineutils_logging_log("INFO::Use YGHJ-move target, UM - up/down");
-    dengineutils_logging_log("INFO::Use [ or ] inner cone, - or = inner cone");
     mat4 view;
+
+    denginegui_init();
+    float fontsz = 32.f;
+    denginegui_set_font(NULL, fontsz,512);
 
     while(dengine_window_isrunning())
     {
@@ -475,6 +477,10 @@ int main(int argc, char** argv)
             dengine_shader_set_vec3(&sLightGizmo, "color", color);
             dengine_draw_primitive(&axis, &sLightGizmo);
         }
+
+        denginegui_text(10, 10, "Use 1-6 to change RGB, WASD - move light, EC - up/down", NULL);
+        denginegui_text(10, 10 + fontsz, "Use YGHJ-move target, UM - up/down", NULL);
+        denginegui_text(10, 10 + 2 * fontsz, "Use [ or ] inner cone, - or = inner cone", NULL);
 
         dengine_window_swapbuffers();
         dengine_window_glfw_pollevents();

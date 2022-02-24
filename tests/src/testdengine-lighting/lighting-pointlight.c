@@ -15,9 +15,10 @@
 #include <cglm/cglm.h>      //mat4
 
 #include <dengine-utils/filesys.h> //f2m
+#include <dengine-gui/gui.h> //text
 int main(int argc, char** argv)
 {
-	int ctx32 = 1;
+    int ctx32 = 1;
     dengine_window_init();
     //we need at least a 3.2 context for glFramebufferTexture (and GLSL 150 for GEOM shader)...
     //for shadow cubemap.
@@ -295,7 +296,8 @@ int main(int argc, char** argv)
     float scale_fac = 0.4f;
     vec3 scale_gizmo = {scale_fac , scale_fac , scale_fac };
 
-    dengineutils_logging_log("INFO::Use 1-6 to change RGB, WASD-move, EC - up/down");
+    denginegui_init();
+    denginegui_set_font(NULL, 32, 512);
 
     while(dengine_window_isrunning())
     {
@@ -355,8 +357,8 @@ int main(int argc, char** argv)
         //clear depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		if(ctx32)
-			dengine_lighting_shadowop_clear(&pLight.shadow);
+        if(ctx32)
+            dengine_lighting_shadowop_clear(&pLight.shadow);
 
         glActiveTexture(GL_TEXTURE0);
         dengine_texture_bind(GL_TEXTURE_2D, &texture);
@@ -377,8 +379,8 @@ int main(int argc, char** argv)
         dengine_shader_set_mat4(&shader, "ivTpModel", ivTpModel[0]);
         dengine_draw_primitive(&cube, &shader);
 		
-		if(ctx32)
-			dengine_lighting_shadow_pointlight_draw(&pLight, &shadow, &cube, model[0]);
+        if(ctx32)
+            dengine_lighting_shadow_pointlight_draw(&pLight, &shadow, &cube, model[0]);
 
         vec3 scale = {5.0, 5.0, 5.0};
         glm_mat4_identity(model);
@@ -389,8 +391,8 @@ int main(int argc, char** argv)
         dengine_shader_set_mat4(&shader, "ivTpModel", ivTpModel[0]);
         dengine_draw_primitive(&plane, &shader);
 		
-		if(ctx32)
-			dengine_lighting_shadow_pointlight_draw(&pLight, &shadow, &cube, model[0]);
+        if(ctx32)
+            dengine_lighting_shadow_pointlight_draw(&pLight, &shadow, &cube, model[0]);
 
         glm_mat4_identity(model);
         glm_translate(model, pLight.position);
@@ -408,6 +410,8 @@ int main(int argc, char** argv)
         //Quad
         dengine_shader_set_vec3(&pLightGizmo, "color", pLight.light.diffuse);
         dengine_draw_primitive(&quad, &pLightGizmo);
+
+        denginegui_text(10, 10, "Use 1-6 to change RGB, WASD-move, EC - up/down", NULL);
 
         dengine_window_swapbuffers();
         dengine_window_glfw_pollevents();
