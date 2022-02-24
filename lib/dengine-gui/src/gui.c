@@ -11,6 +11,13 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h> //stbtt
 
+#include "dengine_config.h"
+
+#ifdef DENGINE_HAS_FONTCONFIG
+#include <fontconfig/fontconfig.h>
+char filestrbuf[DENGINE_FONTCONFIG_FILESTRSIZE];
+#endif
+
 #include <cglm/cam.h> //ortho
 
 #include <stdlib.h> //malloc
@@ -31,6 +38,35 @@ Shader shader;
 
 int initgui = 0;
 #define PANEL_ALPHA 0.4f
+
+const char* _denginegui_get_defaultfont()
+{
+    #if defined (DENGINE_FONT_DEFAULT)
+    return DENGINE_FONT_DEFAULT;
+    #elif defined (DENGINE_HAS_FONTCONFIG)
+    FcPattern* pat, *match;
+    FcResult result;
+    FcChar8* file = NULL;
+
+    pat = FcNameParse((FcChar8*) DENGINE_FONTCONFIG_MATCHPATTERN);
+    FcConfigSubstitute (0, pat, FcMatchPattern);
+    FcDefaultSubstitute (pat);
+    match = FcFontMatch (0, pat, &result);
+    memset(filestrbuf, 0, DENGINE_FONTCONFIG_FILESTRSIZE);
+    if (match)
+    {
+        if(FcPatternGetString(match, FC_FILE, 0, &file) == FcResultMatch)
+        {
+            snprintf(filestrbuf, DENGINE_FONTCONFIG_FILESTRSIZE, "%s", file);
+        }
+    }
+    FcPatternDestroy (pat);
+    FcPatternDestroy (match);
+    return filestrbuf;
+    #else
+    return NULL;
+    #endif
+}
 
 int denginegui_init()
 {
@@ -107,7 +143,26 @@ int denginegui_init()
 
 int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_size)
 {
-    if(!stbtt_InitFont(&info, ttf, 0))
+    void* mem = ttf;
+    if (!ttf) {
+        const char* file = _denginegui_get_defaultfont();
+        FILE* f = fopen(file, "rb");
+        if (!f) {
+            printf("cannot read default font %s\n", file);
+            return 0;
+        }else
+        {
+            fseek(f, 0, SEEK_END);
+            size_t sz = ftell(f);
+            rewind(f);
+            void* rdmem = malloc(sz);
+            fread(rdmem, sz, 1, f);
+            fclose(f);
+            mem = rdmem;
+        }
+    }
+
+    if(!stbtt_InitFont(&info, mem, 0))
     {
         printf("failed to init font\n");
         return 0;
@@ -122,7 +177,7 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
         return 0;
     }
 
-    if(!stbtt_PackFontRange(&ctx, ttf, 0, fontsize, 32, 96, packedchar_data))
+    if(!stbtt_PackFontRange(&ctx, mem, 0, fontsize, 32, 96, packedchar_data))
     {
         printf("failed to pack chars range\n");
         return 0;
