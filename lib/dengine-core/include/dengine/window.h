@@ -44,6 +44,8 @@ int dengine_window_isrunning();
 
 int dengine_window_loadgl();
 
+void dengine_window_makecurrent();
+
 //GLFW Specific Calls
 #if defined(DENGINE_WIN_GLFW)
 

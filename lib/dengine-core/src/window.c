@@ -13,6 +13,7 @@ EGLContext _egl_context;
 #endif
 
 #ifdef DENGINE_ANDROID
+#include "dengine/android.h"
 struct ANativeWindow* _android_current;
 #endif
 
@@ -196,7 +197,6 @@ void dengine_window_swapbuffers()
     #endif // defined
 }
 
-
 int dengine_window_isrunning()
 {
     return isrunning;
@@ -210,6 +210,18 @@ int dengine_window_loadgl()
     return dengine_window_android_egl_context_gladloadgl();
 #else
     return 0;
+#endif
+}
+
+void dengine_window_makecurrent()
+{
+#if defined(DENGINE_WIN_GLFW)
+    dengine_window_glfw_context_makecurrent(glfw_current);
+#elif defined(DENGINE_WIN_EGL)
+    if(!eglMakeCurrent(_egl_display, _egl_surface, _egl_surface, _egl_context))
+    {
+        dengineutils_logging_log("ERROR::WINDOW::CANNOT_MAKE_CONTEXT_CURRENT!");
+    }
 #endif
 }
 
