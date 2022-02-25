@@ -8,6 +8,8 @@
 #include "dengine/window.h"
 #include "dengine/input.h"
 
+#include "dengine-utils/logging.h"
+
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h> //stbtt
 
@@ -149,7 +151,7 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
         const char* file = _denginegui_get_defaultfont();
         FILE* f = fopen(file, "rb");
         if (!f) {
-            printf("cannot read default font %s\n", file);
+            dengineutils_logging_log("cannot read default font %s\n", file);
             return 0;
         }else
         {
@@ -166,34 +168,43 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
 
     if(!stbtt_InitFont(&info, mem, 0))
     {
-        printf("failed to init font\n");
+        dengineutils_logging_log("ERROR::failed to init font\n");
         return 0;
     }
 
-    unsigned char baked_bmp[bitmap_size * bitmap_size];
+    const size_t sz_bmp = bitmap_size * bitmap_size;
+    unsigned char* baked_bmp = malloc(sizeof(unsigned char) * sz_bmp);
+    memset(baked_bmp, 0, sizeof(unsigned char) * sz_bmp);
 
     stbtt_pack_context ctx;
     if(!stbtt_PackBegin(&ctx, baked_bmp, bitmap_size, bitmap_size, 0, 1, NULL))
     {
-        printf("failed to pack chars\n");
-        return 0;
+        dengineutils_logging_log("ERROR::failed to pack chars\n");
+        //return 0;
     }
 
     if(!stbtt_PackFontRange(&ctx, mem, 0, fontsize, 32, 96, packedchar_data))
     {
-        printf("failed to pack chars range\n");
-        return 0;
+        dengineutils_logging_log("ERROR::failed to pack chars range\n");
+        //return 0;
     }
     stbtt_PackEnd(&ctx);
 
     if(!initfont)
         memset(&fontmap, 0, sizeof(Texture));
 
-    fontmap.format = GL_RED;
-    fontmap.internal_format = GL_RED;
+    //Nasty hack to use rgb to dodge various GL/ES quirks
+    unsigned char* baked_bmp_rgb = malloc(sizeof (unsigned char) * sz_bmp * 3);
+    memset(baked_bmp_rgb, 0, sizeof(unsigned char) * sz_bmp * 3);
+    for (size_t i = 0; i < sz_bmp; i++) {
+        baked_bmp_rgb[i * 3] = baked_bmp[i];
+    }
+
+    fontmap.format = GL_RGB;
+    fontmap.internal_format = GL_RGB;
     fontmap.type = GL_UNSIGNED_BYTE;
 
-    fontmap.data = baked_bmp;
+    fontmap.data = baked_bmp_rgb;
     fontmap.filter_min = GL_LINEAR;
 
     fontmap.width = bitmap_size;
@@ -215,6 +226,9 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
 
     if(use_sysfont)
         free(mem);
+
+    free(baked_bmp);
+    free(baked_bmp_rgb);
 
     return 1;
 }
