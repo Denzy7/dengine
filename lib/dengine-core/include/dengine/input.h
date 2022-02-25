@@ -42,6 +42,8 @@ int dengine_input_gamepad_vibration_set_basic(int pad, float leftmotor, float ri
 
 const char* dengine_input_gamepad_vibration_get_error();
 
+void dengine_input_pollevents();
+
 //GLFW callbacks
 #ifdef DENGINE_WIN_GLFW
 

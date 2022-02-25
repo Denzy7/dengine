@@ -5,6 +5,10 @@
 
 #include <stdio.h> // snprintf
 
+#ifdef DENGINE_ANDROID
+#include "dengine/android.h"
+#endif
+
 #ifdef DENGINE_WIN32
 #include <windows.h>
 #include <xinput.h>
@@ -460,6 +464,15 @@ const char* dengine_input_gamepad_vibration_get_error()
     return linux_error_str;
     #else
     return "";
+    #endif
+}
+
+void dengine_input_pollevents()
+{
+    #if defined(DENGINE_WIN_GLFW)
+    dengine_window_glfw_pollevents();
+    #elif defined(DENGINE_ANDROID)
+    dengine_android_pollevents();
     #endif
 }
 
