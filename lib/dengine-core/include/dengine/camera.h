@@ -18,6 +18,7 @@ typedef struct Camera
 extern "C" {
 #endif
 
+void dengine_camera_setup(Camera* camera);
 
 void dengine_camera_project_perspective(float aspect, Camera* camera);
 

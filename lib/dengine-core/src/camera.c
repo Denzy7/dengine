@@ -3,6 +3,35 @@
 #include <cglm/cglm.h> //glm_proj
 #include <string.h>    //memcpy
 
+float _target_zero[3] = {0.0f, 0.0f, 0.0f};
+float _default_distance = 7.0f;
+
+static const char* possible_projmat[]=
+{
+  "projection", "camera.projection", "proj",
+};
+
+static const char* possible_viewmat[]=
+{
+  "view", "camera.view"
+};
+
+static const char* possible_campos[]=
+{
+  "ViewPos", "camera.position"
+};
+#define ARY_SZ(arr) sizeof(arr) / sizeof(arr[0])
+void dengine_camera_setup(Camera* camera)
+{
+    memset(camera, 0, sizeof (Camera));
+    camera->fov = 60.0f;
+    camera->near = 0.01f;
+    camera->far = 100.0f;
+    for (int i = 0; i < 3; i++) {
+        camera->position[i] = _default_distance;
+    }
+}
+
 void dengine_camera_project_perspective(float aspect, Camera* camera)
 {
     mat4 proj;
@@ -16,7 +45,12 @@ void dengine_camera_lookat(float* target, Camera* camera)
     mat3 uview;
     vec3 up = {0.0f, 1.0f, 0.0f};
 
-    glm_lookat(camera->position, target, up, view);
+    float* _target = target;
+    if (!_target) {
+        _target = _target_zero;
+    }
+
+    glm_lookat(camera->position, _target, up, view);
 
     memcpy(camera->view_mat, view, sizeof(camera->view_mat));
     memcpy(camera->uview_mat, view, sizeof(camera->uview_mat));
@@ -24,7 +58,15 @@ void dengine_camera_lookat(float* target, Camera* camera)
 
 void dengine_camera_apply(Shader* shader, Camera* camera)
 {
-    dengine_shader_set_mat4(shader, "projection", camera->projection_mat);
-    dengine_shader_set_mat4(shader, "view", camera->view_mat);
-    dengine_shader_set_vec3(shader, "ViewPos", camera->position);
+    for (size_t i = 0; i < ARY_SZ(possible_projmat); i++) {
+        dengine_shader_set_mat4(shader, possible_projmat[i], camera->projection_mat);
+    }
+
+    for (size_t i = 0; i < ARY_SZ(possible_viewmat); i++) {
+        dengine_shader_set_mat4(shader, possible_viewmat[i], camera->view_mat);
+    }
+
+    for (size_t i = 0; i < ARY_SZ(possible_campos); i++) {
+        dengine_shader_set_vec3(shader, possible_campos[i], camera->position);
+    }
 }
