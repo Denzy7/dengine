@@ -34,7 +34,7 @@ int main(int argc, char** argv)
         dengine_window_request_GL(3, 0, 0);
         ctx32 = 0;
 
-        if(!dengine_window_glfw_create(1280, 720, "testdengine-pointlight(noshadow)"))
+        if(!dengine_window_glfw_create(1280, 720, "testdengine-spotlight(noshadow)"))
         {
             dengineutils_logging_log("WARNING::cannot request an OpenGL 3.0 window!");
             return 1;
@@ -490,8 +490,9 @@ int main(int argc, char** argv)
             dengine_draw_primitive(&axis, &sLightGizmo);
         }
 
-        for (int i = 0 ; i < sizeof (messages) / sizeof (messages[0]); i++) {
-            denginegui_text(10, 10 + i * fontsz, messages[i], NULL);
+        size_t msgcount = sizeof (messages) / sizeof (messages[0]);
+        for (size_t i = 0 ; i < msgcount; i++) {
+            denginegui_text(10, 10 + i * fontsz, messages[msgcount-i-1], NULL);
         }
 
         dengineutils_timer_update();
@@ -502,7 +503,7 @@ int main(int argc, char** argv)
             elapsed = 0;
         }
 
-        denginegui_text(sizeof (fps), h - fontsz, fps, NULL);
+        denginegui_text(10, h - fontsz, fps, NULL);
 
         dengine_window_swapbuffers();
         dengine_window_glfw_pollevents();
