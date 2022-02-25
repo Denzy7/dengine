@@ -47,8 +47,8 @@ int dengine_shader_compile_shader(const uint32_t shader, const char* code)
         {
             type_str = "GEOMETRY";
         }
-        size_t line, column, zero;
-        sscanf(info_log, "%zu:%zu(%zu)", &zero, &line, &column);
+        uint32_t line, column, zero;
+        sscanf(info_log, "%u:%u(%u)", &zero, &line, &column);
 
         size_t findline = 0;
         char* stacktrace = NULL;
