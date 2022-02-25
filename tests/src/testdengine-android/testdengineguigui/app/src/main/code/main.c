@@ -21,7 +21,7 @@ static void init(struct android_app* app)
     {
         window_init = 1;
 		
-		dengine_window_loadgl();
+	dengine_window_loadgl();
 
         dengineutils_logging_log("init window success");
 
@@ -30,13 +30,7 @@ static void init(struct android_app* app)
         if(denginegui_init())
             dengineutils_logging_log("init gui");
 
-        File2Mem f2m;
-        f2m.file = "OpenSans-Regular.ttf";
-        int rd =dengine_android_asset2file2mem(&f2m);
-        dengineutils_logging_log("rd %d", rd);
-
-        if(denginegui_set_font(f2m.mem, 50.0f, 512))
-            dengineutils_filesys_file2mem_free(&f2m);
+        denginegui_set_font(NULL, 50.0f, 512);
     }
 }
 
