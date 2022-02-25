@@ -23,6 +23,8 @@ int glinit;
 GLFWwindow* glfw_current = NULL;
 #endif // defined
 
+Window _window;
+
 int dengine_window_init()
 {
     #if defined (DENGINE_WIN_GLFW)
@@ -102,6 +104,10 @@ int dengine_window_init()
         dengineutils_logging_log("ERROR::WINDOW::NO_EGL_CONTEXT!");
         return 0;
     }
+
+    _window.display = _egl_display;
+    _window.surface = _egl_surface;
+    _window.context = _egl_context;
 
     if(!eglMakeCurrent(_egl_display, _egl_surface, _egl_surface, _egl_context))
     {
@@ -213,16 +219,34 @@ int dengine_window_loadgl()
 #endif
 }
 
-void dengine_window_makecurrent()
+void dengine_window_makecurrent(Window* window)
 {
 #if defined(DENGINE_WIN_GLFW)
-    dengine_window_glfw_context_makecurrent(glfw_current);
+    dengine_window_glfw_context_makecurrent(window->window);
 #elif defined(DENGINE_WIN_EGL)
-    if(!eglMakeCurrent(_egl_display, _egl_surface, _egl_surface, _egl_context))
+    if(!eglMakeCurrent(window->display, window->surface, window->surface, window->context))
     {
         dengineutils_logging_log("ERROR::WINDOW::CANNOT_MAKE_CONTEXT_CURRENT!");
     }
 #endif
+}
+
+int dengine_window_create(int width, int height, const char* title, Window* window)
+{
+#if defined(DENGINE_WIN_GLFW)
+    if (dengine_window_glfw_create(width, height, title)) {
+        window->window = glfw_current;
+        _window.window = glfw_current;
+        return 1;
+    } else
+    {
+        return 0;
+    }
+#else
+    return 0;
+#endif
+
+
 }
 
 //GLFW Specific Calls

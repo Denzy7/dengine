@@ -18,6 +18,21 @@
 #include <android/window.h>
 #endif
 
+typedef struct Window
+{
+    #if defined(DENGINE_ANDROID)
+    struct ANativeWindow* window;
+    #elif defined(DENGINE_WIN_GLFW)
+    GLFWwindow* window;
+    #endif
+
+    #if defined(DENGINE_WIN_EGL)
+    EGLDisplay display;
+    EGLSurface surface;
+    EGLContext context;
+    #endif
+}Window;
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -44,7 +59,9 @@ int dengine_window_isrunning();
 
 int dengine_window_loadgl();
 
-void dengine_window_makecurrent();
+int dengine_window_create(int width, int height, const char* title, Window* window);
+
+void dengine_window_makecurrent(Window* window);
 
 //GLFW Specific Calls
 #if defined(DENGINE_WIN_GLFW)
