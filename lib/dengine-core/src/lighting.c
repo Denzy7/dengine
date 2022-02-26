@@ -3,6 +3,7 @@
 #include "dengine/loadgl.h" //gl
 #include "dengine/draw.h" //draw
 #include "dengine/window.h" //get w,h
+#include "dengine/macros.h" //arr_sz
 
 #include <string.h> //memset
 Lighting lighting;
@@ -28,6 +29,21 @@ static vec3 ups_3d[] = {
     {0.0f, 0.0f, -1.0f},
     {0.0f, -1.0f, 0.0f},
     {0.0f, -1.0f, 0.0f},
+};
+
+static const float default_ambient[3]=
+{
+    .1f,.1f,.1f
+};
+
+static const float default_specular[3]=
+{
+    1.f,.1f,1.f
+};
+
+static const float default_diffuse[3]=
+{
+    1.f,1.f,1.f
 };
 
 const char* LightOpShaderStr=
@@ -112,6 +128,9 @@ Lighting* dengine_lighting_get()
 
 void dengine_lighting_shadowop_clear(ShadowOp* shadowop)
 {
+    if (shadowop->shadow_map.depth.texture_id == 0)
+        return;
+
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &shadowop->shadow_map);
     glClear(GL_DEPTH_BUFFER_BIT); DENGINE_CHECKGL;
     dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
@@ -125,6 +144,18 @@ void dengine_lighting_setup_dirlight(DirLight* dirLight)
 
         memset(dirLight->shadow_projview, 0, sizeof(dirLight->shadow_projview));
     }
+    static const float default_dirlight_pos[3] =
+    {
+      -4.0f, 5.0f, 6.0f
+    };
+
+    memcpy(dirLight->position, default_dirlight_pos, sizeof (default_dirlight_pos));
+    memcpy(dirLight->light.ambient, default_ambient, sizeof (default_ambient));
+    memcpy(dirLight->light.diffuse, default_diffuse, sizeof (default_diffuse));
+    memcpy(dirLight->light.specular, default_specular, sizeof (default_specular));
+
+    dirLight->shadow.pcf = 0;
+    dirLight->shadow.pcf_samples = 4;
 }
 
 void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, Shader* shader, Primitive* primitive, float* modelmtx)
@@ -169,10 +200,24 @@ void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, Shader* shader, P
 
 void dengine_lighting_apply_dirlight(DirLight* dirLight, Shader* shader)
 {
-    if(dirLight->shadow.enable)
+    static const char* possible_pos[]=
     {
+        "lightDir","dLight.position"
+    };
 
+    for (size_t i = 0; i < DENGINE_ARY_SZ(possible_pos); i++) {
+        dengine_shader_set_vec3(shader, possible_pos[i], dirLight->position);
     }
+
+    dengine_shader_set_vec3(shader, "dLight.light.ambient", dirLight->light.ambient);
+    dengine_shader_set_vec3(shader, "dLight.light.diffuse", dirLight->light.diffuse);
+    dengine_shader_set_vec3(shader, "dLight.light.specular", dirLight->light.specular);
+    dengine_shader_set_float(shader, "dLight.shadow.max_bias", dirLight->shadow.max_bias);
+    dengine_shader_set_int(shader, "dLight.shadow.enable", dirLight->shadow.enable);
+    dengine_shader_set_int(shader, "dLight.shadow.pcf", dirLight->shadow.pcf);
+    dengine_shader_set_int(shader, "dLight.shadow.pcf_samples", dirLight->shadow.pcf_samples);
+    dengine_shader_set_mat4(shader, "dLight.shadow_projview", dirLight->shadow_projview);
+
 }
 
 void dengine_lighting_setup_pointlight(PointLight* pointLight)
@@ -188,8 +233,9 @@ void dengine_lighting_setup_pointlight(PointLight* pointLight)
 
     pointLight->light.strength = 1;
 
-    float diff[3] = {1.0f, 1.0f, 1.0f};
-    memcpy(pointLight->light.diffuse, diff, sizeof(diff));
+    memcpy(pointLight->light.ambient, default_ambient, sizeof(default_ambient));
+    memcpy(pointLight->light.diffuse, default_diffuse, sizeof(default_diffuse));
+    memcpy(pointLight->light.specular, default_specular, sizeof(default_specular));
 
     pointLight->shadow.far_shadow = 30.0f;
     pointLight->shadow.near_shadow = 0.1f;
@@ -198,11 +244,38 @@ void dengine_lighting_setup_pointlight(PointLight* pointLight)
 void dengine_lighting_apply_pointlight(PointLight* pointLight, Shader* shader)
 {
     dengine_shader_set_vec3(shader, "lightPos", pointLight->position);
+
     float diffStrength[3];
     memcpy(diffStrength, pointLight->light.diffuse, sizeof(diffStrength));;
 
     for(int i = 0; i < 3; i++)
         diffStrength[i]*=pointLight->light.strength;
+
+    const int bufsz = 1024;
+    char prtbuf[bufsz];
+
+    for (uint32_t i = 0; i < 4; i++) {
+        snprintf(prtbuf, bufsz,"pLights[%u].position",i);
+        dengine_shader_set_vec3(shader, prtbuf, pointLight->position);
+
+        snprintf(prtbuf, bufsz,"pLights[%u].light.ambient",i);
+        dengine_shader_set_vec3(shader, prtbuf, pointLight->light.ambient);
+
+        snprintf(prtbuf, bufsz,"pLights[%u].light.diffuse",i);
+        dengine_shader_set_vec3(shader, prtbuf, pointLight->light.diffuse);
+
+        snprintf(prtbuf, bufsz,"pLights[%u].light.specular",i);
+        dengine_shader_set_vec3(shader, prtbuf, pointLight->light.specular);
+
+        snprintf(prtbuf, bufsz,"pLights[%u].constant",i);
+        dengine_shader_set_float(shader, prtbuf, pointLight->constant);
+
+        snprintf(prtbuf, bufsz,"pLights[%u].linear",i);
+        dengine_shader_set_float(shader, prtbuf, pointLight->linear);
+
+        snprintf(prtbuf, bufsz,"pLights[%u].quadratic",i);
+        dengine_shader_set_float(shader, prtbuf, pointLight->quadratic);
+    }
 
     dengine_shader_set_vec3(shader, "diffuseCol", diffStrength);
     dengine_shader_set_float(shader, "constant", pointLight->constant);
@@ -213,6 +286,9 @@ void dengine_lighting_apply_pointlight(PointLight* pointLight, Shader* shader)
 
 void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, Shader* shader, Primitive* primitive, float* modelmtx)
 {
+    if (pointLight->shadow.shadow_map.depth.texture_id == 0)
+        return;
+
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &pointLight->shadow.shadow_map);
 
     //Guard for no shadow
