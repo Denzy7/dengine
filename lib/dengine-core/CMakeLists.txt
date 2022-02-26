@@ -32,6 +32,7 @@ include/dengine/framebuffer.h
 include/dengine/material.h
 include/dengine/lighting.h
 include/dengine/vao.h
+include/dengine/macros.h
 )
 
 if(ANDROID)
