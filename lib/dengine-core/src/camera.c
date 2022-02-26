@@ -1,10 +1,12 @@
 #include "camera.h"
 
+#include "dengine/macros.h"
+
 #include <cglm/cglm.h> //glm_proj
 #include <string.h>    //memcpy
 
 float _target_zero[3] = {0.0f, 0.0f, 0.0f};
-float _default_distance = 7.0f;
+float _default_distance = 5.0f;
 
 static const char* possible_projmat[]=
 {
@@ -20,7 +22,7 @@ static const char* possible_campos[]=
 {
   "ViewPos", "camera.position"
 };
-#define ARY_SZ(arr) sizeof(arr) / sizeof(arr[0])
+
 void dengine_camera_setup(Camera* camera)
 {
     memset(camera, 0, sizeof (Camera));
@@ -58,15 +60,15 @@ void dengine_camera_lookat(float* target, Camera* camera)
 
 void dengine_camera_apply(Shader* shader, Camera* camera)
 {
-    for (size_t i = 0; i < ARY_SZ(possible_projmat); i++) {
+    for (size_t i = 0; i < DENGINE_ARY_SZ(possible_projmat); i++) {
         dengine_shader_set_mat4(shader, possible_projmat[i], camera->projection_mat);
     }
 
-    for (size_t i = 0; i < ARY_SZ(possible_viewmat); i++) {
+    for (size_t i = 0; i < DENGINE_ARY_SZ(possible_viewmat); i++) {
         dengine_shader_set_mat4(shader, possible_viewmat[i], camera->view_mat);
     }
 
-    for (size_t i = 0; i < ARY_SZ(possible_campos); i++) {
+    for (size_t i = 0; i < DENGINE_ARY_SZ(possible_campos); i++) {
         dengine_shader_set_vec3(shader, possible_campos[i], camera->position);
     }
 }
