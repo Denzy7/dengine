@@ -93,8 +93,24 @@ int dengine_shader_compile_shader(const uint32_t shader, const char* code)
 
 int dengine_shader_setup(Shader* shader)
 {
-    shader->program_id = glCreateProgram(); DENGINE_CHECKGL;
+    //Dont compile an unsupported version
+    int maj = 0,min = 0, ver = 0, shadver = 0;
+    sscanf((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION),"%d.%d", &maj, &min);
+    ver = maj*=100;
+    ver+=min;
+    const char* verstr = strchr(shader->fragment_code, '#');
+    if (verstr) {
+        char vers[10];
+        sscanf(shader->fragment_code, "%s %d",vers,&shadver);
 
+        if (shadver > ver) {
+            dengineutils_logging_log("WARNING::SHADER::Not compiled. #version %d is unsupported. Supported is %d", shadver, ver);
+            return 0;
+        }
+
+    }
+
+    shader->program_id = glCreateProgram(); DENGINE_CHECKGL;
 
     shader->vertex_id = glCreateShader(GL_VERTEX_SHADER); DENGINE_CHECKGL;
     shader->fragment_id = glCreateShader(GL_FRAGMENT_SHADER); DENGINE_CHECKGL;
