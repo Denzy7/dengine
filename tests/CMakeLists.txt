@@ -235,6 +235,13 @@ target_link_libraries(testdengine-model-obj
         dengine-core dengine-utils dengine-gui dengine-model)
 set_property(TARGET testdengine-model-obj PROPERTY C_STANDARD 99)
 
+# test standard shader
+add_executable(testdengine-lighting-standard
+        src/testdengine-lighting/lighting-standard.c)
+target_link_libraries(testdengine-lighting-standard
+        dengine-core dengine-utils dengine-gui dengine-model)
+set_property(TARGET testdengine-lighting-standard PROPERTY C_STANDARD 99)
+
 endif()
 
 
