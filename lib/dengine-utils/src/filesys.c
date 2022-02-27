@@ -63,4 +63,3 @@ const char* dengineutils_filesys_compiledir()
     #endif
     return compdir;
 }
-
