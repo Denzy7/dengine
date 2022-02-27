@@ -23,7 +23,7 @@ int main(int argc, char** argv)
     //we need at least a 3.2 context for glFramebufferTexture (and GLSL 150 for GEOM shader)...
     //for shadow cubemap.
     //a core context is not a must AFAIK, but set to 1 if crash
-    //dengine_window_request_GL(3, 2, 0);
+    dengine_window_request_GL(3, 2, 0);
     if(!dengine_window_glfw_create(1280, 720, "testdengine-spotlight"))
     {
         dengineutils_logging_log("WARNING::cannot request an OpenGL 3.2 window. Shadows disabled\n");
@@ -300,7 +300,7 @@ int main(int argc, char** argv)
     mat4 view;
 
     denginegui_init();
-    float fontsz = 32.f;
+    float fontsz = 18.f;
     denginegui_set_font(NULL, fontsz,512);
 
     char fps[20];
@@ -316,6 +316,9 @@ int main(int argc, char** argv)
 
     while(dengine_window_isrunning())
     {
+        dengineutils_timer_update();
+        double delta = dengineutils_timer_get_delta();
+
         dengine_camera_project_perspective((float)w / (float)h, &camera);
         dengine_camera_lookat(target, &camera);
 
@@ -332,22 +335,22 @@ int main(int argc, char** argv)
         //Change position
 
         if(dengine_input_get_key('D'))
-            sLight.pointLight.position[0] += 0.1f;
+            sLight.pointLight.position[0] += delta * 0.01f;
 
         if(dengine_input_get_key('A'))
-            sLight.pointLight.position[0] -= 0.1f;
+            sLight.pointLight.position[0] -= delta * 0.01f;;
 
         if(dengine_input_get_key('W'))
-            sLight.pointLight.position[2] -= 0.1f;
+            sLight.pointLight.position[2] -= delta * 0.01f;;
 
         if(dengine_input_get_key('S'))
-            sLight.pointLight.position[2] += 0.1f;
+            sLight.pointLight.position[2] += delta * 0.01f;;
 
         if(dengine_input_get_key('E'))
-            sLight.pointLight.position[1] += 0.1f;
+            sLight.pointLight.position[1] += delta * 0.01f;;
 
         if(dengine_input_get_key('C'))
-            sLight.pointLight.position[1] -= 0.1f;
+            sLight.pointLight.position[1] -= delta * 0.01f;;
 
         //Change diffuse, r, g, b
         if(dengine_input_get_key('1'))
@@ -371,22 +374,22 @@ int main(int argc, char** argv)
 
         //Target positioning
         if(dengine_input_get_key('Y'))
-            tgt[2] -= 0.1f;
+            tgt[2] -= delta * 0.01f;;
 
         if(dengine_input_get_key('H'))
-            tgt[2] += 0.1f;
+            tgt[2] += delta * 0.01f;;
 
         if(dengine_input_get_key('G'))
-            tgt[0] -= 0.1f;
+            tgt[0] -= delta * 0.01f;;
 
         if(dengine_input_get_key('J'))
-            tgt[0] += 0.1f;
+            tgt[0] += delta * 0.01f;;
 
         if(dengine_input_get_key('U'))
-            tgt[1] += 0.1f;
+            tgt[1] += delta * 0.01f;;
 
         if(dengine_input_get_key('M'))
-            tgt[1] -= 0.1f;
+            tgt[1] -= delta * 0.01f;;
 
         if(dengine_input_get_key('='))
             sLight.innerCutOff += .1f;
@@ -486,8 +489,6 @@ int main(int argc, char** argv)
             denginegui_text(10, 10 + i * fontsz, messages[msgcount-i-1], NULL);
         }
 
-        dengineutils_timer_update();
-        double delta = dengineutils_timer_get_delta();
         elapsed+=delta;
         if (elapsed > 1000) {
             snprintf(fps, sizeof (fps), "FPS : %.1f", 1 / delta * 1000);
