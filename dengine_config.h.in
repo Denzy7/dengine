@@ -1,6 +1,14 @@
 #ifndef DENGINE_CONFIG_H_INCLUDED
 #define DENGINE_CONFIG_H_INCLUDED
 
+/*
+ * Uncomment to hide compile dir since it has sensitive info like
+ * your username.
+ *
+ * This may break some tests which rely on it
+ */
+//#define DENGINE_HIDECOMPILEDIR
+
 #define DENGINE_GL_GLAD
 #if defined(_WIN32) || defined (__MINGW32__)
     #define DENGINE_WIN32
@@ -24,7 +32,10 @@
     #define DENGINE_FONTCONFIG_FILESTRSIZE 1024
 #endif // defined
 
+//Size of log buffer for snprintf
 #define DENGINE_LOG_BUF_SIZE 2048
+
+//Name of log file to use
 #define DENGINE_LOG_FILE "dengine.log"
 
 #endif // DENGINE_CONFIG_H_INCLUDED

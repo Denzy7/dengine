@@ -8,6 +8,8 @@
 #include "dengine_config.h" //DENGINE_WIN, LINUX
 #define PATH_SEP "/"
 
+#include "dengine_config.h"
+char compdir[1024];
 
 int dengineutils_filesys_file2mem_load(File2Mem* file2mem)
 {
@@ -46,5 +48,19 @@ void dengineutils_filesys_file2mem_free(File2Mem* file2mem)
         free(file2mem->mem);
     else
         dengineutils_logging_log("ERROR::DENGINE_UTILS_FILE2MEM::can't free invalid memory!");
+}
+
+const char* dengineutils_filesys_compiledir()
+{
+    memset(compdir, 0, sizeof (compdir));
+    #ifndef DENGINE_HIDECOMPILEDIR
+    const char* thisfile = __FILE__;
+    const char* thisfile_dir = strstr(thisfile, "dengine");
+    if (thisfile_dir) {
+        size_t strln = strlen(thisfile) - strlen(thisfile_dir) + strlen("dengine");
+        strncpy(compdir, thisfile, strln);
+    }
+    #endif
+    return compdir;
 }
 

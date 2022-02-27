@@ -21,6 +21,8 @@ int dengineutils_filesys_file2mem_load(File2Mem* file2mem);
 
 void dengineutils_filesys_file2mem_free(File2Mem* file2mem);
 
+const char* dengineutils_filesys_compiledir();
+
 #ifdef __cplusplus
 }
 #endif
