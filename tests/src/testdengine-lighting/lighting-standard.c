@@ -41,13 +41,11 @@ int main(int argc, char** argv)
     dengine_window_request_GL(3,2,0);
     if(!dengine_window_create(1280,720,"testdengine-lighting-standard", &window))
     {
-        dengineutils_logging_log("ERROR::cannot create window");
-
         //Use 3.0 then without shadows
         dengine_window_request_GL(3, 0, 0);
         if(!dengine_window_create(1280, 720, "testdengine-lighting-standard(noshadow)", &window))
         {
-            dengineutils_logging_log("WARNING::cannot request an OpenGL 3.0 window!");
+            dengineutils_logging_log("ERROR::cannot request an OpenGL 3.0 window!");
             return 1;
         }
     }
