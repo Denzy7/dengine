@@ -6,7 +6,7 @@
 #include <string.h>    //memcpy
 
 float _target_zero[3] = {0.0f, 0.0f, 0.0f};
-float _default_distance = 5.0f;
+float _default_distance = 7.0f;
 
 static const char* possible_projmat[]=
 {
