@@ -107,7 +107,6 @@ int dengine_shader_setup(Shader* shader)
             dengineutils_logging_log("WARNING::SHADER::Not compiled. #version %d is unsupported. Supported is %d", shadver, ver);
             return 0;
         }
-
     }
 
     shader->program_id = glCreateProgram(); DENGINE_CHECKGL;
