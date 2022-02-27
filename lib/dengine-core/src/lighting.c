@@ -13,6 +13,8 @@ Lighting lighting;
 
 #include <cglm/cglm.h> //mat, proj
 
+static char prtbuf[1024];
+
 static vec3 centers_3d[] = {
     {1.0f, 0.0f, 0.0f},
     {-1.0f, 0.0f, 0.0f},
@@ -38,12 +40,12 @@ static const float default_ambient[3]=
 
 static const float default_specular[3]=
 {
-    1.f,.1f,1.f
+    .75f,.75f,.75f
 };
 
 static const float default_diffuse[3]=
 {
-    1.f,1.f,1.f
+    .75f,.75f,.75f
 };
 
 const char* LightOpShaderStr=
@@ -156,6 +158,8 @@ void dengine_lighting_setup_dirlight(DirLight* dirLight)
 
     dirLight->shadow.pcf = 0;
     dirLight->shadow.pcf_samples = 4;
+
+    dirLight->light.strength = 0.55;
 }
 
 void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, Shader* shader, Primitive* primitive, float* modelmtx)
@@ -212,6 +216,7 @@ void dengine_lighting_apply_dirlight(DirLight* dirLight, Shader* shader)
     dengine_shader_set_vec3(shader, "dLight.light.ambient", dirLight->light.ambient);
     dengine_shader_set_vec3(shader, "dLight.light.diffuse", dirLight->light.diffuse);
     dengine_shader_set_vec3(shader, "dLight.light.specular", dirLight->light.specular);
+    dengine_shader_set_float(shader, "dLight.light.strength", dirLight->light.strength);
     dengine_shader_set_float(shader, "dLight.shadow.max_bias", dirLight->shadow.max_bias);
     dengine_shader_set_int(shader, "dLight.shadow.enable", dirLight->shadow.enable);
     dengine_shader_set_int(shader, "dLight.shadow.pcf", dirLight->shadow.pcf);
@@ -231,7 +236,7 @@ void dengine_lighting_setup_pointlight(PointLight* pointLight)
     pointLight->linear  = 0.09f;
     pointLight->quadratic = 0.032f;
 
-    pointLight->light.strength = 1;
+    pointLight->light.strength = 1.0f;
 
     memcpy(pointLight->light.ambient, default_ambient, sizeof(default_ambient));
     memcpy(pointLight->light.diffuse, default_diffuse, sizeof(default_diffuse));
@@ -243,18 +248,8 @@ void dengine_lighting_setup_pointlight(PointLight* pointLight)
 
 void dengine_lighting_apply_pointlight(PointLight* pointLight, Shader* shader)
 {
-    dengine_shader_set_vec3(shader, "lightPos", pointLight->position);
-
-    float diffStrength[3];
-    memcpy(diffStrength, pointLight->light.diffuse, sizeof(diffStrength));;
-
-    for(int i = 0; i < 3; i++)
-        diffStrength[i]*=pointLight->light.strength;
-
-    const int bufsz = 1024;
-    char prtbuf[bufsz];
-
-    for (uint32_t i = 0; i < 4; i++) {
+    size_t bufsz = sizeof (prtbuf);
+    for (uint32_t i = 0; i < 1; i++) {
         snprintf(prtbuf, bufsz,"pLights[%u].position",i);
         dengine_shader_set_vec3(shader, prtbuf, pointLight->position);
 
@@ -275,8 +270,22 @@ void dengine_lighting_apply_pointlight(PointLight* pointLight, Shader* shader)
 
         snprintf(prtbuf, bufsz,"pLights[%u].quadratic",i);
         dengine_shader_set_float(shader, prtbuf, pointLight->quadratic);
+
+        snprintf(prtbuf, bufsz,"pLights[%u].shadow.far_shadow",i);
+        dengine_shader_set_float(shader, prtbuf, pointLight->shadow.far_shadow);
+
+        snprintf(prtbuf, bufsz,"pLights[%u].light.strength",i);
+        dengine_shader_set_float(shader, prtbuf, pointLight->light.strength);
     }
 
+    //Compatibility until tests are upgraded
+    float diffStrength[3];
+    memcpy(diffStrength, pointLight->light.diffuse, sizeof(diffStrength));;
+
+    for(int j = 0; j < 3; j++)
+        diffStrength[j]*=pointLight->light.strength;
+
+    dengine_shader_set_vec3(shader, "lightPos", pointLight->position);
     dengine_shader_set_vec3(shader, "diffuseCol", diffStrength);
     dengine_shader_set_float(shader, "constant", pointLight->constant);
     dengine_shader_set_float(shader, "linear", pointLight->linear);
@@ -357,6 +366,50 @@ void dengine_lighting_setup_spotlight(SpotLight* spotLight)
 
 void dengine_lighting_apply_spotlight(SpotLight* spotLight, Shader* shader)
 {
+    float oCut_rad = glm_rad(45.0f - glm_clamp(spotLight->outerCutOff, 0.0f, 45.0f));
+    float iCut_rad = glm_rad(45.0f - glm_clamp(spotLight->innerCutOff, 0.0f, spotLight->outerCutOff));
+
+    size_t bufsz = sizeof (prtbuf);
+    for (uint32_t i = 0; i < 1; i++) {
+        snprintf(prtbuf, bufsz,"sLights[%u].pointLight.position",i);
+        dengine_shader_set_vec3(shader, prtbuf, spotLight->pointLight.position);
+
+        snprintf(prtbuf, bufsz,"sLights[%u].pointLight.light.ambient",i);
+        dengine_shader_set_vec3(shader, prtbuf, spotLight->pointLight.light.ambient);
+
+        snprintf(prtbuf, bufsz,"sLights[%u].pointLight.light.diffuse",i);
+        dengine_shader_set_vec3(shader, prtbuf, spotLight->pointLight.light.diffuse);
+
+        snprintf(prtbuf, bufsz,"sLights[%u].pointLight.light.specular",i);
+        dengine_shader_set_vec3(shader, prtbuf, spotLight->pointLight.light.specular);
+
+        snprintf(prtbuf, bufsz,"sLights[%u].direction",i);
+        dengine_shader_set_vec3(shader, prtbuf, spotLight->direction);
+
+        snprintf(prtbuf, bufsz,"sLights[%u].pointLight.constant",i);
+        dengine_shader_set_float(shader, prtbuf, spotLight->pointLight.constant);
+
+        snprintf(prtbuf, bufsz,"sLights[%u].pointLight.linear",i);
+        dengine_shader_set_float(shader, prtbuf, spotLight->pointLight.linear);
+
+        snprintf(prtbuf, bufsz,"sLights[%u].pointLight.quadratic",i);
+        dengine_shader_set_float(shader, prtbuf, spotLight->pointLight.quadratic);
+
+        snprintf(prtbuf, bufsz,"sLights[%u].pointLight.shadow.far_shadow",i);
+        dengine_shader_set_float(shader, prtbuf, spotLight->pointLight.shadow.far_shadow);
+
+        snprintf(prtbuf, bufsz,"sLights[%u].pointLight.light.strength",i);
+        dengine_shader_set_float(shader, prtbuf, spotLight->pointLight.light.strength);
+
+        snprintf(prtbuf, bufsz,"sLights[%u].innerCutOff",i);
+        dengine_shader_set_float(shader, prtbuf, iCut_rad);
+
+        snprintf(prtbuf, bufsz,"sLights[%u].outerCutOff",i);
+        dengine_shader_set_float(shader, prtbuf, oCut_rad);
+    }
+
+    //Compatibility until shaders are upgraded
+
     dengine_shader_set_vec3(shader, "lightPos", spotLight->pointLight.position);
     dengine_shader_set_vec3(shader, "lightDir", spotLight->direction);
     float diffStrength[3];
@@ -370,9 +423,6 @@ void dengine_lighting_apply_spotlight(SpotLight* spotLight, Shader* shader)
     dengine_shader_set_float(shader, "linear", spotLight->pointLight.linear);
     dengine_shader_set_float(shader, "quadratic", spotLight->pointLight.quadratic);
     dengine_shader_set_float(shader, "shadowfar", spotLight->pointLight.shadow.far_shadow);
-
-    float oCut_rad = glm_rad(45.0f - glm_clamp(spotLight->outerCutOff, 0.0f, 45.0f));
-    float iCut_rad = glm_rad(45.0f - glm_clamp(spotLight->innerCutOff, 0.0f, spotLight->outerCutOff));
 
     dengine_shader_set_float(shader, "oCut", oCut_rad);
     dengine_shader_set_float(shader, "iCut", iCut_rad);
