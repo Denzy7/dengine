@@ -156,7 +156,7 @@ int dengine_shader_link(Shader* shader)
 
         glGetProgramInfoLog(shader->program_id, log_length, NULL, info_log); DENGINE_CHECKGL;
 
-        dengineutils_logging_log("ERROR::SHADER::LINK::%s",log_length, info_log);
+        dengineutils_logging_log("ERROR::SHADER::LINK::%s", info_log);
 
         free(info_log);
     }
