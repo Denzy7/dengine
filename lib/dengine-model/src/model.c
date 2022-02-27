@@ -231,7 +231,7 @@ int _denginemodel_load_obj(const void* mem, const size_t sz, Primitive* primitiv
     dengineutils_timer_update();
     double done = dengineutils_timer_get_current();
 
-    dengineutils_logging_log("INFO::meshes : %zu, vertices : %zu, tex_coords : %zu, normals : %zu, faces : %zu, indices : %zu\nTIME : %.1fms\n", n_meshes, n_vertices, n_texcoord, n_normals, n_faces, index_buf.count, done - start);
+    dengineutils_logging_log("INFO::meshes : %zu, vertices : %zu, tex_coords : %zu, normals : %zu, faces : %zu, indices : %zu\nTIME : %.1fms", n_meshes, n_vertices, n_texcoord, n_normals, n_faces, index_buf.count, done - start);
 
     primitive->draw_mode = GL_TRIANGLES;
     primitive->draw_type = GL_UNSIGNED_SHORT;
