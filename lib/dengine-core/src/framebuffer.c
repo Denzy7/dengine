@@ -1,5 +1,7 @@
 #include "framebuffer.h"
 
+#include "dengine-utils/logging.h"
+
 #include "loadgl.h"
 
 #include <string.h> //memset
@@ -27,8 +29,12 @@ void dengine_framebuffer_attach(FramebufferAttachmentType attachment, Texture* t
     //Guard against this dangerous call
     #ifdef DENGINE_GL_GLAD
     if(!glad_glFramebufferTexture)
+    {
+        dengineutils_logging_log("WARNING::FRAMEBUFFER::3D cubemap not attached coz glFramebufferTexture was not loaded");
         return;
+    }
     #endif
+
 
     if(attachment == DENGINE_FRAMEBUFFER_COLOR){
         //on GL/ES 3.2+
