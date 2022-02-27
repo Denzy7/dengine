@@ -230,7 +230,7 @@ const char* dengineutils_filesys_get_cwd()
 {
     memset(cwd, 0, sizeof (cwd));
     #if defined (DENGINE_WIN32)
-    GetCurrentDirectory(cwd, sizeof(cwd));
+    GetCurrentDirectory(sizeof(cwd), cwd);
     #elif defined (DENGINE_LINUX)
     getcwd(cwd, sizeof (cwd));
     #endif
