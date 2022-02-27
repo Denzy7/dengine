@@ -231,6 +231,18 @@ void dengine_window_makecurrent(Window* window)
 #endif
 }
 
+void dengine_window_set_swapinterval(int interval)
+{
+#if defined(DENGINE_WIN_GLFW)
+    dengine_window_glfw_set_swapinterval(interval);
+#elif defined(DENGINE_WIN_EGL)
+    if(!eglSwapInterval(_window.display, interval))
+    {
+        dengineutils_logging_log("ERROR::WINDOW::EGL cannot set swap interval");
+    }
+#endif
+}
+
 int dengine_window_create(int width, int height, const char* title, Window* window)
 {
 #if defined(DENGINE_WIN_GLFW)

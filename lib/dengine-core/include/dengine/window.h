@@ -63,6 +63,8 @@ int dengine_window_create(int width, int height, const char* title, Window* wind
 
 void dengine_window_makecurrent(Window* window);
 
+void dengine_window_set_swapinterval(int interval);
+
 //GLFW Specific Calls
 #if defined(DENGINE_WIN_GLFW)
 
