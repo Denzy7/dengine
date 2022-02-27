@@ -259,12 +259,20 @@ void _denginegui_drawquad()
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); DENGINE_CHECKGL;
 
+    int depthmask;
+    glGetIntegerv(GL_DEPTH_WRITEMASK, &depthmask); DENGINE_CHECKGL;
+    if (depthmask)
+        glDepthMask(GL_FALSE);
+
     dengine_draw_primitive(&quad, &shader);
 
     glBlendFunc(srcalpha, dstalpha); DENGINE_CHECKGL;
 
     if(!blnd)
         glDisable(GL_BLEND); DENGINE_CHECKGL;
+
+    if (depthmask)
+        glDepthMask(GL_TRUE);
 
     dengine_shader_use(NULL);
 }
@@ -417,8 +425,21 @@ int denginegui_button(float x,float y, float width, float height, const char* te
     {
         denginegui_panel(x, y, width, height, NULL, NULL, rgba);
     }
+
+    int scissor = glIsEnabled(GL_SCISSOR_TEST);
+    if(!scissor)
+    {
+        glEnable(GL_SCISSOR_TEST);
+    }
+    glScissor(x, y, width, height);
+
     float txtoffst = (height / 2) - (_fontsz / 4);
     denginegui_text(x + (txtoffst / 2), y + txtoffst, text, NULL);
+
+    if(!scissor)
+    {
+        glDisable(GL_SCISSOR_TEST);
+    }
 
     return down;
 }
