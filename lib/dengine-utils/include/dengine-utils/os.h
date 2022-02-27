@@ -15,6 +15,8 @@ char* dengineutils_os_dialog_fileopen(const char* title);
 
 char* dengineutils_os_dialog_filesave(const char* title);
 
+const char* dengineutils_filesys_get_cwd();
+
 #ifdef __cplusplus
 }
 #endif

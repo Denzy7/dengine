@@ -9,9 +9,13 @@
 
 #include "window.h"
 
+char cwd[FILENAME_MAX];
+
 //Will this work on Win32?
 #define PATH_SEP "/"
+
 #if defined (DENGINE_LINUX)
+#include <unistd.h>
 #include <sys/stat.h>
 int init = 0;
 #elif defined(DENGINE_WIN32)
@@ -220,4 +224,15 @@ char* dengineutils_os_dialog_filesave(const char* title)
     scanf("%1024s", filename);
 #endif
     return filename;
+}
+
+const char* dengineutils_filesys_get_cwd()
+{
+    memset(cwd, 0, sizeof (cwd));
+    #if defined (DENGINE_WIN32)
+    GetCurrentDirectory(cwd, sizeof(cwd));
+    #elif defined (DENGINE_LINUX)
+    getcwd(cwd, sizeof (cwd));
+    #endif
+    return cwd;
 }
