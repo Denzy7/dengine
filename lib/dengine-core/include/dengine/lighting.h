@@ -109,9 +109,6 @@ void dengine_lighting_apply_spotlight(SpotLight* spotLight, Shader* shader);
 
 void dengine_lighting_shadow_spotlight_draw(SpotLight* spotLight, Shader* shader, Primitive* primitive, float* modelmtx);
 
-//Shader patch
-
-int dengine_lighting_patch(Shader* shader);
 
 Lighting* dengine_lighting_get();
 

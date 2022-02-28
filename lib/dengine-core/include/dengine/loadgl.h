@@ -1,3 +1,10 @@
+/*! \file loadgl.h
+ *  Loads GL functions and check errors
+ *
+ *  Simply include this file to access GL functions. It includes the defined function loader in
+ *  dengine_config.h
+ */
+
 #ifndef LOADGL_H
 #define LOADGL_H
 

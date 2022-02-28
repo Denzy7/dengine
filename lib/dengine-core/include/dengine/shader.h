@@ -1,3 +1,8 @@
+/*! \file shader.h
+ *  Execute shader operations
+ */
+
+
 #ifndef SHADER_H
 #define SHADER_H
 
@@ -9,7 +14,14 @@ extern "C" {
 
 #include <stdint.h> //uint32
 
-typedef struct Shader
+/*! \struct Shader
+ *  Code that runs when a Primitive is drawn
+ *
+ *  A shader is the bread and butter of modern computer graphics. It loads code which will execute
+ *  when a fragment is drawn to the screen and how it appears
+ *
+ */
+typedef struct
 {
     char* vertex_code;
     char* fragment_code;

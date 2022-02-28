@@ -1,3 +1,8 @@
+/*!
+ * \file window.h
+ * Execute window operations
+ */
+
 //USES ONLY ONE NATIVE WINDOW.
 
 #ifndef WINDOW_H
@@ -18,7 +23,11 @@
 #include <android/window.h>
 #endif
 
-typedef struct Window
+/*!
+ * \struct Window
+ * This is really just a dummy struct for internal purposes
+ */
+typedef struct
 {
     #if defined(DENGINE_ANDROID)
     struct ANativeWindow* window;

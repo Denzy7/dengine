@@ -1,3 +1,7 @@
+/*! \file draw.h
+ *  Execute draw commands
+ */
+
 #ifndef DRAW_H
 #define DRAW_H
 
@@ -9,6 +13,11 @@
 extern "C" {
 #endif
 
+/*!
+ * \brief Execute glDrawElements on currently bound framebuffer
+ * \param primitive Primitive to draw
+ * \param shader Shader to use
+ */
 void dengine_draw_primitive(Primitive* primitive, Shader* shader);
 
 #ifdef __cplusplus

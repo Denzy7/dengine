@@ -433,12 +433,6 @@ void dengine_lighting_shadow_spotlight_draw(SpotLight* spotLight, Shader* shader
     dengine_lighting_shadow_pointlight_draw(&spotLight->pointLight, shader, primitive, modelmtx);
 }
 
-
-int dengine_lighting_patch(Shader* shader)
-{
-    return 0;
-}
-
 void dengine_lighting_terminate()
 {
     if(lighting.pLights)
