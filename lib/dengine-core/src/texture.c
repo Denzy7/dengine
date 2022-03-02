@@ -52,7 +52,7 @@ int dengine_texture_load_mem(void* mem, size_t size, int flip, Texture* texture)
         return 0;
     }
 
-    if(texture->data)
+    if(!texture->data)
     {
         dengineutils_logging_log("ERROR::TEXTURE:STBI::%s", stbi_failure_reason());
         return 0;
