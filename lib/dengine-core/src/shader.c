@@ -95,7 +95,10 @@ int dengine_shader_setup(Shader* shader)
 {
     //Dont compile an unsupported version
     int maj = 0,min = 0, ver = 0, shadver = 0;
-    sscanf((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION),"%d.%d", &maj, &min);
+    const char* glslv = (char *) glGetString(GL_SHADING_LANGUAGE_VERSION);
+
+    //We might get something like blah blah ES blah ES maj.min
+    sscanf(strchr(glslv, '.') - 1,"%d.%d", &maj, &min);
     ver = maj*=100;
     ver+=min;
     const char* verstr = strchr(shader->fragment_code, '#');
