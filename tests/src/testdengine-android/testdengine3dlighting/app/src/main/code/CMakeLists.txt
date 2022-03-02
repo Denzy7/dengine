@@ -25,10 +25,11 @@ target_include_directories(GFX PUBLIC
 		"${PROJECT_BINARY_DIR}/${DENGINE_BUILD}"
 		${DENGINE_DIR}/lib/dengine-core/include
 		${DENGINE_DIR}/lib/dengine-utils/include
+		${DENGINE_DIR}/lib/dengine-gui/include
 		${DENGINE_DIR}/deps/cglm/include
 		${DENGINE_DIR}/deps/glad/include
 		)
 
 
-target_link_libraries(GFX PUBLIC log EGL glad android dengine-core dengine-utils)
+target_link_libraries(GFX PUBLIC log EGL glad android dengine-core dengine-utils dengine-gui)
 
