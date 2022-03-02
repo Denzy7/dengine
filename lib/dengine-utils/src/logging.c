@@ -5,6 +5,7 @@
 #include <stdio.h>  //printf
 #include <stdarg.h> //vsprint
 #include <string.h> //sprintf
+#include <time.h> //ctime
 
 #include "dengine_config.h" //MAX_LOG_STR_SIZE
 
@@ -46,6 +47,9 @@ int log2file = 0;
 void dengineutils_logging_set_filelogging(int value)
 {
     log2file = value;
+    FILE* f = fopen(DENGINE_LOG_FILE, "a");
+    fprintf(f, "\n====================\n");
+    fclose(f);
 }
 
 void dengineutils_logging_set_consolecolor(char head)
@@ -87,8 +91,10 @@ void dengineutils_logging_log(const char* message, ...)
 
     if(log2file)
     {
+        time_t t;
+        time(&t);
         FILE* f = fopen(DENGINE_LOG_FILE, "a");
-        fprintf(f, "%s\t%s\n", "<ctime-here>", LOG_BUFFER);
+        fprintf(f, "%s\t%s\n", ctime(&t), LOG_BUFFER);
         fclose(f);
     }
 
