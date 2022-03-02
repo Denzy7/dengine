@@ -43,22 +43,19 @@ void dengine_material_add_texture(uint32_t target, Texture* texture, const char*
 
 void dengine_material_use(Material* material)
 {
-
     if (material) {
         for (int i = 0; i < material->textures_count; i++) {
             glActiveTexture(GL_TEXTURE0 + i);
-            if (material->textures[i].texture_id != 0)
-                dengine_texture_bind(material->textures_targets[i], &material->textures[i]);
+            dengine_texture_bind(material->textures_targets[i], &material->textures[i]);
         }
     }else
     {
-        for (int i = 0; i < 16; i++) {
+        int max_tex=0;
+        glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_tex);
+        for (int i = 0; i < max_tex; i++) {
             glActiveTexture(GL_TEXTURE0 + i);
             dengine_texture_bind(GL_TEXTURE_CUBE_MAP, NULL);
             dengine_texture_bind(GL_TEXTURE_2D, NULL);
         }
     }
-
-
-
 }
