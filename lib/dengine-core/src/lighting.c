@@ -70,12 +70,14 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
     depth.width = shadowop->shadow_map_size;
     depth.format = GL_DEPTH_COMPONENT;
     depth.internal_format = GL_DEPTH_COMPONENT;
-    depth.type = GL_FLOAT;
-    depth.filter_min = GL_LINEAR;
+    depth.type = GL_UNSIGNED_BYTE;
+    depth.filter_min = GL_NEAREST;
+    depth.filter_mag = GL_NEAREST;
+    depth.wrap = GL_CLAMP_TO_EDGE;
 
     dengine_texture_gen(1, &depth);
     dengine_texture_bind(shadowmap_target, &depth);
-
+    dengine_texture_set_params(shadowmap_target, &depth);
     if(shadowmap_target == GL_TEXTURE_2D){
         dengine_texture_data(shadowmap_target, &depth);
     }else if (shadowmap_target == GL_TEXTURE_CUBE_MAP)
@@ -86,8 +88,6 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
             dengine_texture_data(face, &depth);
         }
     }
-
-    dengine_texture_set_params(shadowmap_target, &depth);
 
     dengine_framebuffer_gen(1, &shadowop->shadow_map);
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &shadowop->shadow_map);
@@ -164,14 +164,12 @@ void dengine_lighting_setup_dirlight(DirLight* dirLight)
 
 void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, Shader* shader, Primitive* primitive, float* modelmtx)
 {
-    dengine_framebuffer_bind(GL_FRAMEBUFFER, &dirLight->shadow.shadow_map);
-
     //Guard for no shadow
-    if(!dirLight->shadow.enable)
-    {
-        dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
+    if(!dirLight->shadow.enable || !dirLight->shadow.shadow_map.depth.texture_id) {
         return;
     }
+
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, &dirLight->shadow.shadow_map);
 
     float ortho_size = 10.0f;
     mat4 proj, view;
@@ -295,17 +293,11 @@ void dengine_lighting_apply_pointlight(PointLight* pointLight, Shader* shader)
 
 void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, Shader* shader, Primitive* primitive, float* modelmtx)
 {
-    if (pointLight->shadow.shadow_map.depth.texture_id == 0)
+    //Guard for no shadow
+    if (!pointLight->shadow.shadow_map.depth.texture_id|| !pointLight->shadow.enable)
         return;
 
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &pointLight->shadow.shadow_map);
-
-    //Guard for no shadow
-    if(!pointLight->shadow.enable)
-    {
-        dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
-        return;
-    }
 
     mat4 proj, view;
     mat4 projviews[6];
