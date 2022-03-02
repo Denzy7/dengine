@@ -38,6 +38,8 @@ int main(int argc, char** argv)
     dengine_window_init();
     dengine_window_request_MSAA(4);
 
+    dengineutils_logging_set_filelogging(1);
+
     dengine_window_request_GL(3,2,0);
     if(!dengine_window_create(1280,720,"testdengine-lighting-standard", &window))
     {
@@ -299,8 +301,9 @@ int main(int argc, char** argv)
     vec3 pos = {0,1,0};
 
     DirLight dLight;
+    memset(&dLight, 0, sizeof(DirLight));
     dLight.shadow.enable = 1;
-    dLight.shadow.shadow_map_size = 512;;
+    dLight.shadow.shadow_map_size = 512;
     dengine_lighting_setup_dirlight(&dLight);
     dLight.light.strength = .5;
 
