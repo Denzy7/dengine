@@ -78,7 +78,7 @@ static int32_t input_event(struct android_app* app, AInputEvent* event)
 
 static void cmd_handle(struct android_app* app, int32_t cmd)
 {
-    dengineutils_logging_log("cmd %u", cmd);
+    //dengineutils_logging_log("cmd %u", cmd);
     switch (cmd) {
         case APP_CMD_SAVE_STATE:
             dengineutils_logging_log("Saving state...");
