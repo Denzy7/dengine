@@ -38,7 +38,6 @@ void dengine_material_add_texture(uint32_t target, Texture* texture, const char*
         material->textures_targets[material->textures_count] = target;
         dengine_shader_set_int(&material->shader_color, sampler, material->textures_count);
         material->textures_count++;
-
     }
 }
 
@@ -48,7 +47,8 @@ void dengine_material_use(Material* material)
     if (material) {
         for (int i = 0; i < material->textures_count; i++) {
             glActiveTexture(GL_TEXTURE0 + i);
-            dengine_texture_bind(material->textures_targets[i], &material->textures[i]);
+            if (material->textures[i].texture_id != 0)
+                dengine_texture_bind(material->textures_targets[i], &material->textures[i]);
         }
     }else
     {
