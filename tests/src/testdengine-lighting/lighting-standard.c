@@ -274,7 +274,7 @@ int main(int argc, char** argv)
         dengine_texture_bind(GL_TEXTURE_2D,NULL);
         dengine_texture_free_data(tex_plane);
 
-        dengine_material_add_texture(GL_TEXTURE_2D, tex_plane, shaderSamplers[i], &plane_mat);
+        dengine_material_set_texture(tex_plane, shaderSamplers[i], &plane_mat);
 
         Texture* tex_cube = &cubeTex[i];
         dengine_texture_bind(GL_TEXTURE_2D, tex_cube);
@@ -293,7 +293,7 @@ int main(int argc, char** argv)
         dengine_texture_bind(GL_TEXTURE_2D,NULL);
         dengine_texture_free_data(tex_cube);
 
-        dengine_material_add_texture(GL_TEXTURE_2D, tex_cube, shaderSamplers[i], &cube_mat);
+        dengine_material_set_texture(tex_cube, shaderSamplers[i], &cube_mat);
     }
 
     mat4 model;
@@ -316,6 +316,7 @@ int main(int argc, char** argv)
     pLight.position[1] = 5.5;
     pLight.position[2] = -1.5;
     pLight.light.diffuse[2] = 0;
+    pLight.light.specular[2] = 0;
     pLight.light.strength = 1.75;
 
     SpotLight sLight;
@@ -327,18 +328,19 @@ int main(int argc, char** argv)
     sLight.pointLight.position[2] = .5f;
     dengine_lighting_setup_spotlight(&sLight);
     sLight.pointLight.light.diffuse[1] = 0;
+    sLight.pointLight.light.specular[1] = 0;
     sLight.pointLight.light.strength = 3.0f;
 
     float tgt[3] = {1.5f,0.3f,0.f};
 
-    dengine_material_add_texture(GL_TEXTURE_2D, &dLight.shadow.shadow_map.depth, "dLightShadow", &plane_mat);
-    dengine_material_add_texture(GL_TEXTURE_2D, &dLight.shadow.shadow_map.depth, "dLightShadow", &cube_mat);
+    dengine_material_set_texture(&dLight.shadow.shadow_map.depth, "dLightShadow", &plane_mat);
+    dengine_material_set_texture(&dLight.shadow.shadow_map.depth, "dLightShadow", &cube_mat);
 
-    dengine_material_add_texture(GL_TEXTURE_CUBE_MAP, &pLight.shadow.shadow_map.depth, "pLightsShadow[0]", &plane_mat);
-    dengine_material_add_texture(GL_TEXTURE_CUBE_MAP, &pLight.shadow.shadow_map.depth, "pLightsShadow[0]", &cube_mat);
+    dengine_material_set_texture( &pLight.shadow.shadow_map.depth, "pLightsShadow[0]", &plane_mat);
+    dengine_material_set_texture( &pLight.shadow.shadow_map.depth, "pLightsShadow[0]", &cube_mat);
 
-    dengine_material_add_texture(GL_TEXTURE_CUBE_MAP, &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow[0]", &cube_mat);
-    dengine_material_add_texture(GL_TEXTURE_CUBE_MAP, &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow[0]", &plane_mat);
+    dengine_material_set_texture( &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow[0]", &cube_mat);
+    dengine_material_set_texture( &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow[0]", &plane_mat);
 
     int use_shadow3d = 1;
 
@@ -521,6 +523,8 @@ int main(int argc, char** argv)
     }
 
     free(assets_dir);
+    dengine_material_destroy(&cube_mat);
+    dengine_material_destroy(&plane_mat);
 
     return 0;
 }
