@@ -88,6 +88,7 @@ static void init(struct android_app* app)
         dengineutils_logging_log("INFO::init window %dx%d\n", w, h);
 
         dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
+        dengineutils_logging_log("INFO::GLSL : %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
         denginegui_init();
         denginegui_set_font(NULL, fontsz, 512);
@@ -246,6 +247,8 @@ static void init(struct android_app* app)
             dengine_texture_load_mem(f2m.mem, f2m.size, 1, tex_plane);
             dengineutils_filesys_file2mem_free(&f2m);
             tex_plane->filter_min = GL_LINEAR;
+            tex_plane->filter_mag = GL_LINEAR;
+            tex_plane->wrap = GL_CLAMP_TO_EDGE;
             uint32_t fmt = tex_plane->channels == 3 ? GL_RGB : GL_RGBA;
             tex_plane->format = fmt;
             tex_plane->internal_format = fmt;
@@ -257,7 +260,7 @@ static void init(struct android_app* app)
             dengine_texture_bind(GL_TEXTURE_2D,NULL);
             dengine_texture_free_data(tex_plane);
 
-            dengine_material_add_texture(GL_TEXTURE_2D, tex_plane, shaderSamplers[i], &plane_mat);
+            dengine_material_set_texture( tex_plane, shaderSamplers[i], &plane_mat);
 
             Texture* tex_cube = &cubeTex[i];
             dengine_texture_bind(GL_TEXTURE_2D, tex_cube);
@@ -267,6 +270,8 @@ static void init(struct android_app* app)
             dengine_texture_load_mem(f2m.mem, f2m.size, 1, tex_cube);
             dengineutils_filesys_file2mem_free(&f2m);
             tex_cube->filter_min = GL_LINEAR;
+            tex_cube->filter_mag = GL_LINEAR;
+            tex_cube->wrap = GL_CLAMP_TO_EDGE;
             fmt = tex_cube->channels == 3 ? GL_RGB : GL_RGBA;
             tex_cube->format = fmt;
             tex_cube->internal_format = fmt;
@@ -278,7 +283,7 @@ static void init(struct android_app* app)
             dengine_texture_bind(GL_TEXTURE_2D,NULL);
             dengine_texture_free_data(tex_cube);
 
-            dengine_material_add_texture(GL_TEXTURE_2D, tex_cube, shaderSamplers[i], &cube_mat);
+            dengine_material_set_texture(tex_cube, shaderSamplers[i], &cube_mat);
         }
 
         //CAMERA AND 3D
@@ -286,39 +291,41 @@ static void init(struct android_app* app)
 
         //LIGHTING
         memset(&dLight, 0, sizeof(DirLight));
-        dLight.shadow.enable = 1;
-        dLight.shadow.shadow_map_size = 512;
+//        dLight.shadow.enable = 1;
+//        dLight.shadow.shadow_map_size = 512;
         dengine_lighting_setup_dirlight(&dLight);
         dLight.light.strength = .5f;
 
         memset(&pLight, 0, sizeof(PointLight));
-        pLight.shadow.enable = 1;
-        pLight.shadow.shadow_map_size = 512;
+//        pLight.shadow.enable = 1;
+//        pLight.shadow.shadow_map_size = 512;
         dengine_lighting_setup_pointlight(&pLight);
         pLight.position[0] = 0.5f;
         pLight.position[1] = 5.5f;
         pLight.position[2] = -1.5f;
         pLight.light.diffuse[2] = 0;
+        pLight.light.specular[2] = 0;
         pLight.light.strength = 1.75f;
 
         memset(&sLight, 0, sizeof(SpotLight));
-        sLight.pointLight.shadow.enable = 1;
-        sLight.pointLight.shadow.shadow_map_size = 512;
+//        sLight.pointLight.shadow.enable = 1;
+//        sLight.pointLight.shadow.shadow_map_size = 512;
         sLight.pointLight.position[0] = 1.f;
         sLight.pointLight.position[1] = 3.f;
         sLight.pointLight.position[2] = .5f;
         dengine_lighting_setup_spotlight(&sLight);
         sLight.pointLight.light.diffuse[1] = 0;
+        sLight.pointLight.light.specular[1] = 0;
         sLight.pointLight.light.strength = 3.0f;
 
-        dengine_material_add_texture(GL_TEXTURE_2D, &dLight.shadow.shadow_map.depth, "dLightShadow", &plane_mat);
-        dengine_material_add_texture(GL_TEXTURE_2D, &dLight.shadow.shadow_map.depth, "dLightShadow", &cube_mat);
+        dengine_material_set_texture(&dLight.shadow.shadow_map.depth, "dLightShadow", &plane_mat);
+        dengine_material_set_texture(&dLight.shadow.shadow_map.depth, "dLightShadow", &cube_mat);
 
-        dengine_material_add_texture(GL_TEXTURE_CUBE_MAP, &pLight.shadow.shadow_map.depth, "pLightsShadow[0]", &plane_mat);
-        dengine_material_add_texture(GL_TEXTURE_CUBE_MAP, &pLight.shadow.shadow_map.depth, "pLightsShadow[0]", &cube_mat);
+        dengine_material_set_texture( &pLight.shadow.shadow_map.depth, "pLightsShadow[0]", &plane_mat);
+        dengine_material_set_texture( &pLight.shadow.shadow_map.depth, "pLightsShadow[0]", &cube_mat);
 
-        dengine_material_add_texture(GL_TEXTURE_CUBE_MAP, &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow[0]", &cube_mat);
-        dengine_material_add_texture(GL_TEXTURE_CUBE_MAP, &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow[0]", &plane_mat);
+        dengine_material_set_texture( &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow[0]", &cube_mat);
+        dengine_material_set_texture( &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow[0]", &plane_mat);
 
         glEnable(GL_DEPTH_TEST);
 
@@ -331,6 +338,9 @@ static void init(struct android_app* app)
 
 static void term(struct  android_app* app)
 {
+    dengine_material_destroy(&cube_mat);
+    dengine_material_destroy(&plane_mat);
+
     window_init = 0;
     dengineutils_logging_log("ptr : %p", app->window);
     dengine_window_terminate();
@@ -510,8 +520,6 @@ void android_main(struct android_app* state)
     dengine_android_set_app(state);
     dengine_android_set_initfunc(init);
     dengine_android_set_terminatefunc(term);
-
-    state->activity->env
 
     if(state->savedState)
     {
