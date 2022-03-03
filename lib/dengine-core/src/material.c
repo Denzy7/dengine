@@ -109,3 +109,18 @@ void dengine_material_destroy(Material* material)
         free(material->textures);
     }
 }
+
+Texture* dengine_material_get_texture(const char* sampler, Material* material)
+{
+    if (!material || !material->textures)
+        return NULL;
+
+    Texture* find = NULL;
+
+    for (size_t i = 0; i < material->textures_count; i++) {
+        if (!strcmp(sampler, material->textures[i].sampler)) {
+            find = &material->textures[i].texture;
+        }
+    }
+    return find;
+}

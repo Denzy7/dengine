@@ -79,12 +79,21 @@ int dengine_material_set_texture(Texture* texture, const char* sampler, Material
  * \param material Material to use
  */
 void dengine_material_use(Material* material);
+
 /*!
  * \brief Free resources being used by a material. Does NOT destroy the used textures.
  *  Only the sampler strings in the texture list
  * \param material
  */
 void dengine_material_destroy(Material* material);
+
+/*!
+ * \brief Get a texture stored in a material
+ * \param sampler Sampler to search for in material
+ * \param material Material to use
+ * \return A texture object if found. NULL if not
+ */
+Texture* dengine_material_get_texture(const char* sampler, Material* material);
 
 #ifdef __cplusplus
 }
