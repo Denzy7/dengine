@@ -45,7 +45,8 @@ extern "C" {
 void dengine_material_setup(Material* material);
 
 /*!
- * \brief Set the color shader
+ * \brief Set the color shader. This gets the textures expected to be used. Use before
+ * setting texture
  * \param shader Shader to use
  * \param material Material to use
  */
