@@ -77,7 +77,6 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
 
     dengine_texture_gen(1, &depth);
     dengine_texture_bind(shadowmap_target, &depth);
-    dengine_texture_set_params(shadowmap_target, &depth);
     if(shadowmap_target == GL_TEXTURE_2D){
         dengine_texture_data(shadowmap_target, &depth);
     }else if (shadowmap_target == GL_TEXTURE_CUBE_MAP)
@@ -88,6 +87,7 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
             dengine_texture_data(face, &depth);
         }
     }
+    dengine_texture_set_params(shadowmap_target, &depth);
 
     dengine_framebuffer_gen(1, &shadowop->shadow_map);
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &shadowop->shadow_map);
