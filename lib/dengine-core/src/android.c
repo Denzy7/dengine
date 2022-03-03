@@ -67,7 +67,7 @@ static int32_t input_event(struct android_app* app, AInputEvent* event)
         dengine_input_set_mousepos(x, h - y);
         dengine_input_set_mousebtn(0, 1);
 
-        dengineutils_logging_log("%f %f", x, y);
+        //dengineutils_logging_log("%f %f", x, y);
     }else
     {
         dengine_input_set_mousepos(0.0, 0.0);
