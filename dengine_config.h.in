@@ -38,4 +38,7 @@
 //Name of log file to use
 #define DENGINE_LOG_FILE "dengine.log"
 
+//Size of the global white 2D texture
+#define DENGINE_TEX_WHITESZ 256
+
 #endif // DENGINE_CONFIG_H_INCLUDED

@@ -9,6 +9,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h> //stbi_load, stbi_error
 
+#include "dengine_config.h" //DENGINE_TEX_WHITESZ
+Texture* white = NULL;
+
 void dengine_texture_gen(size_t count, Texture* textures)
 {
     for(size_t i = 0; i < count; i++)
@@ -134,3 +137,30 @@ void dengine_texture_destroy(size_t count, Texture* textures)
         glDeleteTextures(1, &textures[i].texture_id); DENGINE_CHECKGL;
 }
 
+Texture* dengine_texture_get_white()
+{
+    if (!white) {
+        white = malloc(sizeof (Texture));
+        memset(white, 0, sizeof (Texture));
+        white->filter_min = GL_NEAREST;
+        white->filter_mag = GL_NEAREST;
+        const int sz = DENGINE_TEX_WHITESZ;
+        white->height = sz;
+        white->width = sz;
+        white->internal_format = GL_RGB;
+        white->format = GL_RGB;
+        white->mipmap = 1;
+        white->type = GL_UNSIGNED_BYTE;
+        uint8_t* dat = malloc(sizeof (uint8_t) * sz * sz * 3 );
+        memset(dat, 255, sizeof (uint8_t) * sz * sz * 3 );
+        white->data = dat;
+        dengine_texture_gen(1, white);
+        dengine_texture_bind(GL_TEXTURE_2D, white);
+        dengine_texture_data(GL_TEXTURE_2D, white);
+        dengine_texture_set_params(GL_TEXTURE_2D, white);
+        dengine_texture_bind(GL_TEXTURE_2D, NULL);
+        free(dat);
+    }
+
+    return white;
+}
