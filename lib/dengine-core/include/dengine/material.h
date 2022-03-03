@@ -14,6 +14,13 @@
 #include "shader.h"
 #include "texture.h"
 
+typedef struct
+{
+    char* sampler;
+    Texture texture;
+    uint32_t target;
+}MaterialTexture;
+
 /*! \struct Material
  *  Defines data in a Material
  */
@@ -23,8 +30,7 @@ typedef struct
     Shader shader_shadow; /*!< 2D shadow shader */
     Shader shader_shadow3d; /*!< 3D shadow shader */
 
-    uint32_t textures_targets[16]; /*!< Added Texture targets */
-    Texture textures[16]; /*!< Added Textures */
+    MaterialTexture* textures; /*!< Added Textures */
     size_t textures_count; /*!< Added Texture count*/
 }Material;
 
@@ -60,19 +66,24 @@ void dengine_material_set_shader_shadow(Shader* shader, Material* material);
 void dengine_material_set_shader_shadow3d(Shader* shader, Material* material);
 
 /*!
- * \brief Add a texture to a material
- * \param target Can be GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP, ...
+ * \brief Set a texture in a material
  * \param texture Texture to add
  * \param sampler Sampler to search in the color shader for assigning texture
  * \param material Material to use
  */
-void dengine_material_add_texture(uint32_t target, Texture* texture, const char* sampler, Material* material);
+int dengine_material_set_texture(Texture* texture, const char* sampler, Material* material);
 
 /*!
  * \brief Use a material in a shader
  * \param material Material to use
  */
 void dengine_material_use(Material* material);
+/*!
+ * \brief Free resources being used by a material. Does NOT destroy the used textures.
+ *  Only the sampler strings in the texture list
+ * \param material
+ */
+void dengine_material_destroy(Material* material);
 
 #ifdef __cplusplus
 }
