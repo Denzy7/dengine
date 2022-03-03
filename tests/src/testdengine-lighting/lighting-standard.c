@@ -60,6 +60,9 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    dengineutils_logging_log("INFO::GL : %s", glGetString(GL_VERSION));
+    dengineutils_logging_log("INFO::GLSL : %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
     //Init systems...
     dengine_input_init();
 
@@ -263,10 +266,12 @@ int main(int argc, char** argv)
         snprintf(prtbuf, sizeof (prtbuf), "%s/%s", assets_dir, planeTextureFile[i]);
         dengine_texture_load_file(prtbuf, 1, tex_plane);
         tex_plane->filter_min = GL_LINEAR;
+        tex_plane->filter_mag = GL_LINEAR;
         uint32_t fmt = tex_plane->channels == 3 ? GL_RGB : GL_RGBA;
         tex_plane->format = fmt;
         tex_plane->internal_format = fmt;
         tex_plane->mipmap = 1;
+        tex_plane->wrap = GL_CLAMP_TO_EDGE;
         tex_plane->type = GL_UNSIGNED_BYTE;
 
         dengine_texture_data(GL_TEXTURE_2D, tex_plane);
@@ -282,6 +287,8 @@ int main(int argc, char** argv)
         snprintf(prtbuf, sizeof (prtbuf), "%s/%s", assets_dir, cubeTextureFile[i]);
         dengine_texture_load_file(prtbuf, 1, tex_cube);
         tex_cube->filter_min = GL_LINEAR;
+        tex_cube->filter_mag = GL_LINEAR;
+        tex_cube->wrap = GL_CLAMP_TO_EDGE;
         fmt = tex_cube->channels == 3 ? GL_RGB : GL_RGBA;
         tex_cube->format = fmt;
         tex_cube->internal_format = fmt;
