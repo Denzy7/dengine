@@ -6,6 +6,13 @@
 #define CAMERA_H
 
 #include "dengine/shader.h"
+#include "dengine/framebuffer.h"
+
+typedef enum
+{
+    DENGINE_CAMERA_RENDER_FOWARD,
+    DENGINE_CAMERA_RENDER_DEFFERED
+}CameraRenderMode;
 
 /*! \struct Camera
  *  Camera struct with camera data
@@ -21,6 +28,12 @@ typedef struct
     float fov; /*!< Field of view in degrees */
     float near; /*!< Near clipping plane */
     float far; /*!< Far clipping plane */
+
+    Framebuffer framebuffer; /*!< Framebuffer to draw to */
+    int render_width; /*!< Width of framebuffer. Usually window width */
+    int render_height; /*!< Height of framebuffer. Usually window height */
+
+    float clearcolor[4]; /*!< Color used to clear framebuffer before drawing anything */
 } Camera;
 
 #ifdef __cplusplus
@@ -57,6 +70,20 @@ void dengine_camera_lookat(float* target, Camera* camera);
  * \param camera Camera to use
  */
 void dengine_camera_apply(Shader* shader, Camera* camera);
+
+/*!
+ * \brief Set render mode. If not set, use the default framebuffer
+ * Use together with dengine_camera_use
+ * \param mode Mode to use
+ * \param camera Camera to use
+ */
+void dengine_camera_set_rendermode(CameraRenderMode mode, Camera* camera);
+
+/*!
+ * \brief Use a camera. Bind and clear its framebuffer if set
+ * \param camera Camera to use
+ */
+void dengine_camera_use(Camera* camera);
 
 #ifdef __cplusplus
 }

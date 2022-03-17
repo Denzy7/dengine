@@ -1,12 +1,15 @@
 #include "camera.h"
 
 #include "dengine/macros.h"
+#include "dengine/loadgl.h"
+#include "dengine/window.h"
 
 #include <cglm/cglm.h> //glm_proj
 #include <string.h>    //memcpy
 
 float _target_zero[3] = {0.0f, 0.0f, 0.0f};
 float _default_distance = 7.0f;
+float _default_clearcol[4] = {1.0f, 0.5f, 0.3f, 1.0};
 
 static const char* possible_projmat[]=
 {
@@ -32,6 +35,14 @@ void dengine_camera_setup(Camera* camera)
     for (int i = 0; i < 3; i++) {
         camera->position[i] = _default_distance;
     }
+    memcpy(camera->clearcolor, _default_clearcol, sizeof (_default_clearcol));
+    int w,h;
+    dengine_window_get_window_dim(&w, &h);
+    camera->render_height = h;
+    camera->render_width = w;
+
+    dengine_camera_project_perspective( (float)w / (float)h, camera);
+    dengine_camera_lookat(NULL, camera);
 }
 
 void dengine_camera_project_perspective(float aspect, Camera* camera)
@@ -70,5 +81,66 @@ void dengine_camera_apply(Shader* shader, Camera* camera)
 
     for (size_t i = 0; i < DENGINE_ARY_SZ(possible_campos); i++) {
         dengine_shader_set_vec3(shader, possible_campos[i], camera->position);
+    }
+}
+
+void dengine_camera_set_rendermode(CameraRenderMode mode, Camera* camera)
+{
+    if (mode == DENGINE_CAMERA_RENDER_FOWARD) {
+        Texture rgba_depth[2];
+        memset(&rgba_depth,0,sizeof (rgba_depth));
+
+        dengine_texture_gen(2, rgba_depth);
+        Texture* rgba =  &rgba_depth[0];
+        Texture* depth =  &rgba_depth[1];  //Use renderbuffer?
+
+        //rgba
+        rgba->format = GL_RGBA;
+        rgba->internal_format = GL_RGBA;
+        rgba->width =  camera->render_width;
+        rgba->height = camera->render_height;
+        rgba->filter_mag = GL_LINEAR;
+        rgba->filter_min = GL_LINEAR;
+        rgba->type = GL_UNSIGNED_BYTE;
+
+        dengine_texture_bind(GL_TEXTURE_2D, rgba);
+        dengine_texture_data(GL_TEXTURE_2D, rgba);
+        dengine_texture_set_params(GL_TEXTURE_2D, rgba);
+
+        //depth
+        depth->format = GL_DEPTH_COMPONENT;
+        depth->internal_format = GL_DEPTH_COMPONENT;
+        depth->width = camera->render_width;
+        depth->height = camera->render_height;
+        depth->type = GL_UNSIGNED_BYTE;
+
+        dengine_texture_bind(GL_TEXTURE_2D, depth);
+        dengine_texture_data(GL_TEXTURE_2D, depth);
+        dengine_texture_set_params(GL_TEXTURE_2D, depth);
+
+        dengine_framebuffer_gen(1, &camera->framebuffer);
+        dengine_framebuffer_bind(GL_FRAMEBUFFER, &camera->framebuffer);
+        dengine_framebuffer_attach2D(DENGINE_FRAMEBUFFER_COLOR, rgba, &camera->framebuffer);
+        dengine_framebuffer_attach2D(DENGINE_FRAMEBUFFER_DEPTH, depth, &camera->framebuffer);
+        dengine_framebuffer_bind(GL_FRAMEBUFFER,NULL);
+    }
+}
+
+void dengine_camera_use(Camera* camera)
+{
+    if (camera && camera->framebuffer.color->texture_id == 0)
+        return;
+
+    if (camera) {
+        dengine_framebuffer_bind(GL_FRAMEBUFFER, &camera->framebuffer);
+        glClearColor(
+                camera->clearcolor[0],
+                camera->clearcolor[1],
+                camera->clearcolor[2],
+                camera->clearcolor[3]);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }else
+    {
+        dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
     }
 }
