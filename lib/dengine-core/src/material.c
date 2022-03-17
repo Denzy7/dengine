@@ -19,8 +19,8 @@ void dengine_material_set_shader_color(Shader* shader, Material* material)
 
     int count, max_uniform_ln, size;
     uint32_t type;
-    glGetProgramiv(shader->program_id, GL_ACTIVE_UNIFORMS, &count);
-    glGetProgramiv(shader->program_id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_uniform_ln);
+    glGetProgramiv(shader->program_id, GL_ACTIVE_UNIFORMS, &count); DENGINE_CHECKGL;
+    glGetProgramiv(shader->program_id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_uniform_ln); DENGINE_CHECKGL;
     char* uniform_name = malloc(max_uniform_ln);
     
     vtor tex;
@@ -28,7 +28,7 @@ void dengine_material_set_shader_color(Shader* shader, Material* material)
 
     for (int i = 0; i < count; i++)
     {
-        glGetActiveUniform(shader->program_id, i, max_uniform_ln, NULL, &size, &type, uniform_name);
+        glGetActiveUniform(shader->program_id, i, max_uniform_ln, NULL, &size, &type, uniform_name); DENGINE_CHECKGL;
         if(type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE)
         {
             vtor_pushback(&tex, &i);
@@ -40,7 +40,7 @@ void dengine_material_set_shader_color(Shader* shader, Material* material)
 
     int* tex_idx = tex.data;
     for (size_t i = 0; i < tex.count; i++) {
-        glGetActiveUniform(shader->program_id, tex_idx[i], max_uniform_ln, NULL, &size, &type, uniform_name);
+        glGetActiveUniform(shader->program_id, tex_idx[i], max_uniform_ln, NULL, &size, &type, uniform_name); DENGINE_CHECKGL;
         if (type == GL_SAMPLER_2D) {
             textures[i].target = GL_TEXTURE_2D;
             textures[i].texture = *dengine_texture_get_white();
@@ -85,15 +85,15 @@ void dengine_material_use(Material* material)
 {
     if (material) {
         for (size_t i = 0; i < material->textures_count; i++) {
-            glActiveTexture(GL_TEXTURE0 + i);
+            glActiveTexture(GL_TEXTURE0 + i); DENGINE_CHECKGL;
             dengine_texture_bind(material->textures[i].target, &material->textures[i].texture);
         }
     }else
     {
         int max_tex=0;
-        glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_tex);
+        glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_tex); DENGINE_CHECKGL;
         for (int i = 0; i < max_tex; i++) {
-            glActiveTexture(GL_TEXTURE0 + i);
+            glActiveTexture(GL_TEXTURE0 + i); DENGINE_CHECKGL;
             dengine_texture_bind(GL_TEXTURE_CUBE_MAP, NULL);
             dengine_texture_bind(GL_TEXTURE_2D, NULL);
         }
