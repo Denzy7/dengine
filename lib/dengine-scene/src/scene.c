@@ -57,10 +57,10 @@ void _denginescene_ecs_do_transform_children(Entity* root)
                      child->transform.modelmtx
                      );
 
-//        vec4 t,s;
-//        mat4 r;
-//        glm_decompose(child->transform.modelmtx,t,r,s);
-        //dengineutils_logging_log("dcmp chld %u %f %f %f",child->entity_id,t[0],t[1],t[2]);
+        vec4 t,s;
+        mat4 r;
+        glm_decompose(child->transform.modelmtx,t,r,s);
+        dengineutils_logging_log("dcmp chld %u %f %f %f",child->entity_id,t[0],t[1],t[2]);
         _denginescene_ecs_do_transform_children(child);
     }
 }
@@ -69,7 +69,7 @@ void _denginescene_ecs_do_transform_children(Entity* root)
 
 void _denginescene_ecs_do_camera_draw_mesh(Entity* camera, Entity* mesh)
 {
-//    dengineutils_logging_log("drw %u",mesh->entity_id);
+    dengineutils_logging_log("drw %u",mesh->entity_id);
 //    dengine_material_use(mesh->mesh_component->material);
 //    dengine_camera_apply(&mesh->mesh_component->material->shader_color,camera->camera_component->camera);
 //    dengine_shader_set_mat4(&mesh->mesh_component->material->shader_color,
