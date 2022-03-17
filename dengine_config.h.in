@@ -41,4 +41,16 @@
 //Size of the global white 2D texture
 #define DENGINE_TEX_WHITESZ 256
 
+/*
+ * Maximum number of children any ECS entity can have.
+ * It's also the maximum entities a scene can hold
+ *
+ * I know it can be tempting to increase this but remember
+ * it will exponentially increase memory use.
+ *
+ * This limitation may be removed in the future once vtor is extended
+ * to hold pointer of arrays
+ */
+#define DENGINE_ECS_MAXCHILDREN 128
+
 #endif // DENGINE_CONFIG_H_INCLUDED
