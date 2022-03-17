@@ -47,8 +47,9 @@ typedef struct
     uint32_t internal_format; /*!< More or less the same as format with some additional special formats or compression*/
     uint32_t type; /*!< How each bit of color is sized; UNSIGNED_BYTE, FLOAT, ... */
 
+    //params to glTexParameteri
     uint32_t filter_mag; /*!< Magnification filer; LINEAR, NEAREST,...  */
-    uint32_t filter_min; /*!< Minification filter; Like magnification */
+    uint32_t filter_min; /*!< Minification filter; Like magnification. Always set this */
     uint32_t wrap; /*!< Wrapping; CLAMP, REPEAT, ... */
 
     char* name; /*!< Unused. Name of texture */
@@ -80,7 +81,7 @@ void dengine_texture_bind(uint32_t target, Texture* texture);
 void dengine_texture_data(uint32_t target, Texture* texture);
 
 /*!
- * \brief Attemp to load from memory
+ * \brief Attempt to load from memory
  * \param mem Memory location
  * \param size Size of memory
  * \param flip Flip y axis on load
