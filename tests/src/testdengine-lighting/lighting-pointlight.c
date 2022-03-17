@@ -242,7 +242,7 @@ int main(int argc, char** argv)
     texture.internal_format = fmt;
     texture.format = fmt;
     texture.type = GL_UNSIGNED_BYTE;
-    texture.mipmap = 1;
+    texture.filter_min=GL_LINEAR;
 
     dengine_texture_gen(1, &texture);
     dengine_texture_bind(GL_TEXTURE_2D, &texture);

@@ -270,7 +270,6 @@ int main(int argc, char** argv)
         uint32_t fmt = tex_plane->channels == 3 ? GL_RGB : GL_RGBA;
         tex_plane->format = fmt;
         tex_plane->internal_format = fmt;
-        tex_plane->mipmap = 1;
         tex_plane->wrap = GL_CLAMP_TO_EDGE;
         tex_plane->type = GL_UNSIGNED_BYTE;
 
@@ -292,7 +291,6 @@ int main(int argc, char** argv)
         fmt = tex_cube->channels == 3 ? GL_RGB : GL_RGBA;
         tex_cube->format = fmt;
         tex_cube->internal_format = fmt;
-        tex_cube->mipmap = 1;
         tex_cube->type = GL_UNSIGNED_BYTE;
 
         dengine_texture_data(GL_TEXTURE_2D, tex_cube);

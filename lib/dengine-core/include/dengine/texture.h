@@ -50,7 +50,6 @@ typedef struct
     uint32_t filter_mag; /*!< Magnification filer; LINEAR, NEAREST,...  */
     uint32_t filter_min; /*!< Minification filter; Like magnification */
     uint32_t wrap; /*!< Wrapping; CLAMP, REPEAT, ... */
-    int mipmap; /*!< Create mipmaps/LOD's. Use this option for all textures */
 
     char* name; /*!< Unused. Name of texture */
 }Texture;
@@ -124,6 +123,13 @@ void dengine_texture_destroy(size_t count, Texture* textures);
  * \return A 2D white texture of 256x256 unless defined otherwise
  */
 Texture* dengine_texture_get_white();
+
+/*!
+ * \brief Bind texture then generate mipmap then unbind
+ * \param target Target to use
+ * \param texture Texture to use
+ */
+void dengine_texture_mipmap(uint32_t target, Texture* texture);
 
 #ifdef __cplusplus
 }

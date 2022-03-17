@@ -105,9 +105,6 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture)
 
 void dengine_texture_set_params(uint32_t target, Texture* texture)
 {
-    if(texture->mipmap)
-        glGenerateMipmap(target); DENGINE_CHECKGL;
-
     if(texture->filter_mag)
         glTexParameteri(target, GL_TEXTURE_MAG_FILTER, texture->filter_mag); DENGINE_CHECKGL;
 
@@ -149,7 +146,6 @@ Texture* dengine_texture_get_white()
         white->width = sz;
         white->internal_format = GL_RGB;
         white->format = GL_RGB;
-        white->mipmap = 1;
         white->type = GL_UNSIGNED_BYTE;
         uint8_t* dat = malloc(sizeof (uint8_t) * sz * sz * 3 );
         memset(dat, 255, sizeof (uint8_t) * sz * sz * 3 );
@@ -163,4 +159,11 @@ Texture* dengine_texture_get_white()
     }
 
     return white;
+}
+
+void dengine_texture_mipmap(uint32_t target, Texture* texture)
+{
+    dengine_texture_bind(GL_TEXTURE_2D, texture);
+    glGenerateMipmap(target); DENGINE_CHECKGL;
+    dengine_texture_bind(GL_TEXTURE_2D, NULL);
 }
