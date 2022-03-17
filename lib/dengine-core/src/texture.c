@@ -163,6 +163,12 @@ Texture* dengine_texture_get_white()
 
 void dengine_texture_mipmap(uint32_t target, Texture* texture)
 {
+    if(!glad_glGenerateMipmap)
+    {
+        dengineutils_logging_log("WARNING::TEXTURE::glGenerateMipmap not loaded. No mipmap generated");
+        return;
+    }
+
     dengine_texture_bind(GL_TEXTURE_2D, texture);
     glGenerateMipmap(target); DENGINE_CHECKGL;
     dengine_texture_bind(GL_TEXTURE_2D, NULL);
