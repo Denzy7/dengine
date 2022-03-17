@@ -96,7 +96,7 @@ int main(int argc, char** argv)
     brickwall.internal_format = GL_RGB;
     brickwall.format = GL_RGB;
     brickwall.type = GL_UNSIGNED_BYTE;
-    brickwall.mipmap = 1;
+    brickwall.filter_min=GL_LINEAR;
 
     dengine_texture_gen(1, &brickwall);
     dengine_texture_bind(GL_TEXTURE_2D, &brickwall);
