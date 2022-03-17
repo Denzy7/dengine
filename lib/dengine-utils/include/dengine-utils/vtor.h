@@ -32,7 +32,7 @@ void vtor_create_alloc(vtor* vtor, size_t type_sz, size_t num);
 
 void vtor_create(vtor* vtor, size_t type_sz);
 
-void vtor_pushback(vtor* vtor, void* val);
+void vtor_pushback(vtor* vtor, const void* val);
 
 void vtor_popback(vtor* vtor);
 
@@ -79,7 +79,7 @@ void vtor_create(vtor* vtor, size_t type_sz)
 #endif // VTOR_VERBOSE
 }
 
-void vtor_pushback(vtor* vtor, void* val)
+void vtor_pushback(vtor* vtor, const void* val)
 {
     unsigned int capacity = vtor->capacity;
     size_t type_sz = vtor->type_sz;
