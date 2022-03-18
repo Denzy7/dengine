@@ -32,6 +32,8 @@ typedef struct
 
     MaterialTexture* textures; /*!< Added Textures */
     size_t textures_count; /*!< Added Texture count*/
+
+    Texture* white; /*!< White texture this material uses */
 }Material;
 
 #ifdef __cplusplus
@@ -82,7 +84,7 @@ void dengine_material_use(Material* material);
 
 /*!
  * \brief Free resources being used by a material. Does NOT destroy the used textures.
- *  Only the sampler strings in the texture list
+ *  Only the sampler strings in the texture list and the white texture
  * \param material
  */
 void dengine_material_destroy(Material* material);

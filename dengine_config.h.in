@@ -38,9 +38,6 @@
 //Name of log file to use
 #define DENGINE_LOG_FILE "dengine.log"
 
-//Size of the global white 2D texture
-#define DENGINE_TEX_WHITESZ 256
-
 /*
  * Maximum number of children any ECS entity can have.
  * It's also the maximum entities a scene can hold
