@@ -96,8 +96,15 @@ void main()
 
     vec3 FragColor = vec3(0.0);
     FragColor+=dirLightAdd();
-    FragColor+=pointLightAdd(pLights[0], pLightsShadow[0]);
-    FragColor+=spotLightAdd(sLights[0], sLightsShadow[0]);
+
+    vec3 pLightInfl = pointLightAdd(pLights[0], pLightsShadow[0]);
+    vec3 sLightInfl = spotLightAdd(sLights[0], sLightsShadow[0]);
+
+    if(length(pLightInfl) > 0.0)
+        FragColor+=pLightInfl;
+
+    if(length(sLightInfl) > 0.0)
+        FragColor+=sLightInfl;
 
     gl_FragColor = vec4(FragColor, 1.0);
 }
