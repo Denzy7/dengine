@@ -5,7 +5,7 @@
  * Uncomment to hide compile dir since it has sensitive info like
  * your username.
  *
- * This may break some tests which rely on it
+ * This may break some tests which rely on it. Use when distibuting
  */
 //#define DENGINE_HIDECOMPILEDIR
 
