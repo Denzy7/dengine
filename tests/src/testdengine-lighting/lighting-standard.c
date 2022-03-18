@@ -84,16 +84,16 @@ int main(int argc, char** argv)
     };
 
     //Check for assets from compile dir
-    snprintf(prtbuf, sizeof (prtbuf), "%s/assets/%s", dengineutils_filesys_compiledir(), stdshadersrcfile[0]);
+    snprintf(prtbuf, sizeof (prtbuf), "%s/assets/%s", dengineutils_filesys_get_srcdir(), stdshadersrcfile[0]);
     FILE* f = fopen(prtbuf, "rb");
     if (f) {
-        snprintf(prtbuf, sizeof (prtbuf), "%s/assets", dengineutils_filesys_compiledir());
+        snprintf(prtbuf, sizeof (prtbuf), "%s/assets", dengineutils_filesys_get_srcdir());
         assets_dir = strdup(prtbuf);
         dengineutils_logging_log("INFO::using asset dir %s", assets_dir);
     }
 
     if (!assets_dir) {
-        const char* cwd = dengineutils_filesys_get_cwd();
+        const char* cwd = dengineutils_os_get_cwd();
         snprintf(prtbuf, sizeof (prtbuf), "%s/assets/%s", cwd, stdshadersrcfile[0]);
         FILE* f = fopen(prtbuf, "rb");
         if (f) {

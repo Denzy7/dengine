@@ -17,4 +17,5 @@ int main(int argc, char** argv)
         dengineutils_filesys_file2mem_free(&test);
     }
 
+    dengineutils_filesys_get_assetsdir();
 }
