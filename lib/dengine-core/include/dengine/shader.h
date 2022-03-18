@@ -56,6 +56,7 @@ void dengine_shader_set_float(const Shader* shader, const char* name, float valu
 
 void dengine_shader_set_int(const Shader* shader, const char* name, int value);
 
+Shader* dengine_shader_new_shader_standard();
 
 #ifdef __cplusplus
 }

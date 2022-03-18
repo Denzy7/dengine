@@ -5,6 +5,7 @@
 #include <stdlib.h> //malloc
 #include <string.h> //strlen
 #include "logging.h"//log
+#include "dengine-utils/filesys.h"//assetdir
 
 void dengine_shader_create(Shader* shader)
 {
@@ -213,4 +214,41 @@ void dengine_shader_set_float(const Shader* shader, const char* name, float valu
     glUniform1f(location, value); DENGINE_CHECKGL;
 }
 
+Shader* dengine_shader_new_shader_standard()
+{
+    Shader* stdshdr = malloc(sizeof(Shader));
+    memset(stdshdr,0,sizeof(Shader));
 
+    const int prtbuf_sz=2048;
+    char* prtbuf=malloc(prtbuf_sz);
+
+    static const char *stdshdrfile[2]=
+    {
+        "shaders/standard.vert.glsl",
+        "shaders/standard.frag.glsl"
+    };
+    char *stdshdrsrc[2];
+
+    File2Mem f2m;
+    for (int i = 0; i < 2; i++) {
+        snprintf(prtbuf, prtbuf_sz, "%s/%s", dengineutils_filesys_get_assetsdir(), stdshdrfile[i]);
+        f2m.file = prtbuf;
+        dengineutils_filesys_file2mem_load(&f2m);
+        stdshdrsrc[i] = strdup(f2m.mem);
+        dengineutils_filesys_file2mem_free(&f2m);
+    }
+
+    stdshdr->vertex_code = stdshdrsrc[0];
+    stdshdr->fragment_code = stdshdrsrc[1];
+
+    dengine_shader_create(stdshdr);
+    dengine_shader_setup(stdshdr);
+
+    for (int i = 0; i < 2; i++) {
+        free(stdshdrsrc[i]);
+    }
+
+    free(prtbuf);
+
+    return stdshdr;
+}
