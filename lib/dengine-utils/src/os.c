@@ -226,7 +226,7 @@ char* dengineutils_os_dialog_filesave(const char* title)
     return filename;
 }
 
-const char* dengineutils_filesys_get_cwd()
+const char* dengineutils_os_get_cwd()
 {
     memset(cwd, 0, sizeof (cwd));
     #if defined (DENGINE_WIN32)
