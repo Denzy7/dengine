@@ -20,18 +20,18 @@ Lightweight Renderer and Engine
 	See [tools/mingw/README.md](tools/mingw/README.md)
 
 	- Build the tree:
-`cmake --build build/desktop`
+        `cmake --build build/desktop`
 
 - **Android** : Clone the repo as a Linux user.
 
-Run `./gradlew` (Linux) or `gradlew.bat` (Windows). Install a JDK if don't have one
+	- Run `./gradlew` (Linux) or `gradlew.bat` (Windows). Install a JDK if don't have one
 
-By default, this builds an APK which you can run on a Physical Device or Emulator.
+	- By default, this builds an APK which you can run on a Physical Device or Emulator.
 
-To build the tests, run regular cmake. Use the toolchain in the NDK
-`cmake -S . -B build/android -DCMAKE_TOOLCHAIN_FILE='<NDK_DIR>/build/cmake/android.toolchain.cmake' -DANDROID_API=24`
+	- To build the tests, run regular cmake. Use the toolchain in the NDK
+	`cmake -S . -B build/android -DCMAKE_TOOLCHAIN_FILE='<NDK_DIR>/build/cmake/android.toolchain.cmake' -DANDROID_API=24`
 
-See other options at [Android docs](https://developer.android.com/studio/projects/configure-cmake#call-cmake-cli)
+	See other options at [Android docs](https://developer.android.com/studio/projects/configure-cmake#call-cmake-cli)
 
-Run the tests with a terminal emulator like [Termux](https://f-droid.org/en/packages/com.termux/)
+	- Run the tests with a terminal emulator like [Termux](https://f-droid.org/en/packages/com.termux/)
 
