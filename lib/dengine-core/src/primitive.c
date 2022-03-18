@@ -4,6 +4,8 @@
 
 #include "vtor.h"
 
+#include <string.h> //memset
+
 void dengine_primitive_setup(Primitive* primitive, Shader* shader)
 {
     dengine_vao_gen(1, &primitive->vao);
@@ -49,6 +51,8 @@ void dengine_primitive_setup(Primitive* primitive, Shader* shader)
 
 void dengine_primitive_gen_quad(Primitive* primitive, Shader* shader)
 {
+    memset(primitive,0,sizeof (Primitive));
+
     static float quad_array[]=
     {
         //Vert              //TexCoord
@@ -93,6 +97,8 @@ void dengine_primitive_gen_quad(Primitive* primitive, Shader* shader)
 
 void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader)
 {
+    memset(primitive,0,sizeof (Primitive));
+
     vtor plane_array;
     vtor_create(&plane_array, sizeof(float));
 
@@ -191,6 +197,8 @@ void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader)
 
 void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
 {
+    memset(primitive,0,sizeof (Primitive));
+
     vtor cube_array;
     vtor_create(&cube_array, sizeof(float));
 
@@ -345,6 +353,8 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
 
 void dengine_primitive_gen_grid(uint16_t slice, Primitive* primitive, Shader* shader)
 {
+    memset(primitive,0,sizeof (Primitive));
+
     vtor grid_vertices, grid_indices;
     vtor_create(&grid_vertices, sizeof(float));
     vtor_create(&grid_indices, sizeof(uint16_t));
@@ -416,6 +426,8 @@ void dengine_primitive_gen_grid(uint16_t slice, Primitive* primitive, Shader* sh
 
 void dengine_primitive_gen_axis(Primitive* primitive, Shader* shader)
 {
+    memset(primitive,0,sizeof (Primitive));
+
     const float letteroff = 0.1f;
     static float axis_vertices[]=
     {
