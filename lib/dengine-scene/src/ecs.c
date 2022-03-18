@@ -18,7 +18,7 @@ Entity* denginescene_ecs_new_entity()
     ent->entity_id = entity_count;
     //dengineutils_logging_log("new ent : %u, %p", entity_count, ent);
     ent->active = 1;
-    glm_mat4_identity(ent->transform.modelmtx);
+    ent->transform.scale[0]=1.0f,ent->transform.scale[1]=1.0f,ent->transform.scale[2]=1.0f;
     ent->children = malloc(DENGINE_ECS_MAXCHILDREN * sizeof (Entity*));
     return ent;
 }
@@ -55,4 +55,12 @@ void denginescene_ecs_parent(struct _Entity* parent, struct _Entity* child)
     parent->children_count++;
 
     dengineutils_logging_log("parent %u (%p) to %u", child->entity_id, child, parent->entity_id);
+}
+
+void denginescene_ecs_get_model(Entity* entity,mat4 mat4x4)
+{
+    glm_mat4_identity(mat4x4);
+    glm_translate(mat4x4,entity->transform.position);
+    //rotate here
+    glm_scale(mat4x4,entity->transform.scale);
 }

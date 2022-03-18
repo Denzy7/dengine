@@ -11,7 +11,9 @@
 
 typedef struct
 {
-    mat4 modelmtx;
+    vec3 position;
+    vec3 rotation;
+    vec3 scale;
 }TransformComponent;
 
 typedef struct
@@ -72,6 +74,8 @@ void denginescene_ecs_destroy_entity(Entity* root);
  * \param child Child to use
  */
 void denginescene_ecs_parent(struct _Entity* parent, struct _Entity* child);
+
+void denginescene_ecs_get_model(Entity* entity,mat4 mat4x4);
 
 #ifdef __cplusplus
 extern "C" {
