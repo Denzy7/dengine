@@ -1,6 +1,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+
 #include <cglm/cglm.h>
 
 #include <dengine/window.h>
@@ -13,6 +16,8 @@
 #include <dengine/material.h>
 
 #include <dengine-utils/filesys.h>
+#include <dengine-utils/logging.h>
+#include <dengine-utils/os.h>
 
 #include <dengine-gui/gui.h>
 
@@ -24,7 +29,13 @@ int main(int argc, char *argv[])
     dengine_window_makecurrent(&window);
     dengine_window_loadgl();
 
+    const int prtbf_sz=1024;
+    char* prtbf=malloc(prtbf_sz);
+
     denginegui_init();
+    dengine_input_init();
+    float fontsz=24.0f;
+    denginegui_set_font(NULL,fontsz,512);
 
     Shader* stdshader=dengine_shader_new_shader_standard();
 
@@ -88,11 +99,29 @@ int main(int argc, char *argv[])
         dengine_camera_use(NULL);
 
         denginegui_panel(0,0,1280/2,720/2, &camera.framebuffer.color[0], NULL, NULL);
+        if(denginegui_button(0,360,200,50,"Dump to fb.jpg",NULL))
+        {
+            dengine_framebuffer_bind(GL_FRAMEBUFFER,&camera.framebuffer);
+            uint8_t* rgb=calloc(1280*720*3,sizeof(uint8_t));
+            glFinish();
+            glReadPixels(0,0,1280,720,GL_RGB,GL_UNSIGNED_BYTE,rgb);
+
+            stbi_flip_vertically_on_write(1);
+            stbi_write_jpg("fb.jpg",1280,720,3,rgb,95);
+
+            free(rgb);
+
+            snprintf(prtbf,prtbf_sz,"dumped to %s/fb.jpg",dengineutils_os_get_cwd());
+            dengineutils_os_dialog_messagebox("dump success",prtbf,0);
+
+            dengine_framebuffer_bind(GL_FRAMEBUFFER,NULL);
+        }
 
         dengine_input_pollevents();
         dengine_window_swapbuffers();
     }
 
+    free(prtbf);
     dengine_shader_destroy(stdshader);
     free(stdshader);
 
