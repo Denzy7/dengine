@@ -19,11 +19,14 @@
 #include <dengine-utils/logging.h>
 #include <dengine-utils/os.h>
 #include <dengine-utils/rng.h>
+#include <dengine-utils/debug.h>
 
 #include <dengine-gui/gui.h>
 
 int main(int argc, char *argv[])
 {
+    dengineutils_debug_init();
+
     Window window;
     dengine_window_init();
     dengine_window_create(1280, 720, "testdengine-camera-foward", &window);
@@ -134,6 +137,7 @@ int main(int argc, char *argv[])
 
     dengine_material_destroy(&cube_mat);
 
+    dengineutils_debug_terminate();
     dengine_window_terminate();
 
 
