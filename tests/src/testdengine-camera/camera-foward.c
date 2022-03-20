@@ -18,6 +18,7 @@
 #include <dengine-utils/filesys.h>
 #include <dengine-utils/logging.h>
 #include <dengine-utils/os.h>
+#include <dengine-utils/rng.h>
 
 #include <dengine-gui/gui.h>
 
@@ -36,6 +37,8 @@ int main(int argc, char *argv[])
     dengine_input_init();
     float fontsz=24.0f;
     denginegui_set_font(NULL,fontsz,512);
+
+    dengineutils_rng_set_seedwithtime();
 
     Shader* stdshader=dengine_shader_new_shader_standard();
 
@@ -77,27 +80,6 @@ int main(int argc, char *argv[])
         glClearColor(.3, .2, .1, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        dengine_camera_use(&camera);
-        dengine_material_use(&cube_mat);
-
-        for (int i = -1; i <= 1; i++) {
-            for (int j = -1; j <= 1; j++) {
-                glm_vec3_zero(pos);
-                glm_mat4_identity(model);
-
-                pos[0] = (float)i+(float)i*(float)j;
-                pos[2] = (float)j+(float)i*(float)j;
-
-                glm_translate(model, pos);
-                dengine_shader_set_mat4(stdshader, "model", model[0]);
-
-                dengine_draw_primitive(&cube, stdshader);
-            }
-        }
-
-        dengine_material_use(NULL);
-        dengine_camera_use(NULL);
-
         denginegui_panel(0,0,1280/2,720/2, &camera.framebuffer.color[0], NULL, NULL);
         if(denginegui_button(0,360,200,50,"Dump to fb.jpg",NULL))
         {
@@ -115,6 +97,31 @@ int main(int argc, char *argv[])
             dengineutils_os_dialog_messagebox("dump success",prtbf,0);
 
             dengine_framebuffer_bind(GL_FRAMEBUFFER,NULL);
+        }
+
+        if(denginegui_button(205,360,200,50,"render",NULL))
+        {
+            dengine_camera_use(&camera);
+            dengine_material_use(&cube_mat);
+
+            for (int i = -1; i <= 1; i++) {
+                for (int j = -1; j <= 1; j++) {
+                    glm_vec3_zero(pos);
+                    glm_mat4_identity(model);
+
+                    pos[0] = (float)i+(float)i*(float)j;
+                    pos[1] = (float)dengineutils_rng_int(10)/8.5;
+                    pos[2] = (float)j+(float)i*(float)j;
+
+                    glm_translate(model, pos);
+                    dengine_shader_set_mat4(stdshader, "model", model[0]);
+
+                    dengine_draw_primitive(&cube, stdshader);
+                }
+            }
+
+            dengine_material_use(NULL);
+            dengine_camera_use(NULL);
         }
 
         dengine_input_pollevents();
