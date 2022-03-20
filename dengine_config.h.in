@@ -50,4 +50,14 @@
  */
 #define DENGINE_ECS_MAXCHILDREN 128
 
+/*
+ * Debug tracing when program crashes
+ * SIZE=max stacktrace items
+ * STRLN=max length of each trace item
+ * FILE=file stack trace will be dumped to
+ */
+#define DENGINE_DEBUG_TRACESIZE 20
+#define DENGINE_DEBUG_TRACESTRLN 2048
+#define DENGINE_DEBUG_TRACEFILE "dengine.trace.log"
+
 #endif // DENGINE_CONFIG_H_INCLUDED
