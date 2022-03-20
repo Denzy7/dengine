@@ -127,7 +127,7 @@ vec3 dirLightAdd()
         diffuse = dLight.light.diffuse * diff * texDiffuseCol * dLight.light.strength;
     }
 
-    specular= dLight.light.specular * spec * texSpecularCol;
+    specular= dLight.light.specular * spec * texSpecularCol * dLight.light.strength;
 
     float shadow = 0.0;
 
@@ -162,7 +162,7 @@ vec3 pointLightAdd(PointLight pL, samplerCube cube)
         diffuse = pL.light.diffuse * diff * texDiffuseCol * pL.light.strength;
     }
 
-    specular = pL.light.specular * spec * texSpecularCol;
+    specular = pL.light.specular * spec * texSpecularCol * pL.light.strength;
 
     float shadow = 0.0;
     shadow_bias = max(0.1 * (1.0 - dot(nNormal, dir)), 0.005);
@@ -192,7 +192,7 @@ vec3 spotLightAdd(SpotLight sL, samplerCube cube)
         diffuse = sL.pointLight.light.diffuse * diff * texDiffuseCol * sL.pointLight.light.strength;
     }
 
-    specular = sL.pointLight.light.specular * spec * texSpecularCol;
+    specular = sL.pointLight.light.specular * spec * texSpecularCol * sL.pointLight.light.strength;
 
     float theta = dot(dir, normalize(-sL.direction));
     float epsilon = sL.innerCutOff - sL.outerCutOff;
