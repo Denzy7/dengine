@@ -18,6 +18,7 @@
 #include <dengine-utils/filesys.h>
 #include <dengine-utils/timer.h>
 #include <dengine-utils/os.h>
+#include <dengine-utils/debug.h>
 
 #include <dengine-gui/gui.h>
 
@@ -34,6 +35,8 @@ void draw_axis(Primitive* axis, Shader* shader)
 
 int main(int argc, char** argv)
 {
+    dengineutils_debug_init();
+
     Window window;
     dengine_window_init();
     dengine_window_request_MSAA(4);
@@ -530,6 +533,9 @@ int main(int argc, char** argv)
     free(assets_dir);
     dengine_material_destroy(&cube_mat);
     dengine_material_destroy(&plane_mat);
+
+    dengineutils_debug_terminate();
+    dengine_window_terminate();
 
     return 0;
 }
