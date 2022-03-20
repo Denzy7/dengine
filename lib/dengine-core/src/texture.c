@@ -11,6 +11,8 @@
 
 #include "dengine_config.h" //DENGINE_TEX_WHITESZ
 
+void _dengine_texture_autoload(Texture* texture);
+
 void dengine_texture_gen(size_t count, Texture* textures)
 {
     for(size_t i = 0; i < count; i++)
@@ -60,6 +62,8 @@ int dengine_texture_load_mem(void* mem, size_t size, int flip, Texture* texture)
         return 0;
     }else
     {
+        if(texture->auto_dataonload)
+            _dengine_texture_autoload(texture);
         return 1;
     }
 }
@@ -98,6 +102,8 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture)
         return 0;
     }else
     {
+        if(texture->auto_dataonload)
+            _dengine_texture_autoload(texture);
         return 1;
     }
 }
@@ -167,4 +173,19 @@ void dengine_texture_mipmap(uint32_t target, Texture* texture)
     dengine_texture_bind(GL_TEXTURE_2D, texture);
     glGenerateMipmap(target); DENGINE_CHECKGL;
     dengine_texture_bind(GL_TEXTURE_2D, NULL);
+}
+
+void _dengine_texture_autoload(Texture* texture)
+{
+    texture->format=texture->channels==3?GL_RGB:GL_RGBA;
+    texture->internal_format=texture->format;
+    texture->type=GL_UNSIGNED_BYTE;
+    texture->filter_min=GL_LINEAR;
+    texture->filter_mag=GL_LINEAR;
+    dengine_texture_gen(1,texture);
+    dengine_texture_bind(GL_TEXTURE_2D,texture);
+    dengine_texture_data(GL_TEXTURE_2D,texture);
+    dengine_texture_set_params(GL_TEXTURE_2D,texture);
+    dengine_texture_free_data(texture);
+    dengine_texture_bind(GL_TEXTURE_2D,NULL);
 }

@@ -53,6 +53,7 @@ typedef struct
     uint32_t wrap; /*!< Wrapping; CLAMP, REPEAT, ... */
 
     char* name; /*!< Unused. Name of texture */
+    int auto_dataonload; /*!< Automatically fill texture once its loaded. Only for 2D texture */
 }Texture;
 
 #ifdef __cplusplus
