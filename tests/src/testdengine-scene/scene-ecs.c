@@ -103,6 +103,7 @@ int main(int argc, char *argv[])
     DirLight dLight;
     memset(&dLight,0,sizeof (DirLight));
     dengine_lighting_setup_dirlight(&dLight);
+    dLight.light.strength=0.55f;
 
     PointLight pLight;
     memset(&pLight,0,sizeof (PointLight));
@@ -110,6 +111,7 @@ int main(int argc, char *argv[])
     pLight.position[1] = 5.5;
     pLight.light.diffuse[2] = 0;
     pLight.light.specular[2] = 0;
+    pLight.light.strength=0.35f;
 
     dengine_lighting_apply_dirlight(&dLight,stdshdr);
     dengine_lighting_apply_pointlight(&pLight,stdshdr);
