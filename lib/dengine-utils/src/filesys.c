@@ -8,6 +8,7 @@
 #include "logging.h"
 
 char srcdir[1024],assetdir[1024];
+int hasloggedassetdir=0;
 
 int dengineutils_filesys_file2mem_load(File2Mem* file2mem)
 {
@@ -76,7 +77,12 @@ const char* _dengineutils_filesys_get_assetsdir_resolve(const char* dir)
     snprintf(assetdir, sizeof (assetdir), "%s/assets/%s", dir,dftshdrvert);
     if (fopen(assetdir, "rb")) {
         snprintf(assetdir, sizeof (assetdir), "%s/assets", dir);
-        dengineutils_logging_log("INFO::using asset dir %s", assetdir);
+
+        if(!hasloggedassetdir)
+        {
+            dengineutils_logging_log("INFO::using asset dir %s", assetdir);
+            hasloggedassetdir=1;
+        }
         return assetdir;
     }
 
