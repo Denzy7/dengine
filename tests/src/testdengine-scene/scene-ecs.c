@@ -55,6 +55,8 @@ int main(int argc, char *argv[])
 
     Entity* ent13 = denginescene_ecs_new_entity();
 
+    Entity* ent14 = denginescene_ecs_new_entity();
+
     denginescene_ecs_parent(ent6, ent7);
     denginescene_ecs_parent(ent6, ent8);
     denginescene_ecs_parent(ent6, ent9);
@@ -75,18 +77,22 @@ int main(int argc, char *argv[])
     ent13->camera_component=&camc;
 
     Shader* stdshdr = dengine_shader_new_shader_standard();
+    Shader* dftshdr = dengine_shader_new_shader_default();
 
-    Material cube_mat,duck_mat;
+    Material cube_mat,duck_mat,dft_mat;
 
     dengine_material_setup(&cube_mat);
     dengine_material_setup(&duck_mat);
+    dengine_material_setup(&dft_mat);
 
     dengine_material_set_shader_color(stdshdr,&cube_mat);
     dengine_material_set_shader_color(stdshdr,&duck_mat);
+    dengine_material_set_shader_color(dftshdr,&dft_mat);
 
-    Primitive cube,plane,duck;
+    Primitive cube,plane,duck,grid;
     dengine_primitive_gen_cube(&cube,stdshdr);
     dengine_primitive_gen_plane(&plane,stdshdr);
+    dengine_primitive_gen_grid(10,&grid,dftshdr);
 
     const int prtbf_sz=2048;
     char* prtbf=malloc(prtbf_sz);
@@ -108,20 +114,23 @@ int main(int argc, char *argv[])
     dengine_lighting_apply_dirlight(&dLight,stdshdr);
     dengine_lighting_apply_pointlight(&pLight,stdshdr);
 
-    MeshComponent cube_mesh,plane_mesh,duck_mesh;
+    MeshComponent cube_mesh,plane_mesh,duck_mesh,grid_mesh;
 
     cube_mesh.material=&cube_mat;
     plane_mesh.material=&cube_mat;
     duck_mesh.material=&duck_mat;
+    grid_mesh.material=&dft_mat;
 
     plane_mesh.mesh=&plane;
     cube_mesh.mesh=&cube;
     duck_mesh.mesh=&duck;
+    grid_mesh.mesh=&grid;
 
     ent1->mesh_component=&plane_mesh;
     ent6->mesh_component=&cube_mesh;
     ent7->mesh_component=&cube_mesh;
     ent3->mesh_component=&duck_mesh;
+    ent14->mesh_component=&grid_mesh;
 
     Texture duck_tex;
     memset(&duck_tex,0,sizeof (Texture));
@@ -134,7 +143,7 @@ int main(int argc, char *argv[])
     dengine_material_set_texture(&duck_tex,"diffuseTex",&duck_mat);
 
     /*
-     *            SCENE -- 13(camera)
+     *            SCENE -- 13(camera),14=grid
      *            |    |
      *            1    10
      *            |    / \
@@ -163,17 +172,21 @@ int main(int argc, char *argv[])
     p[0]=4.0f,p[1]=2.0f,p[2]=1.0f;
     memcpy(ent3->transform.position,p,sizeof (vec3));
 
+    p[0]=10.0f,p[1]=10.0f,p[2]=10.0f;
+    memcpy(ent14->transform.scale,p,sizeof (vec3));
+
     Scene* scene = denginescene_new();
     denginescene_add_entity(scene, ent1);
     denginescene_add_entity(scene, ent10);
     denginescene_add_entity(scene, ent13);
-
-    glEnable(GL_DEPTH_TEST);
+    denginescene_add_entity(scene, ent14);
 
     denginegui_init();
     static float fontsz=18.0f;
     denginegui_set_font(NULL,fontsz,512);
     char fpsstr[30];
+
+    glEnable(GL_DEPTH_TEST);
 
     while (dengine_window_isrunning()) {
         dengine_input_pollevents();
@@ -195,7 +208,7 @@ int main(int argc, char *argv[])
         glClearColor(0.1,0.1,0.1,1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        denginegui_panel(0,0,640,360,&cam.framebuffer.color[0],NULL,NULL);
+        denginegui_panel(0,0,854,480,&cam.framebuffer.color[0],NULL,NULL);
         denginegui_text(10,10,fpsstr,NULL);
 
         dengine_window_swapbuffers();
@@ -205,9 +218,13 @@ int main(int argc, char *argv[])
 
     dengine_material_destroy(&cube_mat);
     dengine_material_destroy(&duck_mat);
+    dengine_material_destroy(&dft_mat);
 
     dengine_shader_destroy(stdshdr);
+    dengine_shader_destroy(dftshdr);
+
     free(stdshdr);
+    free(dftshdr);
 
     free(prtbf);
 
