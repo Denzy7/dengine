@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     pLight.position[1] = 5.5;
     pLight.light.diffuse[2] = 0;
     pLight.light.specular[2] = 0;
-    pLight.light.strength=0.35f;
+    pLight.light.strength=0.85f;
 
     dengine_lighting_apply_dirlight(&dLight,stdshdr);
     dengine_lighting_apply_pointlight(&pLight,stdshdr);
