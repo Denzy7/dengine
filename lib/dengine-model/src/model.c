@@ -233,6 +233,8 @@ int _denginemodel_load_obj(const void* mem, const size_t sz, Primitive* primitiv
 
     dengineutils_logging_log("INFO::meshes : %zu, vertices : %zu, tex_coords : %zu, normals : %zu, faces : %zu, indices : %zu\nTIME : %.1fms", n_meshes, n_vertices, n_texcoord, n_normals, n_faces, index_buf.count, done - start);
 
+    memset(primitive, 0,sizeof(Primitive));
+
     primitive->draw_mode = GL_TRIANGLES;
     primitive->draw_type = GL_UNSIGNED_SHORT;
 
