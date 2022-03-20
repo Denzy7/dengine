@@ -26,6 +26,9 @@ char LOG_BUFFER[DENGINE_LOG_BUF_SIZE];
 //Disable file log by default to avoid crash on Android
 int log2file = 0;
 
+//messagebox on error
+int msgboxerr=1;
+
 //ANSI COLORS
 #define  ANSI_Red "\033[0;31m"
 #define  ANSI_Green "\033[0;32m"
@@ -116,11 +119,16 @@ void dengineutils_logging_log(const char* message, ...)
         ANDROID_LOGI("%s",LOG_BUFFER + strlen(delim));
     #endif // DENGINE_ANDROID
 
-    if(LOG_BUFFER[0] == 'E')
+    if(LOG_BUFFER[0] == 'E' && msgboxerr)
     {
         dengineutils_os_dialog_messagebox("Critical Error!", LOG_BUFFER + strlen(delim), 1);
         #ifdef DENGINE_ANDROID
         ANDROID_LOGE("%s",LOG_BUFFER + strlen(delim));
         #endif // DENGINE_ANDROID
     }
+}
+
+void dengineutils_logging_set_msgboxerror(int value)
+{
+    msgboxerr=value;
 }
