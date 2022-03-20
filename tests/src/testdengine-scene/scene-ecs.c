@@ -7,6 +7,7 @@
 
 #include <dengine-utils/logging.h>
 #include <dengine-utils/timer.h>
+#include <dengine-utils/filesys.h>
 
 #include <dengine/input.h>
 #include <dengine/window.h>
@@ -14,6 +15,8 @@
 #include <dengine/camera.h>
 
 #include <dengine-gui/gui.h>
+
+#include <dengine-model/model.h>
 
 //void prt (Entity* ent)
 //{
@@ -73,13 +76,23 @@ int main(int argc, char *argv[])
 
     Shader* stdshdr = dengine_shader_new_shader_standard();
 
-    Material cube_mat;
-    dengine_material_setup(&cube_mat);
-    dengine_material_set_shader_color(stdshdr,&cube_mat);
+    Material cube_mat,duck_mat;
 
-    Primitive cube,plane;
+    dengine_material_setup(&cube_mat);
+    dengine_material_setup(&duck_mat);
+
+    dengine_material_set_shader_color(stdshdr,&cube_mat);
+    dengine_material_set_shader_color(stdshdr,&duck_mat);
+
+    Primitive cube,plane,duck;
     dengine_primitive_gen_cube(&cube,stdshdr);
     dengine_primitive_gen_plane(&plane,stdshdr);
+
+    const int prtbf_sz=2048;
+    char* prtbf=malloc(prtbf_sz);
+
+    snprintf(prtbf,prtbf_sz,"%s/models/duck.obj",dengineutils_filesys_get_assetsdir());
+    denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ,prtbf,&duck,stdshdr);
 
     DirLight dLight;
     memset(&dLight,0,sizeof (DirLight));
@@ -95,17 +108,30 @@ int main(int argc, char *argv[])
     dengine_lighting_apply_dirlight(&dLight,stdshdr);
     dengine_lighting_apply_pointlight(&pLight,stdshdr);
 
-    MeshComponent cube_mesh,plane_mesh;
+    MeshComponent cube_mesh,plane_mesh,duck_mesh;
 
     cube_mesh.material=&cube_mat;
     plane_mesh.material=&cube_mat;
+    duck_mesh.material=&duck_mat;
 
     plane_mesh.mesh=&plane;
     cube_mesh.mesh=&cube;
+    duck_mesh.mesh=&duck;
 
     ent1->mesh_component=&plane_mesh;
     ent6->mesh_component=&cube_mesh;
     ent7->mesh_component=&cube_mesh;
+    ent3->mesh_component=&duck_mesh;
+
+    Texture duck_tex;
+    memset(&duck_tex,0,sizeof (Texture));
+    duck_tex.auto_dataonload=1;
+    duck_tex.interface=DENGINE_TEXTURE_INTERFACE_8_BIT;
+
+    snprintf(prtbf,prtbf_sz,"%s/textures/2d/duck.png",dengineutils_filesys_get_assetsdir());
+    dengine_texture_load_file(prtbf,1,&duck_tex);
+
+    dengine_material_set_texture(&duck_tex,"diffuseTex",&duck_mat);
 
     /*
      *            SCENE -- 13(camera)
@@ -122,7 +148,7 @@ int main(int argc, char *argv[])
      */
 
 //    prt(ent1);
-    vec3 p={6.1f,7.18f,3.4f};
+    vec3 p={4.1f,5.18f,3.4f};
     memcpy(ent13->transform.position,p,sizeof (vec3));
 
     p[0]=1.3f,p[1]=2.9f,p[2]=1.0f;
@@ -133,6 +159,9 @@ int main(int argc, char *argv[])
 
     p[0]=5.0f,p[1]=5.0f,p[2]=5.0f;
     memcpy(ent1->transform.scale,p,sizeof (vec3));
+
+    p[0]=4.0f,p[1]=2.0f,p[2]=1.0f;
+    memcpy(ent3->transform.position,p,sizeof (vec3));
 
     Scene* scene = denginescene_new();
     denginescene_add_entity(scene, ent1);
@@ -175,8 +204,12 @@ int main(int argc, char *argv[])
     denginescene_destroy(scene);
 
     dengine_material_destroy(&cube_mat);
+    dengine_material_destroy(&duck_mat);
+
     dengine_shader_destroy(stdshdr);
     free(stdshdr);
+
+    free(prtbf);
 
     dengine_window_terminate();
 
