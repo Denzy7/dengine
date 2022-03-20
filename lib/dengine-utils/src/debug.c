@@ -65,12 +65,9 @@ void dengineutils_debug_trace_dump()
     FILE* f=fopen(DENGINE_DEBUG_TRACEFILE,"a");
     dengineutils_timer_update();
 
-    printf("\n");
     for (uint32_t i = DENGINE_DEBUG_TRACESIZE; i > 0; i--) {
         snprintf(fmt,DENGINE_DEBUG_TRACESTRLN,"%3u: %s %s",i-1,trace[i-1],i==traceptr?"<==":"");
-        printf("%s",fmt);
-        printf("\n");
-
+        dengineutils_logging_log("%s",fmt);
         if(f)
         {
             fprintf(f,"%s\n",fmt);
