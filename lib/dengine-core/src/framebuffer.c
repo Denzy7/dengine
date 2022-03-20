@@ -1,12 +1,15 @@
 #include "framebuffer.h"
 
 #include "dengine-utils/logging.h"
+#include "dengine-utils/debug.h"
 
 #include "loadgl.h"
 
 #include <string.h> //memset
 void dengine_framebuffer_gen(size_t count, Framebuffer* framebuffers)
 {
+    DENGINE_DEBUG_ENTER;
+
     for(size_t i = 0; i < count; i++)
     {
         memset(&framebuffers[i], 0, sizeof(Framebuffer));
@@ -16,6 +19,8 @@ void dengine_framebuffer_gen(size_t count, Framebuffer* framebuffers)
 
 void dengine_framebuffer_bind(uint32_t target, Framebuffer* framebuffer)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(framebuffer)
         glBindFramebuffer(target, framebuffer->framebuffer_id);
     else
@@ -26,6 +31,8 @@ void dengine_framebuffer_bind(uint32_t target, Framebuffer* framebuffer)
 
 void dengine_framebuffer_attach(FramebufferAttachmentType attachment, Texture* texture, Framebuffer* framebuffer)
 {
+    DENGINE_DEBUG_ENTER;
+
     //Guard against this dangerous call
     #ifdef DENGINE_GL_GLAD
     if(!glad_glFramebufferTexture)
@@ -59,6 +66,8 @@ void dengine_framebuffer_attach(FramebufferAttachmentType attachment, Texture* t
 
 void dengine_framebuffer_attach2D(FramebufferAttachmentType attachment, Texture* texture, Framebuffer* framebuffer)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(attachment == DENGINE_FRAMEBUFFER_COLOR){
         //on GL 3.0 / ES 2.0+
         glFramebufferTexture2D(GL_FRAMEBUFFER, attachment + framebuffer->n_color, GL_TEXTURE_2D, texture->texture_id, 0);

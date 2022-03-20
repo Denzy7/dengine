@@ -6,6 +6,7 @@
 #include <string.h> //strlen
 #include "logging.h"//log
 #include "dengine-utils/filesys.h"//assetdir
+#include "dengine-utils/debug.h"
 
 void dengine_shader_create(Shader* shader)
 {
@@ -14,6 +15,8 @@ void dengine_shader_create(Shader* shader)
 
 void dengine_shader_destroy(Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     glDeleteShader(shader->fragment_id); DENGINE_CHECKGL;
     glDeleteShader(shader->vertex_id); DENGINE_CHECKGL;
 
@@ -25,6 +28,8 @@ void dengine_shader_destroy(Shader* shader)
 
 int dengine_shader_compile_shader(const uint32_t shader, const char* code)
 {
+    DENGINE_DEBUG_ENTER;
+
     glShaderSource(shader, 1, &code, NULL); DENGINE_CHECKGL;
     glCompileShader(shader); DENGINE_CHECKGL;
     int ok;
@@ -94,6 +99,8 @@ int dengine_shader_compile_shader(const uint32_t shader, const char* code)
 
 int dengine_shader_setup(Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     //Dont compile an unsupported version
     int maj = 0,min = 0, ver = 0, shadver = 0;
     const char* glslv = (char *) glGetString(GL_SHADING_LANGUAGE_VERSION);
@@ -145,6 +152,8 @@ int dengine_shader_setup(Shader* shader)
 
 int dengine_shader_link(Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     glLinkProgram(shader->program_id); DENGINE_CHECKGL;
 
     int ok;
@@ -216,6 +225,8 @@ void dengine_shader_set_float(const Shader* shader, const char* name, float valu
 
 Shader* dengine_shader_new_shader_standard()
 {
+    DENGINE_DEBUG_ENTER;
+
     Shader* stdshdr = malloc(sizeof(Shader));
     memset(stdshdr,0,sizeof(Shader));
 
@@ -255,6 +266,8 @@ Shader* dengine_shader_new_shader_standard()
 
 Shader* dengine_shader_new_shader_default()
 {
+    DENGINE_DEBUG_ENTER;
+
     Shader* dftshdr = malloc(sizeof(Shader));
     memset(dftshdr,0,sizeof(Shader));
 

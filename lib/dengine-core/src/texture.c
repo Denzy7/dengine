@@ -10,11 +10,14 @@
 #include <stb_image.h> //stbi_load, stbi_error
 
 #include "dengine_config.h" //DENGINE_TEX_WHITESZ
+#include "dengine-utils/debug.h"
 
 void _dengine_texture_autoload(Texture* texture);
 
 void dengine_texture_gen(size_t count, Texture* textures)
 {
+    DENGINE_DEBUG_ENTER;
+
     for(size_t i = 0; i < count; i++)
         glGenTextures(1, &textures[i].texture_id); DENGINE_CHECKGL;
 }
@@ -30,6 +33,8 @@ void dengine_texture_bind(uint32_t target, Texture* texture)
 
 void dengine_texture_data(uint32_t target, Texture* texture)
 {
+    DENGINE_DEBUG_ENTER;
+
     glTexImage2D(target, 0, texture->internal_format, texture->width, texture->height, 0,
                  texture->format, texture->type, texture->data);
     DENGINE_CHECKGL;
@@ -37,6 +42,8 @@ void dengine_texture_data(uint32_t target, Texture* texture)
 
 int dengine_texture_load_mem(void* mem, size_t size, int flip, Texture* texture)
 {
+    DENGINE_DEBUG_ENTER;
+
     stbi_set_flip_vertically_on_load(flip);
 
     if (texture->interface == DENGINE_TEXTURE_INTERFACE_8_BIT)
@@ -70,6 +77,8 @@ int dengine_texture_load_mem(void* mem, size_t size, int flip, Texture* texture)
 
 int dengine_texture_load_file(const char* file, int flip, Texture* texture)
 {
+    DENGINE_DEBUG_ENTER;
+
     stbi_set_flip_vertically_on_load(flip);
 
     FILE* fp = fopen(file, "rb");
@@ -110,6 +119,8 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture)
 
 void dengine_texture_set_params(uint32_t target, Texture* texture)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(texture->filter_mag)
         glTexParameteri(target, GL_TEXTURE_MAG_FILTER, texture->filter_mag); DENGINE_CHECKGL;
 
@@ -129,18 +140,24 @@ void dengine_texture_set_params(uint32_t target, Texture* texture)
 
 void dengine_texture_free_data(Texture* texture)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(texture->data)
         stbi_image_free(texture->data);
 }
 
 void dengine_texture_destroy(size_t count, Texture* textures)
 {
+    DENGINE_DEBUG_ENTER;
+
     for(size_t i = 0; i < count; i++)
         glDeleteTextures(1, &textures[i].texture_id); DENGINE_CHECKGL;
 }
 
 Texture* dengine_texture_new_white(const int width, const int height)
 {
+    DENGINE_DEBUG_ENTER;
+
     Texture* white = malloc(sizeof (Texture));
     memset(white, 0, sizeof (Texture));
     white->filter_min = GL_NEAREST;
@@ -164,6 +181,8 @@ Texture* dengine_texture_new_white(const int width, const int height)
 
 void dengine_texture_mipmap(uint32_t target, Texture* texture)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(!glad_glGenerateMipmap)
     {
         dengineutils_logging_log("WARNING::TEXTURE::glGenerateMipmap not loaded. No mipmap generated");
@@ -177,6 +196,8 @@ void dengine_texture_mipmap(uint32_t target, Texture* texture)
 
 void _dengine_texture_autoload(Texture* texture)
 {
+    DENGINE_DEBUG_ENTER;
+
     texture->format=texture->channels==3?GL_RGB:GL_RGBA;
     texture->internal_format=texture->format;
     texture->type=GL_UNSIGNED_BYTE;

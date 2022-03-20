@@ -4,6 +4,8 @@
 #include "dengine/loadgl.h"
 #include "dengine/window.h"
 
+#include "dengine-utils/debug.h"
+
 #include <cglm/cglm.h> //glm_proj
 #include <string.h>    //memcpy
 
@@ -28,6 +30,8 @@ static const char* possible_campos[]=
 
 void dengine_camera_setup(Camera* camera)
 {
+    DENGINE_DEBUG_ENTER;
+
     memset(camera, 0, sizeof (Camera));
     camera->fov = 60.0f;
     camera->near = 0.01f;
@@ -47,6 +51,8 @@ void dengine_camera_setup(Camera* camera)
 
 void dengine_camera_project_perspective(float aspect, Camera* camera)
 {
+    DENGINE_DEBUG_ENTER;
+
     mat4 proj;
     glm_perspective(glm_rad(camera->fov), aspect, camera->near, camera->far, proj);
     memcpy(camera->projection_mat, proj, sizeof(camera->projection_mat));
@@ -54,6 +60,8 @@ void dengine_camera_project_perspective(float aspect, Camera* camera)
 
 void dengine_camera_lookat(float* target, Camera* camera)
 {
+    DENGINE_DEBUG_ENTER;
+
     mat4 view;
     mat3 uview;
     vec3 up = {0.0f, 1.0f, 0.0f};
@@ -71,6 +79,8 @@ void dengine_camera_lookat(float* target, Camera* camera)
 
 void dengine_camera_apply(Shader* shader, Camera* camera)
 {
+    DENGINE_DEBUG_ENTER;
+
     for (size_t i = 0; i < DENGINE_ARY_SZ(possible_projmat); i++) {
         dengine_shader_set_mat4(shader, possible_projmat[i], camera->projection_mat);
     }
@@ -86,6 +96,8 @@ void dengine_camera_apply(Shader* shader, Camera* camera)
 
 void dengine_camera_set_rendermode(CameraRenderMode mode, Camera* camera)
 {
+    DENGINE_DEBUG_ENTER;
+
     if (mode == DENGINE_CAMERA_RENDER_FOWARD) {
         Texture rgba_depth[2];
         memset(&rgba_depth,0,sizeof (rgba_depth));
@@ -128,6 +140,8 @@ void dengine_camera_set_rendermode(CameraRenderMode mode, Camera* camera)
 
 void dengine_camera_use(Camera* camera)
 {
+    DENGINE_DEBUG_ENTER;
+
     if (camera && camera->framebuffer.color->texture_id == 0)
         return;
 
