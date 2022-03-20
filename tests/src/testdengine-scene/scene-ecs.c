@@ -177,6 +177,10 @@ int main(int argc, char *argv[])
     p[0]=10.0f,p[1]=10.0f,p[2]=10.0f;
     memcpy(ent14->transform.scale,p,sizeof (vec3));
 
+    ent3->transform.rotation[1]=45.f;
+
+    ent6->transform.rotation[1]=5.f;
+
     Scene* scene = denginescene_new();
     denginescene_add_entity(scene, ent1);
     denginescene_add_entity(scene, ent10);

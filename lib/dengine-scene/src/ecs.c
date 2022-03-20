@@ -54,13 +54,23 @@ void denginescene_ecs_parent(struct _Entity* parent, struct _Entity* child)
     parent->children[parent->children_count] = child;
     parent->children_count++;
 
-    dengineutils_logging_log("parent %u (%p) to %u", child->entity_id, child, parent->entity_id);
+    //dengineutils_logging_log("parent %u (%p) to %u", child->entity_id, child, parent->entity_id);
 }
 
 void denginescene_ecs_get_model(Entity* entity,mat4 mat4x4)
 {
     glm_mat4_identity(mat4x4);
     glm_translate(mat4x4,entity->transform.position);
-    //rotate here
+
+    versor x,y,z;
+
+    glm_quat(x,entity->transform.rotation[0],1.0f,0.0f,0.0f);
+    glm_quat(y,entity->transform.rotation[1],0.0f,1.0f,0.0f);
+    glm_quat(z,entity->transform.rotation[2],0.0f,0.0f,1.0f);
+
+    glm_quat_rotate(mat4x4,x,mat4x4);
+    glm_quat_rotate(mat4x4,y,mat4x4);
+    glm_quat_rotate(mat4x4,z,mat4x4);
+
     glm_scale(mat4x4,entity->transform.scale);
 }
