@@ -188,6 +188,8 @@ int main(int argc, char *argv[])
 
     glEnable(GL_DEPTH_TEST);
 
+    float viewportcol[4]={.0,.0,.0,1.};
+
     while (dengine_window_isrunning()) {
         dengine_input_pollevents();
 
@@ -208,7 +210,7 @@ int main(int argc, char *argv[])
         glClearColor(0.1,0.1,0.1,1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        denginegui_panel(0,0,854,480,&cam.framebuffer.color[0],NULL,NULL);
+        denginegui_panel(0,0,854,480,&cam.framebuffer.color[0],NULL,viewportcol);
         denginegui_text(10,10,fpsstr,NULL);
 
         dengine_window_swapbuffers();
