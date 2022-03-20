@@ -252,3 +252,42 @@ Shader* dengine_shader_new_shader_standard()
 
     return stdshdr;
 }
+
+Shader* dengine_shader_new_shader_default()
+{
+    Shader* dftshdr = malloc(sizeof(Shader));
+    memset(dftshdr,0,sizeof(Shader));
+
+    const int prtbuf_sz=2048;
+    char* prtbuf=malloc(prtbuf_sz);
+
+    static const char *dftshdrfile[2]=
+    {
+        "shaders/default.vert.glsl",
+        "shaders/default.frag.glsl"
+    };
+    char *dftshdrsrc[2];
+
+    File2Mem f2m;
+    for (int i = 0; i < 2; i++) {
+        snprintf(prtbuf, prtbuf_sz, "%s/%s", dengineutils_filesys_get_assetsdir(), dftshdrfile[i]);
+        f2m.file = prtbuf;
+        dengineutils_filesys_file2mem_load(&f2m);
+        dftshdrsrc[i] = strdup(f2m.mem);
+        dengineutils_filesys_file2mem_free(&f2m);
+    }
+
+    dftshdr->vertex_code = dftshdrsrc[0];
+    dftshdr->fragment_code = dftshdrsrc[1];
+
+    dengine_shader_create(dftshdr);
+    dengine_shader_setup(dftshdr);
+
+    for (int i = 0; i < 2; i++) {
+        free(dftshdrsrc[i]);
+    }
+
+    free(prtbuf);
+
+    return dftshdr;
+}

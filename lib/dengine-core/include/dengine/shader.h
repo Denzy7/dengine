@@ -58,6 +58,8 @@ void dengine_shader_set_int(const Shader* shader, const char* name, int value);
 
 Shader* dengine_shader_new_shader_standard();
 
+Shader* dengine_shader_new_shader_default();
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus
