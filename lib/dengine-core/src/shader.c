@@ -172,6 +172,9 @@ int dengine_shader_link(Shader* shader)
         dengineutils_logging_log("ERROR::SHADER::LINK::%s", info_log);
 
         free(info_log);
+    }else {
+        int ctxver=GLVersion.major*10+GLVersion.minor;
+        dengine_shader_set_int(shader,"ctxver",ctxver);
     }
 
     return ok;
