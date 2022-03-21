@@ -158,11 +158,11 @@ Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* mesh
             memset(cmp_buf, 0, cmp_buf_sz);
 
             //FACES. Assumes they are triangulated
-            size_t x1, x2, x3, y1, y2, y3, z1, z2, z3;
+            uint32_t x1, x2, x3, y1, y2, y3, z1, z2, z3;
             strncpy(cmp_buf, ln_buf, strlen(face_delim));
             if(!strcmp(cmp_buf, face_delim))
             {
-                sscanf(ln_buf, "f %zu/%zu/%zu %zu/%zu/%zu %zu/%zu/%zu",
+                sscanf(ln_buf, "f %u/%u/%u %u/%u/%u %u/%u/%u",
                        &x1, &y1, &z1, &x2, &y2, &z2, &x3, &y3, &z3);
 
 //                printf("face : %hu/%hu/%hu %hu/%hu/%hu %hu/%hu/%hu\n",
