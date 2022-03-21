@@ -75,7 +75,8 @@ add_subdirectory(lib/dengine-scene "dengine-scene-build")
 
 add_library(dengine
     lib/dengine-core/include/dengine/dengine.h
-    lib/dengine-core/src/dengine.c)
+    lib/dengine-core/src/dengine.c
+    lib/dengine-core/src/dengine.rc)
 target_link_libraries(dengine
     dengine-core
     dengine-utils
