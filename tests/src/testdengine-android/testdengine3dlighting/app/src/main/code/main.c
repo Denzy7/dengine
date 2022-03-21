@@ -252,7 +252,6 @@ static void init(struct android_app* app)
             uint32_t fmt = tex_plane->channels == 3 ? GL_RGB : GL_RGBA;
             tex_plane->format = fmt;
             tex_plane->internal_format = fmt;
-            tex_plane->mipmap = 1;
             tex_plane->type = GL_UNSIGNED_BYTE;
 
             dengine_texture_data(GL_TEXTURE_2D, tex_plane);
@@ -275,7 +274,6 @@ static void init(struct android_app* app)
             fmt = tex_cube->channels == 3 ? GL_RGB : GL_RGBA;
             tex_cube->format = fmt;
             tex_cube->internal_format = fmt;
-            tex_cube->mipmap = 1;
             tex_cube->type = GL_UNSIGNED_BYTE;
 
             dengine_texture_data(GL_TEXTURE_2D, tex_cube);
@@ -321,11 +319,11 @@ static void init(struct android_app* app)
         dengine_material_set_texture(&dLight.shadow.shadow_map.depth, "dLightShadow", &plane_mat);
         dengine_material_set_texture(&dLight.shadow.shadow_map.depth, "dLightShadow", &cube_mat);
 
-        dengine_material_set_texture( &pLight.shadow.shadow_map.depth, "pLightsShadow[0]", &plane_mat);
-        dengine_material_set_texture( &pLight.shadow.shadow_map.depth, "pLightsShadow[0]", &cube_mat);
+        dengine_material_set_texture( &pLight.shadow.shadow_map.depth, "pLightsShadow0", &plane_mat);
+        dengine_material_set_texture( &pLight.shadow.shadow_map.depth, "pLightsShadow0", &cube_mat);
 
-        dengine_material_set_texture( &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow[0]", &cube_mat);
-        dengine_material_set_texture( &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow[0]", &plane_mat);
+        dengine_material_set_texture( &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow0", &cube_mat);
+        dengine_material_set_texture( &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow0", &plane_mat);
 
         glEnable(GL_DEPTH_TEST);
 
