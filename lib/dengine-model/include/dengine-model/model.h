@@ -13,7 +13,7 @@ typedef enum DengineModelFormat
 extern "C" {
 #endif
 
-int denginemodel_load_file(DengineModelFormat format, const char* file, Primitive* primitive, Shader* shader);
+Primitive* denginemodel_load_file(DengineModelFormat format, const char* file, size_t* meshes , Shader* shader);
 
 #ifdef __cplusplus
 }
