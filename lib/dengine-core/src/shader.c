@@ -226,84 +226,59 @@ void dengine_shader_set_float(const Shader* shader, const char* name, float valu
     glUniform1f(location, value); DENGINE_CHECKGL;
 }
 
-Shader* dengine_shader_new_shader_standard()
+Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
 {
     DENGINE_DEBUG_ENTER;
 
     Shader* stdshdr = malloc(sizeof(Shader));
     memset(stdshdr,0,sizeof(Shader));
 
+    dengine_shader_create(stdshdr);
+
     const int prtbuf_sz=2048;
     char* prtbuf=malloc(prtbuf_sz);
 
-    static const char *stdshdrfile[2]=
+    static const char *stdshaderssrcfiles[][3]=
     {
-        "shaders/standard.vert.glsl",
-        "shaders/standard.frag.glsl"
+        {"standard.vert.glsl", "standard.frag.glsl"},
+        {"default.vert.glsl", "default.frag.glsl"},
+        {"shadow2d.vert.glsl", "shadow2d.frag.glsl"},
+        {"shadow3d.vert.glsl", "shadow3d.frag.glsl", "shadow3d.geom.glsl"},
     };
-    char *stdshdrsrc[2];
+
+    char *stdshdrsrc[3] =
+    {
+      NULL, NULL, NULL //Is this necessary?
+    };
 
     File2Mem f2m;
-    for (int i = 0; i < 2; i++) {
-        snprintf(prtbuf, prtbuf_sz, "%s/%s", dengineutils_filesys_get_assetsdir(), stdshdrfile[i]);
-        f2m.file = prtbuf;
-        dengineutils_filesys_file2mem_load(&f2m);
-        stdshdrsrc[i] = strdup(f2m.mem);
-        dengineutils_filesys_file2mem_free(&f2m);
+    for (int i = 0; i < 3; i++) {
+        const char* stdshdrsrcfile = stdshaderssrcfiles[stdshader][i];
+        if(stdshdrsrcfile)
+        {
+            snprintf(prtbuf, prtbuf_sz, "%s/shaders/%s", dengineutils_filesys_get_assetsdir(), stdshdrsrcfile);
+            f2m.file = prtbuf;
+            dengineutils_filesys_file2mem_load(&f2m);
+            stdshdrsrc[i] = strdup(f2m.mem);
+            dengineutils_filesys_file2mem_free(&f2m);
+        }
     }
 
     stdshdr->vertex_code = stdshdrsrc[0];
     stdshdr->fragment_code = stdshdrsrc[1];
+    stdshdr->geometry_code = stdshdrsrc[2];
 
-    dengine_shader_create(stdshdr);
     dengine_shader_setup(stdshdr);
 
     for (int i = 0; i < 2; i++) {
-        free(stdshdrsrc[i]);
+        char* stdshdrsrcdup = stdshdrsrc[i];
+        if(stdshdrsrcdup)
+        {
+            free(stdshdrsrcdup);
+        }
     }
 
     free(prtbuf);
 
     return stdshdr;
-}
-
-Shader* dengine_shader_new_shader_default()
-{
-    DENGINE_DEBUG_ENTER;
-
-    Shader* dftshdr = malloc(sizeof(Shader));
-    memset(dftshdr,0,sizeof(Shader));
-
-    const int prtbuf_sz=2048;
-    char* prtbuf=malloc(prtbuf_sz);
-
-    static const char *dftshdrfile[2]=
-    {
-        "shaders/default.vert.glsl",
-        "shaders/default.frag.glsl"
-    };
-    char *dftshdrsrc[2];
-
-    File2Mem f2m;
-    for (int i = 0; i < 2; i++) {
-        snprintf(prtbuf, prtbuf_sz, "%s/%s", dengineutils_filesys_get_assetsdir(), dftshdrfile[i]);
-        f2m.file = prtbuf;
-        dengineutils_filesys_file2mem_load(&f2m);
-        dftshdrsrc[i] = strdup(f2m.mem);
-        dengineutils_filesys_file2mem_free(&f2m);
-    }
-
-    dftshdr->vertex_code = dftshdrsrc[0];
-    dftshdr->fragment_code = dftshdrsrc[1];
-
-    dengine_shader_create(dftshdr);
-    dengine_shader_setup(dftshdr);
-
-    for (int i = 0; i < 2; i++) {
-        free(dftshdrsrc[i]);
-    }
-
-    free(prtbuf);
-
-    return dftshdr;
 }

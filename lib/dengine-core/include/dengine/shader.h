@@ -36,6 +36,17 @@ typedef struct
     int linking_succeeded;
 } Shader;
 
+/*! \struct StandardShader
+ *  Built in standard shaders
+ */
+typedef enum
+{
+    DENGINE_SHADER_STANDARD, /*!< 3D standard lit shader that just works */
+    DENGINE_SHADER_DEFAULT, /*!< 3D basic shader with a single color uniform */
+    DENGINE_SHADER_SHADOW2D, /*!< 3D shader for 2D shadow mapping */
+    DENGINE_SHADER_SHADOW3D /*!< 3D shader for 3D shadow mapping. GL/ES 3.2+ only */
+}StandardShader;
+
 void dengine_shader_create(Shader* shader);
 
 void dengine_shader_destroy(Shader* shader);
@@ -56,9 +67,7 @@ void dengine_shader_set_float(const Shader* shader, const char* name, float valu
 
 void dengine_shader_set_int(const Shader* shader, const char* name, int value);
 
-Shader* dengine_shader_new_shader_standard();
-
-Shader* dengine_shader_new_shader_default();
+Shader* dengine_shader_new_shader_standard(StandardShader stdshader);
 
 #ifdef __cplusplus
 }

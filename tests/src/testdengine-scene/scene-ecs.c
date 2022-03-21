@@ -76,8 +76,8 @@ int main(int argc, char *argv[])
     camc.camera=&cam;
     ent13->camera_component=&camc;
 
-    Shader* stdshdr = dengine_shader_new_shader_standard();
-    Shader* dftshdr = dengine_shader_new_shader_default();
+    Shader* stdshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_STANDARD);
+    Shader* dftshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_DEFAULT);
 
     Material cube_mat,duck_mat,dft_mat;
 

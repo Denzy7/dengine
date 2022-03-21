@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
     dengineutils_rng_set_seedwithtime();
 
-    Shader* stdshader=dengine_shader_new_shader_standard();
+    Shader* stdshader=dengine_shader_new_shader_standard(DENGINE_SHADER_STANDARD);
 
     Camera camera;
     dengine_camera_setup(&camera);
