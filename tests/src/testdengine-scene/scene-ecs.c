@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     dengine_material_set_shader_color(stdshdr,&duck_mat);
     dengine_material_set_shader_color(dftshdr,&dft_mat);
 
-    Primitive cube,plane,duck,grid;
+    Primitive cube,plane,grid;
     dengine_primitive_gen_cube(&cube,stdshdr);
     dengine_primitive_gen_plane(&plane,stdshdr);
     dengine_primitive_gen_grid(10,&grid,dftshdr);
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
     char* prtbf=malloc(prtbf_sz);
 
     snprintf(prtbf,prtbf_sz,"%s/models/duck.obj",dengineutils_filesys_get_assetsdir());
-    denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ,prtbf,&duck,stdshdr);
+    Primitive* duck = denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ,prtbf,NULL,stdshdr);
 
     DirLight dLight;
     memset(&dLight,0,sizeof (DirLight));
@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
 
     plane_mesh.mesh=&plane;
     cube_mesh.mesh=&cube;
-    duck_mesh.mesh=&duck;
+    duck_mesh.mesh=duck;
     grid_mesh.mesh=&grid;
 
     ent1->mesh_component=&plane_mesh;
@@ -235,6 +235,7 @@ int main(int argc, char *argv[])
     free(dftshdr);
 
     free(prtbf);
+    free(duck);
 
     dengine_window_terminate();
 

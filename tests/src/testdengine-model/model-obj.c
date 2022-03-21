@@ -61,14 +61,14 @@ int main(int argc, char** argv)
     dengine_shader_create(&shader);
     dengine_shader_setup(&shader);
 
-//    char* file = dengineutils_os_dialog_fileopen("Select a wavefront .obj file");
-//    if (!file) {
-//        dengineutils_logging_log("ERROR::No file selected!");
-//        return 1;
-//    }
+    char* file = dengineutils_os_dialog_fileopen("Select a wavefront .obj file");
+    if (!file) {
+        dengineutils_logging_log("ERROR::No file selected!");
+        return 1;
+    }
     size_t meshes;
-    Primitive* loaded = denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ, "/home/denzy/DenGineGameEngine/assets/models/complex-icosphere.obj", &meshes, &shader);
-//    free(file);
+    Primitive* loaded = denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ, file, &meshes, &shader);
+    free(file);
 
     Camera camera;
     camera.near = 0.01f;
@@ -105,6 +105,8 @@ int main(int argc, char** argv)
         dengine_window_swapbuffers();
         dengine_window_glfw_pollevents();
     }
+
+    free(loaded);
 
     dengine_window_terminate();
     return 0;
