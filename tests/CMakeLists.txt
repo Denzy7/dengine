@@ -264,6 +264,13 @@ target_link_libraries(testdengine-scene-ecs
 set_property(TARGET testdengine-scene-ecs PROPERTY C_STANDARD 99)
 
 
+# render some text in < 10 lines
+add_executable(testdengine-dengine-verybasic
+        src/testdengine-dengine/dengine-verybasic.c)
+target_link_libraries(testdengine-dengine-verybasic
+        dengine)
+set_property(TARGET testdengine-dengine-verybasic PROPERTY C_STANDARD 99)
+
 endif()
 
 
