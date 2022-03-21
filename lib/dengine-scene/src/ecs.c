@@ -10,16 +10,53 @@ uint32_t entity_count = 0;
 
 void _denginescene_ecs_destroy_entity_children(Entity* root);
 
-Entity* denginescene_ecs_new_entity()
+void _denginescene_ecs_new_entity_setup(Entity* ent);
+
+void _denginescene_ecs_new_entity_setup(Entity* ent)
 {
     entity_count++;
-    Entity* ent = malloc(sizeof (Entity));
-    memset(ent, 0, sizeof (Entity));
     ent->entity_id = entity_count;
     //dengineutils_logging_log("new ent : %u, %p", entity_count, ent);
     ent->active = 1;
     ent->transform.scale[0]=1.0f,ent->transform.scale[1]=1.0f,ent->transform.scale[2]=1.0f;
     ent->children = malloc(DENGINE_ECS_MAXCHILDREN * sizeof (Entity*));
+}
+
+Entity* denginescene_ecs_new_entity()
+{
+    Entity* ent = malloc(sizeof(Entity));
+
+    if(!ent)
+        return NULL;
+
+    memset(ent, 0, sizeof (Entity));
+
+    _denginescene_ecs_new_entity_setup(ent);
+
+    return ent;
+}
+
+Entity** denginescene_ecs_new_entity_n(const size_t n)
+{
+    Entity** ent = malloc(n * sizeof(Entity*));
+
+    if(!ent)
+        return NULL;
+
+    for(size_t i = 0; i < n; i++)
+    {
+        ent[i] = malloc(sizeof(Entity));
+        if(!ent[i])
+        {
+            free(ent);
+            dengineutils_logging_log("ERROR::Failed to alloc n=%zu entities", n);
+            return NULL;
+        }
+
+        memset(ent[i], 0, sizeof (Entity));
+        _denginescene_ecs_new_entity_setup(ent[i]);
+    }
+
     return ent;
 }
 
