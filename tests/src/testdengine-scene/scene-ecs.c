@@ -100,6 +100,51 @@ int main(int argc, char *argv[])
     snprintf(prtbf,prtbf_sz,"%s/models/duck.obj",dengineutils_filesys_get_assetsdir());
     Primitive* duck = denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ,prtbf,NULL,stdshdr);
 
+    //load separated planes
+    snprintf(prtbf,prtbf_sz,"%s/models/sperated-planes.obj",dengineutils_filesys_get_assetsdir());
+    size_t n_planes = 0;
+    Primitive* sep_planes = denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ,prtbf,&n_planes,stdshdr);
+
+    MeshComponent* sep_planes_mesh = NULL;
+    Entity** child_sep = NULL;
+    Entity* ent15 = denginescene_ecs_new_entity();
+
+    Material sep_planes_mat;
+    dengine_material_setup(&sep_planes_mat);
+    dengine_material_set_shader_color(stdshdr,&sep_planes_mat);
+
+
+    Texture sep_plane_tex;
+    memset(&sep_plane_tex,0,sizeof (Texture));
+    sep_plane_tex.auto_dataonload=1;
+    sep_plane_tex.interface=DENGINE_TEXTURE_INTERFACE_8_BIT;
+
+    snprintf(prtbf,prtbf_sz,"%s/textures/2d/cube_diff.png",dengineutils_filesys_get_assetsdir());
+    dengine_texture_load_file(prtbf,1,&sep_plane_tex);
+
+    dengine_material_set_texture(&sep_plane_tex,"diffuseTex",&sep_planes_mat);
+
+    if(n_planes)
+    {
+        sep_planes_mesh = calloc(n_planes, sizeof(MeshComponent));
+        child_sep = denginescene_ecs_new_entity_n(n_planes);
+        for(size_t i = 0; i < n_planes; i++)
+        {
+            if(child_sep)
+            {
+                child_sep[i]->transform.position[1] = (float)i / (float)n_planes;
+                child_sep[i]->transform.rotation[1] = i * 10.0f;
+
+                sep_planes_mesh[i].material = &sep_planes_mat;
+                sep_planes_mesh[i].mesh = &sep_planes[i];
+
+                child_sep[i]->mesh_component = &sep_planes_mesh[i];
+
+                denginescene_ecs_parent(ent15, child_sep[i]);
+            }
+        }
+    }
+
     DirLight dLight;
     memset(&dLight,0,sizeof (DirLight));
     dengine_lighting_setup_dirlight(&dLight);
@@ -177,15 +222,20 @@ int main(int argc, char *argv[])
     p[0]=10.0f,p[1]=10.0f,p[2]=10.0f;
     memcpy(ent14->transform.scale,p,sizeof (vec3));
 
+    p[0]=3.0f,p[1]=3.0f,p[2]=3.0f;
+    memcpy(ent15->transform.position,p,sizeof (vec3));
+
     ent3->transform.rotation[1]=45.f;
 
     ent6->transform.rotation[1]=5.f;
 
     Scene* scene = denginescene_new();
+
     denginescene_add_entity(scene, ent1);
     denginescene_add_entity(scene, ent10);
     denginescene_add_entity(scene, ent13);
     denginescene_add_entity(scene, ent14);
+    denginescene_add_entity(scene, ent15);
 
     denginegui_init();
     static float fontsz=18.0f;
@@ -227,6 +277,7 @@ int main(int argc, char *argv[])
     dengine_material_destroy(&cube_mat);
     dengine_material_destroy(&duck_mat);
     dengine_material_destroy(&dft_mat);
+    dengine_material_destroy(&sep_planes_mat);
 
     dengine_shader_destroy(stdshdr);
     dengine_shader_destroy(dftshdr);
@@ -236,6 +287,15 @@ int main(int argc, char *argv[])
 
     free(prtbf);
     free(duck);
+
+    if(sep_planes_mesh)
+        free(sep_planes_mesh);
+
+    if(child_sep)
+        free(child_sep);
+
+    if(sep_planes)
+        free(sep_planes);
 
     dengine_window_terminate();
 
