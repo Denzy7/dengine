@@ -24,7 +24,7 @@ if(NOT ANDROID)
             set(DENGINE_HAS_FONTCONFIG 1)
         else()
             #most if not all distros have fontconfig
-            message(FATAL_ERROR ">>> Could not find fontconfig. Default font support will not work! Consider installing it")
+            message(WARNING ">>> Could not find fontconfig. Default font support will not work! Consider installing it")
         endif()
     else()
         message(WARNING ">>> Could not find pkg-config. Will compile From sources")
@@ -57,6 +57,13 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-scene/include/dengine-scene
         )
 
+option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
+option(DENGINE_MERGE_LIBS "Compile all libs as static and merge as one shared lib (dengine.so/dll)" OFF)
+
+if(DENGINE_MERGE_LIBS)
+    set(BUILD_SHARED_LIBS ON)
+endif()
+
 configure_file(dengine_config.h.in dengine_config.h)
 
 add_subdirectory(deps/glad "glad-build")
@@ -65,6 +72,24 @@ add_subdirectory(lib/dengine-core "dengine-core-build")
 add_subdirectory(lib/dengine-gui "dengine-gui-build")
 add_subdirectory(lib/dengine-model "dengine-model-build")
 add_subdirectory(lib/dengine-scene "dengine-scene-build")
+
+add_library(dengine
+    lib/dengine-core/include/dengine/dengine.h
+    lib/dengine-core/src/dengine.c)
+target_link_libraries(dengine
+    dengine-core
+    dengine-utils
+    dengine-gui
+    dengine-model)
+set_property(TARGET dengine PROPERTY C_STANDARD 99)
+#remove lib prefix
+if(WIN32)
+    set_target_properties(dengine PROPERTIES PREFIX "")
+endif()
+set_target_properties(dengine PROPERTIES
+                      VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
+                      SOVERSION ${dengine_VERSION_MAJOR}
+                      POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(tests "tests-build")
 

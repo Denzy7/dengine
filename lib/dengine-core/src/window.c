@@ -18,7 +18,7 @@ struct ANativeWindow* _android_current;
 #endif
 
 int isrunning = 0;
-int glinit;
+int glinit = 0;
 #if defined (DENGINE_WIN_GLFW)
 GLFWwindow* glfw_current = NULL;
 #endif // defined
@@ -205,18 +205,21 @@ void dengine_window_swapbuffers()
 
 int dengine_window_isrunning()
 {
+    #ifndef DENGINE_GL_NONE
+    if(glinit)
+        glClear(GL_COLOR_BUFFER_BIT);
+    #endif // DENGINE_GL_NONE
     return isrunning;
 }
 
 int dengine_window_loadgl()
 {
 #if defined(DENGINE_WIN_GLFW)
-    return dengine_window_glfw_context_gladloadgl();
+    glinit = dengine_window_glfw_context_gladloadgl();
 #elif defined(DENGINE_WIN_EGL)
-    return dengine_window_android_egl_context_gladloadgl();
-#else
-    return 0;
+    glinit = dengine_window_android_egl_context_gladloadgl();
 #endif
+    return glinit;
 }
 
 void dengine_window_makecurrent(Window* window)

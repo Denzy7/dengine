@@ -23,7 +23,15 @@ include/dengine-utils/strpatch.h
 include/dengine-utils/debug.h
 )
 
-add_library(dengine-utils ${dengine-utils-hdr} ${dengine-utils-src})
+if(BUILD_SHARED_LIBS AND DENGINE_MERGE_LIBS)
+    add_library(dengine-utils STATIC ${dengine-utils-hdr} ${dengine-utils-src})
+    set_target_properties(dengine-utils PROPERTIES
+                          POSITION_INDEPENDENT_CODE ON)
+else()
+    add_library(dengine-utils ${dengine-utils-hdr} ${dengine-utils-src})
+endif()
+
+
 
 if(GTK3_LIBRARIES AND UNIX)
     target_link_libraries(dengine-utils ${GTK3_LIBRARIES})
