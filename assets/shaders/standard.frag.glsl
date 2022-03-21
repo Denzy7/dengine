@@ -62,11 +62,8 @@ uniform PointLight pLights[MAX_POINT_LIGHT];
 uniform SpotLight sLights[MAX_SPOT_LIGHT];
 
 uniform sampler2D dLightShadow;
-uniform samplerCube pLightsShadow[MAX_POINT_LIGHT];
-uniform samplerCube sLightsShadow[MAX_SPOT_LIGHT];
-
-uniform samplerCube shadowCompat;
-uniform int ctxver;
+uniform samplerCube pLightsShadow0;
+uniform samplerCube sLightsShadow0;
 
 uniform sampler2D diffuseTex;
 uniform sampler2D specularTex;
@@ -105,15 +102,8 @@ void main()
         vec3 pLightInfl = vec3(0.0);
         vec3 sLightInfl = vec3(0.0);
 
-        if(ctxver>=32)
-        {
-            pLightInfl = pointLightAdd(pLights[i], pLightsShadow[0]);
-            sLightInfl = spotLightAdd(sLights[i], sLightsShadow[0]);
-        }else
-        {
-            pLightInfl = pointLightAdd(pLights[i], shadowCompat);
-            sLightInfl = spotLightAdd(sLights[i], shadowCompat);
-        }
+        pLightInfl = pointLightAdd(pLights[i], pLightsShadow0);
+        sLightInfl = spotLightAdd(sLights[i], sLightsShadow0);
 
         if(length(pLightInfl) > 0.0)
             FragColor+=pLightInfl;

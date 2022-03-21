@@ -344,11 +344,11 @@ int main(int argc, char** argv)
     dengine_material_set_texture(&dLight.shadow.shadow_map.depth, "dLightShadow", &plane_mat);
     dengine_material_set_texture(&dLight.shadow.shadow_map.depth, "dLightShadow", &cube_mat);
 
-    dengine_material_set_texture( &pLight.shadow.shadow_map.depth, "pLightsShadow[0]", &plane_mat);
-    dengine_material_set_texture( &pLight.shadow.shadow_map.depth, "pLightsShadow[0]", &cube_mat);
+    dengine_material_set_texture( &pLight.shadow.shadow_map.depth, "pLightsShadow0", &plane_mat);
+    dengine_material_set_texture( &pLight.shadow.shadow_map.depth, "pLightsShadow0", &cube_mat);
 
-    dengine_material_set_texture( &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow[0]", &cube_mat);
-    dengine_material_set_texture( &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow[0]", &plane_mat);
+    dengine_material_set_texture( &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow0", &cube_mat);
+    dengine_material_set_texture( &sLight.pointLight.shadow.shadow_map.depth, "sLightsShadow0", &plane_mat);
 
     int use_shadow3d = 1;
 

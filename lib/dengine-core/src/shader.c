@@ -109,14 +109,18 @@ int dengine_shader_setup(Shader* shader)
     sscanf(strchr(glslv, '.') - 1,"%d.%d", &maj, &min);
     ver = maj*=100;
     ver+=min;
-    const char* verstr = strchr(shader->fragment_code, '#');
-    if (verstr) {
-        char vers[10];
-        sscanf(shader->fragment_code, "%s %d",vers,&shadver);
 
-        if (shadver > ver) {
-            dengineutils_logging_log("WARNING::SHADER::Not compiled. #version %d is unsupported. Supported is %d", shadver, ver);
-            return 0;
+    if (shader->vertex_code) {
+        const char* verstr = strchr(shader->vertex_code, '#');
+        if(verstr)
+        {
+            char vers[10];
+            sscanf(shader->fragment_code, "%s %d",vers,&shadver);
+
+            if (shadver > ver) {
+                dengineutils_logging_log("WARNING::SHADER::Not compiled. #version %d is unsupported. Supported is %d", shadver, ver);
+                return 0;
+            }
         }
     }
 
@@ -172,9 +176,6 @@ int dengine_shader_link(Shader* shader)
         dengineutils_logging_log("ERROR::SHADER::LINK::%s", info_log);
 
         free(info_log);
-    }else {
-        int ctxver=GLVersion.major*10+GLVersion.minor;
-        dengine_shader_set_int(shader,"ctxver",ctxver);
     }
 
     return ok;
