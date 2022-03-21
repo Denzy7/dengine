@@ -6,7 +6,9 @@ include_directories(
 include/
 )
 
-add_library(glad src/glad.c)
+add_library(glad STATIC src/glad.c)
+set_target_properties(glad PROPERTIES
+                      POSITION_INDEPENDENT_CODE ON)
 if(NOT WIN32)
 	target_link_libraries(glad dl)
 endif()
