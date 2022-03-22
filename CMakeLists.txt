@@ -44,7 +44,7 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/stb
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/cglm/include
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/glad/include
-        ${PROJECT_BINARY_DIR} #dengine_config.h
+        ${PROJECT_BINARY_DIR}/dengine_config #dengine_config.h
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-core/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-core/include/dengine
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-utils/include
@@ -64,7 +64,7 @@ if(DENGINE_MERGE_LIBS)
     set(BUILD_SHARED_LIBS ON)
 endif()
 
-configure_file(dengine_config.h.in dengine_config.h)
+configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
 add_subdirectory(deps/glad "glad-build")
 add_subdirectory(lib/dengine-utils "dengine-utils-build")
