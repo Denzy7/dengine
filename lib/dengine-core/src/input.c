@@ -21,6 +21,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#ifdef DENGINE_HAS_GTK3
+#include <gtk/gtk.h>
+#endif
+
 struct input_event play, stop, gain;
 //2 basic rumble effects
 struct ff_effect effects[2];
@@ -474,6 +478,11 @@ void dengine_input_pollevents()
     #elif defined(DENGINE_ANDROID)
     dengine_android_pollevents();
     #endif
+
+#ifdef DENGINE_HAS_GTK3
+    //do gtk main non-blocking loop to unfreeze dialogs
+    gtk_main_iteration_do(0);
+#endif
 }
 
 void dengine_input_set_mousepos(double x, double y)
