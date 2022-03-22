@@ -17,8 +17,10 @@
 
 #ifdef DENGINE_HAS_FONTCONFIG
 #include <fontconfig/fontconfig.h>
-char filestrbuf[DENGINE_FONTCONFIG_FILESTRSIZE];
+char* fcfilestrbuf = NULL;
+const int fcfilestrbufsz = 2048;
 #endif
+
 
 #include <cglm/cam.h> //ortho
 
@@ -36,7 +38,7 @@ float _fontsz = 0.0f;
 
 //the standard gui quad
 Primitive quad;
-Shader shader;
+Shader* shader = NULL;
 
 int initgui = 0;
 #define PANEL_ALPHA 0.4f
@@ -54,17 +56,16 @@ const char* _denginegui_get_defaultfont()
     FcConfigSubstitute (0, pat, FcMatchPattern);
     FcDefaultSubstitute (pat);
     match = FcFontMatch (0, pat, &result);
-    memset(filestrbuf, 0, DENGINE_FONTCONFIG_FILESTRSIZE);
     if (match)
     {
         if(FcPatternGetString(match, FC_FILE, 0, &file) == FcResultMatch)
         {
-            snprintf(filestrbuf, DENGINE_FONTCONFIG_FILESTRSIZE, "%s", file);
+            snprintf(fcfilestrbuf, fcfilestrbufsz, "%s", file);
         }
     }
     FcPatternDestroy (pat);
     FcPatternDestroy (match);
-    return filestrbuf;
+    return fcfilestrbuf;
     #else
     return NULL;
     #endif
@@ -101,39 +102,16 @@ int denginegui_init()
     quad.aTexCoord.type = GL_FLOAT;
     quad.aTexCoord.ptr = (void*)(2 * sizeof(float));
 
-    shader.vertex_code =
-            "#version 100\n"
-            "attribute vec2 aPos;"
-            "attribute vec2 aTexCoord;"
-            "varying vec2 TexCoord;"
-            "uniform mat4 projection;"
-            "void main()"
-            "{"
-                "gl_Position = projection * vec4(aPos, 0.0, 1.0);"
-                "TexCoord = aTexCoord;"
-            "}";
-    shader.fragment_code =
-            "#version 100\n"
-            "precision mediump float;"
-            "varying vec2 TexCoord;"
-            "uniform sampler2D tex;"
-            "uniform vec4 col;"
-            "uniform int istext;"
-            "void main()"
-            "{"
-                "vec4 a = vec4(0.0);"
-                "if(istext == 1)"
-                "   a = vec4(1.0, 1.0, 1.0, texture2D(tex, TexCoord).r) * col;"
-                "else"
-                "   a = vec4( texture2D(tex, TexCoord).rgb + col.rgb, col.a);"
-                "gl_FragColor = a;"
-            "}";
+    shader = dengine_shader_new_shader_standard(DENGINE_SHADER_GUI);
 
-    dengine_shader_create(&shader);
-    if(dengine_shader_setup(&shader))
+    #ifdef DENGINE_HAS_FONTCONFIG
+    fcfilestrbuf = calloc(fcfilestrbufsz, sizeof(char));
+    #endif
+
+    if(shader)
     {
-        dengine_shader_set_int(&shader, "tex", 0);
-        dengine_primitive_setup(&quad, &shader);
+        dengine_shader_set_int(shader, "tex", 0);
+        dengine_primitive_setup(&quad, shader);
         initgui = 1;
         return 1;
     }else
@@ -141,6 +119,17 @@ int denginegui_init()
         printf("cannot init quad shader\n");
         return 0;
     }
+}
+
+void denginegui_terminate()
+{
+    dengine_texture_destroy(1, &fontmap);
+    dengine_shader_destroy(shader);
+    dengine_primitive_destroy(&quad);
+
+#ifdef DENGINE_HAS_FONTCONFIG
+    free(fcfilestrbuf);
+#endif
 }
 
 int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_size)
@@ -240,12 +229,12 @@ void _denginegui_projectquad()
     dengine_window_get_window_height(&h);
     dengine_window_get_window_width(&w);
     glm_ortho(0.0, w, 0.0, h, -1.0f, 1.0f, projection);
-    dengine_shader_set_mat4(&shader, "projection", projection[0]);
+    dengine_shader_set_mat4(shader, "projection", projection[0]);
 }
 
 void _denginegui_drawquad()
 {
-    dengine_shader_use(&shader);
+    dengine_shader_use(shader);
 
     //return previous src, dst alpha and blend
     int srcalpha, dstalpha;
@@ -264,7 +253,7 @@ void _denginegui_drawquad()
     if (depthmask)
         glDepthMask(GL_FALSE);
 
-    dengine_draw_primitive(&quad, &shader);
+    dengine_draw_primitive(&quad, shader);
 
     glBlendFunc(srcalpha, dstalpha); DENGINE_CHECKGL;
 
@@ -315,12 +304,12 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
             };
             float white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
-            dengine_shader_set_int(&shader, "istext", 1);
+            dengine_shader_set_int(shader, "istext", 1);
 
             if(!rgba)
-                dengine_shader_set_vec4(&shader, "col", white);
+                dengine_shader_set_vec4(shader, "col", white);
             else
-                dengine_shader_set_vec4(&shader, "col", rgba);
+                dengine_shader_set_vec4(shader, "col", rgba);
 
 
             quad.array.data = vertices;
@@ -364,11 +353,11 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
     float white[4] = {0.0f, 0.0f, 0.0f, PANEL_ALPHA};
 
     if(!rgba)
-        dengine_shader_set_vec4(&shader, "col", white);
+        dengine_shader_set_vec4(shader, "col", white);
     else
-        dengine_shader_set_vec4(&shader, "col", rgba);
+        dengine_shader_set_vec4(shader, "col", rgba);
 
-    dengine_shader_set_int(&shader, "istext", 0);
+    dengine_shader_set_int(shader, "istext", 0);
 
     glActiveTexture(GL_TEXTURE0);
     if(texture)

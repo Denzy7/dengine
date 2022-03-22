@@ -28,8 +28,6 @@
     #cmakedefine DENGINE_HAS_FONTCONFIG @DENGINE_HAS_FONTCONFIG@
     //Match pattern to pass to FcNameParse. run fc-match "<pattern>" in terminal
     #define DENGINE_FONTCONFIG_MATCHPATTERN "monospace"
-    //Buffer size where the matched font is stored
-    #define DENGINE_FONTCONFIG_FILESTRSIZE 1024
 #endif // defined
 
 //Size of log buffer for snprintf

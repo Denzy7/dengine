@@ -9,6 +9,8 @@ extern "C" {
 
 int denginegui_init();
 
+void denginegui_terminate();
+
 int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_size);
 
 void denginegui_text(float x,float y, const char* text, float* rgba);
