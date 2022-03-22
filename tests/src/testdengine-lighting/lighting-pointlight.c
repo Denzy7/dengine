@@ -41,6 +41,8 @@ int main(int argc, char** argv)
     GLFWwindow* current = dengine_window_glfw_get_currentwindow();
     dengine_window_glfw_context_makecurrent(current);
 
+    dengineutils_filesys_init();
+
     if(!dengine_window_glfw_context_gladloadgl())
     {
         dengineutils_logging_log("ERROR::cannot load gl!\n");
@@ -421,6 +423,7 @@ int main(int argc, char** argv)
         dengine_window_swapbuffers();
         dengine_input_pollevents();
     }
+    dengineutils_filesys_terminate();
     denginegui_terminate();
 
     dengine_window_terminate();

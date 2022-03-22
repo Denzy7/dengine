@@ -12,6 +12,7 @@
 #include <dengine-gui/gui.h> //panel
 
 #include <dengine-utils/os.h> //filedialogopen
+#include <dengine-utils/filesys.h>
 #include <dengine/input.h>
 #include <string.h> //memset, memcpy
 #include <cglm/cglm.h>      //mat4
@@ -24,6 +25,7 @@ int main(int argc, char** argv)
         dengineutils_logging_log("ERROR::cannot init window\n");
         return 1;
     }
+    dengineutils_filesys_init();
 
     GLFWwindow* current = dengine_window_glfw_get_currentwindow();
     dengine_window_glfw_context_makecurrent(current);
@@ -261,6 +263,7 @@ int main(int argc, char** argv)
         dengine_input_pollevents();
     }
     denginegui_terminate();
+    dengineutils_filesys_terminate();
     dengine_window_terminate();
     return 0;
 }

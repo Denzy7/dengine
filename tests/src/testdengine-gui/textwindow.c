@@ -27,7 +27,7 @@ int main(int argc, char** argv)
         dengineutils_logging_log("ERROR::cannot load gl!\n");
         return 1;
     }
-
+    dengineutils_filesys_init();
     dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
     File2Mem fontmem;
 
@@ -86,6 +86,7 @@ int main(int argc, char** argv)
         dengine_input_pollevents();
     }
     denginegui_terminate();
+    dengineutils_filesys_terminate();
 
     dengineutils_filesys_file2mem_free(&fontmem);
     dengine_window_terminate();

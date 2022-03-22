@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
     dengine_window_create(1280, 720, "testdengine-camera-foward", &window);
     dengine_window_makecurrent(&window);
     dengine_window_loadgl();
+    dengineutils_filesys_init();
 
     const int prtbf_sz=1024;
     char* prtbf=malloc(prtbf_sz);
@@ -138,6 +139,8 @@ int main(int argc, char *argv[])
     dengine_material_destroy(&cube_mat);
 
     denginegui_terminate();
+
+    dengineutils_filesys_terminate();
 
     dengineutils_debug_terminate();
     dengine_window_terminate();

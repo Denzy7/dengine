@@ -48,6 +48,8 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    dengineutils_filesys_init();
+
     int w, h;
     dengine_window_get_window_width(&w);
     dengine_window_get_window_height(&h);
@@ -501,6 +503,7 @@ int main(int argc, char** argv)
         dengine_input_pollevents();
     }
     denginegui_terminate();
+    dengineutils_filesys_terminate();
     dengine_window_terminate();
     return 0;
 }
