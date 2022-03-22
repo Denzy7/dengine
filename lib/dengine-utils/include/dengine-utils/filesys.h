@@ -22,6 +22,10 @@ typedef struct File2Mem
 extern "C" {
 #endif
 
+int dengineutils_filesys_init();
+
+void dengineutils_filesys_terminate();
+
 int dengineutils_filesys_file2mem_load(File2Mem* file2mem);
 
 void dengineutils_filesys_file2mem_free(File2Mem* file2mem);

@@ -7,8 +7,25 @@
 
 #include "logging.h"
 
-char srcdir[1024],assetdir[1024];
-int hasloggedassetdir=0;
+const size_t dirbuflen = 2048;
+char* srcdir = NULL,* assetdir = NULL;
+int hasloggedassetdir=0, filesysinit = 0;
+
+int dengineutils_filesys_init()
+{
+    if(filesysinit)
+        return 0;
+
+    srcdir = calloc(dirbuflen, sizeof(char));
+    assetdir = calloc(dirbuflen, sizeof(char));
+    return assetdir && srcdir;
+}
+
+void dengineutils_filesys_terminate()
+{
+    free(assetdir);
+    free(srcdir);
+}
 
 int dengineutils_filesys_file2mem_load(File2Mem* file2mem)
 {
@@ -51,7 +68,12 @@ void dengineutils_filesys_file2mem_free(File2Mem* file2mem)
 
 const char* dengineutils_filesys_get_srcdir()
 {
-    memset(srcdir, 0, sizeof (srcdir));
+    if(!srcdir)
+    {
+        dengineutils_logging_log("ERROR::cannot get srcdir. filesys has not been init!");
+        return NULL;
+    }
+    memset(srcdir, 0, dirbuflen);
     #ifndef DENGINE_HIDESRCDIR
     const char* thisfile = __FILE__;
     const char* thisfile_dir = strstr(thisfile, "dengine");
@@ -69,14 +91,12 @@ const char* dengineutils_filesys_get_srcdir()
 
 const char* _dengineutils_filesys_get_assetsdir_resolve(const char* dir)
 {
-    memset(assetdir, 0, sizeof (assetdir));
-
     //look for default vert shader. expand this to check sth cool like an md5 hash or file list
     const char* dftshdrvert="shaders/default.vert.glsl";
 
-    snprintf(assetdir, sizeof (assetdir), "%s/assets/%s", dir,dftshdrvert);
+    snprintf(assetdir, dirbuflen, "%s/assets/%s", dir,dftshdrvert);
     if (fopen(assetdir, "rb")) {
-        snprintf(assetdir, sizeof (assetdir), "%s/assets", dir);
+        snprintf(assetdir, dirbuflen, "%s/assets", dir);
 
         if(!hasloggedassetdir)
         {
@@ -91,6 +111,12 @@ const char* _dengineutils_filesys_get_assetsdir_resolve(const char* dir)
 
 const char* dengineutils_filesys_get_assetsdir()
 {
+    if(!assetdir)
+    {
+        dengineutils_logging_log("ERROR::cannot get assetsdir. filesys has not been init!");
+        return NULL;
+    }
+
     //Check for assets from compile dir, cwd & envvar
     if (_dengineutils_filesys_get_assetsdir_resolve(dengineutils_filesys_get_srcdir()))
         return assetdir;
