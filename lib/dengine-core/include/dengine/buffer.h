@@ -43,6 +43,13 @@ void dengine_buffer_bind(uint32_t target, Buffer* buffer);
  */
 void dengine_buffer_data(uint32_t target, Buffer* buffer);
 
+/*!
+ * \brief Release resources used by a buffer
+ * \param count Number of buffers
+ * \param buffers Pointer to the buffers
+ */
+void dengine_buffer_destroy(size_t count, Buffer* buffers);
+
 #ifdef __cplusplus
 }
 #endif

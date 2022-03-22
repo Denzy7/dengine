@@ -35,3 +35,19 @@ void dengine_vao_bind(VAO* vao)
 
     DENGINE_CHECKGL;
 }
+
+void dengine_vao_destroy(size_t count, VAO* vaos)
+{
+    for(size_t i = 0; i < count; i++)
+    {
+        //Check for possible PFNs
+        if(glad_glDeleteVertexArrays)
+            glDeleteVertexArrays(1, &vaos[i].vao);
+        else if(glad_glDeleteVertexArrays)
+            glDeleteVertexArraysOES(1, &vaos[i].vao);
+        else if(glad_glDeleteVertexArraysAPPLE)
+            glDeleteVertexArraysAPPLE(1, &vaos[i].vao);
+
+        DENGINE_CHECKGL;
+    }
+}

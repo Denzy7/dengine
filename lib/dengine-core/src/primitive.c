@@ -48,6 +48,12 @@ void dengine_primitive_setup(Primitive* primitive, Shader* shader)
     primitive->offset = NULL;
 }
 
+void dengine_primitive_destroy(Primitive* primitive)
+{
+    dengine_vao_destroy(1, &primitive->vao);
+    dengine_buffer_destroy(1, &primitive->array);
+    dengine_buffer_destroy(1, &primitive->index);
+}
 
 void dengine_primitive_gen_quad(Primitive* primitive, Shader* shader)
 {

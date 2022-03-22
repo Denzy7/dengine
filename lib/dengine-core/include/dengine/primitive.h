@@ -55,6 +55,12 @@ extern "C" {
 void dengine_primitive_setup(Primitive* primitive, Shader* shader);
 
 /*!
+ * \brief Release resources being used by a set up primitive
+ * \param primitive
+ */
+void dengine_primitive_destroy(Primitive* primitive);
+
+/*!
  * \brief Generate an NDC fullscreen quad
  * \param primitive Primitive to use
  * \param shader Shader to use

@@ -31,6 +31,13 @@ extern "C" {
 void dengine_vao_gen(size_t count, VAO* vaos);
 
 /*!
+ * \brief Release a VAO
+ * \param count Number of VAOs
+ * \param vaos VAOs
+ */
+void dengine_vao_destroy(size_t count, VAO* vaos);
+
+/*!
  * \brief Bind a VAO
  * \param vao VAO to bind
  */

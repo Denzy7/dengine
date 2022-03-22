@@ -28,3 +28,9 @@ void dengine_buffer_data(uint32_t target, Buffer* buffer)
 
     glBufferData(target, buffer->size, buffer->data, buffer->usage); DENGINE_CHECKGL;
 }
+
+void dengine_buffer_destroy(size_t count, Buffer* buffers)
+{
+    for(size_t i = 0; i < count; i++)
+        glDeleteBuffers(1, &buffers[i].buffer_id); DENGINE_CHECKGL;
+}
