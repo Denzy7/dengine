@@ -22,12 +22,23 @@ typedef struct
 #include <dengine/window.h>
 #include <dengine/input.h>
 #include <dengine/primitive.h>
+#include <dengine/material.h>
+#include <dengine/lighting.h>
+#include <dengine/draw.h>
 #include <dengine/loadgl.h>
+#include <dengine/macros.h>
+#ifdef DENGINE_ANDROID
+#include <dengine/android.h>
+#endif
 
 #include <dengine-utils/filesys.h>
 #include <dengine-utils/debug.h>
 
 #include <dengine-gui/gui.h>
+
+#include <dengine-model/model.h>
+
+#include <dengine-scene/scene.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -81,7 +81,8 @@ target_link_libraries(dengine
     dengine-core
     dengine-utils
     dengine-gui
-    dengine-model)
+    dengine-model
+    dengine-scene)
 set_property(TARGET dengine PROPERTY C_STANDARD 99)
 #remove lib prefix
 if(WIN32)
