@@ -6,6 +6,7 @@
 #include <dengine/draw.h> //draw_prim
 #include <dengine/camera.h> //camera
 #include <dengine/texture.h>
+#include <dengine/input.h>
 
 #include <dengine/lighting.h>
 #include <dengine-gui/gui.h> //panel
@@ -257,7 +258,7 @@ int main(int argc, char** argv)
         denginegui_panel(10, 10, 200, 200, &dLight.shadow.shadow_map.depth, NULL, rgba);
 
         dengine_window_swapbuffers();
-        dengine_window_glfw_pollevents();
+        dengine_input_pollevents();
     }
     denginegui_terminate();
     dengine_window_terminate();

@@ -5,6 +5,7 @@
 #include <dengine/primitive.h> //gen_plane
 #include <dengine/draw.h> //draw_prim
 #include <dengine/camera.h> //camera
+#include <dengine/input.h> //pollevents
 #include <string.h> //memset, memcpy
 #include <cglm/cglm.h>      //mat4
 
@@ -103,7 +104,7 @@ int main(int argc, char** argv)
         }
 
         dengine_window_swapbuffers();
-        dengine_window_glfw_pollevents();
+        dengine_input_pollevents();
     }
 
     free(loaded);

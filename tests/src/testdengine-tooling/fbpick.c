@@ -133,7 +133,7 @@ int main(int argc, char** argv)
         denginegui_text(0.0, scl + (3 * fontsz), "This is just a demo reading window framebuffer. In an actual situation, a sole MRT framebuffer is used", NULL);
 
         dengine_window_swapbuffers();
-        dengine_window_glfw_pollevents();
+        dengine_input_pollevents();
     }
     denginegui_terminate();
     dengineutils_filesys_file2mem_free(&ttf);

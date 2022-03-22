@@ -419,7 +419,7 @@ int main(int argc, char** argv)
         denginegui_text(sizeof (fps), h - fontsz, fps, NULL);
 
         dengine_window_swapbuffers();
-        dengine_window_glfw_pollevents();
+        dengine_input_pollevents();
     }
     denginegui_terminate();
 

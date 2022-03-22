@@ -6,6 +6,7 @@
 #include <dengine/draw.h> //draw_prim
 #include <dengine/camera.h> //camera
 #include <dengine/texture.h>
+#include <dengine/input.h>
 
 #include <dengine-utils/os.h>//filedialog
 
@@ -168,7 +169,7 @@ int main(int argc, char** argv)
         dengine_draw_primitive(&cube, &shader);
 
         dengine_window_swapbuffers();
-        dengine_window_glfw_pollevents();
+        dengine_input_pollevents();
     }
 
     dengine_window_terminate();
