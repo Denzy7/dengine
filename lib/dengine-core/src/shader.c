@@ -245,6 +245,7 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
         {"default.vert.glsl", "default.frag.glsl"},
         {"shadow2d.vert.glsl", "shadow2d.frag.glsl"},
         {"shadow3d.vert.glsl", "shadow3d.frag.glsl", "shadow3d.geom.glsl"},
+        {"gui.vert.glsl", "gui.frag.glsl"},
     };
 
     char *stdshdrsrc[3] =
