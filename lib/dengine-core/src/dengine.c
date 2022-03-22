@@ -3,11 +3,12 @@
 #include <string.h>
 
 DengineInitOpts opts;
-int hassetopts = 0;
+int hasgotopts = 0;
 
 int dengine_init()
 {
-    dengine_init_set_opts(dengine_init_get_defopts());
+    if(!hasgotopts)
+        opts = *dengine_init_get_opts();
 
     //All this to GL initialization
     if(!dengine_window_init())
@@ -50,13 +51,7 @@ void dengine_terminate()
     dengine_window_terminate();
 }
 
-void dengine_init_set_opts(DengineInitOpts* _opts)
-{
-    hassetopts = 1;
-    opts = *_opts;
-}
-
-DengineInitOpts* dengine_init_get_defopts()
+DengineInitOpts* dengine_init_get_opts()
 {
     memset(&opts, 0, sizeof(DengineInitOpts));
 
@@ -66,6 +61,8 @@ DengineInitOpts* dengine_init_get_defopts()
 
     opts.font_size = 18.0f;
     opts.font_bitmapsize = 512;
+
+    hasgotopts = 1;
 
     return &opts;
 }

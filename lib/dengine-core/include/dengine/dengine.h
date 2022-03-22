@@ -50,9 +50,7 @@ void dengine_terminate();
 
 void dengine_update();
 
-void dengine_init_set_opts(DengineInitOpts* _opts);
-
-DengineInitOpts* dengine_init_get_defopts();
+DengineInitOpts* dengine_init_get_opts();
 
 #ifdef __cplusplus
 }
