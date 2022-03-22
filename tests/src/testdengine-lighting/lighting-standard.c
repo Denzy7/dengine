@@ -68,6 +68,7 @@ int main(int argc, char** argv)
 
     //Init systems...
     dengine_input_init();
+    dengineutils_filesys_init();
 
     float fontsz = 20.0f;
     denginegui_init();
@@ -529,6 +530,8 @@ int main(int argc, char** argv)
         dengine_window_swapbuffers();
         dengine_input_pollevents();
     }
+
+    denginegui_terminate();
 
     free(assets_dir);
     dengine_material_destroy(&cube_mat);

@@ -135,7 +135,7 @@ int main(int argc, char** argv)
         dengine_window_swapbuffers();
         dengine_window_glfw_pollevents();
     }
-
+    denginegui_terminate();
     dengineutils_filesys_file2mem_free(&ttf);
     dengine_window_terminate();
     return 0;

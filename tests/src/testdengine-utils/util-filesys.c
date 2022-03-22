@@ -8,6 +8,8 @@ int main(int argc, char** argv)
     if(argc < 2)
         dengineutils_logging_log("ERROR::Specify a file to argv[1]");
 
+    dengineutils_filesys_init();
+
     File2Mem test;
     test.file = argv[1];
     if(dengineutils_filesys_file2mem_load(&test))
@@ -18,4 +20,6 @@ int main(int argc, char** argv)
     }
 
     dengineutils_filesys_get_assetsdir();
+
+    dengineutils_filesys_terminate();
 }

@@ -137,6 +137,8 @@ int main(int argc, char *argv[])
 
     dengine_material_destroy(&cube_mat);
 
+    denginegui_terminate();
+
     dengineutils_debug_terminate();
     dengine_window_terminate();
 

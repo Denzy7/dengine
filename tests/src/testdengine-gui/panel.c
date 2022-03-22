@@ -118,6 +118,7 @@ int main(int argc, char** argv)
         dengine_window_glfw_pollevents();
     }
 
+    denginegui_terminate();
     dengineutils_filesys_file2mem_free(&fontmem);
     dengine_window_terminate();
     return 0;

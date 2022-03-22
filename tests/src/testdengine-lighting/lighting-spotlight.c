@@ -500,7 +500,7 @@ int main(int argc, char** argv)
         dengine_window_swapbuffers();
         dengine_window_glfw_pollevents();
     }
-
+    denginegui_terminate();
     dengine_window_terminate();
     return 0;
 }

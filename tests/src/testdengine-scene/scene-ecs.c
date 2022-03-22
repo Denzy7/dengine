@@ -39,6 +39,8 @@ int main(int argc, char *argv[])
     dengine_window_makecurrent(&window);
     dengine_window_loadgl();
 
+    dengineutils_filesys_init();
+
     Entity* ent1 = denginescene_ecs_new_entity();
     Entity* ent2 = denginescene_ecs_new_entity();
     Entity* ent3 = denginescene_ecs_new_entity();
@@ -297,6 +299,8 @@ int main(int argc, char *argv[])
     if(sep_planes)
         free(sep_planes);
 
+    denginegui_terminate();
+    dengineutils_filesys_terminate();
     dengine_window_terminate();
 
     return 0;
