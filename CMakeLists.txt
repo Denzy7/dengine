@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(dengine VERSION 0.1 LANGUAGES C)
+project(dengine VERSION 0.2.0 LANGUAGES C)
 
 if(NOT ANDROID)
     find_package(PkgConfig QUIET)
@@ -89,8 +89,8 @@ if(WIN32)
     set_target_properties(dengine PROPERTIES PREFIX "")
 endif()
 set_target_properties(dengine PROPERTIES
-                      VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
-                      SOVERSION ${dengine_VERSION_MAJOR}
+                      VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}.${dengine_VERSION_PATCH}
+                      SOVERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
                       POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(tests "tests-build")
