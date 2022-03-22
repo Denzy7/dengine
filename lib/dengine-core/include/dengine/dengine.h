@@ -33,6 +33,9 @@ typedef struct
 
 #include <dengine-utils/filesys.h>
 #include <dengine-utils/debug.h>
+#include <dengine-utils/os.h>
+#include <dengine-utils/rng.h>
+#include <dengine-utils/timer.h>
 
 #include <dengine-gui/gui.h>
 

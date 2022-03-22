@@ -14,11 +14,14 @@ int dengine_init()
     if(!dengine_window_init())
         return 0;
 
+#ifndef DENGINE_ANDROID
+    //Android creates a window already in init... how convinient and limiting?
     Window window;
     if(!dengine_window_create(opts.window_width, opts.window_height, opts.window_title, &window))
         return 0;
 
-    dengine_window_makecurrent(&window);
+     dengine_window_makecurrent(&window);
+#endif
 
     if(!dengine_window_loadgl())
         return 0;
@@ -29,25 +32,34 @@ int dengine_init()
     //DEBUGGING, INCASE OF SIGSEGV OR SIGABRT
     dengineutils_debug_init();
 
+    //ALLOCATE FILESYS DIRECTORIES
+    dengineutils_filesys_init();
+
     //GUI. SET FONT TOO
     if(!denginegui_init())
         return 0;
 
     denginegui_set_font(NULL, opts.font_size, opts.font_bitmapsize);
 
+    //SEED RNG. NOT MT-SAFE!(AFAIK)
+    dengineutils_rng_set_seedwithtime();
+
     return 1;
 }
 
 void dengine_update()
 {
+    dengineutils_timer_update();
     dengine_window_swapbuffers();
     dengine_input_pollevents();
 }
 
 void dengine_terminate()
 {
-    dengineutils_debug_terminate();
+    denginegui_terminate();
+    dengineutils_filesys_terminate();
 
+    dengineutils_debug_terminate();
     dengine_window_terminate();
 }
 
