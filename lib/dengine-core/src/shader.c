@@ -8,6 +8,9 @@
 #include "dengine-utils/filesys.h"//assetdir
 #include "dengine-utils/debug.h"
 
+#ifdef DENGINE_ANDROID
+#include <dengine/android.h>
+#endif
 static
 float default_shader_col[3] = {1.0, 0.0, 0.0};
 
@@ -250,8 +253,7 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
     dengine_shader_create(stdshdr);
 
     const int prtbuf_sz=2048;
-    char* prtbuf=malloc(prtbuf_sz);
-
+    char* prtbuf = NULL;
     char *stdshdrsrc[3] =
     {
       NULL, NULL, NULL //Is this necessary?
@@ -262,9 +264,17 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
         const char* stdshdrsrcfile = stdshaderssrcfiles[stdshader][i];
         if(stdshdrsrcfile)
         {
+#ifdef DENGINE_ANDROID
+            f2m.file = stdshdrsrcfile;
+            dengine_android_asset2file2mem(&f2m);
+#else
+            if(!prtbuf)
+                prtbuf = malloc(prtbuf_sz);
+
             snprintf(prtbuf, prtbuf_sz, "%s/shaders/%s", dengineutils_filesys_get_assetsdir(), stdshdrsrcfile);
             f2m.file = prtbuf;
             dengineutils_filesys_file2mem_load(&f2m);
+#endif
             stdshdrsrc[i] = strdup(f2m.mem);
             dengineutils_filesys_file2mem_free(&f2m);
         }
@@ -284,7 +294,8 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
         }
     }
 
-    free(prtbuf);
+    if(prtbuf)
+        free(prtbuf);
 
     if(stdshader == DENGINE_SHADER_DEFAULT)
     {
