@@ -135,6 +135,15 @@ Texture* dengine_texture_new_white(const int width, const int height);
  */
 void dengine_texture_mipmap(uint32_t target, Texture* texture);
 
+/*!
+ * \brief Write out a texture to file
+ * \param outfile File to use
+ * \param flip Flip vertically on write
+ * \param texture Texture to use
+ * \return 0 if failed, else success
+ */
+int dengine_texture_writeout(const char* outfile, const int flip, Texture* texture);
+
 #ifdef __cplusplus
 }
 #endif
