@@ -8,6 +8,19 @@
 #include "dengine-utils/filesys.h"//assetdir
 #include "dengine-utils/debug.h"
 
+static
+float default_shader_col[3] = {1.0, 0.0, 0.0};
+
+static const char *stdshaderssrcfiles[][3]=
+{
+    {"standard.vert.glsl", "standard.frag.glsl"},
+    {"default.vert.glsl", "default.frag.glsl"},
+    {"shadow2d.vert.glsl", "shadow2d.frag.glsl"},
+    {"shadow3d.vert.glsl", "shadow3d.frag.glsl", "shadow3d.geom.glsl"},
+    {"gui.vert.glsl", "gui.frag.glsl"},
+    {"debug/normals.vert.glsl", "debug/normals.frag.glsl"},
+};
+
 void dengine_shader_create(Shader* shader)
 {
     shader->geometry_code= NULL;
@@ -239,15 +252,6 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
     const int prtbuf_sz=2048;
     char* prtbuf=malloc(prtbuf_sz);
 
-    static const char *stdshaderssrcfiles[][3]=
-    {
-        {"standard.vert.glsl", "standard.frag.glsl"},
-        {"default.vert.glsl", "default.frag.glsl"},
-        {"shadow2d.vert.glsl", "shadow2d.frag.glsl"},
-        {"shadow3d.vert.glsl", "shadow3d.frag.glsl", "shadow3d.geom.glsl"},
-        {"gui.vert.glsl", "gui.frag.glsl"},
-    };
-
     char *stdshdrsrc[3] =
     {
       NULL, NULL, NULL //Is this necessary?
@@ -281,6 +285,11 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
     }
 
     free(prtbuf);
+
+    if(stdshader == DENGINE_SHADER_DEFAULT)
+    {
+        dengine_shader_set_vec3(stdshdr,"color", default_shader_col);
+    }
 
     return stdshdr;
 }

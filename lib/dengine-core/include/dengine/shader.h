@@ -45,7 +45,8 @@ typedef enum
     DENGINE_SHADER_DEFAULT, /*!< 3D basic shader with a single color uniform */
     DENGINE_SHADER_SHADOW2D, /*!< 3D shader for 2D shadow mapping */
     DENGINE_SHADER_SHADOW3D, /*!< 3D shader for 3D shadow mapping. GL/ES 3.2+ only */
-    DENGINE_SHADER_GUI /*!< 2D shader for GUI quad */
+    DENGINE_SHADER_GUI, /*!< 2D shader for GUI quad */
+    DENGINE_SHADER_DEBUG_NORMALS, /*!< 3D shader that outputs normals as color */
 }StandardShader;
 
 void dengine_shader_create(Shader* shader);
