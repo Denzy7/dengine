@@ -108,7 +108,7 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture);
 void dengine_texture_set_params(uint32_t target, Texture* texture);
 
 /*!
- * \brief Free data that was loaded with load_file or load_mem as its no longer needed
+ * \brief Free data that was loaded with texture_load_* or texture_new_* as its no longer needed
  * \param texture Texture to use
  */
 void dengine_texture_free_data(Texture* texture);
@@ -136,7 +136,7 @@ Texture* dengine_texture_new_white(const int width, const int height);
 void dengine_texture_mipmap(uint32_t target, Texture* texture);
 
 /*!
- * \brief Write out a texture to file
+ * \brief Write out a texture to a file (JPG compression, 95% quality)
  * \param outfile File to use
  * \param flip Flip vertically on write
  * \param texture Texture to use
