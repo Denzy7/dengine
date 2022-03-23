@@ -2,12 +2,9 @@
 #include "loadgl.h"  //glGen,Bind,Tex...
 #include "logging.h" //log
 
-//png, jpg
-#define STBI_ONLY_PNG
-#define STBI_ONLY_JPEG
-#define STBI_ONLY_HDR
-#define STB_IMAGE_IMPLEMENTATION
+#include <string.h>
 #include <stb_image.h> //stbi_load, stbi_error
+#include <stb_image_write.h> //stbi_write_jpg
 
 #include "dengine_config.h" //DENGINE_TEX_WHITESZ
 #include "dengine-utils/debug.h"
@@ -209,4 +206,15 @@ void _dengine_texture_autoload(Texture* texture)
     dengine_texture_set_params(GL_TEXTURE_2D,texture);
     dengine_texture_free_data(texture);
     dengine_texture_bind(GL_TEXTURE_2D,NULL);
+}
+
+int dengine_texture_writeout(const char* outfile, const int flip, Texture* texture)
+{
+    stbi_flip_vertically_on_write(flip);
+    int write = stbi_write_jpg(outfile, texture->width, texture->height, texture->channels, texture->data, 95);
+    if(!write)
+    {
+        dengineutils_logging_log("ERROR::STBI_WRITE::%s", stbi_failure_reason());
+    }
+    return write;
 }
