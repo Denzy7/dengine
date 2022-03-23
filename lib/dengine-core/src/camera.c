@@ -124,7 +124,7 @@ void dengine_camera_set_rendermode(CameraRenderMode mode, Camera* camera)
         depth->internal_format = GL_DEPTH_COMPONENT;
         depth->width = camera->render_width;
         depth->height = camera->render_height;
-        depth->type = GL_UNSIGNED_BYTE;
+        depth->type = GL_UNSIGNED_SHORT;
 
         dengine_texture_bind(GL_TEXTURE_2D, depth);
         dengine_texture_data(GL_TEXTURE_2D, depth);

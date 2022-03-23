@@ -70,7 +70,7 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
     depth.width = shadowop->shadow_map_size;
     depth.format = GL_DEPTH_COMPONENT;
     depth.internal_format = GL_DEPTH_COMPONENT;
-    depth.type = GL_UNSIGNED_BYTE;
+    depth.type = GL_UNSIGNED_SHORT;
     depth.filter_min = GL_NEAREST;
     depth.filter_mag = GL_NEAREST;
     depth.wrap = GL_CLAMP_TO_EDGE;
