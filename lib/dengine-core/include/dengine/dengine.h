@@ -15,6 +15,9 @@ typedef struct
     int gl_min;
     int gl_core;
 
+    int enable_depth;
+    int enable_backfaceculling;
+
     float font_size;
     int font_bitmapsize;
 }DengineInitOpts;
@@ -31,6 +34,7 @@ typedef struct
 #include <dengine/android.h>
 #endif
 
+#include <dengine-utils/logging.h>
 #include <dengine-utils/filesys.h>
 #include <dengine-utils/debug.h>
 #include <dengine-utils/os.h>

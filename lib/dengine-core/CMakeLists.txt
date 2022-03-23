@@ -13,6 +13,7 @@ src/framebuffer.c
 src/material.c
 src/lighting.c
 src/vao.c
+src/renderbuffer.c
 )
 
 set(dengine-core-hdr
@@ -33,6 +34,7 @@ include/dengine/material.h
 include/dengine/lighting.h
 include/dengine/vao.h
 include/dengine/macros.h
+include/dengine/renderbuffer.h
 )
 
 if(ANDROID)

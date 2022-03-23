@@ -12,12 +12,12 @@ typedef struct
     uint32_t height;
 }Renderbuffer;
 
-void dengine_renderbuffer_gen(const size_t count, Renderbuffer* renderbuffers);
+void dengine_renderbuffer_gen(size_t count, Renderbuffer* renderbuffers);
 
-void dengine_renderbuffer_destroy(const size_t count, Renderbuffer* renderbuffers);
+void dengine_renderbuffer_destroy(size_t count, Renderbuffer* renderbuffers);
 
-void dengine_renderbuffer_bind(const Renderbuffer* renderbuffer);
+void dengine_renderbuffer_bind(Renderbuffer* renderbuffer);
 
-void dengine_renderbuffer_data(const Renderbuffer* renderbuffer);
+void dengine_renderbuffer_data(Renderbuffer* renderbuffer);
 
 #endif // RENDERBUFFER_H
