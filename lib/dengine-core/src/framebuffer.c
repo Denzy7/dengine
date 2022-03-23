@@ -13,7 +13,12 @@ void dengine_framebuffer_gen(size_t count, Framebuffer* framebuffers)
     for(size_t i = 0; i < count; i++)
     {
         memset(&framebuffers[i], 0, sizeof(Framebuffer));
-        glGenFramebuffers(1, &framebuffers[i].framebuffer_id); DENGINE_CHECKGL;
+        if(glad_glGenFramebuffers)
+            glGenFramebuffers(1, &framebuffers[i].framebuffer_id);
+        else if(glad_glGenFramebuffersEXT)
+            glGenFramebuffersEXT(1, &framebuffers[i].framebuffer_id);
+
+        DENGINE_CHECKGL;
     }
 }
 
@@ -21,10 +26,14 @@ void dengine_framebuffer_bind(uint32_t target, Framebuffer* framebuffer)
 {
     DENGINE_DEBUG_ENTER;
 
+    uint32_t fb = 0;
     if(framebuffer)
-        glBindFramebuffer(target, framebuffer->framebuffer_id);
-    else
-        glBindFramebuffer(target, 0);
+        fb = framebuffer->framebuffer_id;
+
+    if(glad_glBindFramebuffer)
+        glBindFramebuffer(target, fb);
+    else if(glad_glBindFramebufferEXT)
+        glBindFramebufferEXT(target, fb);
 
     DENGINE_CHECKGL;
 }
@@ -41,7 +50,6 @@ void dengine_framebuffer_attach(FramebufferAttachmentType attachment, Texture* t
         return;
     }
     #endif
-
 
     if(attachment == DENGINE_FRAMEBUFFER_COLOR){
         //on GL/ES 3.2+
@@ -68,17 +76,24 @@ void dengine_framebuffer_attach2D(FramebufferAttachmentType attachment, Texture*
 {
     DENGINE_DEBUG_ENTER;
 
+    //on GL 3.0 / ES 2.0+, or with ext GL_EXT/ARB_framebuffer_object for < 3.0
     if(attachment == DENGINE_FRAMEBUFFER_COLOR){
-        //on GL 3.0 / ES 2.0+
-        glFramebufferTexture2D(GL_FRAMEBUFFER, attachment + framebuffer->n_color, GL_TEXTURE_2D, texture->texture_id, 0);
+        if(glad_glFramebufferTexture2D)
+            glFramebufferTexture2D(GL_FRAMEBUFFER, attachment + framebuffer->n_color, GL_TEXTURE_2D, texture->texture_id, 0);
+        else if(glad_glFramebufferTexture2DEXT)
+            glFramebufferTexture2DEXT(GL_FRAMEBUFFER, attachment + framebuffer->n_color, GL_TEXTURE_2D, texture->texture_id, 0);
+
         if(!DENGINE_CHECKGL){
             framebuffer->color[framebuffer->n_color] = *texture;
             framebuffer->n_color++;
         }
     }
     else{
-        //on GL 3.0 / ES 2.0+
-        glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->texture_id, 0);
+        if(glad_glFramebufferTexture2D)
+            glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->texture_id, 0);
+        else if(glad_glFramebufferTexture2DEXT)
+            glFramebufferTexture2DEXT(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->texture_id, 0);
+
         if(!DENGINE_CHECKGL)
         {
             if(attachment == DENGINE_FRAMEBUFFER_DEPTH)
