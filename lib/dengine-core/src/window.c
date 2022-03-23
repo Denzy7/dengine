@@ -207,7 +207,7 @@ int dengine_window_isrunning()
 {
     #ifndef DENGINE_GL_NONE
     if(glinit)
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     #endif // DENGINE_GL_NONE
     return isrunning;
 }
