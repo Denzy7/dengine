@@ -103,3 +103,27 @@ void dengine_framebuffer_attach2D(FramebufferAttachmentType attachment, Texture*
         }
     }
 }
+
+void dengine_framebuffer_attachRB(FramebufferAttachmentType attachment, Renderbuffer* renderbuffer, Framebuffer* framebuffer)
+{
+    DENGINE_DEBUG_ENTER;
+    if(glad_glFramebufferRenderbuffer)
+    {
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment,
+                                  GL_RENDERBUFFER, renderbuffer->renderbuffer_id);
+    }else if(glad_glFramebufferRenderbufferEXT)
+    {
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, attachment,
+                                  GL_RENDERBUFFER, renderbuffer->renderbuffer_id);
+    }
+    DENGINE_CHECKGL;
+}
+
+void dengine_framebuffer_readback(Texture* dest, Framebuffer* framebuffer)
+{
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, framebuffer);
+    glReadPixels(0, 0, dest->width, dest->height, dest->format, dest->type, dest->data);
+    glFinish();
+    DENGINE_CHECKGL;
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
+}

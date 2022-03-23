@@ -9,6 +9,7 @@
 #include <stdint.h> //uint32
 
 #include "dengine/texture.h"
+#include "dengine/renderbuffer.h"
 #include "dengine/loadgl.h"
 
 /*! \enum FramebufferAttachmentType
@@ -70,6 +71,29 @@ void dengine_framebuffer_attach(FramebufferAttachmentType attachment, Texture* t
  * \param framebuffer Framebuffer to use
  */
 void dengine_framebuffer_attach2D(FramebufferAttachmentType attachment, Texture* texture, Framebuffer* framebuffer);
+
+/*!
+ * \brief Attach a Renderbuffer to a framebuffer
+ * \param attachment attachment point to use
+ * \param renderbuffer Renderbuffer to attach
+ * \param framebuffer Framebuffer to use
+ */
+void dengine_framebuffer_attachRB(FramebufferAttachmentType attachment, Renderbuffer* renderbuffer, Framebuffer* framebuffer);
+
+/*!
+ * \brief Readback a framebuffer attachment to an allocated texture
+ *
+ * Note that this call will first bind the framebuffer, read from it then
+ * bind the window framebuffer i.e. 0.
+ *
+ * Don't run this when you have a bound framebuffer as it will be unbound!
+ *
+ * This call is incredibly slow as it calls glFinish() to wait for readback to complete
+ *
+ * \param dest Texture to write to
+ * \param framebuffer Framebuffer to read from
+ */
+void dengine_framebuffer_readback(Texture* dest, Framebuffer* framebuffer);
 
 #ifdef __cplusplus
 }
