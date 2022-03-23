@@ -129,6 +129,14 @@ void dengine_texture_destroy(size_t count, Texture* textures);
 Texture* dengine_texture_new_white(const int width, const int height);
 
 /*!
+ * \brief Create a Texture that can readback framebuffer color attachments
+ * \param width width of texture
+ * \param height height of texture
+ * \return A 2D RGBA texture
+ */
+Texture* dengine_texture_new_canreadback_color(const int width, const int height);
+
+/*!
  * \brief Bind texture then generate mipmap then unbind
  * \param target Target to use
  * \param texture Texture to use
