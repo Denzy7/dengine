@@ -111,6 +111,7 @@ void dengine_material_destroy(Material* material)
     }
     if (material)
     {
+        dengine_texture_free_data(material->white);
         dengine_texture_destroy(1,material->white);
         free(material->white);
     }

@@ -140,7 +140,7 @@ void dengine_texture_free_data(Texture* texture)
     DENGINE_DEBUG_ENTER;
 
     if(texture->data)
-        stbi_image_free(texture->data);
+        free(texture->data);
 }
 
 void dengine_texture_destroy(size_t count, Texture* textures)
@@ -172,7 +172,6 @@ Texture* dengine_texture_new_white(const int width, const int height)
     dengine_texture_data(GL_TEXTURE_2D, white);
     dengine_texture_set_params(GL_TEXTURE_2D, white);
     dengine_texture_bind(GL_TEXTURE_2D, NULL);
-    free(dat);
     return white;
 }
 
@@ -211,10 +210,13 @@ void _dengine_texture_autoload(Texture* texture)
 int dengine_texture_writeout(const char* outfile, const int flip, Texture* texture)
 {
     stbi_flip_vertically_on_write(flip);
-    int write = stbi_write_jpg(outfile, texture->width, texture->height, texture->channels, texture->data, 95);
+    int comp = 3;
+    if(texture->format == GL_RGBA)
+        comp = 4;
+    int write = stbi_write_jpg(outfile, texture->width, texture->height, comp, texture->data, 95);
     if(!write)
     {
-        dengineutils_logging_log("ERROR::STBI_WRITE::%s", stbi_failure_reason());
+        dengineutils_logging_log("ERROR::STBI_WRITE::FAILED!");
     }
     return write;
 }
