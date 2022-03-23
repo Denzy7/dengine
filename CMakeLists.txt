@@ -95,4 +95,9 @@ set_target_properties(dengine PROPERTIES
 
 add_subdirectory(tests "tests-build")
 
+#please ignore this
+if(DENGINE_BUILD_TESTS_PRIV)
+    add_subdirectory(testspriv)
+endif()
+
 
