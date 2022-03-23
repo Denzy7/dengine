@@ -44,6 +44,14 @@ int dengine_init()
     //SEED RNG. NOT MT-SAFE!(AFAIK)
     dengineutils_rng_set_seedwithtime();
 
+    //depth testing ✅
+    if(opts.enable_depth)
+        glEnable(GL_DEPTH_TEST);
+
+    //backface culling. save draw calls ✅
+    if(opts.enable_backfaceculling)
+        glEnable(GL_CULL_FACE);
+
     return 1;
 }
 
@@ -73,6 +81,9 @@ DengineInitOpts* dengine_init_get_opts()
 
     opts.font_size = 18.0f;
     opts.font_bitmapsize = 512;
+
+    opts.enable_backfaceculling = 1;
+    opts.enable_depth = 1;
 
     hasgotopts = 1;
 
