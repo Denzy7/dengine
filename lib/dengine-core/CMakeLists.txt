@@ -14,6 +14,8 @@ src/material.c
 src/lighting.c
 src/vao.c
 src/renderbuffer.c
+src/stb_image.c
+src/stb_image_write.c
 )
 
 set(dengine-core-hdr
