@@ -19,6 +19,10 @@ int main(int argc, char** argv)
         dengineutils_filesys_file2mem_free(&test);
     }
 
+    dengineutils_logging_log("files : %s", dengineutils_filesys_get_filesdir());
+
+    dengineutils_logging_log("cache : %s", dengineutils_filesys_get_cachedir());
+
     dengineutils_filesys_get_assetsdir();
 
     dengineutils_filesys_terminate();
