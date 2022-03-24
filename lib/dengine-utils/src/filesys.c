@@ -111,6 +111,11 @@ const char* _dengineutils_filesys_get_assetsdir_resolve(const char* dir)
 
 const char* dengineutils_filesys_get_assetsdir()
 {
+#ifdef DENGINE_ANDROID
+    //load from AAssetManager
+    return "";
+#endif
+
     if(!assetdir)
     {
         dengineutils_logging_log("ERROR::cannot get assetsdir. filesys has not been init!");
