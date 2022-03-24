@@ -159,6 +159,16 @@ void dengine_window_request_MSAA(int samples)
     #endif // defined
 }
 
+void dengine_window_request_defaultall()
+{
+#ifdef DENGINE_WIN_GLFW
+    glfwDefaultWindowHints();
+#endif
+    _gl_max = 2;
+    _gl_min = 0;
+    _win_msaa = 0;
+}
+
 void dengine_window_get_window_width(int* width)
 {
     #if defined (DENGINE_WIN_GLFW)

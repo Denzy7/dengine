@@ -54,6 +54,8 @@ void dengine_window_request_GL(int gl_major, int gl_minor, int gl_core);
 
 void dengine_window_request_MSAA(int samples);
 
+void dengine_window_request_defaultall();
+
 void dengine_window_get_window_width(int* width);
 
 void dengine_window_get_window_height(int* height);
