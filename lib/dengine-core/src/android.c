@@ -136,3 +136,77 @@ void dengine_android_set_app(struct android_app* app)
     _app->onAppCmd = cmd_handle;
     _app->onInputEvent = input_event;
 }
+
+char* dengine_android_getfilesdir()
+{
+    JNIEnv* env;
+    JavaVM* vm = _app->activity->vm;
+    jint attached = (*vm)->AttachCurrentThread(vm, &env, NULL);
+    char* ret = NULL;
+    if(attached < 0)
+    {
+        dengineutils_logging_log("ERROR::FAILED TO ATTACH VM");
+        return NULL;
+    }
+
+    jclass activity = (*env)->FindClass(env, "android/app/NativeActivity");
+    if(!activity)
+        goto detach;
+
+    jmethodID getFilesDir = (*env)->GetMethodID(env, activity, "getFilesDir", "()Ljava/io/File;");
+    jobject files_dir = (*env)->CallObjectMethod(env, _app->activity->clazz, getFilesDir);
+
+    jclass  fileClass = (*env)->FindClass(env, "java/io/File");
+
+    jmethodID  getPath = (*env)->GetMethodID(env, fileClass, "getPath", "()Ljava/lang/String;");
+    jstring file_string = (*env)->CallObjectMethod( env,files_dir, getPath );
+
+    const char* file_chars = (*env)->GetStringUTFChars( env, file_string, NULL );
+    strdup(file_chars);
+
+    detach:
+
+    if((*env)->ExceptionOccurred(env))
+    {
+        (*env)->ExceptionDescribe(env);
+    }
+    (*vm)->DetachCurrentThread(vm);
+    return ret;
+}
+
+char* dengine_android_getcachedir()
+{
+    JNIEnv* env;
+    JavaVM* vm = _app->activity->vm;
+    jint attached = (*vm)->AttachCurrentThread(vm, &env, NULL);
+    char* ret = NULL;
+    if(attached < 0)
+    {
+        dengineutils_logging_log("ERROR::FAILED TO ATTACH VM");
+        return NULL;
+    }
+
+    jclass activity = (*env)->FindClass(env, "android/app/NativeActivity");
+    if(!activity)
+        goto detach;
+
+    jmethodID getCacheDir = (*env)->GetMethodID(env, activity, "getCacheDir", "()Ljava/io/File;");
+    jobject cache_dir = (*env)->CallObjectMethod(env, _app->activity->clazz, getCacheDir);
+
+    jclass  fileClass = (*env)->FindClass(env, "java/io/File");
+
+    jmethodID  getPath = (*env)->GetMethodID(env, fileClass, "getPath", "()Ljava/lang/String;");
+    jstring cache_string = (*env)->CallObjectMethod(env, cache_dir, getPath );
+
+    const char* file_chars = (*env)->GetStringUTFChars(env, cache_string, NULL );
+    strdup(file_chars);
+
+    detach:
+
+    if((*env)->ExceptionOccurred(env))
+    {
+        (*env)->ExceptionDescribe(env);
+    }
+    (*vm)->DetachCurrentThread(vm);
+    return ret;
+}
