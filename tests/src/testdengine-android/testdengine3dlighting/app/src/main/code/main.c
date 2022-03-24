@@ -18,6 +18,7 @@
 #include <dengine-utils/logging.h>
 #include <dengine-utils/filesys.h>
 #include <dengine-utils/timer.h>
+#include <dengine-utils/debug.h>
 
 #include <dengine-gui/gui.h>
 
@@ -74,6 +75,7 @@ static void init(struct android_app* app)
     dengine_window_android_set_nativewindow(app->window);
 
     dengine_window_request_GL(2, 0, 0);
+    dengineutils_debug_init();
 
     if(dengine_window_init())
     {
@@ -289,8 +291,8 @@ static void init(struct android_app* app)
 
         //LIGHTING
         memset(&dLight, 0, sizeof(DirLight));
-//        dLight.shadow.enable = 1;
-//        dLight.shadow.shadow_map_size = 512;
+        dLight.shadow.enable = 1;
+        dLight.shadow.shadow_map_size = 512;
         dengine_lighting_setup_dirlight(&dLight);
         dLight.light.strength = .5f;
 
@@ -336,6 +338,7 @@ static void init(struct android_app* app)
 
 static void term(struct  android_app* app)
 {
+    dengineutils_debug_terminate();
     dengine_material_destroy(&cube_mat);
     dengine_material_destroy(&plane_mat);
 
