@@ -29,8 +29,8 @@ int main(int argc, char** argv)
         dengineutils_logging_log("WARNING::cannot request an OpenGL 3.2 window. Shadows disabled\n");
 
         //Too bad we can't have 3.2
-        //Use 3.0 then without shadows
-        dengine_window_request_GL(3, 0, 0);
+        //Use default then without shadows
+        dengine_window_request_defaultall();
 
         if(!dengine_window_glfw_create(1280, 720, "testdengine-spotlight(noshadow)"))
         {
