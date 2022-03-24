@@ -34,6 +34,10 @@ const char* dengineutils_filesys_get_srcdir();
 
 const char* dengineutils_filesys_get_assetsdir();
 
+const char* dengineutils_filesys_get_filesdir();
+
+const char* dengineutils_filesys_get_cachedir();
+
 #ifdef __cplusplus
 }
 #endif

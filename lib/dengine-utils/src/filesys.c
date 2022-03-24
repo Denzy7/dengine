@@ -7,8 +7,12 @@
 
 #include "logging.h"
 
+#ifdef DENGINE_ANDROID
+#include "dengine/android.h"
+#endif
+
 const size_t dirbuflen = 2048;
-char* srcdir = NULL,* assetdir = NULL;
+char* srcdir = NULL,* assetdir = NULL,* cachedir = NULL,* filesdir = NULL;
 int hasloggedassetdir=0, filesysinit = 0;
 
 int dengineutils_filesys_init()
@@ -18,13 +22,17 @@ int dengineutils_filesys_init()
 
     srcdir = calloc(dirbuflen, sizeof(char));
     assetdir = calloc(dirbuflen, sizeof(char));
-    return assetdir && srcdir;
+    cachedir = calloc(dirbuflen, sizeof(char));
+    filesdir = calloc(dirbuflen, sizeof(char));
+    return assetdir && srcdir && cachedir && filesdir;
 }
 
 void dengineutils_filesys_terminate()
 {
     free(assetdir);
     free(srcdir);
+    free(cachedir);
+    free(filesdir);
 }
 
 int dengineutils_filesys_file2mem_load(File2Mem* file2mem)
@@ -157,4 +165,40 @@ const char* dengineutils_filesys_get_assetsdir()
                              "-setting envvar DENGINEASSETS\n\t"
                              "-recompiling sources on this machine");
     return NULL;
+}
+
+const char* dengineutils_filesys_get_filesdir()
+{
+#ifdef DENGINE_ANDROID
+    char* fdir = dengine_android_getfilesdir();
+    if(fdir)
+    {
+        snprintf(filesdir, dirbuflen, "%s", fdir);
+        free(fdir);
+    }
+#elif defined(DENGINE_LINUX)
+    snprintf(filesdir, dirbuflen, "%s/.local/share",getenv("HOME"));
+#elif defined(DENGINE_WIN32)
+    snprintf(filesdir, dirbuflen, "%s", getenv("APPDATA"));
+#endif
+    dengineutils_os_mkdir(filesdir);
+    return filesdir;
+}
+
+const char* dengineutils_filesys_get_cachedir()
+{
+#ifdef DENGINE_ANDROID
+    char* cdir = dengine_android_getcachedir();
+    if(cdir)
+    {
+        snprintf(filesdir, dirbuflen, "%s", cdir);
+        free(cdir);
+    }
+#elif defined(DENGINE_LINUX)
+    snprintf(cachedir, dirbuflen, "%s/.cache",getenv("HOME"));
+#elif defined(DENGINE_WIN32)
+    snprintf(cachedir, dirbuflen, "%s", getenv("TEMP"));
+#endif
+    dengineutils_os_mkdir(cachedir);
+    return cachedir;
 }
