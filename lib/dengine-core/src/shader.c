@@ -253,7 +253,7 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
     dengine_shader_create(stdshdr);
 
     const int prtbuf_sz=2048;
-    char* prtbuf = NULL;
+    char* prtbuf = malloc(prtbuf_sz);;
     char *stdshdrsrc[3] =
     {
       NULL, NULL, NULL //Is this necessary?
@@ -264,14 +264,12 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
         const char* stdshdrsrcfile = stdshaderssrcfiles[stdshader][i];
         if(stdshdrsrcfile)
         {
+            snprintf(prtbuf, prtbuf_sz, "%s/shaders/%s", dengineutils_filesys_get_assetsdir(), stdshdrsrcfile);
 #ifdef DENGINE_ANDROID
-            f2m.file = stdshdrsrcfile;
+            char* assetsshaders = strstr(prtbuf + 1, "shaders");
+            f2m.file = assetsshaders;
             dengine_android_asset2file2mem(&f2m);
 #else
-            if(!prtbuf)
-                prtbuf = malloc(prtbuf_sz);
-
-            snprintf(prtbuf, prtbuf_sz, "%s/shaders/%s", dengineutils_filesys_get_assetsdir(), stdshdrsrcfile);
             f2m.file = prtbuf;
             dengineutils_filesys_file2mem_load(&f2m);
 #endif
@@ -294,8 +292,7 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
         }
     }
 
-    if(prtbuf)
-        free(prtbuf);
+    free(prtbuf);
 
     if(stdshader == DENGINE_SHADER_DEFAULT)
     {
