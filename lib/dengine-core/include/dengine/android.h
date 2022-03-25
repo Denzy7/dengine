@@ -19,9 +19,9 @@ void dengine_android_set_terminatefunc(DengineAndroidAppFunc func);
 
 void dengine_android_pollevents();
 
-char* dengine_android_getfilesdir();
+void dengine_android_set_filesdir();
 
-char* dengine_android_getcachedir();
+void dengine_android_set_cachedir();
 
 int dengine_android_asset2file2mem(File2Mem* f2m);
 

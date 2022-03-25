@@ -137,18 +137,16 @@ void dengine_android_set_app(struct android_app* app)
     _app->onInputEvent = input_event;
 }
 
-char* dengine_android_getfilesdir()
+void dengine_android_set_filesdir();
 {
     JNIEnv* env;
     JavaVM* vm = _app->activity->vm;
     jint attached = (*vm)->AttachCurrentThread(vm, &env, NULL);
-    char* ret = NULL;
     if(attached < 0)
     {
         dengineutils_logging_log("ERROR::FAILED TO ATTACH VM");
         return NULL;
     }
-
     jclass activity = (*env)->FindClass(env, "android/app/NativeActivity");
     if(!activity)
         goto detach;
@@ -162,7 +160,7 @@ char* dengine_android_getfilesdir()
     jstring file_string = (*env)->CallObjectMethod( env,files_dir, getPath );
 
     const char* file_chars = (*env)->GetStringUTFChars( env, file_string, NULL );
-    strdup(file_chars);
+    dengineutils_filesys_set_filesdir(file_chars);
 
     detach:
 
@@ -171,10 +169,9 @@ char* dengine_android_getfilesdir()
         (*env)->ExceptionDescribe(env);
     }
     (*vm)->DetachCurrentThread(vm);
-    return ret;
 }
 
-char* dengine_android_getcachedir()
+void dengine_android_set_cachedir()
 {
     JNIEnv* env;
     JavaVM* vm = _app->activity->vm;
@@ -199,8 +196,7 @@ char* dengine_android_getcachedir()
     jstring cache_string = (*env)->CallObjectMethod(env, cache_dir, getPath );
 
     const char* file_chars = (*env)->GetStringUTFChars(env, cache_string, NULL );
-    strdup(file_chars);
-
+    dengineutils_filesys_set_cachedir(file_chars);
     detach:
 
     if((*env)->ExceptionOccurred(env))
@@ -208,5 +204,5 @@ char* dengine_android_getcachedir()
         (*env)->ExceptionDescribe(env);
     }
     (*vm)->DetachCurrentThread(vm);
-    return ret;
 }
+
