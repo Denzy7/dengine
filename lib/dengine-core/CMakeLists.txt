@@ -82,7 +82,7 @@ if(WIN32)
 endif()
 
 if(ANDROID)
-    target_link_libraries(dengine-core android)
+    target_link_libraries(dengine-core android EGL)
 endif()
 
 set_property(TARGET dengine-core PROPERTY C_STANDARD 99)
