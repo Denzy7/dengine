@@ -5,6 +5,10 @@
 DengineInitOpts opts;
 int hasgotopts = 0;
 
+#ifdef DENGINE_ANDROID
+#include <dengine/android.h>
+#endif
+
 int dengine_init()
 {
     if(!hasgotopts)
@@ -34,6 +38,12 @@ int dengine_init()
 
     //ALLOCATE FILESYS DIRECTORIES
     dengineutils_filesys_init();
+
+#ifdef DENGINE_ANDROID
+    //Can safely set files and cachedirs
+    dengine_android_set_filesdir();
+    dengine_android_set_cachedir();
+#endif
 
     //GUI. SET FONT TOO
     if(!denginegui_init())
