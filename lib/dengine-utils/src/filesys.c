@@ -7,10 +7,6 @@
 
 #include "logging.h"
 
-#ifdef DENGINE_ANDROID
-#include "dengine/android.h"
-#endif
-
 const size_t dirbuflen = 2048;
 char* srcdir = NULL,* assetdir = NULL,* cachedir = NULL,* filesdir = NULL;
 int hasloggedassetdir=0, filesysinit = 0;
@@ -170,12 +166,8 @@ const char* dengineutils_filesys_get_assetsdir()
 const char* dengineutils_filesys_get_filesdir()
 {
 #ifdef DENGINE_ANDROID
-    char* fdir = dengine_android_getfilesdir();
-    if(fdir)
-    {
-        snprintf(filesdir, dirbuflen, "%s", fdir);
-        free(fdir);
-    }
+    //Set by jni by dengine_android_set_filesdir
+    return filesdir;
 #elif defined(DENGINE_LINUX)
     snprintf(filesdir, dirbuflen, "%s/.local/share",getenv("HOME"));
 #elif defined(DENGINE_WIN32)
@@ -188,12 +180,8 @@ const char* dengineutils_filesys_get_filesdir()
 const char* dengineutils_filesys_get_cachedir()
 {
 #ifdef DENGINE_ANDROID
-    char* cdir = dengine_android_getcachedir();
-    if(cdir)
-    {
-        snprintf(filesdir, dirbuflen, "%s", cdir);
-        free(cdir);
-    }
+    //Set by jni by dengine_android_set_cachedir
+    return cachedir;
 #elif defined(DENGINE_LINUX)
     snprintf(cachedir, dirbuflen, "%s/.cache",getenv("HOME"));
 #elif defined(DENGINE_WIN32)
@@ -201,4 +189,26 @@ const char* dengineutils_filesys_get_cachedir()
 #endif
     dengineutils_os_mkdir(cachedir);
     return cachedir;
+}
+
+void dengineutils_filesys_set_filesdir(const char* dir)
+{
+    if(!filesdir)
+    {
+        dengineutils_logging_log("ERROR::cannot set filesdir. filesys has not been init!");
+        return;
+    }
+
+    snprintf(filesdir, dirbuflen, "%s", dir);
+}
+
+void dengineutils_filesys_set_cachedir(const char* dir)
+{
+    if(!cachedir)
+    {
+        dengineutils_logging_log("ERROR::cannot set cachedir. filesys has not been init!");
+        return;
+    }
+
+    snprintf(cachedir, dirbuflen, "%s", dir);
 }
