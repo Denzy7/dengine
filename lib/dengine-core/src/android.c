@@ -137,7 +137,7 @@ void dengine_android_set_app(struct android_app* app)
     _app->onInputEvent = input_event;
 }
 
-void dengine_android_set_filesdir();
+void dengine_android_set_filesdir()
 {
     JNIEnv* env;
     JavaVM* vm = _app->activity->vm;
@@ -145,7 +145,7 @@ void dengine_android_set_filesdir();
     if(attached < 0)
     {
         dengineutils_logging_log("ERROR::FAILED TO ATTACH VM");
-        return NULL;
+        return;
     }
     jclass activity = (*env)->FindClass(env, "android/app/NativeActivity");
     if(!activity)
@@ -176,11 +176,10 @@ void dengine_android_set_cachedir()
     JNIEnv* env;
     JavaVM* vm = _app->activity->vm;
     jint attached = (*vm)->AttachCurrentThread(vm, &env, NULL);
-    char* ret = NULL;
     if(attached < 0)
     {
         dengineutils_logging_log("ERROR::FAILED TO ATTACH VM");
-        return NULL;
+        return;
     }
 
     jclass activity = (*env)->FindClass(env, "android/app/NativeActivity");
