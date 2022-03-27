@@ -29,14 +29,16 @@ typedef struct
     Buffer array; /*!< Array buffer of Primitive */
     Buffer index; /*!< Main index buffer for how array buffer is drawn */
     uint16_t index_count; /*!< Number of indices in the main index buffer */
+    void* offset; /*!< Offset at which GL will start drawing from in the index buffer. Like sizeof(type) * offset. Default is NULL */
 
     VertexAttribute aPos; /*!< VertexAtrribute for vertex position */
     VertexAttribute aTexCoord; /*!< VertexAtrribute for texture coordinate */
     VertexAttribute aNormal; /*!< VertexAtrribute for vertex normal */
+    VertexAttribute aTangent; /*!< VertexAtrribute for tangent to normal */
+    VertexAttribute aBiTangent; /*!< VertexAtrribute for cross of tangent and normal*/
 
     uint32_t draw_mode; /*!< How primitive is drawn with GL primitives. GL_TRIANGLES, GL_LINES,... */
     uint32_t draw_type; /*!< The type in the index buffer */
-    void* offset; /*!< Offset at which GL will start drawing from in the index buffer. Like sizeof(type) * offset. Default is NULL */
 } Primitive;
 
 #ifdef __cplusplus

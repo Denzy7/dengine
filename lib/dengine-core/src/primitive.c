@@ -40,6 +40,20 @@ void dengine_primitive_setup(Primitive* primitive, Shader* shader)
         dengine_vertex_attribute_enable(&primitive->aNormal);
     }
 
+    dengine_vertex_attribute_indexfromshader(shader, &primitive->aTangent, "aTangent");
+    if(primitive->aTangent.index != -1)
+    {
+        dengine_vertex_attribute_setup(&primitive->aTangent);
+        dengine_vertex_attribute_enable(&primitive->aTangent);
+    }
+
+    dengine_vertex_attribute_indexfromshader(shader, &primitive->aBiTangent, "aBiTangent");
+    if(primitive->aBiTangent.index != -1)
+    {
+        dengine_vertex_attribute_setup(&primitive->aBiTangent);
+        dengine_vertex_attribute_enable(&primitive->aBiTangent);
+    }
+
     dengine_buffer_bind(GL_ELEMENT_ARRAY_BUFFER, NULL);
     dengine_buffer_bind(GL_ARRAY_BUFFER, NULL);
 
