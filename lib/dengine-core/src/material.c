@@ -12,6 +12,7 @@ void dengine_material_setup(Material* material)
 {
     memset(material, 0, sizeof(Material));
     material->white=dengine_texture_new_white(256,256);
+    material->normalmap = dengine_texture_new_normalmap(256, 256);
 }
 
 void dengine_material_set_shader_color(Shader* shader, Material* material)
@@ -44,7 +45,11 @@ void dengine_material_set_shader_color(Shader* shader, Material* material)
         glGetActiveUniform(shader->program_id, tex_idx[i], max_uniform_ln, NULL, &size, &type, uniform_name); DENGINE_CHECKGL;
         if (type == GL_SAMPLER_2D) {
             textures[i].target = GL_TEXTURE_2D;
-            textures[i].texture = *material->white;
+            //guess if its a normalmap
+            if(strstr(uniform_name, "normal"))
+                textures[i].texture = *material->normalmap;
+            else
+                textures[i].texture = *material->white;
         }else if (type == GL_SAMPLER_CUBE) {
             textures[i].target = GL_TEXTURE_CUBE_MAP;
         }
@@ -114,6 +119,10 @@ void dengine_material_destroy(Material* material)
         dengine_texture_free_data(material->white);
         dengine_texture_destroy(1,material->white);
         free(material->white);
+
+        dengine_texture_free_data(material->normalmap);
+        dengine_texture_destroy(1,material->normalmap);
+        free(material->normalmap);
     }
 }
 

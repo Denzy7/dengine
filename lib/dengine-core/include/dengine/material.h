@@ -34,6 +34,7 @@ typedef struct
     size_t textures_count; /*!< Added Texture count*/
 
     Texture* white; /*!< White texture this material uses */
+    Texture* normalmap; /*!< Empty normal map texture this material uses */
 }Material;
 
 #ifdef __cplusplus
