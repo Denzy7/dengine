@@ -72,6 +72,7 @@ uniform sampler2D normalTex;
 
 vec3 texDiffuseCol = vec3(0.0);
 vec3 texSpecularCol = vec3(0.0);
+vec3 texNormalCol = vec3(0.0);
 
 float specular_power = 64.0;
 
@@ -90,18 +91,14 @@ float shadowCalcCube(samplerCube cube, vec3 pos, float shadowfar);
 
 void main()
 {
-    //basic normals
-    //nNormal = normalize(Normal);
+    texDiffuseCol = texture2D(diffuseTex, TexCoord).rgb;
+    texSpecularCol = texture2D(specularTex, TexCoord).rgb;
+    texNormalCol = texture2D(normalTex, TexCoord).rgb;
 
-    //normalmap
-    nNormal = texture2D(normalTex, TexCoord).rgb;
-    nNormal = normalize(nNormal * 2.0 - 1.0);
+    nNormal = normalize(texNormalCol * 2.0 - 1.0);
     nNormal = normalize(TBN * nNormal);
 
     camDir = normalize(CamPos - FragPos);
-
-    texDiffuseCol = texture2D(diffuseTex, TexCoord).rgb;
-    texSpecularCol = texture2D(specularTex, TexCoord).rgb;
 
     vec3 FragColor = vec3(0.0);
     FragColor+=dirLightAdd();
