@@ -277,7 +277,7 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
     for(int i = 0; i < index_sz; i++)
     {
         float* vertices = cube_vertices.data;
-        int index = cube_index[i];
+        uint16_t index = cube_index[i];
 
         float x = vertices[(3 * index)];
         float y = vertices[(3 * index) + 1];
