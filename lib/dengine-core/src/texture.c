@@ -241,3 +241,31 @@ Texture* dengine_texture_new_canreadback_color(const int width, const int height
     dengine_texture_bind(GL_TEXTURE_2D, NULL);
     return tex;
 }
+
+Texture* dengine_texture_new_normalmap(const int width, const int height)
+{
+    Texture* tex = malloc(sizeof(Texture));
+    memset(tex, 0, sizeof(Texture));
+    tex->width = width;
+    tex->height = height;
+    tex->type = GL_UNSIGNED_BYTE;
+    tex->format = GL_RGB;
+    tex->internal_format = GL_RGB;
+    tex->filter_min = GL_LINEAR;
+    tex->filter_mag = GL_LINEAR;
+    uint8_t* data = calloc(width * height * 3, sizeof(uint8_t));
+    for(size_t i = 0; i < width * height; i++)
+    {
+        data[i * 3] = 255 / 2;
+        data[i * 3 + 1] = 255 / 2;
+        data[i * 3 + 2] = 255;
+    }
+
+    tex->data = data;
+    dengine_texture_gen(1, tex);
+    dengine_texture_bind(GL_TEXTURE_2D, tex);
+    dengine_texture_data(GL_TEXTURE_2D, tex);
+    dengine_texture_set_params(GL_TEXTURE_2D, tex);
+    dengine_texture_bind(GL_TEXTURE_2D, NULL);
+    return tex;
+}

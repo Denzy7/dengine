@@ -129,6 +129,14 @@ void dengine_texture_destroy(size_t count, Texture* textures);
 Texture* dengine_texture_new_white(const int width, const int height);
 
 /*!
+ * \brief Create an instance of an empty normal map
+ * \param width width
+ * \param height height
+ * \return An empty 2D RGB normalmap width x height
+ */
+Texture* dengine_texture_new_normalmap(const int width, const int height);
+
+/*!
  * \brief Create a Texture that can readback framebuffer color attachments
  * \param width width of texture
  * \param height height of texture
