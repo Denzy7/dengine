@@ -9,6 +9,8 @@
 #include <stdlib.h> //malloc, free
 #include <string.h> //memset
 
+#include <cglm/cglm.h> //normalize, sub
+
 Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* meshes, Shader* shader);
 
 Primitive* denginemodel_load_file(DengineModelFormat format, const char* file, size_t* meshes , Shader* shader)
@@ -77,6 +79,9 @@ Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* mesh
     size_t read = 0;
     size_t last = 0;
     size_t last_off = 0, last_idx = 0;
+
+    vec3 edge1, edge2, tangent, bitangent;
+    vec2 deltaUV1, deltaUV2;
 
     dengineutils_timer_update();
     double start = dengineutils_timer_get_current();
@@ -177,6 +182,34 @@ Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* mesh
                 float* tcoord_ptr = tcoords.data;
                 float* normal_ptr = norms.data;
 
+                edge1[0] = vert_ptr[ (3 * (x2 - 1))] - vert_ptr[ (3 * (x1 - 1))];
+                edge1[1] = vert_ptr[ (3 * (x2 - 1)) + 1] - vert_ptr[ (3 * (x1 - 1)) + 1];
+                edge1[2] = vert_ptr[ (3 * (x2 - 1)) + 2] - vert_ptr[ (3 * (x1 - 1)) + 2];
+
+                edge2[0] = vert_ptr[ (3 * (x3 - 1))] - vert_ptr[ (3 * (x1 - 1))];
+                edge2[1] = vert_ptr[ (3 * (x3 - 1)) + 1] - vert_ptr[ (3 * (x1 - 1)) + 1];
+                edge2[2] = vert_ptr[ (3 * (x3 - 1)) + 2] - vert_ptr[ (3 * (x1 - 1)) + 2];
+
+                deltaUV1[0] = tcoord_ptr[ (2 * (y2 - 1))] - tcoord_ptr[ (2 * (y1 - 1))];
+                deltaUV1[1] = tcoord_ptr[ (2 * (y2 - 1)) + 1] - tcoord_ptr[ (2 * (y1 - 1)) + 1];
+
+                deltaUV2[0] = tcoord_ptr[ (2 * (y3 - 1))] - tcoord_ptr[ (2 * (y1 - 1))];
+                deltaUV2[1] = tcoord_ptr[ (2 * (y3 - 1)) + 1] - tcoord_ptr[ (2 * (y1 - 1)) + 1];
+
+                float f = 1.0f / (deltaUV1[0] * deltaUV2[1] - deltaUV2[0] * deltaUV1[1]);
+
+                tangent[0] = f * (deltaUV2[1] * edge1[0] - deltaUV1[1] * edge2[0]);
+                tangent[1] = f * (deltaUV2[1] * edge1[1] - deltaUV1[1] * edge2[1]);
+                tangent[2] = f * (deltaUV2[1] * edge1[2] - deltaUV1[1] * edge2[2]);
+
+                glm_vec3_normalize(tangent);
+
+                bitangent[0] = f * (-deltaUV2[0] * edge1[0] + deltaUV1[0] * edge2[0]);
+                bitangent[1] = f * (-deltaUV2[0] * edge1[1] + deltaUV1[0] * edge2[1]);
+                bitangent[2] = f * (-deltaUV2[0] * edge1[2] + deltaUV1[0] * edge2[2]);
+
+                glm_vec3_normalize(bitangent);
+
                 //point 1
                 for(size_t i = 0; i < 3; i++)
                     vtor_pushback(&array_buf, &vert_ptr[ (3 * (x1 - 1)) + i]);
@@ -186,6 +219,12 @@ Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* mesh
 
                 for(size_t i = 0; i < 3; i++)
                     vtor_pushback(&array_buf, &normal_ptr[ (3 * (z1 - 1)) + i]);
+
+                for(size_t i = 0; i < 3; i++)
+                    vtor_pushback(&array_buf, &tangent[i]);
+
+                for(size_t i = 0; i < 3; i++)
+                    vtor_pushback(&array_buf, &bitangent[i]);
 
                 //point 2
                 for(size_t i = 0; i < 3; i++)
@@ -197,6 +236,12 @@ Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* mesh
                 for(size_t i = 0; i < 3; i++)
                     vtor_pushback(&array_buf, &normal_ptr[ (3 * (z2 - 1)) + i]);
 
+                for(size_t i = 0; i < 3; i++)
+                    vtor_pushback(&array_buf, &tangent[i]);
+
+                for(size_t i = 0; i < 3; i++)
+                    vtor_pushback(&array_buf, &bitangent[i]);
+
                 //point 3
                 for(size_t i = 0; i < 3; i++)
                     vtor_pushback(&array_buf, &vert_ptr[ (3 * (x3 - 1)) + i]);
@@ -206,6 +251,12 @@ Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* mesh
 
                 for(size_t i = 0; i < 3; i++)
                     vtor_pushback(&array_buf, &normal_ptr[ (3 * (z3 - 1)) + i]);
+
+                for(size_t i = 0; i < 3; i++)
+                    vtor_pushback(&array_buf, &tangent[i]);
+
+                for(size_t i = 0; i < 3; i++)
+                    vtor_pushback(&array_buf, &bitangent[i]);
 
                 vtor_pushback(&index_buf, &point1);
                 vtor_pushback(&index_buf, &point2);
@@ -256,8 +307,8 @@ Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* mesh
         ret = calloc(n_meshes,sizeof (Primitive));
         if(meshes)
             *meshes=n_meshes;
-                            //v+t+n
-        const size_t stride = 3+2+3;
+                            //v + te+ n + ta+ b
+        const size_t stride = 3 + 2 + 3 + 3 + 3;
         const size_t elemsize = sizeof(float);
         size_t last_offset = 0;
         for(size_t i = 0; i < n_meshes; i++)
@@ -323,21 +374,33 @@ Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* mesh
 
             //aPos
             ret[i].aPos.size = 3;
-            ret[i].aPos.stride = 8 * sizeof(float);
+            ret[i].aPos.stride = stride * elemsize;
             ret[i].aPos.type = GL_FLOAT;
             ret[i].aPos.ptr = NULL;
 
             //aTexCoord
             ret[i].aTexCoord.size = 2;
-            ret[i].aTexCoord.stride = 8 * sizeof(float);
+            ret[i].aTexCoord.stride = stride * elemsize;
             ret[i].aTexCoord.type = GL_FLOAT;
             ret[i].aTexCoord.ptr = (void*)(3 * sizeof(float));
 
             //aNormal
             ret[i].aNormal.size = 3;
-            ret[i].aNormal.stride = 8 * sizeof(float);
+            ret[i].aNormal.stride = stride * elemsize;
             ret[i].aNormal.type = GL_FLOAT;
             ret[i].aNormal.ptr = (void*)(5 * sizeof(float));
+
+            //aTangent
+            ret[i].aTangent.size = 3;
+            ret[i].aTangent.stride = stride * elemsize;
+            ret[i].aTangent.type = GL_FLOAT;
+            ret[i].aTangent.ptr = (void*)(8 * sizeof(float));
+
+            //aBiTangent
+            ret[i].aBiTangent.size = 3;
+            ret[i].aBiTangent.stride = stride * elemsize;
+            ret[i].aBiTangent.type = GL_FLOAT;
+            ret[i].aBiTangent.ptr = (void*)(11 * sizeof(float));
 
             dengine_primitive_setup(&ret[i], shader);
 
