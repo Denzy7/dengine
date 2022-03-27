@@ -147,13 +147,21 @@ void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader)
                 vtor_pushback(&plane_array, &y_n);
                 vtor_pushback(&plane_array, &z_n);
 
-                // float x_tan = 0.0f;
-                // float y_tan = 0.0f;
-                // float z_tan = 0.0f;
+                 float x_tan = 1.0f;
+                 float y_tan = 0.0f;
+                 float z_tan = 0.0f;
 
-                // float x_bitan = 0.0f;
-                // float y_bitan = 0.0f;
-                // float z_bitan = 0.0f;
+                 vtor_pushback(&plane_array, &x_tan);
+                 vtor_pushback(&plane_array, &y_tan);
+                 vtor_pushback(&plane_array, &z_tan);
+
+                 float x_bitan = 0.0f;
+                 float y_bitan = 0.0f;
+                 float z_bitan = 1.0f;
+
+                 vtor_pushback(&plane_array, &x_bitan);
+                 vtor_pushback(&plane_array, &y_bitan);
+                 vtor_pushback(&plane_array, &z_bitan);
 
 //                printf(
 //                "%f %f %f" //aPos
@@ -190,25 +198,37 @@ void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader)
         primitive->index.usage = GL_STATIC_DRAW;
         primitive->index_count = sizeof(plane_index) / sizeof(plane_index[0]);
 
+        size_t stride = 14 * sizeof(float);
 
         //aPos
         primitive->aPos.size = 3;
-        primitive->aPos.stride = 8 * sizeof(float);
+        primitive->aPos.stride = stride;
         primitive->aPos.type = GL_FLOAT;
         primitive->aPos.ptr = NULL;
 
         //aTexCoord
         primitive->aTexCoord.size = 2;
-        primitive->aTexCoord.stride = 8 * sizeof(float);
+        primitive->aTexCoord.stride = stride;
         primitive->aTexCoord.type = GL_FLOAT;
         primitive->aTexCoord.ptr = (void*)(3 * sizeof(float));
 
         //aNormal
         primitive->aNormal.size = 3;
-        primitive->aNormal.stride = 8 * sizeof(float);
+        primitive->aNormal.stride = stride;
         primitive->aNormal.type = GL_FLOAT;
         primitive->aNormal.ptr = (void*)(5 * sizeof(float));
 
+        //aTangent
+        primitive->aTangent.size = 3;
+        primitive->aTangent.stride = stride;
+        primitive->aTangent.type = GL_FLOAT;
+        primitive->aTangent.ptr = (void*)(8 * sizeof(float));
+
+        //aBiTangent
+        primitive->aBiTangent.size = 3;
+        primitive->aBiTangent.stride = stride;
+        primitive->aBiTangent.type = GL_FLOAT;
+        primitive->aBiTangent.ptr = (void*)(11 * sizeof(float));
 
         dengine_primitive_setup(primitive, shader);
 
