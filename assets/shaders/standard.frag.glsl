@@ -56,6 +56,7 @@ struct SpotLight
 
 varying vec3 Normal, CamPos, FragPos;
 varying vec2 TexCoord;
+varying mat3 TBN;
 
 uniform DirLight dLight;
 uniform PointLight pLights[MAX_POINT_LIGHT];
@@ -67,6 +68,7 @@ uniform samplerCube sLightsShadow0;
 
 uniform sampler2D diffuseTex;
 uniform sampler2D specularTex;
+uniform sampler2D normalTex;
 
 vec3 texDiffuseCol = vec3(0.0);
 vec3 texSpecularCol = vec3(0.0);
@@ -88,7 +90,14 @@ float shadowCalcCube(samplerCube cube, vec3 pos, float shadowfar);
 
 void main()
 {
-    nNormal = normalize(Normal);
+    //basic normals
+    //nNormal = normalize(Normal);
+
+    //normalmap
+    nNormal = texture2D(normalTex, TexCoord).rgb;
+    nNormal = normalize(nNormal * 2.0 - 1.0);
+    nNormal = normalize(TBN * nNormal);
+
     camDir = normalize(CamPos - FragPos);
 
     texDiffuseCol = texture2D(diffuseTex, TexCoord).rgb;
@@ -100,14 +109,16 @@ void main()
     for(int i = 0; i < 1; i++)
     {
         vec3 pLightInfl = vec3(0.0);
-        vec3 sLightInfl = vec3(0.0);
-
         pLightInfl = pointLightAdd(pLights[i], pLightsShadow0);
-        sLightInfl = spotLightAdd(sLights[i], sLightsShadow0);
 
         if(length(pLightInfl) > 0.0)
             FragColor+=pLightInfl;
+    }
 
+    for(int i = 0; i < 1; i++)
+    {
+        vec3 sLightInfl = vec3(0.0);
+        sLightInfl = spotLightAdd(sLights[i], sLightsShadow0);
         if(length(sLightInfl) > 0.0)
             FragColor+=sLightInfl;
     }
