@@ -133,8 +133,8 @@ void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader)
                 vtor_pushback(&plane_array, &y);
                 vtor_pushback(&plane_array, &z);
 
-                float s = x < 0.0f ? 0.0f : 1.0f;
-                float t = z < 0.0f ? 0.0f : 1.0f;
+                float s = x < 0.0f ? 1.0f : 0.0f;
+                float t = z < 0.0f ? 1.0f : 0.0f;
 
                 vtor_pushback(&plane_array, &s);
                 vtor_pushback(&plane_array, &t);
