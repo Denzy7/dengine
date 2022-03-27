@@ -436,3 +436,8 @@ int denginegui_button(float x,float y, float width, float height, const char* te
 
     return down;
 }
+
+float denginegui_get_fontsz()
+{
+    return _fontsz;
+}
