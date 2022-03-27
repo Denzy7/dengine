@@ -306,36 +306,87 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
         float y_n;
         float z_n;
 
+        float tangent[3], bitangent[3];
+
         if(i >= 0 && i < 6)
         {
             x_n = -1.0f;
             y_n = 0.0f;
             z_n = 0.0f;
+
+            tangent[0] = 0.0f;
+            tangent[1] = -1.0f;
+            tangent[2] = 0.0f;
+
+            bitangent[0] = 0.0f;
+            bitangent[1] = 0.0f;
+            bitangent[2] = -1.0f;
         }else if(i >= 6 && i < 12)
         {
             x_n = 1.0f;
             y_n = 0.0f;
             z_n = 0.0f;
+
+            tangent[0] = 0.0f;
+            tangent[1] = 1.0f;
+            tangent[2] = 0.0f;
+
+            bitangent[0] = 0.0f;
+            bitangent[1] = 0.0f;
+            bitangent[2] = 1.0f;
         }else if(i >= 12 && i < 18)
         {
             x_n = 0.0f;
             y_n = -1.0f;
             z_n = 0.0f;
-        }else if(i >= 18 && i < 24)
+
+            tangent[0] = -1.0f;
+            tangent[1] = 0.0f;
+            tangent[2] = 0.0f;
+
+            bitangent[0] = 0.0f;
+            bitangent[1] = 0.0f;
+            bitangent[2] = -1.0f;
+        }
+        else if(i >= 18 && i < 24)
         {
             x_n = 0.0f;
             y_n = 1.0f;
             z_n = 0.0f;
+
+            tangent[0] = 1.0f;
+            tangent[1] = 0.0f;
+            tangent[2] = 0.0f;
+
+            bitangent[0] = 0.0f;
+            bitangent[1] = 0.0f;
+            bitangent[2] = 1.0f;
         }else if(i >= 24 && i < 30)
         {
             x_n = 0.0f;
             y_n = 0.0f;
             z_n = -1.0f;
+
+            tangent[0] = -1.0f;
+            tangent[1] = 0.0f;
+            tangent[2] = 0.0f;
+
+            bitangent[0] = 0.0f;
+            bitangent[1] = -1.0f;
+            bitangent[2] = 0.0f;
         }else if(i >= 30 && i < 36)
         {
             x_n = 0.0f;
             y_n = 0.0f;
             z_n = 1.0f;
+
+            tangent[0] = 1.0f;
+            tangent[1] = 0.0f;
+            tangent[2] = 0.0f;
+
+            bitangent[0] = 0.0f;
+            bitangent[1] = 1.0f;
+            bitangent[2] = 0.0f;
         }
 
         vtor_pushback(&cube_array, &x);
@@ -349,6 +400,13 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
         vtor_pushback(&cube_array, &y_n);
         vtor_pushback(&cube_array, &z_n);
 
+        vtor_pushback(&cube_array, &tangent[0]);
+        vtor_pushback(&cube_array, &tangent[1]);
+        vtor_pushback(&cube_array, &tangent[2]);
+
+        vtor_pushback(&cube_array, &bitangent[0]);
+        vtor_pushback(&cube_array, &bitangent[1]);
+        vtor_pushback(&cube_array, &bitangent[2]);
         //now normalize
         cube_index[i] = i;
     }
@@ -367,23 +425,37 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
     primitive->index.usage = GL_STATIC_DRAW;
     primitive->index_count = sizeof(cube_index) / sizeof(cube_index[0]);
 
+    size_t stride = 14 * sizeof(float);
+
     //aPos
     primitive->aPos.size = 3;
-    primitive->aPos.stride = 8 * sizeof(float);
+    primitive->aPos.stride = stride;
     primitive->aPos.type = GL_FLOAT;
     primitive->aPos.ptr = NULL;
 
     //aTexCoord
     primitive->aTexCoord.size = 2;
-    primitive->aTexCoord.stride = 8 * sizeof(float);
+    primitive->aTexCoord.stride = stride;
     primitive->aTexCoord.type = GL_FLOAT;
     primitive->aTexCoord.ptr = (void*)(3 * sizeof(float));
 
     //aNormal
     primitive->aNormal.size = 3;
-    primitive->aNormal.stride = 8 * sizeof(float);
+    primitive->aNormal.stride = stride;
     primitive->aNormal.type = GL_FLOAT;
     primitive->aNormal.ptr = (void*)(5 * sizeof(float));
+
+    //aTangent
+    primitive->aTangent.size = 3;
+    primitive->aTangent.stride = stride;
+    primitive->aTangent.type = GL_FLOAT;
+    primitive->aTangent.ptr = (void*)(8 * sizeof(float));
+
+    //aBiTangent
+    primitive->aBiTangent.size = 3;
+    primitive->aBiTangent.stride = stride;
+    primitive->aBiTangent.type = GL_FLOAT;
+    primitive->aBiTangent.ptr = (void*)(11 * sizeof(float));
 
     dengine_primitive_setup(primitive, shader);
 
