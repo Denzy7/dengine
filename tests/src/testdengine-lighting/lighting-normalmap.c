@@ -51,6 +51,8 @@ int main(int argc, char *argv[])
     pLight.position[1] = 2.5f;
     pLight.position[2] = 1.5f;
 
+    pLight.light.strength = 2.0f;
+
     Camera camera;
     dengine_camera_setup(&camera);
     dengine_camera_apply(stdshdr, &camera);
