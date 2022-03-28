@@ -26,6 +26,17 @@ if(NOT ANDROID)
             #most if not all distros have fontconfig
             message(WARNING ">>> Could not find fontconfig. Default font support will not work! Consider installing it")
         endif()
+
+        pkg_check_modules(python3 python3-embed)
+        if(python3_LIBRARIES)
+            message(">>> Found python3 libraries")
+            include_directories(${python3_INCLUDE_DIRS})
+            link_directories(${python3_LIBRARY_DIRS})
+            set(DENGINE_HAS_PYTHON3 1)
+        else()
+            #most if not all distros have python3
+            message(WARNING ">>> Could not find python3. Python scripting will not work! Consider installing it")
+        endif()
     else()
         message(WARNING ">>> Could not find pkg-config. Will compile From sources")
     endif()
