@@ -4,10 +4,14 @@
 - Written in C99
 - Uses at least OpenGL 3.0 and OpenGL ES 2.0
 - Some features need GL 3.2 or ES 3.2
+- It's possible to use GL 2.1 provided the following generic extensions are available:
+	- `GL_*_vertex_array_object`
+	- `GL_*_framebuffer_object`
+	- `GL_*_depth_texture`
 - 3D graphics is the main focus
 
 # modules/libs
-
+Meta shared library `dengine` is split into:  
 1. **dengine-core** – Contains the basic functions to create context, textures, buffers and drawing  
 	**HEADERS**  
 	- dengine_config.h – Compile defines for compiling
@@ -24,13 +28,16 @@
 	- input.h – Interface to native Input
 	- framebuffer.h – Framebuffer operations
 	- lighting.h – Basic light sources
-		      
+	- vao.h - Vertex array objects
+	- macros.h - Various macro defines
+	- renderbuffer.h - Renderbuffer objects
+
 	**DEPENDS**  
 	- GLFW – Context and Input for Desktop GL
 	- CGLM – Math for OpenGL
 	- GLAD – Function and extension loader for OpenGL
 	- EGL – Context creation for GLES
-	- STB – stb_image.h to read texture files
+	- STB – stb_image.h to read texture files, stb_image_write.h to write
       
 2. **dengine-utils** – Various misc. utilities  
 	**HEADERS**  
@@ -41,6 +48,8 @@
 	- confserialize.h – Serialize ASCII text to key-value pairs
 	- rng.h – Random number generator
 	- timer.h – Time interface for delta and current
+	- debug.h - Debugging and tracing
+	- str.h - String utils
 
 	**DEPENDS**  
 	- GTK3 – For dialogs on Linux
@@ -51,7 +60,8 @@
                       
 4. **dengine-scene** – Scene creation. Serializes JSON  
 	**HEADERS**  
-	- scene.h – Parses json to various scene constructs
+	- scene.h – Construct scenes and add entities. Parse scenes to and fro JSON
+	- ecs.h - Entity component system definitions
 
 	**DEPENDS**  
 	- Any JSON library can do. Use JSON-C
