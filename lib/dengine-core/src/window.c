@@ -5,7 +5,7 @@
 
 #include <stdio.h>  //printf
 
-int _gl_max, _gl_min, _win_msaa;
+int _gl_max = 0, _gl_min = 0, _gl_core = 0 , _win_msaa = 0;
 #ifdef DENGINE_WIN_EGL
 EGLDisplay _egl_display;
 EGLSurface _egl_surface;
@@ -31,7 +31,19 @@ int dengine_window_init()
     //Set callbacks
     glfwSetErrorCallback(dengine_window_glfw_callback_error);
 
-    return glfwInit();
+    int initglfw = glfwInit();
+    if(initglfw)
+    {
+        if(_gl_max)
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, _gl_max);
+        if(_gl_min)
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, _gl_min);
+        if(_gl_core)
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        if(_win_msaa)
+            glfwWindowHint(GLFW_SAMPLES, _win_msaa);
+    }
+    return initglfw;
 
     #elif defined(DENGINE_WIN_EGL) && defined(DENGINE_ANDROID)
     /*
@@ -142,21 +154,12 @@ void dengine_window_request_GL(int gl_major, int gl_minor, int gl_core)
 {
     _gl_max = gl_major;
     _gl_min = gl_minor;
-    #if defined (DENGINE_WIN_GLFW)
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, gl_major);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, gl_minor);
 
-    if(gl_core)
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    #endif // defined
 }
 
 void dengine_window_request_MSAA(int samples)
 {
     _win_msaa = samples;
-    #if defined (DENGINE_WIN_GLFW)
-    glfwWindowHint(GLFW_SAMPLES, samples);
-    #endif // defined
 }
 
 void dengine_window_request_defaultall()
