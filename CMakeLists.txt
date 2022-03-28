@@ -61,11 +61,9 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-utils/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-utils/include/dengine-utils
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-gui/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-gui/include/dengine-gui
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-model/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-model/include/dengine-model
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-scene/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-scene/include/dengine-scene
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-script/include
         )
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
@@ -83,6 +81,7 @@ add_subdirectory(lib/dengine-core "dengine-core-build")
 add_subdirectory(lib/dengine-gui "dengine-gui-build")
 add_subdirectory(lib/dengine-model "dengine-model-build")
 add_subdirectory(lib/dengine-scene "dengine-scene-build")
+add_subdirectory(lib/dengine-script "dengine-script-build")
 
 add_library(dengine
     lib/dengine-core/include/dengine/dengine.h
