@@ -14,6 +14,9 @@ int dengine_init()
     if(!hasgotopts)
         opts = *dengine_init_get_opts();
 
+    if(opts.window_msaa)
+        dengine_window_request_MSAA(opts.window_msaa);
+
     //All this to GL initialization
     if(!dengine_window_init())
         return 0;
@@ -29,6 +32,20 @@ int dengine_init()
 
     if(!dengine_window_loadgl())
         return 0;
+
+    int w, h;
+    dengine_window_get_window_dim(&w, &h);
+    int samples;
+    glGetIntegerv(GL_SAMPLES, &samples);
+    const char* GL = (const char*)glGetString(GL_VERSION);
+    const char* GLSL = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+    const char* VENDOR = (const char*)glGetString(GL_VENDOR);
+    const char* RENDERDER = (const char*)glGetString(GL_RENDERER);
+
+    dengineutils_logging_log("INFO::GL : %s\nGLSL : %s\nVENDOR : %s\nRENDERDER : %s\n"
+                             "WINDOW : %dx%d %dx MSAA",
+                             GL, GLSL, VENDOR, RENDERDER,
+                             w, h, samples);
 
     //INPUT
     dengine_input_init();
@@ -88,6 +105,7 @@ DengineInitOpts* dengine_init_get_opts()
     opts.window_height = 720;
     opts.window_width = 1280;
     opts.window_title = "Dengine!";
+    opts.window_msaa = 4;
 
     opts.font_size = 18.0f;
     opts.font_bitmapsize = 512;

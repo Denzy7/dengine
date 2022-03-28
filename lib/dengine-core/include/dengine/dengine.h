@@ -10,6 +10,7 @@ typedef struct
     int window_width;
     int window_height;
     char* window_title;
+    int window_msaa;
 
     int gl_max;
     int gl_min;
