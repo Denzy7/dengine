@@ -166,15 +166,16 @@ vec3 pointLightAdd(PointLight pL, samplerCube cube)
     vec3 reflectDir=reflect(-dir, nNormal);
     float spec = pow(max(dot(camDir, reflectDir), 0.0), specular_power);
 
-    if(length(texDiffuseCol) == 0.0)
-    {
-        ambient = pL.light.ambient;
-        diffuse = pL.light.diffuse * diff * pL.light.strength;
-    }else
-    {
-        ambient = pL.light.ambient * texDiffuseCol;
-        diffuse = pL.light.diffuse * diff * texDiffuseCol * pL.light.strength;
-    }
+    //Check if a texture is assigned. causes a bottleneck. use material instead
+    //since its assigns a blank white texture
+//    if(length(texDiffuseCol) == 0.0)
+//    {
+//        ambient = pL.light.ambient;
+//        diffuse = pL.light.diffuse * diff * pL.light.strength;
+//    }else{
+    ambient = pL.light.ambient * texDiffuseCol;
+    diffuse = pL.light.diffuse * diff * texDiffuseCol * pL.light.strength;
+    //}
 
     specular = pL.light.specular * spec * texSpecularCol * pL.light.strength;
 
@@ -195,16 +196,17 @@ vec3 spotLightAdd(SpotLight sL, samplerCube cube)
 
     vec3 reflectDir=reflect(-dir, nNormal);
     float spec = pow(max(dot(camDir, reflectDir), 0.0), specular_power);
-
-    if(length(texDiffuseCol) == 0.0)
-    {
-        ambient = sL.pointLight.light.ambient;
-        diffuse = sL.pointLight.light.diffuse * diff * sL.pointLight.light.strength;
-    }else
-    {
+    //Check if a texture is assigned. causes a bottleneck. use material instead
+    //since its assigns a blank white texture
+//    if(length(texDiffuseCol) == 0.0)
+//    {
+//        ambient = sL.pointLight.light.ambient;
+//        diffuse = sL.pointLight.light.diffuse * diff * sL.pointLight.light.strength;
+//    }else
+//    {
         ambient = sL.pointLight.light.ambient * texDiffuseCol;
         diffuse = sL.pointLight.light.diffuse * diff * texDiffuseCol * sL.pointLight.light.strength;
-    }
+//    }
 
     specular = sL.pointLight.light.specular * spec * texSpecularCol * sL.pointLight.light.strength;
 
