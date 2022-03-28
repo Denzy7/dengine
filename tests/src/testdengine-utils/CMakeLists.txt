@@ -40,13 +40,13 @@ target_link_libraries(testdengine-util-timer
         dengine-utils m)
 set_property(TARGET testdengine-util-timer PROPERTY C_STANDARD 99)
 
-#strpatch util
-add_executable(testdengine-util-strpatch
-        util-strpatch.c
+#str util
+add_executable(testdengine-util-str
+        util-str.c
     )
-target_link_libraries(testdengine-util-strpatch
+target_link_libraries(testdengine-util-str
         dengine-utils)
-set_property(TARGET testdengine-util-strpatch PROPERTY C_STANDARD 99)
+set_property(TARGET testdengine-util-str PROPERTY C_STANDARD 99)
 
 #vtor util
 add_executable(testdengine-util-vtor
