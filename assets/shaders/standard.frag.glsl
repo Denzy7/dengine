@@ -130,16 +130,17 @@ vec3 dirLightAdd()
 
     vec3 reflectDir = reflect(dir, nNormal);
     float spec = pow(max(dot(camDir, reflectDir), 0.0), specular_power);
-
-    if(length(texDiffuseCol) == 0.0)
-    {
-        ambient = dLight.light.ambient;
-        diffuse = dLight.light.diffuse * diff * dLight.light.strength;
-    }else
-    {
+    //Check if a texture is assigned. causes a bottleneck. use material instead
+    //since its assigns a blank white texture
+//    if(length(texDiffuseCol) == 0.0)
+//    {
+//        ambient = dLight.light.ambient;
+//        diffuse = dLight.light.diffuse * diff * dLight.light.strength;
+//    }else
+//    {
         ambient = dLight.light.ambient * texDiffuseCol;
         diffuse = dLight.light.diffuse * diff * texDiffuseCol * dLight.light.strength;
-    }
+//    }
 
     specular= dLight.light.specular * spec * texSpecularCol * dLight.light.strength;
 
