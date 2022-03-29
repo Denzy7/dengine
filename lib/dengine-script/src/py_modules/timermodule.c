@@ -12,7 +12,7 @@ static PyObject* timer_get_delta(PyObject* self, PyObject* args)
     return PyFloat_FromDouble(dengineutils_timer_get_delta());
 }
 
-static PyMethodDef DengineInptModuleMethods[]=
+static PyMethodDef DengineTimerModuleMethods[]=
 {
     {"get_delta", timer_get_delta, METH_VARARGS, "Get delta time in ms"},
     {"get_current", timer_get_current, METH_VARARGS, "Get current time in ms"},
@@ -23,9 +23,9 @@ static struct PyModuleDef denginetimer =
 {
     PyModuleDef_HEAD_INIT,
     "timer",
-    "Dengine timer utils",
+    "Dengine timer util",
     -1,
-    DengineInptModuleMethods
+    DengineTimerModuleMethods
 };
 
 PyMODINIT_FUNC PyInit_timer()
