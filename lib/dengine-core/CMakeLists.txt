@@ -48,12 +48,11 @@ endif()
 
 if(BUILD_SHARED_LIBS AND DENGINE_MERGE_LIBS)
     add_library(dengine-core STATIC ${dengine-core-hdr} ${dengine-core-src})
-    set_target_properties(dengine-core PROPERTIES
-                          POSITION_INDEPENDENT_CODE ON)
 else()
     add_library(dengine-core ${dengine-core-hdr} ${dengine-core-src})
 endif()
-
+set_target_properties(dengine-core PROPERTIES
+                      POSITION_INDEPENDENT_CODE ON)
 
 if(ANDROID)
     target_include_directories(dengine-core PUBLIC
