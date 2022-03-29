@@ -1,4 +1,4 @@
-#include "dengine-script/modules/timermodule.h"
+#include "timermodule.h"
 
 #include "dengine-utils/timer.h"
 

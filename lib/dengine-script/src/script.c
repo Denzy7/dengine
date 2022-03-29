@@ -2,8 +2,8 @@
 
 #include "dengine-utils/logging.h"
 
-#include "dengine-script/modules/inptmodule.h" //input_mod
-#include "dengine-script/modules/timermodule.h" //timer_mod
+#include "py_modules/inptmodule.h" //input_mod
+#include "py_modules/timermodule.h" //timer_mod
 
 static PyObject* dengineinit(PyObject* self, PyObject* args)
 {
