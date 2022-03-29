@@ -10,6 +10,7 @@ set(dengine-script-py_modules
     src/py_modules/inptmodule.c
     src/py_modules/loggingmodule.c
     src/py_modules/timermodule.c
+    src/py_modules/filesysmodule.c
 )
 
 if(BUILD_SHARED_LIBS AND DENGINE_MERGE_LIBS)
