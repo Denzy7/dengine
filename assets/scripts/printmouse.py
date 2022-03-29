@@ -2,8 +2,6 @@ import dengine.inpt as inpt
 import dengine.timer as timer
 elapsed = 0.0
 def start():
-    global elapsed
-    elapsed += timer.get_delta()
     print("Start called")
 
 def update():
