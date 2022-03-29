@@ -21,7 +21,7 @@ if(python3_LIBRARIES)
 target_link_libraries(dengine-script ${python3_LIBRARIES})
 #add python modules (shared libraries)
 add_subdirectory(src/modules "modules-build")
-target_link_libraries(dengine-script inpt)
+target_link_libraries(dengine-script inpt timer)
 endif()
 
 #remove lib prefix
