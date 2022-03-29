@@ -79,6 +79,8 @@ int dengine_init()
     if(opts.enable_backfaceculling)
         glEnable(GL_CULL_FACE);
 
+    denginescript_init();
+
     return 1;
 }
 
@@ -93,6 +95,7 @@ void dengine_terminate()
 {
     denginegui_terminate();
     dengineutils_filesys_terminate();
+    denginescript_terminate();
 
     dengineutils_debug_terminate();
     dengine_window_terminate();

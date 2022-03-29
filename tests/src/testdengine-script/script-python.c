@@ -1,5 +1,5 @@
 #include <dengine/dengine.h>
-#include <dengine-script/script.h>
+
 int main(int argc, char *argv[])
 {
     DengineInitOpts* opts = dengine_init_get_opts();
@@ -8,8 +8,6 @@ int main(int argc, char *argv[])
 
     const size_t prtbf_sz = 2048;
     char* prtbf = malloc(prtbf_sz);
-
-    denginescript_init();
 
     const char* script_file = "scripts/printmouse.py";
     File2Mem f2m;
@@ -30,7 +28,7 @@ int main(int argc, char *argv[])
     }
     free(script);
     free(prtbf);
-    denginescript_terminate();
+
     dengine_terminate();
     return 0;
 }

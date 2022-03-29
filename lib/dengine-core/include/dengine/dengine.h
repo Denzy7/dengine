@@ -48,6 +48,7 @@ typedef struct
 
 #include <dengine-scene/scene.h>
 
+#include <dengine-script/script.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
