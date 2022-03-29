@@ -112,8 +112,9 @@ void dengineutils_logging_log(const char* message, ...)
         delim = "";
 
     dengineutils_logging_set_consolecolor(LOG_BUFFER[0]);
-    printf("\n%s\n", LOG_BUFFER + strlen(delim));
+    printf("\n%s", LOG_BUFFER + strlen(delim));
     dengineutils_logging_set_consolecolor('0');
+    printf("\n");
 
     #ifdef DENGINE_ANDROID
         ANDROID_LOGI("%s",LOG_BUFFER + strlen(delim));
