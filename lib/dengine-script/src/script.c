@@ -3,6 +3,7 @@
 #include "dengine-utils/logging.h"
 
 #include "dengine-script/modules/inptmodule.h" //input_mod
+#include "dengine-script/modules/timermodule.h" //timer_mod
 
 static PyObject* dengineinit(PyObject* self, PyObject* args)
 {
@@ -38,6 +39,7 @@ int denginescript_init()
 {
     int append_dengine = PyImport_AppendInittab("dengine", &PyInit_dengine);
     PyImport_AppendInittab("dengine.inpt", &PyInit_inpt);
+    PyImport_AppendInittab("dengine.timer", &PyInit_timer);
 
     Py_Initialize();
 
@@ -67,7 +69,7 @@ int denginescript_init()
         dengineutils_logging_log("ERROR::cannot get python compiler!");
     }
 
-    return append_dengine && py_builtins && py_builtins;
+    return append_dengine && py_builtins && py_compiler;
 }
 
 PyScript* denginescript_python_new(const char* src, const char* name)
