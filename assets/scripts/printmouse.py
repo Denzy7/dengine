@@ -4,8 +4,10 @@ import dengine.logging as logging
 
 elapsed = 0.0
 
+
 def start():
     logging.log("INFO::start called")
+
 
 def update():
     global elapsed
@@ -24,4 +26,3 @@ def update():
 
     if(inpt.get_key('X')):
         logging.log("ERROR::pressed x")
-
