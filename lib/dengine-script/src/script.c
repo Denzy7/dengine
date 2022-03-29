@@ -4,6 +4,7 @@
 
 #include "py_modules/inptmodule.h" //input_mod
 #include "py_modules/timermodule.h" //timer_mod
+#include "py_modules/loggingmodule.h" //logging_mod
 
 static PyObject* dengineinit(PyObject* self, PyObject* args)
 {
@@ -40,6 +41,7 @@ int denginescript_init()
     int append_dengine = PyImport_AppendInittab("dengine", &PyInit_dengine);
     PyImport_AppendInittab("dengine.inpt", &PyInit_inpt);
     PyImport_AppendInittab("dengine.timer", &PyInit_timer);
+    PyImport_AppendInittab("dengine.logging", &PyInit_logging);
 
     Py_Initialize();
 
