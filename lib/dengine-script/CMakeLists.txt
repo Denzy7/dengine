@@ -19,6 +19,9 @@ set_property(TARGET dengine-script PROPERTY C_STANDARD 99)
 
 if(python3_LIBRARIES)
 target_link_libraries(dengine-script ${python3_LIBRARIES})
+#add python modules (shared libraries)
+add_subdirectory(src/modules "modules-build")
+target_link_libraries(dengine-script inpt)
 endif()
 
 #remove lib prefix
