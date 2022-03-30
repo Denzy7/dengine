@@ -31,19 +31,7 @@ int dengine_window_init()
     //Set callbacks
     glfwSetErrorCallback(dengine_window_glfw_callback_error);
 
-    int initglfw = glfwInit();
-    if(initglfw)
-    {
-        if(_gl_max)
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, _gl_max);
-        if(_gl_min)
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, _gl_min);
-        if(_gl_core)
-            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        if(_win_msaa)
-            glfwWindowHint(GLFW_SAMPLES, _win_msaa);
-    }
-    return initglfw;
+    return glfwInit();
 
     #elif defined(DENGINE_WIN_EGL) && defined(DENGINE_ANDROID)
     /*
@@ -167,7 +155,7 @@ void dengine_window_request_defaultall()
 #ifdef DENGINE_WIN_GLFW
     glfwDefaultWindowHints();
 #endif
-    _gl_max = 2;
+    _gl_max = 0;
     _gl_min = 0;
     _win_msaa = 0;
 }
@@ -282,6 +270,15 @@ int dengine_window_create(int width, int height, const char* title, Window* wind
 
 int dengine_window_glfw_create(int width, int height, const char* title)
 {
+    if(_gl_max)
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, _gl_max);
+    if(_gl_min)
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, _gl_min);
+    if(_gl_core)
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    if(_win_msaa)
+        glfwWindowHint(GLFW_SAMPLES, _win_msaa);
+
     glfw_current = glfwCreateWindow(width, height, title, NULL, NULL);
 
     if(glfw_current)
