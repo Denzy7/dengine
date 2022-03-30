@@ -2,10 +2,10 @@
 
 #include "dengine-utils/logging.h"
 
-#include "py_modules/inptmodule.h" //input_mod
-#include "py_modules/timermodule.h" //timer_mod
-#include "py_modules/loggingmodule.h" //logging_mod
-#include "py_modules/filesysmodule.h" //filesys_mod
+PyMODINIT_FUNC PyInit_inpt(); //input_mod
+PyMODINIT_FUNC PyInit_timer(); //timer_mod
+PyMODINIT_FUNC PyInit_logging(); //logging_mod
+PyMODINIT_FUNC PyInit_filesys(); //filesys_mod
 
 static PyObject* dengineinit(PyObject* self, PyObject* args)
 {

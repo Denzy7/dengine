@@ -1,5 +1,4 @@
-#include "timermodule.h"
-
+#include "dengine-script/script.h"
 #include "dengine-utils/timer.h"
 
 static PyObject* timer_get_current(PyObject* self, PyObject* args)

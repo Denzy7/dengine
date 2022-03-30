@@ -1,5 +1,4 @@
-#include "loggingmodule.h"
-
+#include "dengine-script/script.h"
 #include "dengine-utils/logging.h"
 
 static PyObject* logging_log(PyObject* self, PyObject* args)

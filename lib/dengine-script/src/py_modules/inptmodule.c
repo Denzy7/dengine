@@ -1,4 +1,4 @@
-#include "inptmodule.h"
+#include "dengine-script/script.h"
 #include "dengine/input.h"
 
 static PyObject* inpt_getmousepos_x(PyObject* self, PyObject* args)
