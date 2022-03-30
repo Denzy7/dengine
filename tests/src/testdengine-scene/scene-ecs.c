@@ -13,6 +13,7 @@
 #include <dengine/window.h>
 #include <dengine/draw.h>
 #include <dengine/camera.h>
+#include <dengine/loadgl.h>
 
 #include <dengine-gui/gui.h>
 

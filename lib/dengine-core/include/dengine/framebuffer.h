@@ -10,16 +10,16 @@
 
 #include "dengine/texture.h"
 #include "dengine/renderbuffer.h"
-#include "dengine/loadgl.h"
+//#include "dengine/loadgl.h"
 
 /*! \enum FramebufferAttachmentType
  *  Helper for various framebuffer atttachments
  */
 typedef enum
 {
-    DENGINE_FRAMEBUFFER_COLOR = GL_COLOR_ATTACHMENT0,
-    DENGINE_FRAMEBUFFER_DEPTH = GL_DEPTH_ATTACHMENT,
-    DENGINE_FRAMEBUFFER_STENCIL = GL_STENCIL_ATTACHMENT
+    DENGINE_FRAMEBUFFER_COLOR,// = GL_COLOR_ATTACHMENT0,
+    DENGINE_FRAMEBUFFER_DEPTH,// = GL_DEPTH_ATTACHMENT,
+    DENGINE_FRAMEBUFFER_STENCIL,// = GL_STENCIL_ATTACHMENT
 }FramebufferAttachmentType;
 
 /*! \struct Framebuffer
