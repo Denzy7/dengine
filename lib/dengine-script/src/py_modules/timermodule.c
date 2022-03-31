@@ -18,7 +18,7 @@ static PyMethodDef DengineTimerModuleMethods[]=
     {NULL, NULL, 0, NULL},
 };
 
-static struct PyModuleDef denginetimer =
+static PyModuleDef denginetimer =
 {
     PyModuleDef_HEAD_INIT,
     "timer",

@@ -19,7 +19,7 @@ static PyMethodDef DengineLoggingModuleMethods[]=
     {NULL, NULL, 0, NULL},
 };
 
-static struct PyModuleDef denginelogging =
+static PyModuleDef denginelogging =
 {
     PyModuleDef_HEAD_INIT,
     "logging",

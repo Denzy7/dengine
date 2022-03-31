@@ -18,7 +18,7 @@ static PyMethodDef DengineFileSysModuleMethods[]=
     {NULL, NULL, 0, NULL},
 };
 
-static struct PyModuleDef denginefilesys =
+static PyModuleDef denginefilesys =
 {
     PyModuleDef_HEAD_INIT,
     "filesys",

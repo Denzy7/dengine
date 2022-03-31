@@ -31,7 +31,7 @@ static PyMethodDef DengineInptModuleMethods[]=
     {NULL, NULL, 0, NULL},
 };
 
-static struct PyModuleDef dengineinpt =
+static PyModuleDef dengineinpt =
 {
     PyModuleDef_HEAD_INIT,
     "inpt",
