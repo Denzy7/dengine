@@ -26,17 +26,6 @@ if(NOT ANDROID)
             #most if not all distros have fontconfig
             message(WARNING ">>> Could not find fontconfig. Default font support will not work! Consider installing it")
         endif()
-
-        pkg_check_modules(python3 python3-embed)
-        if(python3_LIBRARIES)
-            message(">>> Found python3 libraries")
-            include_directories(${python3_INCLUDE_DIRS})
-            link_directories(${python3_LIBRARY_DIRS})
-            set(DENGINE_HAS_PYTHON3 1)
-        else()
-            #most if not all distros have python3
-            message(WARNING ">>> Could not find python3. Python scripting will not work! Consider installing it")
-        endif()
     else()
         message(WARNING ">>> Could not find pkg-config. Will compile From sources")
     endif()
@@ -63,7 +52,7 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-gui/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-model/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-scene/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-script/include
+        #${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-script/include
         )
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
@@ -81,7 +70,7 @@ add_subdirectory(lib/dengine-core "dengine-core-build")
 add_subdirectory(lib/dengine-gui "dengine-gui-build")
 add_subdirectory(lib/dengine-model "dengine-model-build")
 add_subdirectory(lib/dengine-scene "dengine-scene-build")
-add_subdirectory(lib/dengine-script "dengine-script-build")
+#add_subdirectory(lib/dengine-script "dengine-script-build")
 
 add_library(dengine
     lib/dengine-core/include/dengine/dengine.h
@@ -93,7 +82,9 @@ target_link_libraries(dengine
     dengine-gui
     dengine-model
     dengine-scene
-    dengine-script)
+#   dengine-script is not yet mature enough and has its own unstable branch
+#    dengine-script
+)
 set_property(TARGET dengine PROPERTY C_STANDARD 99)
 #remove lib prefix
 if(WIN32)
