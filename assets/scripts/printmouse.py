@@ -5,7 +5,6 @@ import dengine.filesys as filesys
 import time
 elapsed = 0.0
 
-
 def start():
     logging.log("INFO::start called")
     cd = filesys.get_cachedir()
