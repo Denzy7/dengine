@@ -41,7 +41,7 @@ set_property(TARGET testdengine-lighting-standard PROPERTY C_STANDARD 99)
 add_executable(testdengine-lighting-normalmap
         lighting-normalmap.c)
 target_link_libraries(testdengine-lighting-normalmap
-        dengine)
+        ${dengine})
 set_property(TARGET testdengine-lighting-normalmap PROPERTY C_STANDARD 99)
 
 

@@ -6,11 +6,7 @@ set(dengine-model-hdr
 include/dengine-model/model.h
 )
 
-if(BUILD_SHARED_LIBS AND DENGINE_MERGE_LIBS)
-    add_library(dengine-model STATIC ${dengine-model-hdr} ${dengine-model-src})
-else()
-    add_library(dengine-model ${dengine-model-hdr} ${dengine-model-src})
-endif()
+add_library(dengine-model ${dengine-model-hdr} ${dengine-model-src})
 set_target_properties(dengine-model PROPERTIES
                       POSITION_INDEPENDENT_CODE ON)
 

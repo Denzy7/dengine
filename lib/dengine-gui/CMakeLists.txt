@@ -6,11 +6,7 @@ set(dengine-gui-hdr
 include/dengine-gui/gui.h
 )
 
-if(BUILD_SHARED_LIBS AND DENGINE_MERGE_LIBS)
-    add_library(dengine-gui STATIC ${dengine-gui-hdr} ${dengine-gui-src})
-else()
-    add_library(dengine-gui ${dengine-gui-hdr} ${dengine-gui-src})
-endif()
+add_library(dengine-gui ${dengine-gui-hdr} ${dengine-gui-src})
 set_target_properties(dengine-gui PROPERTIES
                       POSITION_INDEPENDENT_CODE ON)
 

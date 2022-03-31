@@ -23,11 +23,7 @@ include/dengine-utils/str.h
 include/dengine-utils/debug.h
 )
 
-if(BUILD_SHARED_LIBS AND DENGINE_MERGE_LIBS)
-    add_library(dengine-utils STATIC ${dengine-utils-hdr} ${dengine-utils-src})
-else()
-    add_library(dengine-utils ${dengine-utils-hdr} ${dengine-utils-src})
-endif()
+add_library(dengine-utils ${dengine-utils-hdr} ${dengine-utils-src})
 set_target_properties(dengine-utils PROPERTIES
                       POSITION_INDEPENDENT_CODE ON)
 

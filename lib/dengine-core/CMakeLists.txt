@@ -16,6 +16,7 @@ src/vao.c
 src/renderbuffer.c
 src/stb_image.c
 src/stb_image_write.c
+src/dengine.rc
 )
 
 set(dengine-core-hdr
@@ -37,6 +38,7 @@ include/dengine/lighting.h
 include/dengine/vao.h
 include/dengine/macros.h
 include/dengine/renderbuffer.h
+include/dengine/dengine.h
 )
 
 if(ANDROID)
@@ -46,11 +48,7 @@ if(ANDROID)
     list(APPEND dengine-core-src "${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c")
 endif()
 
-if(BUILD_SHARED_LIBS AND DENGINE_MERGE_LIBS)
-    add_library(dengine-core STATIC ${dengine-core-hdr} ${dengine-core-src})
-else()
-    add_library(dengine-core ${dengine-core-hdr} ${dengine-core-src})
-endif()
+add_library(dengine-core ${dengine-core-hdr} ${dengine-core-src})
 set_target_properties(dengine-core PROPERTIES
                       POSITION_INDEPENDENT_CODE ON)
 

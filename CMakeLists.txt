@@ -56,11 +56,6 @@ include_directories(
         )
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
-option(DENGINE_MERGE_LIBS "Compile all libs as static and merge as one shared lib (dengine.so/dll)" OFF)
-
-if(DENGINE_MERGE_LIBS)
-    set(BUILD_SHARED_LIBS ON)
-endif()
 
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
@@ -72,28 +67,7 @@ add_subdirectory(lib/dengine-model "dengine-model-build")
 add_subdirectory(lib/dengine-scene "dengine-scene-build")
 #add_subdirectory(lib/dengine-script "dengine-script-build")
 
-add_library(dengine
-    lib/dengine-core/include/dengine/dengine.h
-    lib/dengine-core/src/dengine.c
-    lib/dengine-core/src/dengine.rc)
-target_link_libraries(dengine
-    dengine-core
-    dengine-utils
-    dengine-gui
-    dengine-model
-    dengine-scene
-#   dengine-script is not yet mature enough and has its own unstable branch
-#    dengine-script
-)
-set_property(TARGET dengine PROPERTY C_STANDARD 99)
-#remove lib prefix
-if(WIN32)
-    set_target_properties(dengine PROPERTIES PREFIX "")
-endif()
-set_target_properties(dengine PROPERTIES
-                      VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}.${dengine_VERSION_PATCH}
-                      SOVERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
-                      POSITION_INDEPENDENT_CODE ON)
+set(dengine dengine-utils dengine-core dengine-gui dengine-scene)
 
 add_subdirectory(tests "tests-build")
 

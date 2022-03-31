@@ -1,6 +1,8 @@
 #ifndef DENGINE_H
 #define DENGINE_H
 
+#include <string.h> //memset
+
 /*
  * Includes all the stuff we'd expect to use
  */
@@ -9,7 +11,7 @@ typedef struct
 {
     int window_width;
     int window_height;
-    char* window_title;
+    const char* window_title;
     int window_msaa;
 
     int gl_max;
@@ -52,13 +54,125 @@ typedef struct
 extern "C" {
 #endif
 
-int dengine_init();
+#if defined(_MSC_VER)
+#  define DENGINE_INLINE __forceinline
+#else
+#  define DENGINE_INLINE static inline __attribute((always_inline))
+#endif
 
-void dengine_terminate();
+static DengineInitOpts DENGINE_INIT_OPTS;
+static int DENGINE_HAS_GOT_INIT_OPTS = 0;
 
-void dengine_update();
+DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
+{
+    memset(&DENGINE_INIT_OPTS, 0, sizeof(DENGINE_HAS_GOT_INIT_OPTS));
 
-DengineInitOpts* dengine_init_get_opts();
+    DENGINE_INIT_OPTS.window_height = 720;
+    DENGINE_INIT_OPTS.window_width = 1280;
+    DENGINE_INIT_OPTS.window_title = "Dengine!";
+    DENGINE_INIT_OPTS.window_msaa = 4;
+
+    DENGINE_INIT_OPTS.font_size = 18.0f;
+    DENGINE_INIT_OPTS.font_bitmapsize = 512;
+
+    DENGINE_INIT_OPTS.enable_backfaceculling = 1;
+    DENGINE_INIT_OPTS.enable_depth = 1;
+
+    DENGINE_HAS_GOT_INIT_OPTS = 1;
+
+    return &DENGINE_INIT_OPTS;
+}
+
+
+DENGINE_INLINE int dengine_init()
+{
+    if(!DENGINE_HAS_GOT_INIT_OPTS)
+        DENGINE_INIT_OPTS = *dengine_init_get_opts();
+
+    if(DENGINE_INIT_OPTS.window_msaa)
+        dengine_window_request_MSAA(DENGINE_INIT_OPTS.window_msaa);
+
+    //All this to GL initialization
+    if(!dengine_window_init())
+        return 0;
+
+#ifndef DENGINE_ANDROID
+    //Android creates a window already in init... how convinient and limiting?
+    Window window;
+    if(!dengine_window_create(DENGINE_INIT_OPTS.window_width, DENGINE_INIT_OPTS.window_height, DENGINE_INIT_OPTS.window_title, &window))
+        return 0;
+
+     dengine_window_makecurrent(&window);
+#endif
+
+    if(!dengine_window_loadgl())
+        return 0;
+
+    int w, h;
+    dengine_window_get_window_dim(&w, &h);
+    int samples;
+    glGetIntegerv(GL_SAMPLES, &samples);
+    const char* GL = (const char*)glGetString(GL_VERSION);
+    const char* GLSL = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+    const char* VENDOR = (const char*)glGetString(GL_VENDOR);
+    const char* RENDERDER = (const char*)glGetString(GL_RENDERER);
+
+    dengineutils_logging_log("INFO::GL : %s\nGLSL : %s\nVENDOR : %s\nRENDERDER : %s\n"
+                             "WINDOW : %dx%d %dx MSAA",
+                             GL, GLSL, VENDOR, RENDERDER,
+                             w, h, samples);
+
+    //INPUT
+    dengine_input_init();
+
+    //DEBUGGING, INCASE OF SIGSEGV OR SIGABRT
+    dengineutils_debug_init();
+
+    //ALLOCATE FILESYS DIRECTORIES
+    dengineutils_filesys_init();
+
+#ifdef DENGINE_ANDROID
+    //Can safely set files and cachedirs
+    dengine_android_set_filesdir();
+    dengine_android_set_cachedir();
+#endif
+
+    //GUI. SET FONT TOO
+    if(!denginegui_init())
+        return 0;
+
+    denginegui_set_font(NULL, DENGINE_INIT_OPTS.font_size, DENGINE_INIT_OPTS.font_bitmapsize);
+
+    //SEED RNG. NOT MT-SAFE!(AFAIK)
+    dengineutils_rng_set_seedwithtime();
+
+    //depth testing ✅
+    if(DENGINE_INIT_OPTS.enable_depth)
+        glEnable(GL_DEPTH_TEST);
+
+    //backface culling. save draw calls ✅
+    if(DENGINE_INIT_OPTS.enable_backfaceculling)
+        glEnable(GL_CULL_FACE);
+
+    return 1;
+}
+
+DENGINE_INLINE void dengine_terminate()
+{
+    denginegui_terminate();
+    dengineutils_filesys_terminate();
+
+    dengineutils_debug_terminate();
+    dengine_window_terminate();
+}
+
+DENGINE_INLINE void dengine_update()
+{
+    dengineutils_timer_update();
+    dengine_window_swapbuffers();
+    dengine_input_pollevents();
+}
+
 
 #ifdef __cplusplus
 }
