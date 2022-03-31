@@ -11,6 +11,7 @@ set(dengine-script-py_modules
     src/py_modules/loggingmodule.c
     src/py_modules/timermodule.c
     src/py_modules/filesysmodule.c
+    src/py_modules/scenemodule.c
 )
 
 if(BUILD_SHARED_LIBS AND DENGINE_MERGE_LIBS)
@@ -21,7 +22,7 @@ endif()
 set_target_properties(dengine-script PROPERTIES
                       POSITION_INDEPENDENT_CODE ON)
 
-target_link_libraries(dengine-script dengine-core dengine-utils)
+target_link_libraries(dengine-script dengine-core dengine-utils dengine-scene)
 set_property(TARGET dengine-script PROPERTY C_STANDARD 99)
 
 if(python3_LIBRARIES)
