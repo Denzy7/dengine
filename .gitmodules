@@ -7,7 +7,3 @@
 [submodule "deps/glfw"]
 	path = deps/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "deps/cpython"]
-	path = deps/cpython
-	url = https://github.com/python/cpython.git
-	branch = 3.9
