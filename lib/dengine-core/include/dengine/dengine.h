@@ -50,10 +50,6 @@ typedef struct
 
 #include <dengine-scene/scene.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if defined(_MSC_VER)
 #  define DENGINE_INLINE __forceinline
 #else
@@ -172,10 +168,5 @@ DENGINE_INLINE void dengine_update()
     dengine_window_swapbuffers();
     dengine_input_pollevents();
 }
-
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // DENGINE_H
