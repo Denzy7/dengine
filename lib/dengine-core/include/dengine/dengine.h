@@ -113,11 +113,18 @@ DENGINE_INLINE int dengine_init()
     const char* VENDOR = (const char*)glGetString(GL_VENDOR);
     const char* RENDERDER = (const char*)glGetString(GL_RENDERER);
 
-    dengineutils_logging_log("INFO::GL : %s\nGLSL : %s\nVENDOR : %s\nRENDERDER : %s\n"
-                             "WINDOW : %dx%d %dx MSAA",
-                             GL, GLSL, VENDOR, RENDERDER,
-                             w, h, samples);
+    //-fpermissive we need cast for C++
+    char* msaastr = (char*) calloc(9, 1);
+    if(samples)
+        snprintf(msaastr, 9, "%dx MSAA", samples);
+    else
+        snprintf(msaastr, 9, "NO MSAA");
 
+    dengineutils_logging_log("INFO::GL : %s\nGLSL : %s\nVENDOR : %s\nRENDERDER : %s\n"
+                             "WINDOW : %dx%d %s",
+                             GL, GLSL, VENDOR, RENDERDER,
+                             w, h, msaastr);
+    free(msaastr);
     //INPUT
     dengine_input_init();
 
