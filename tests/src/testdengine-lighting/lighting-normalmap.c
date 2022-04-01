@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     mat4 model;
     vec3 scale = {5.0f, 5.0f, 5.0f};
     vec3 position = {0.0f, 1.0f, 0.0f};
-    vec3 yellow = {1.0f, 1.0f, 0.0};
+    vec4 yellow = {1.0f, 1.0f, 0.0f, 1.0f};
 
     char fps[100];
     snprintf(fps, sizeof(fps), "FPS : 0.0 (0.0ms)");
