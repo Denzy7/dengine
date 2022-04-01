@@ -13,10 +13,12 @@ typedef struct
     int window_height;
     const char* window_title;
     int window_msaa;
+    int window_createnative;
 
     int gl_max;
     int gl_min;
     int gl_core;
+    int gl_loaddefault;
 
     int enable_depth;
     int enable_backfaceculling;
@@ -67,6 +69,7 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
     DENGINE_INIT_OPTS.window_width = 1280;
     DENGINE_INIT_OPTS.window_title = "Dengine!";
     DENGINE_INIT_OPTS.window_msaa = 4;
+    DENGINE_INIT_OPTS.window_createnative = 1;
 
     DENGINE_INIT_OPTS.font_size = 18.0f;
     DENGINE_INIT_OPTS.font_bitmapsize = 512;
@@ -89,20 +92,32 @@ DENGINE_INLINE int dengine_init()
         dengine_window_request_MSAA(DENGINE_INIT_OPTS.window_msaa);
 
     //All this to GL initialization
-    if(!dengine_window_init())
-        return 0;
+    if(DENGINE_INIT_OPTS.window_createnative)
+    {
+        if(!dengine_window_init())
+            return 0;
 
 #ifndef DENGINE_ANDROID
-    //Android creates a window already in init... how convinient and limiting?
-    Window window;
-    if(!dengine_window_create(DENGINE_INIT_OPTS.window_width, DENGINE_INIT_OPTS.window_height, DENGINE_INIT_OPTS.window_title, &window))
-        return 0;
+        //Android creates a window already in init... how convinient and limiting?
+        Window window;
+        if(!dengine_window_create(DENGINE_INIT_OPTS.window_width, DENGINE_INIT_OPTS.window_height, DENGINE_INIT_OPTS.window_title, &window))
+            return 0;
 
-     dengine_window_makecurrent(&window);
+         dengine_window_makecurrent(&window);
 #endif
+    }
 
-    if(!dengine_window_loadgl())
-        return 0;
+    if(DENGINE_INIT_OPTS.gl_loaddefault)
+    {
+        //use default glad loader
+        if(!gladLoadGL())
+            return 0;
+    }else
+    {
+        //use window loader
+        if(!dengine_window_loadgl())
+            return 0;
+    }
 
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
