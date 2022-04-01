@@ -5,7 +5,6 @@
 #include "dengine/primitive.h"
 #include "dengine/shader.h"
 #include "dengine/draw.h"
-#include "dengine/window.h"
 #include "dengine/input.h"
 
 #include "dengine-utils/logging.h"
@@ -225,10 +224,9 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
 void _denginegui_projectquad()
 {
     mat4 projection;
-    int w, h;
-    dengine_window_get_window_height(&h);
-    dengine_window_get_window_width(&w);
-    glm_ortho(0.0, w, 0.0, h, -1.0f, 1.0f, projection);
+    int viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    glm_ortho(0.0, viewport[2], 0.0, viewport[3], -1.0f, 1.0f, projection);
     dengine_shader_set_mat4(shader, "projection", projection[0]);
 }
 

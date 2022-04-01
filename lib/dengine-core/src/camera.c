@@ -2,7 +2,6 @@
 
 #include "dengine/macros.h"
 #include "dengine/loadgl.h"
-#include "dengine/window.h"
 
 #include "dengine-utils/debug.h"
 
@@ -40,12 +39,12 @@ void dengine_camera_setup(Camera* camera)
         camera->position[i] = _default_distance;
     }
     memcpy(camera->clearcolor, _default_clearcol, sizeof (_default_clearcol));
-    int w,h;
-    dengine_window_get_window_dim(&w, &h);
-    camera->render_height = h;
-    camera->render_width = w;
+    int viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    camera->render_height = viewport[3];
+    camera->render_width = viewport[2];
 
-    dengine_camera_project_perspective( (float)w / (float)h, camera);
+    dengine_camera_project_perspective( (float)camera->render_width / (float)camera->render_height, camera);
     dengine_camera_lookat(NULL, camera);
 }
 
