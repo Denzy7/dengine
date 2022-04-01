@@ -2,7 +2,7 @@
 
 #include "dengine/loadgl.h" //gl
 #include "dengine/draw.h" //draw
-#include "dengine/window.h" //get w,h
+//#include "dengine/window.h" //get w,h
 #include "dengine/macros.h" //arr_sz
 
 #include <string.h> //memset
@@ -174,6 +174,10 @@ void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, Shader* shader, P
         return;
     }
 
+    int viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    int h = viewport[3], w = viewport[2];
+
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &dirLight->shadow.shadow_map);
 
     float ortho_size = 10.0f;
@@ -197,8 +201,6 @@ void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, Shader* shader, P
 
     dengine_draw_primitive(primitive, shader);
 
-    int h, w;
-    dengine_window_get_window_dim(&w, &h);
     glViewport(0, 0, w, h);
     dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
 
@@ -302,6 +304,10 @@ void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, Shader* sha
     if (!pointLight->shadow.shadow_map.depth.texture_id|| !pointLight->shadow.enable)
         return;
 
+    int viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    int h = viewport[3], w = viewport[2];
+
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &pointLight->shadow.shadow_map);
 
     mat4 proj, view;
@@ -339,8 +345,6 @@ void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, Shader* sha
 
     dengine_draw_primitive(primitive, shader);
 
-    int h, w;
-    dengine_window_get_window_dim(&w, &h);
     glViewport(0, 0, w, h);
     dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
 }
