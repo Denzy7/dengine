@@ -104,8 +104,9 @@ DENGINE_INLINE int dengine_init()
     if(!dengine_window_loadgl())
         return 0;
 
-    int w, h;
-    dengine_window_get_window_dim(&w, &h);
+    int viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
     int samples;
     glGetIntegerv(GL_SAMPLES, &samples);
     const char* GL = (const char*)glGetString(GL_VERSION);
@@ -113,18 +114,16 @@ DENGINE_INLINE int dengine_init()
     const char* VENDOR = (const char*)glGetString(GL_VENDOR);
     const char* RENDERDER = (const char*)glGetString(GL_RENDERER);
 
-    //-fpermissive we need cast for C++
-    char* msaastr = (char*) calloc(9, 1);
+    char msaastr[9];
     if(samples)
         snprintf(msaastr, 9, "%dx MSAA", samples);
     else
         snprintf(msaastr, 9, "NO MSAA");
 
     dengineutils_logging_log("INFO::GL : %s\nGLSL : %s\nVENDOR : %s\nRENDERDER : %s\n"
-                             "WINDOW : %dx%d %s",
+                             "VIEWPORT : %dx%d %s",
                              GL, GLSL, VENDOR, RENDERDER,
-                             w, h, msaastr);
-    free(msaastr);
+                             viewport[2], viewport[3], msaastr);
     //INPUT
     dengine_input_init();
 
