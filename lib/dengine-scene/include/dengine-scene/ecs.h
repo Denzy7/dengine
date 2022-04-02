@@ -69,8 +69,7 @@ Entity* denginescene_ecs_new_entity();
 Entity** denginescene_ecs_new_entity_n(const size_t n);
 
 /*!
- * \brief Destroy an allocated entity and its underlying entities. Does not destoy
- * components
+ * \brief Destroy an allocated entity, its underlying entities and components
  * \param root Entity to destroy
  */
 void denginescene_ecs_destroy_entity(Entity* root);
