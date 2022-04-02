@@ -145,6 +145,8 @@ void dengine_camera_use(Camera* camera)
         return;
 
     if (camera) {
+        float orig_clear[4];
+        glGetFloatv(GL_COLOR_CLEAR_VALUE, orig_clear);
         dengine_framebuffer_bind(GL_FRAMEBUFFER, &camera->framebuffer);
         glClearColor(
                 camera->clearcolor[0],
@@ -152,6 +154,12 @@ void dengine_camera_use(Camera* camera)
                 camera->clearcolor[2],
                 camera->clearcolor[3]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(
+                orig_clear[0],
+                orig_clear[1],
+                orig_clear[2],
+                orig_clear[3]
+                    );
     }else
     {
         dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
