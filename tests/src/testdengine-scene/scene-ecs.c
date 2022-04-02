@@ -75,9 +75,9 @@ int main(int argc, char *argv[])
     Camera cam;
     dengine_camera_setup(&cam);
     dengine_camera_set_rendermode(DENGINE_CAMERA_RENDER_FOWARD,&cam);
-    CameraComponent camc;
-    camc.camera=&cam;
-    ent13->camera_component=&camc;
+
+    CameraComponent* camc = denginescene_ecs_new_cameracomponent(&cam);
+    ent13->camera_component=camc;
 
     Shader* stdshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_STANDARD);
     Shader* dftshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_DEFAULT);
@@ -108,14 +108,12 @@ int main(int argc, char *argv[])
     size_t n_planes = 0;
     Primitive* sep_planes = denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ,prtbf,&n_planes,stdshdr);
 
-    MeshComponent* sep_planes_mesh = NULL;
     Entity** child_sep = NULL;
     Entity* ent15 = denginescene_ecs_new_entity();
 
     Material sep_planes_mat;
     dengine_material_setup(&sep_planes_mat);
     dengine_material_set_shader_color(stdshdr,&sep_planes_mat);
-
 
     Texture sep_plane_tex;
     memset(&sep_plane_tex,0,sizeof (Texture));
@@ -129,7 +127,6 @@ int main(int argc, char *argv[])
 
     if(n_planes)
     {
-        sep_planes_mesh = calloc(n_planes, sizeof(MeshComponent));
         child_sep = denginescene_ecs_new_entity_n(n_planes);
         for(size_t i = 0; i < n_planes; i++)
         {
@@ -138,11 +135,8 @@ int main(int argc, char *argv[])
                 child_sep[i]->transform.position[1] = (float)i / (float)n_planes;
                 child_sep[i]->transform.rotation[1] = i * 10.0f;
 
-                sep_planes_mesh[i].material = &sep_planes_mat;
-                sep_planes_mesh[i].mesh = &sep_planes[i];
-
-                child_sep[i]->mesh_component = &sep_planes_mesh[i];
-
+                MeshComponent* sep_plane_mesh = denginescene_ecs_new_meshcomponent(&sep_planes[i], &sep_planes_mat);
+                child_sep[i]->mesh_component = sep_plane_mesh;
                 denginescene_ecs_parent(ent15, child_sep[i]);
             }
         }
@@ -164,23 +158,18 @@ int main(int argc, char *argv[])
     dengine_lighting_apply_dirlight(&dLight,stdshdr);
     dengine_lighting_apply_pointlight(&pLight,stdshdr);
 
-    MeshComponent cube_mesh,plane_mesh,duck_mesh,grid_mesh;
+    MeshComponent* cube_mesh, * cube_mesh2,* plane_mesh,* duck_mesh,* grid_mesh;
+    cube_mesh = denginescene_ecs_new_meshcomponent(&cube, &cube_mat);
+    plane_mesh = denginescene_ecs_new_meshcomponent(&plane, &cube_mat);
+    duck_mesh = denginescene_ecs_new_meshcomponent(duck, &duck_mat);
+    grid_mesh = denginescene_ecs_new_meshcomponent(&grid, &dft_mat);
+    cube_mesh2 = denginescene_ecs_new_meshcomponent(&cube, &cube_mat);
 
-    cube_mesh.material=&cube_mat;
-    plane_mesh.material=&cube_mat;
-    duck_mesh.material=&duck_mat;
-    grid_mesh.material=&dft_mat;
-
-    plane_mesh.mesh=&plane;
-    cube_mesh.mesh=&cube;
-    duck_mesh.mesh=duck;
-    grid_mesh.mesh=&grid;
-
-    ent1->mesh_component=&plane_mesh;
-    ent6->mesh_component=&cube_mesh;
-    ent7->mesh_component=&cube_mesh;
-    ent3->mesh_component=&duck_mesh;
-    ent14->mesh_component=&grid_mesh;
+    ent1->mesh_component=plane_mesh;
+    ent6->mesh_component=cube_mesh;
+    ent7->mesh_component=cube_mesh2;
+    ent3->mesh_component=duck_mesh;
+    ent14->mesh_component=grid_mesh;
 
     Texture duck_tex;
     memset(&duck_tex,0,sizeof (Texture));
@@ -290,9 +279,6 @@ int main(int argc, char *argv[])
 
     free(prtbf);
     free(duck);
-
-    if(sep_planes_mesh)
-        free(sep_planes_mesh);
 
     if(child_sep)
         free(child_sep);
