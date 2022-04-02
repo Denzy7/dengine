@@ -1,8 +1,8 @@
-#include "confserialize.h"
+#include "dengine-utils/confserialize.h"
 #include <stdio.h>  //fopen
 #include <string.h> //strdup
 #include <stdlib.h> //malloc
-#include "logging.h" //log
+#include "dengine-utils/logging.h" //log
 
 #define MAX_KV_SIZE 100
 

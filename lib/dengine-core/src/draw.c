@@ -1,8 +1,8 @@
-#include "draw.h"
+#include "dengine/draw.h"
 
-#include "loadgl.h"
+#include "dengine/loadgl.h"
 
-#include "buffer.h" //bind
+#include "dengine/buffer.h" //bind
 
 void dengine_draw_primitive(Primitive* primitive, Shader* shader)
 {

@@ -1,6 +1,6 @@
-#include "logging.h"//log
+#include "dengine-utils/logging.h"//log
 
-#include "loadgl.h" //glGetError (incl. checkgl.h
+#include "dengine/loadgl.h" //glGetError (incl. checkgl.h
 
 #include <string.h>
 int dengine_checkgl(const char* file, const int line)

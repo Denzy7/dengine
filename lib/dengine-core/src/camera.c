@@ -1,4 +1,4 @@
-#include "camera.h"
+#include "dengine/camera.h"
 
 #include "dengine/macros.h"
 #include "dengine/loadgl.h"

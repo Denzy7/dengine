@@ -1,11 +1,11 @@
-#include "filesys.h"
+#include "dengine-utils/filesys.h"
 #include "dengine-utils/os.h"
 
 #include <stdio.h>  //fopen, fread
 #include <stdlib.h> //malloc
 #include <string.h> //str
 
-#include "logging.h"
+#include "dengine-utils/logging.h"
 
 const size_t dirbuflen = 2048;
 char* srcdir = NULL,* assetdir = NULL,* cachedir = NULL,* filesdir = NULL;

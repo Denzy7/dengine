@@ -1,4 +1,4 @@
-#include "rng.h"
+#include "dengine-utils/rng.h"
 
 #include <stdlib.h> //rand()
 #include <time.h> //time_t, time()

@@ -1,7 +1,7 @@
-#include "buffer.h"
+#include "dengine/buffer.h"
 #include "dengine-utils/debug.h"
 
-#include "loadgl.h" //glGen,Bind,Data
+#include "dengine/loadgl.h" //glGen,Bind,Data
 void dengine_buffer_gen(size_t count, Buffer* buffers)
 {
     DENGINE_DEBUG_ENTER;

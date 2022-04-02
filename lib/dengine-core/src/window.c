@@ -1,7 +1,7 @@
-#include "window.h"
+#include "dengine/window.h"
 
-#include "loadgl.h" //glViewport
-#include "logging.h"//log
+#include "dengine/loadgl.h" //glViewport
+#include "dengine-utils/logging.h"//log
 
 #include <stdio.h>  //printf
 

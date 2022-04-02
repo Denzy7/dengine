@@ -1,6 +1,6 @@
-#include "logging.h"
+#include "dengine-utils/logging.h"
 
-#include "os.h"
+#include "dengine-utils/os.h"
 
 #include <stdio.h>  //printf
 #include <stdarg.h> //vsprint

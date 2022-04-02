@@ -1,6 +1,6 @@
-#include "vertex.h"
+#include "dengine/vertex.h"
 
-#include "loadgl.h"
+#include "dengine/loadgl.h"
 
 void dengine_vertex_attribute_setup(VertexAttribute* attribute)
 {

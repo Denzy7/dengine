@@ -1,13 +1,11 @@
-#include "os.h"
+#include "dengine-utils/os.h"
 #include "dengine_config.h"
-#include "logging.h"
+#include "dengine-utils/logging.h"
 
 #include <dirent.h> //opendir
 #include <stdio.h> //fopen, remove
 #include <string.h>//strdup, strlen
 #include <stdlib.h>//malloc
-
-#include "window.h"
 
 char cwd[FILENAME_MAX];
 

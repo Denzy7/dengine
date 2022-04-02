@@ -46,9 +46,7 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/glad/include
         ${PROJECT_BINARY_DIR}/dengine_config #dengine_config.h
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-core/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-core/include/dengine
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-utils/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-utils/include/dengine-utils
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-gui/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-model/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-scene/include

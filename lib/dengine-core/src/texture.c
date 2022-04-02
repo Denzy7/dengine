@@ -1,6 +1,6 @@
-#include "texture.h"
-#include "loadgl.h"  //glGen,Bind,Tex...
-#include "logging.h" //log
+#include "dengine/texture.h"
+#include "dengine/loadgl.h"  //glGen,Bind,Tex...
+#include "dengine-utils/logging.h" //log
 
 #include <string.h>
 #include <stb_image.h> //stbi_load, stbi_error

@@ -1,8 +1,8 @@
-#include "primitive.h"
+#include "dengine/primitive.h"
 
-#include "loadgl.h" //gltypes
+#include "dengine/loadgl.h" //gltypes
 
-#include "vtor.h"
+#include "dengine-utils/vtor.h"
 
 #include <string.h> //memset
 

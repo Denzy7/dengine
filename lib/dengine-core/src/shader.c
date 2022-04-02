@@ -1,10 +1,10 @@
-#include "shader.h"
-#include "loadgl.h" //shader
+#include "dengine/shader.h"
+#include "dengine/loadgl.h" //shader
 
 #include <stdio.h>  //printf
 #include <stdlib.h> //malloc
 #include <string.h> //strlen
-#include "logging.h"//log
+#include "dengine-utils/logging.h"//log
 #include "dengine-utils/filesys.h"//assetdir
 #include "dengine-utils/debug.h"
 

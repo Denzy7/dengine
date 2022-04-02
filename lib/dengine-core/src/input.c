@@ -1,5 +1,5 @@
-#include "input.h"
-#include "window.h" //glfw_current
+#include "dengine/input.h"
+#include "dengine/window.h" //glfw_current
 
 #include <string.h> //memset
 

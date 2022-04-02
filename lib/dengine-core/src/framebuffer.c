@@ -1,9 +1,9 @@
-#include "framebuffer.h"
+#include "dengine/framebuffer.h"
 
 #include "dengine-utils/logging.h"
 #include "dengine-utils/debug.h"
 
-#include "loadgl.h"
+#include "dengine/loadgl.h"
 
 #include <string.h> //memset
 void dengine_framebuffer_gen(size_t count, Framebuffer* framebuffers)
