@@ -111,3 +111,32 @@ void denginescene_ecs_get_model(Entity* entity,mat4 mat4x4)
 
     glm_scale(mat4x4,entity->transform.scale);
 }
+
+MeshComponent* denginescene_ecs_new_meshcomponent(const Primitive mesh, const Material material)
+{
+    MeshComponent* mesh_comp = calloc(1, sizeof(MeshComponent));
+
+    Primitive* prim = calloc(1, sizeof(Primitive));
+    Material* mat = calloc(1, sizeof(Material));
+
+    memcpy(prim, &mesh, sizeof(Primitive));
+    memcpy(mat, &material, sizeof(Material));
+
+    mesh_comp->draw = 1;
+    mesh_comp->material = mat;
+    mesh_comp->mesh= prim;
+
+    return mesh_comp;
+}
+
+CameraComponent* denginescene_ecs_new_cameracomponent(const Camera camera)
+{
+    CameraComponent* cam_comp = calloc(1, sizeof(CameraComponent));
+
+    Camera* cam = calloc(1, sizeof(Camera));
+    memcpy(cam, &camera, sizeof(Camera));
+
+    cam_comp->camera = cam;
+
+    return cam_comp;
+}

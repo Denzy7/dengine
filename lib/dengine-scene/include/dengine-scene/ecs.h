@@ -84,6 +84,10 @@ void denginescene_ecs_parent(struct _Entity* parent, struct _Entity* child);
 
 void denginescene_ecs_get_model(Entity* entity,mat4 mat4x4);
 
+MeshComponent* denginescene_ecs_new_meshcomponent(const Primitive mesh, const Material material);
+
+CameraComponent* denginescene_ecs_new_cameracomponent(const Camera camera);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
