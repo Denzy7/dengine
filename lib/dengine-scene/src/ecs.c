@@ -44,7 +44,7 @@ void _denginescene_ecs_new_entity_setup(Entity* ent)
 
 Entity* denginescene_ecs_new_entity()
 {
-    Entity* ent = malloc(sizeof(Entity));
+    Entity* ent = malloc(sizeof(struct _Entity));
 
     if(!ent)
         return NULL;
@@ -52,30 +52,6 @@ Entity* denginescene_ecs_new_entity()
     memset(ent, 0, sizeof (Entity));
 
     _denginescene_ecs_new_entity_setup(ent);
-
-    return ent;
-}
-
-Entity** denginescene_ecs_new_entity_n(const size_t n)
-{
-    Entity** ent = malloc(n * sizeof(Entity*));
-
-    if(!ent)
-        return NULL;
-
-    for(size_t i = 0; i < n; i++)
-    {
-        ent[i] = malloc(sizeof(Entity));
-        if(!ent[i])
-        {
-            free(ent);
-            dengineutils_logging_log("ERROR::Failed to alloc n=%zu entities", n);
-            return NULL;
-        }
-
-        memset(ent[i], 0, sizeof (Entity));
-        _denginescene_ecs_new_entity_setup(ent[i]);
-    }
 
     return ent;
 }

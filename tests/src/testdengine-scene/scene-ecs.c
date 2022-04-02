@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     size_t n_planes = 0;
     Primitive* sep_planes = denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ,prtbf,&n_planes,stdshdr);
 
-    Entity** child_sep = NULL;
+    //Entity** child_sep = NULL;
     Entity* ent15 = denginescene_ecs_new_entity();
 
     Material sep_planes_mat;
@@ -127,17 +127,18 @@ int main(int argc, char *argv[])
 
     if(n_planes)
     {
-        child_sep = denginescene_ecs_new_entity_n(n_planes);
+        //child_sep = denginescene_ecs_new_entity_n(n_planes);
         for(size_t i = 0; i < n_planes; i++)
         {
-            if(child_sep)
+            Entity* ent = denginescene_ecs_new_entity();
+            if(ent)
             {
-                child_sep[i]->transform.position[1] = (float)i / (float)n_planes;
-                child_sep[i]->transform.rotation[1] = i * 10.0f;
+                ent->transform.position[1] = (float)i / (float)n_planes;
+                ent->transform.rotation[1] = i * 10.0f;
 
                 MeshComponent* sep_plane_mesh = denginescene_ecs_new_meshcomponent(&sep_planes[i], &sep_planes_mat);
-                child_sep[i]->mesh_component = sep_plane_mesh;
-                denginescene_ecs_parent(ent15, child_sep[i]);
+                ent->mesh_component = sep_plane_mesh;
+                denginescene_ecs_parent(ent15, ent);
             }
         }
     }
@@ -280,8 +281,8 @@ int main(int argc, char *argv[])
     free(prtbf);
     free(duck);
 
-    if(child_sep)
-        free(child_sep);
+//    if(child_sep)
+//        free(child_sep);
 
     if(sep_planes)
         free(sep_planes);

@@ -62,13 +62,6 @@ typedef struct _Entity
 Entity* denginescene_ecs_new_entity();
 
 /*!
- * \brief Create some n entities
- * \param n Entities to create
- * \return Array of empty entities
- */
-Entity** denginescene_ecs_new_entity_n(const size_t n);
-
-/*!
  * \brief Destroy an allocated entity, its underlying entities and components
  * \param root Entity to destroy
  */
