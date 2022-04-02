@@ -6,7 +6,7 @@ include_directories(
 include/
 )
 
-add_library(glad STATIC src/glad.c)
+add_library(glad src/glad.c include/glad/glad.h)
 set_target_properties(glad PROPERTIES
                       POSITION_INDEPENDENT_CODE ON)
 if(NOT WIN32)
