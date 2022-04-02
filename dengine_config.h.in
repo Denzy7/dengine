@@ -48,6 +48,9 @@
  */
 #define DENGINE_ECS_MAXCHILDREN 128
 
+//Size of buffer with the name of the entity
+#define DENGINE_ECS_MAXNAME 1024
+
 /*
  * Debug tracing when program crashes
  * SIZE=max stacktrace items

@@ -40,6 +40,7 @@ typedef struct _Entity
     uint32_t entity_id;
     int active;
     TransformComponent transform;
+    char* name;
 
     /* PARENT-CHILD R/SHIPS */
 
@@ -66,6 +67,13 @@ Entity* denginescene_ecs_new_entity();
  * \param root Entity to destroy
  */
 void denginescene_ecs_destroy_entity(Entity* root);
+
+/*!
+ * \brief Set the name of an entity
+ * \param entity Entity to use
+ * \param name Name to use
+ */
+void denginescene_ecs_set_entity_name(Entity* entity, const char* name);
 
 /*!
  * \brief Parent a child to a parent entity

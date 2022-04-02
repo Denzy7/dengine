@@ -40,6 +40,8 @@ void _denginescene_ecs_new_entity_setup(Entity* ent)
     ent->active = 1;
     ent->transform.scale[0]=1.0f,ent->transform.scale[1]=1.0f,ent->transform.scale[2]=1.0f;
     ent->children = malloc(DENGINE_ECS_MAXCHILDREN * sizeof (Entity*));
+    ent->name =  malloc(DENGINE_ECS_MAXNAME);
+    snprintf(ent->name, DENGINE_ECS_MAXNAME, "Entity %u",ent->entity_id);
 }
 
 Entity* denginescene_ecs_new_entity()
@@ -64,6 +66,7 @@ void _denginescene_ecs_destroy_entity_children(Entity* root)
         _denginescene_ecs_destroy_entity_components(child);
         _denginescene_ecs_destroy_entity_children(child);
         //dengineutils_logging_log("destroy child %u. parent %u", child->entity_id, child->parent->entity_id);
+        free(child->name);
         free(child);
     }
     free(root->children);
@@ -74,6 +77,7 @@ void denginescene_ecs_destroy_entity(Entity* root)
     _denginescene_ecs_destroy_entity_children(root);
     _denginescene_ecs_destroy_entity_components(root);
     //dengineutils_logging_log("destroy root %u", root->entity_id);
+    free(root->name);
     free(root);
 }
 
@@ -107,6 +111,11 @@ void denginescene_ecs_get_model(Entity* entity,mat4 mat4x4)
     glm_quat_rotate(mat4x4,z,mat4x4);
 
     glm_scale(mat4x4,entity->transform.scale);
+}
+
+void denginescene_ecs_set_entity_name(Entity* entity, const char* name)
+{
+    snprintf(entity->name, DENGINE_ECS_MAXNAME, "%s", name);
 }
 
 MeshComponent* denginescene_ecs_new_meshcomponent(const Primitive* mesh, const Material* material)
