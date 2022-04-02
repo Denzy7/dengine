@@ -12,6 +12,26 @@ void _denginescene_ecs_destroy_entity_children(Entity* root);
 
 void _denginescene_ecs_new_entity_setup(Entity* ent);
 
+void _denginescene_ecs_destroy_entity_components(Entity* root);
+
+void _denginescene_ecs_destroy_entity_components(Entity* root)
+{
+    if(root->mesh_component)
+    {
+        free(root->mesh_component->material);
+        free(root->mesh_component->mesh);
+        free(root->mesh_component);
+        root->mesh_component = NULL;
+    }
+
+    if(root->camera_component)
+    {
+        free(root->camera_component->camera);
+        free(root->camera_component);
+        root->camera_component = NULL;
+    }
+}
+
 void _denginescene_ecs_new_entity_setup(Entity* ent)
 {
     entity_count++;
@@ -65,6 +85,7 @@ void _denginescene_ecs_destroy_entity_children(Entity* root)
     size_t children_count = root->children_count;
     for (size_t i = 0; i < children_count; i++) {
         Entity* child = root->children[i];
+        _denginescene_ecs_destroy_entity_components(child);
         _denginescene_ecs_destroy_entity_children(child);
         //dengineutils_logging_log("destroy child %u. parent %u", child->entity_id, child->parent->entity_id);
         free(child);
@@ -75,7 +96,7 @@ void _denginescene_ecs_destroy_entity_children(Entity* root)
 void denginescene_ecs_destroy_entity(Entity* root)
 {
     _denginescene_ecs_destroy_entity_children(root);
-
+    _denginescene_ecs_destroy_entity_components(root);
     //dengineutils_logging_log("destroy root %u", root->entity_id);
     free(root);
 }
@@ -112,15 +133,15 @@ void denginescene_ecs_get_model(Entity* entity,mat4 mat4x4)
     glm_scale(mat4x4,entity->transform.scale);
 }
 
-MeshComponent* denginescene_ecs_new_meshcomponent(const Primitive mesh, const Material material)
+MeshComponent* denginescene_ecs_new_meshcomponent(const Primitive* mesh, const Material* material)
 {
     MeshComponent* mesh_comp = calloc(1, sizeof(MeshComponent));
 
     Primitive* prim = calloc(1, sizeof(Primitive));
     Material* mat = calloc(1, sizeof(Material));
 
-    memcpy(prim, &mesh, sizeof(Primitive));
-    memcpy(mat, &material, sizeof(Material));
+    memcpy(prim, mesh, sizeof(Primitive));
+    memcpy(mat, material, sizeof(Material));
 
     mesh_comp->draw = 1;
     mesh_comp->material = mat;
@@ -129,12 +150,12 @@ MeshComponent* denginescene_ecs_new_meshcomponent(const Primitive mesh, const Ma
     return mesh_comp;
 }
 
-CameraComponent* denginescene_ecs_new_cameracomponent(const Camera camera)
+CameraComponent* denginescene_ecs_new_cameracomponent(const Camera* camera)
 {
     CameraComponent* cam_comp = calloc(1, sizeof(CameraComponent));
 
     Camera* cam = calloc(1, sizeof(Camera));
-    memcpy(cam, &camera, sizeof(Camera));
+    memcpy(cam, camera, sizeof(Camera));
 
     cam_comp->camera = cam;
 
