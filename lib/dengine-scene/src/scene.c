@@ -4,7 +4,7 @@
 #include "dengine-scene/scene.h"
 #include "dengine-utils/logging.h"
 #include "dengine/draw.h"
-
+#include "dengine/loadgl.h" //getFBO
 #include "dengine_config.h"// DENGINE_ECS_MAXCHILDREN
 
 Scene* denginescene_new()
@@ -96,6 +96,11 @@ void _denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
            camera->transform.position,
            sizeof(camera->camera_component->camera->position));
     //dengineutils_logging_log("dcmp %f %f %f",t[0],t[1],t[2]);
+
+    //we might not have entered with fb 0, save binding for later
+    int bind;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &bind); DENGINE_CHECKGL;
+
     dengine_camera_use(camera->camera_component->camera);
     //render scene recursive
     for (size_t i = 0; i < scene->n_entities; i++)
@@ -103,7 +108,8 @@ void _denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
         _denginescene_ecs_do_camera_draw(camera,scene->entities[i]);
     }
 
-    dengine_camera_use(NULL);
+    //now bind what we entered with
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, bind); DENGINE_CHECKGL;
 }
 void _denginescene_ecs_do_camera_children(Entity* root, Scene* scene)
 {
