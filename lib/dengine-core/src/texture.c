@@ -53,9 +53,13 @@ int dengine_texture_load_mem(void* mem, size_t size, int flip, Texture* texture)
         texture->data = stbi_load_16_from_memory(mem, size,
                                               &texture->width, &texture->height,&texture->channels,
                                               0);
+    }else if (texture->interface == DENGINE_TEXTURE_INTERFACE_FLOAT)
+    {
+        texture->data = stbi_loadf_from_memory(mem, size,
+                                              &texture->width, &texture->height,&texture->channels,
+                                              0);
     }else
     {
-        //TODO : TEXTURE_INTERFACE_FLOAT impl.
         dengineutils_logging_log("ERROR::TEXTURE::INVALID_INTERFACE");
         return 0;
     }
@@ -95,9 +99,13 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture)
         texture->data = stbi_load_from_file_16(fp,
                                               &texture->width, &texture->height,&texture->channels,
                                               0);
+    }else if (texture->interface == DENGINE_TEXTURE_INTERFACE_FLOAT)
+    {
+        texture->data = stbi_loadf_from_file(fp,
+                                              &texture->width, &texture->height,&texture->channels,
+                                              0);
     }else
     {
-        //TODO : TEXTURE_INTERFACE_FLOAT impl.
         dengineutils_logging_log("ERROR::TEXTURE::INVALID_INTERFACE");
         return 0;
     }
