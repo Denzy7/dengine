@@ -16,14 +16,15 @@ float default_shader_col[3] = {1.0, 0.0, 0.0};
 
 static const char *stdshaderssrcfiles[][3]=
 {
+    //vertex_shader, fragment_shader, geometry_shader
     {"standard.vert.glsl", "standard.frag.glsl"},
     {"default.vert.glsl", "default.frag.glsl"},
     {"shadow2d.vert.glsl", "shadow2d.frag.glsl"},
     {"shadow3d.vert.glsl", "shadow3d.frag.glsl", "shadow3d.geom.glsl"},
     {"gui.vert.glsl", "gui.frag.glsl"},
     {"debug/normals.vert.glsl", "debug/normals.frag.glsl"},
-    {"skyboxcube.vert.glsl", "skyboxcube.frag.glsl"},
-    {"skybox2d.vert.glsl", "skybox2d.frag.glsl"},
+    {"skybox.vert.glsl", "skyboxcube.frag.glsl"},
+    {"skybox.vert.glsl", "skybox2d.frag.glsl"},
 };
 
 void dengine_shader_create(Shader* shader)
