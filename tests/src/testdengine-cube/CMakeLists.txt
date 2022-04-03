@@ -13,3 +13,11 @@ add_executable(testdengine-3d-cube-textured
 target_link_libraries(testdengine-3d-cube-textured
         dengine-core dengine-utils)
 set_property(TARGET testdengine-3d-cube-textured PROPERTY C_STANDARD 99)
+
+#a skybox from cube
+add_executable(testdengine-3d-cube-skybox
+        3d-skybox.c
+        )
+target_link_libraries(testdengine-3d-cube-skybox
+        ${dengine})
+set_property(TARGET testdengine-3d-cube-skybox PROPERTY C_STANDARD 99)
