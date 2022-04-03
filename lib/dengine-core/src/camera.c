@@ -22,6 +22,11 @@ static const char* possible_viewmat[]=
   "view", "camera.view"
 };
 
+static const char* possible_uviewmat[]=
+{
+  "uview", "camera.uview"
+};
+
 static const char* possible_campos[]=
 {
   "ViewPos", "camera.position"
@@ -91,6 +96,10 @@ void dengine_camera_apply(Shader* shader, Camera* camera)
 
     for (size_t i = 0; i < DENGINE_ARY_SZ(possible_viewmat); i++) {
         dengine_shader_set_mat4(shader, possible_viewmat[i], camera->view_mat);
+    }
+
+    for (size_t i = 0; i < DENGINE_ARY_SZ(possible_uviewmat); i++) {
+        dengine_shader_set_mat4(shader, possible_uviewmat[i], camera->uview_mat);
     }
 
     for (size_t i = 0; i < DENGINE_ARY_SZ(possible_campos); i++) {
