@@ -47,7 +47,7 @@ typedef enum
     DENGINE_SHADER_SHADOW3D, /*!< 3D shader for 3D shadow mapping. GL/ES 3.2+ only */
     DENGINE_SHADER_GUI, /*!< 2D shader for GUI quad */
     DENGINE_SHADER_DEBUG_NORMALS, /*!< 3D shader that outputs normals as color */
-    DENGINE_SHADER_SKYBOX, /*!< 3D shader when using a cubemap skybox */
+    DENGINE_SHADER_SKYBOXCUBE, /*!< 3D shader when using a cubemap skybox */
     DENGINE_SHADER_SKYBOX2D, /*!< 3D shader when using a 2D skybox (hdri map) */
 }StandardShader;
 

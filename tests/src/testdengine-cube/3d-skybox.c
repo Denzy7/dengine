@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     const size_t prtbf_sz = 2048;
     char* prtbf = malloc(prtbf_sz);
 
-    Shader* sky = dengine_shader_new_shader_standard(DENGINE_SHADER_SKYBOX);
+    Shader* sky = dengine_shader_new_shader_standard(DENGINE_SHADER_SKYBOXCUBE);
     Shader* dft = dengine_shader_new_shader_standard(DENGINE_SHADER_DEFAULT);
 
     Primitive cube, axis;
