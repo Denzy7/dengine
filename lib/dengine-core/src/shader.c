@@ -346,13 +346,15 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
     const int prtbuf_sz=2048;
     char* prtbuf = malloc(prtbuf_sz);
 
+    //get cache name from vertex shader
+    const char* vertfile = strchr(stdshaderssrcfiles[stdshader][0], '.');
+    const size_t n = strlen(stdshaderssrcfiles[stdshader][0]) - strlen(vertfile);
+    char* cached = dengineutils_str_ndup(stdshaderssrcfiles[stdshader][0],
+            n);
+    stdshdr->cached_name = cached;
+
     if(dengineutils_filesys_isinit())
     {
-        const char* vertfile = strchr(stdshaderssrcfiles[stdshader][0], '.');
-        const size_t n = strlen(stdshaderssrcfiles[stdshader][0]) - strlen(vertfile);
-        char* cached = dengineutils_str_ndup(stdshaderssrcfiles[stdshader][0],
-                n);
-        stdshdr->cached_name = cached;
         int bin_success = 0;
 
         snprintf(prtbuf, prtbuf_sz, "%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
@@ -363,9 +365,10 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
         {
             bin_success = dengine_shader_setup(stdshdr);
         }
-        free(cached);
+
         if(bin_success)
         {
+            free(cached);
             free(prtbuf);
             return stdshdr;
         }
@@ -410,6 +413,7 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
         }
     }
     free(prtbuf);
+    free(cached);
 
     if(stdshader == DENGINE_SHADER_DEFAULT)
     {
