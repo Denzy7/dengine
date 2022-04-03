@@ -27,7 +27,7 @@ static const char *stdshaderssrcfiles[][3]=
     {"shadow2d.vert.glsl", "shadow2d.frag.glsl"},
     {"shadow3d.vert.glsl", "shadow3d.frag.glsl", "shadow3d.geom.glsl"},
     {"gui.vert.glsl", "gui.frag.glsl"},
-    {"debug/normals.vert.glsl", "debug/normals.frag.glsl"},
+    {"debug-normals.vert.glsl", "debug-normals.frag.glsl"},
     {"skybox.vert.glsl", "skyboxcube.frag.glsl"},
     {"skybox.vert.glsl", "skybox2d.frag.glsl"},
 };
