@@ -7,10 +7,14 @@
 #include "dengine-utils/logging.h"//log
 #include "dengine-utils/filesys.h"//assetdir
 #include "dengine-utils/debug.h"
-
+#include "dengine-utils/str.h" //str_ndup
+#include "dengine-utils/os.h" //mkdir
 #ifdef DENGINE_ANDROID
 #include <dengine/android.h>
 #endif
+
+#define DENGINE_SHADER_CACHE_DIR "dengine/shader_cache"
+#define DENGINE_SHADER_CACHE_EXT ".shader"
 static
 float default_shader_col[3] = {1.0, 0.0, 0.0};
 
@@ -145,6 +149,44 @@ int dengine_shader_setup(Shader* shader)
 
     shader->program_id = glCreateProgram(); DENGINE_CHECKGL;
 
+    if(dengineutils_filesys_isinit())
+    {
+        const size_t prtbf_sz = 4096;
+        char* prtbf = malloc(prtbf_sz);
+
+        snprintf(prtbf, prtbf_sz, "%s/%s", dengineutils_filesys_get_cachedir(),
+                 DENGINE_SHADER_CACHE_DIR);
+        if(!dengineutils_os_mkdir(prtbf))
+        {
+            free(prtbf);
+            prtbf = NULL;
+        }else
+        {
+            snprintf(prtbf, prtbf_sz, "%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
+                     DENGINE_SHADER_CACHE_DIR,
+                     shader->cached_name, DENGINE_SHADER_CACHE_EXT);
+
+            if(fopen(prtbf, "rb"))
+            {
+                File2Mem f2m;
+                f2m.file = prtbf;
+                dengineutils_filesys_file2mem_load(&f2m);
+
+                //load binary here
+                dengineutils_logging_log("TODO::load binary");
+
+                free(prtbf);
+                prtbf = NULL;
+                dengineutils_filesys_file2mem_free(&f2m);
+                return 1;
+            }
+
+        }
+
+        if(prtbf)
+            free(prtbf);
+    }
+
     shader->vertex_id = glCreateShader(GL_VERTEX_SHADER); DENGINE_CHECKGL;
     shader->fragment_id = glCreateShader(GL_FRAGMENT_SHADER); DENGINE_CHECKGL;
 
@@ -195,6 +237,26 @@ int dengine_shader_link(Shader* shader)
         dengineutils_logging_log("ERROR::SHADER::LINK::%s", info_log);
 
         free(info_log);
+    }else
+    {
+        if(dengineutils_filesys_isinit())
+        {
+            const size_t prtbf_sz = 4096;
+            char* prtbf = malloc(prtbf_sz);
+
+            snprintf(prtbf, prtbf_sz, "%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
+                     DENGINE_SHADER_CACHE_DIR,
+                     shader->cached_name, DENGINE_SHADER_CACHE_EXT);
+
+            if(!fopen(prtbf, "rb"))
+            {
+                //fopen and save binary here
+                dengineutils_logging_log("TODO::save binary");
+            }
+
+            free(prtbf);
+        }
+
     }
 
     return ok;
@@ -285,6 +347,11 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
     stdshdr->fragment_code = stdshdrsrc[1];
     stdshdr->geometry_code = stdshdrsrc[2];
 
+    const char* vertfile = strchr(stdshaderssrcfiles[stdshader][0], '.');
+    const size_t n = strlen(stdshaderssrcfiles[stdshader][0]) - strlen(vertfile);
+    char* cached = dengineutils_str_ndup(stdshaderssrcfiles[stdshader][0],
+            n);
+    stdshdr->cached_name = cached;
     dengine_shader_setup(stdshdr);
 
     for (int i = 0; i < 2; i++) {
@@ -295,6 +362,7 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
         }
     }
 
+    free(cached);
     free(prtbuf);
 
     if(stdshader == DENGINE_SHADER_DEFAULT)

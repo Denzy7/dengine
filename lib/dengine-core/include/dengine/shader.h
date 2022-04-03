@@ -26,6 +26,7 @@ typedef struct
     char* vertex_code;
     char* fragment_code;
     char* geometry_code;
+    char* cached_name;
 
     uint32_t vertex_id;
     uint32_t fragment_id;
