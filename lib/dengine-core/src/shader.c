@@ -34,6 +34,7 @@ static const char *stdshaderssrcfiles[][3]=
 void dengine_shader_create(Shader* shader)
 {
     shader->geometry_code= NULL;
+    shader->cached_name = NULL;
 }
 
 void dengine_shader_destroy(Shader* shader)
@@ -153,14 +154,16 @@ int dengine_shader_setup(Shader* shader)
     {
         const size_t prtbf_sz = 4096;
         char* prtbf = malloc(prtbf_sz);
+        int binload = 0;
 
         snprintf(prtbf, prtbf_sz, "%s/%s", dengineutils_filesys_get_cachedir(),
                  DENGINE_SHADER_CACHE_DIR);
-        if(!dengineutils_os_mkdir(prtbf))
-        {
-            free(prtbf);
-            prtbf = NULL;
-        }else
+
+        if(!dengineutils_os_direxist(prtbf))
+            dengineutils_os_mkdir(prtbf);
+
+
+        if(shader->cached_name)
         {
             snprintf(prtbf, prtbf_sz, "%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
                      DENGINE_SHADER_CACHE_DIR,
@@ -170,21 +173,20 @@ int dengine_shader_setup(Shader* shader)
             {
                 File2Mem f2m;
                 f2m.file = prtbf;
-                dengineutils_filesys_file2mem_load(&f2m);
+                //dengineutils_filesys_file2mem_load(&f2m);
 
-                //load binary here
-                dengineutils_logging_log("TODO::load binary");
+                //load binary here and set to 1 on link success
+                //binload = 1;
+                dengineutils_logging_log("TODO::load binary %s", shader->cached_name);
 
-                free(prtbf);
-                prtbf = NULL;
-                dengineutils_filesys_file2mem_free(&f2m);
-                return 1;
+                //dengineutils_filesys_file2mem_free(&f2m);
             }
-
         }
 
-        if(prtbf)
-            free(prtbf);
+        free(prtbf);
+
+        if(binload)
+            return 1;
     }
 
     shader->vertex_id = glCreateShader(GL_VERTEX_SHADER); DENGINE_CHECKGL;
@@ -248,10 +250,10 @@ int dengine_shader_link(Shader* shader)
                      DENGINE_SHADER_CACHE_DIR,
                      shader->cached_name, DENGINE_SHADER_CACHE_EXT);
 
-            if(!fopen(prtbf, "rb"))
+            if(!fopen(prtbf, "rb") && shader->cached_name)
             {
                 //fopen and save binary here
-                dengineutils_logging_log("TODO::save binary");
+                dengineutils_logging_log("TODO::save binary %s", shader->cached_name);
             }
 
             free(prtbf);
