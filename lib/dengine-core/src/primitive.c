@@ -288,8 +288,8 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
 
         if(i >= 0 && i < 12)
         {
-            s = y < 0.0f ? 0.0f : 1.0f;
-            t = z < 0.0f ? 0.0f : 1.0f;
+            s = z < 0.0f ? 0.0f : 1.0f;
+            t = y < 0.0f ? 0.0f : 1.0f;
         }
         if(i >= 12 && i < 24)
         {
