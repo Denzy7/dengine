@@ -21,7 +21,6 @@ endif()
 get_directory_property(subdirs SUBDIRECTORIES)
 foreach(subdir ${subdirs})
     get_directory_property(dir_tgts DIRECTORY ${subdir} BUILDSYSTEM_TARGETS)
-    message(${dir_tgts})
     set_target_properties(${dir_tgts} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 endforeach()
