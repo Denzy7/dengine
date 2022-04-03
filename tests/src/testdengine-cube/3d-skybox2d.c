@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
         //GUI
         glDepthFunc(GL_LESS);
 
-        //denginegui_panel(0, 0, 512, 512, &equireq, NULL, black);
+        denginegui_text(10, 10, "USE WASD=move camera, EC = up/dowm", NULL);
 
         dengine_update();
     }
