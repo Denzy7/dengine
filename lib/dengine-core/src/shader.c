@@ -9,12 +9,11 @@
 #include "dengine-utils/debug.h"
 #include "dengine-utils/str.h" //str_ndup
 #include "dengine-utils/os.h" //mkdir
+#include "dengine_config.h" //cache_dir, ext
 #ifdef DENGINE_ANDROID
 #include <dengine/android.h>
 #endif
 
-#define DENGINE_SHADER_CACHE_DIR "dengine/shader_cache"
-#define DENGINE_SHADER_CACHE_EXT ".shader"
 static
 float default_shader_col[3] = {1.0, 0.0, 0.0};
 

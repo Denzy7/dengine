@@ -61,4 +61,13 @@
 #define DENGINE_DEBUG_TRACESTRLN 2048
 #define DENGINE_DEBUG_TRACEFILE "dengine.trace.log"
 
+/*
+ * Directory relative to filesys_get_cachedir() where cached shaders
+ * are stored. cachedir if filled during in runtime and is OS-dependant
+ */
+#define DENGINE_SHADER_CACHE_DIR "dengine/shader_cache"
+
+//Extension to save cached binary of shaders in SHADER_CACHE_DIR
+#define DENGINE_SHADER_CACHE_EXT ".shader"
+
 #endif // DENGINE_CONFIG_H_INCLUDED
