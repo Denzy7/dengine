@@ -48,7 +48,7 @@ void _dengineutils_os_init_null()
 
 int dengineutils_os_mkdir(const char* directory)
 {
-    int ok;
+    int ok = 0;
     //TODO : CLEAN THIS SHIT UP!
     const  char* ok_file = "ok.file";
     size_t directory_len = strlen(directory) + strlen(ok_file);
@@ -87,13 +87,25 @@ int dengineutils_os_mkdir(const char* directory)
     if(okdir)
     {
         ok = 1;
-    }else
-    {
-        ok = 0;
+        closedir(okdir);
     }
 
     free(path);
     free(path_build);
+
+    return ok;
+}
+
+int dengineutils_os_direxist(const char* directory)
+{
+    int ok = 0;
+    DIR* okdir = opendir(directory);
+
+    if(okdir)
+    {
+        ok = 1;
+        closedir(okdir);
+    }
 
     return ok;
 }
