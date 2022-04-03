@@ -20,7 +20,16 @@ int dengineutils_filesys_init()
     assetdir = calloc(dirbuflen, sizeof(char));
     cachedir = calloc(dirbuflen, sizeof(char));
     filesdir = calloc(dirbuflen, sizeof(char));
-    return assetdir && srcdir && cachedir && filesdir;
+    filesysinit = assetdir && srcdir && cachedir && filesdir;
+
+    dengineutils_logging_log("%d", filesysinit);
+
+    return filesysinit;
+}
+
+int dengineutils_filesys_isinit()
+{
+    return filesysinit;
 }
 
 void dengineutils_filesys_terminate()

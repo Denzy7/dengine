@@ -24,6 +24,8 @@ extern "C" {
 
 int dengineutils_filesys_init();
 
+int dengineutils_filesys_isinit();
+
 void dengineutils_filesys_terminate();
 
 int dengineutils_filesys_file2mem_load(File2Mem* file2mem);
