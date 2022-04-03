@@ -138,8 +138,16 @@ void dengine_lighting_shadowop_clear(ShadowOp* shadowop)
     if (shadowop->shadow_map.depth.texture_id == 0)
         return;
 
+    //we might not have entered with fb 0, save binding for later
+    int bind;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &bind); DENGINE_CHECKGL;
+
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &shadowop->shadow_map);
     glClear(GL_DEPTH_BUFFER_BIT); DENGINE_CHECKGL;
+
+    //bind entry fb
+    glBindFramebuffer(GL_FRAMEBUFFER, bind); DENGINE_CHECKGL;
+
     dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
 }
 
@@ -178,6 +186,10 @@ void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, Shader* shader, P
     glGetIntegerv(GL_VIEWPORT, viewport);
     int h = viewport[3], w = viewport[2];
 
+    //we might not have entered with fb 0, save binding for later
+    int bind;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &bind); DENGINE_CHECKGL;
+
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &dirLight->shadow.shadow_map);
 
     float ortho_size = 10.0f;
@@ -202,7 +214,9 @@ void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, Shader* shader, P
     dengine_draw_primitive(primitive, shader);
 
     glViewport(0, 0, w, h);
-    dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
+
+    //bind entry fb
+    glBindFramebuffer(GL_FRAMEBUFFER, bind); DENGINE_CHECKGL;
 
     memcpy(dirLight->shadow_projview, projview[0], sizeof(mat4));
 }
@@ -308,6 +322,9 @@ void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, Shader* sha
     glGetIntegerv(GL_VIEWPORT, viewport);
     int h = viewport[3], w = viewport[2];
 
+    int bind;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &bind); DENGINE_CHECKGL;
+
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &pointLight->shadow.shadow_map);
 
     mat4 proj, view;
@@ -346,7 +363,9 @@ void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, Shader* sha
     dengine_draw_primitive(primitive, shader);
 
     glViewport(0, 0, w, h);
-    dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
+
+    //bind entry fb
+    glBindFramebuffer(GL_FRAMEBUFFER, bind); DENGINE_CHECKGL;
 }
 
 void dengine_lighting_setup_spotlight(SpotLight* spotLight)
