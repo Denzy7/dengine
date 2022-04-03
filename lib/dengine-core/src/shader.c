@@ -186,7 +186,7 @@ int dengine_shader_setup(Shader* shader)
                     if(dengine_shader_set_binary(shader, f2m.mem, (int)f2m.size))
                     {
                         binload = 1;
-                        //dengineutils_logging_log("TODO::load binary %s, %d,%u", shader->cached_name, (int)f2m.size, binfmt);
+                        dengineutils_logging_log("TODO::load binary %s, %d,%u", shader->cached_name, (int)f2m.size, binfmt);
                     }
                     dengineutils_filesys_file2mem_free(&f2m);
                 }
@@ -277,7 +277,7 @@ int dengine_shader_link(Shader* shader)
                         free(bin);
                     }
                 }
-                //dengineutils_logging_log("TODO::save binary %s", shader->cached_name);
+                dengineutils_logging_log("TODO::save binary %s", shader->cached_name);
             }
 
             free(prtbf);
