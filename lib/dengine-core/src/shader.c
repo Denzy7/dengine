@@ -277,7 +277,6 @@ int dengine_shader_link(Shader* shader)
                         free(bin);
                     }
                 }
-
                 //dengineutils_logging_log("TODO::save binary %s", shader->cached_name);
             }
 
@@ -345,7 +344,33 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
     dengine_shader_create(stdshdr);
 
     const int prtbuf_sz=2048;
-    char* prtbuf = malloc(prtbuf_sz);;
+    char* prtbuf = malloc(prtbuf_sz);
+
+    if(dengineutils_filesys_isinit())
+    {
+        const char* vertfile = strchr(stdshaderssrcfiles[stdshader][0], '.');
+        const size_t n = strlen(stdshaderssrcfiles[stdshader][0]) - strlen(vertfile);
+        char* cached = dengineutils_str_ndup(stdshaderssrcfiles[stdshader][0],
+                n);
+        stdshdr->cached_name = cached;
+        int bin_success = 0;
+
+        snprintf(prtbuf, prtbuf_sz, "%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
+                 DENGINE_SHADER_CACHE_DIR,
+                 stdshdr->cached_name, DENGINE_SHADER_CACHE_EXT);
+
+        if(fopen(prtbuf, "rb"))
+        {
+            bin_success = dengine_shader_setup(stdshdr);
+        }
+        free(cached);
+        if(bin_success)
+        {
+            free(prtbuf);
+            return stdshdr;
+        }
+    }
+
     char *stdshdrsrc[3] =
     {
       NULL, NULL, NULL //Is this necessary?
@@ -374,11 +399,7 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
     stdshdr->fragment_code = stdshdrsrc[1];
     stdshdr->geometry_code = stdshdrsrc[2];
 
-    const char* vertfile = strchr(stdshaderssrcfiles[stdshader][0], '.');
-    const size_t n = strlen(stdshaderssrcfiles[stdshader][0]) - strlen(vertfile);
-    char* cached = dengineutils_str_ndup(stdshaderssrcfiles[stdshader][0],
-            n);
-    stdshdr->cached_name = cached;
+
     dengine_shader_setup(stdshdr);
 
     for (int i = 0; i < 2; i++) {
@@ -388,8 +409,6 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
             free(stdshdrsrcdup);
         }
     }
-
-    free(cached);
     free(prtbuf);
 
     if(stdshader == DENGINE_SHADER_DEFAULT)
