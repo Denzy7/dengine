@@ -36,3 +36,10 @@ char* dengineutils_str_pat(const char* str, const char* key, const char* val)
 
     return new_str;
 }
+
+char* dengineutils_str_ndup(const char* str, const size_t n)
+{
+    char* newstr = calloc(n + 1, 1);
+    strncpy(newstr, str, n);
+    return newstr;
+}
