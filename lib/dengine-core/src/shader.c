@@ -22,6 +22,8 @@ static const char *stdshaderssrcfiles[][3]=
     {"shadow3d.vert.glsl", "shadow3d.frag.glsl", "shadow3d.geom.glsl"},
     {"gui.vert.glsl", "gui.frag.glsl"},
     {"debug/normals.vert.glsl", "debug/normals.frag.glsl"},
+    {"skybox.vert.glsl", "skybox.frag.glsl"},
+    {"skybox2d.vert.glsl", "skybox2d.frag.glsl"},
 };
 
 void dengine_shader_create(Shader* shader)
