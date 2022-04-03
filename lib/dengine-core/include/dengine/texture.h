@@ -137,6 +137,24 @@ Texture* dengine_texture_new_white(const int width, const int height);
 Texture* dengine_texture_new_normalmap(const int width, const int height);
 
 /*!
+ * \brief Create an instance of a checkerboard pattern
+ * \param width width
+ * \param height height
+ * \param segments segments to split width and height
+ * \param foreground foreground color
+ * \param background background color
+ * \param foreground_first 1 = foreground first, 0 = background first
+ * \param channels color channels in both foreground and background
+ * \return A 2D checkerboard pattern split by segments using the width
+ */
+Texture* dengine_texture_new_checkerboard(const int width, const int height,
+                                         const int segments,
+                                         unsigned char* foreground,
+                                         unsigned char* background,
+                                         int foreground_first,
+                                         const int channels);
+
+/*!
  * \brief Create a Texture that can readback framebuffer color attachments
  * \param width width of texture
  * \param height height of texture

@@ -183,6 +183,67 @@ Texture* dengine_texture_new_white(const int width, const int height)
     return white;
 }
 
+Texture* dengine_texture_new_checkerboard(const int width, const int height,
+                                         const int segments,
+                                         unsigned char* foreground,
+                                         unsigned char* background,
+                                         int foreground_first,
+                                         const int channels)
+{
+    DENGINE_DEBUG_ENTER;
+
+    Texture* check = malloc(sizeof (Texture));
+    memset(check, 0, sizeof (Texture));
+    check->filter_min = GL_NEAREST;
+    check->filter_mag = GL_NEAREST;
+    check->width = width;
+    check->height = height;
+    check->format = channels == 3 ? GL_RGB : GL_RGBA;
+    check->internal_format = check->format;
+    check->type = GL_UNSIGNED_BYTE;
+    uint8_t* dat = calloc(width * height * channels, sizeof (uint8_t));
+
+    int swap = 0;
+    int fill = foreground_first; /* set to 1 to fill fg first*/
+    int box_sz = width / segments;
+    uint8_t* col = NULL;
+    for(int i = 0; i < width * height; i++)
+    {
+        if(i % (width * box_sz) == 0 && i != 0)
+            swap = !swap;
+
+        if(i % box_sz == 0 && i != 0)
+            fill = !fill;
+
+        if(fill)
+        {
+            if(swap)
+                col = background;
+            else
+                col = foreground;
+        }else
+        {
+            if(swap)
+                col = foreground;
+            else
+                col = background;
+        }
+
+        for(int j = 0; j < channels; j++)
+        {
+            dat[i*channels + j] = col[j];
+        }
+    }
+
+    check->data = dat;
+    dengine_texture_gen(1, check);
+    dengine_texture_bind(GL_TEXTURE_2D, check);
+    dengine_texture_data(GL_TEXTURE_2D, check);
+    dengine_texture_set_params(GL_TEXTURE_2D, check);
+    dengine_texture_bind(GL_TEXTURE_2D, NULL);
+    return check;
+}
+
 void dengine_texture_mipmap(uint32_t target, Texture* texture)
 {
     DENGINE_DEBUG_ENTER;
