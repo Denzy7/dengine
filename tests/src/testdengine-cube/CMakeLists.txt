@@ -15,9 +15,18 @@ target_link_libraries(testdengine-3d-cube-textured
 set_property(TARGET testdengine-3d-cube-textured PROPERTY C_STANDARD 99)
 
 #a skybox from cube
-add_executable(testdengine-3d-cube-skybox
+add_executable(testdengine-3d-cube-skyboxcube
         3d-skybox.c
         )
-target_link_libraries(testdengine-3d-cube-skybox
+target_link_libraries(testdengine-3d-cube-skyboxcube
         ${dengine})
-set_property(TARGET testdengine-3d-cube-skybox PROPERTY C_STANDARD 99)
+set_property(TARGET testdengine-3d-cube-skyboxcube PROPERTY C_STANDARD 99)
+
+#a skybox from 2d texture (hdri)
+add_executable(testdengine-3d-cube-skybox2d
+        3d-skybox2d.c
+        )
+target_link_libraries(testdengine-3d-cube-skybox2d
+        ${dengine})
+set_property(TARGET testdengine-3d-cube-skybox2d PROPERTY C_STANDARD 99)
+
