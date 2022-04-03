@@ -9,7 +9,7 @@
 
 #include "dengine_config.h" //MAX_LOG_STR_SIZE
 
-
+#include "dengine/macros.h"
 
 #if defined(DENGINE_ANDROID)
 #include <android/log.h>
@@ -29,23 +29,47 @@ int log2file = 0;
 //messagebox on error
 int msgboxerr=1;
 
+
+static const char* offsetneedles[]=
+{
+    "INFO::",
+    "ERROR::",
+    "WARNING::",
+    "TODO::",
+};
+
+#ifdef DENGINE_LINUX
 //ANSI COLORS
 #define  ANSI_Red "\033[0;31m"
 #define  ANSI_Green "\033[0;32m"
-//#define  ANSI_Blue "\033[0;34m"
+#define  ANSI_Blue "\033[0;34m"
 #define  ANSI_Yellow "\033[0;33m"
-//#define  ANSI_Cyan "\033[0;36m"
-//#define  ANSI_White "\033[0;37m"
-
+#define  ANSI_Cyan "\033[0;36m"
+#define  ANSI_White "\033[0;37m"
 #define ANSI_Reset "\033[0m"
-
+static const char* logcolorpairsANSI[][2]=
+{
+    {"I", ANSI_Green},
+    {"E", ANSI_Red},
+    {"W", ANSI_Yellow},
+    {"T", ANSI_Cyan},
+};
+#elif defined(DENGINE_WIN32)
 //WIN32 COLORS
 #define WIN32_Red 12
 #define WIN32_Green 10
-//#define WIN32_Blue 9
+#define WIN32_Blue 9
 #define WIN32_Yellow 14
-//#define WIN32_Cyan 11
+#define WIN32_Cyan 11
 #define WIN32_White 15
+static const char logcolorpairsWIN32[][2]=
+{
+    {'I', WIN32_Green},
+    {'E', WIN32_Red},
+    {'W', WIN32_Yellow},
+    {'T', WIN32_Cyan},
+};
+#endif
 
 void dengineutils_logging_set_filelogging(int value)
 {
@@ -58,27 +82,39 @@ void dengineutils_logging_set_filelogging(int value)
 void dengineutils_logging_set_consolecolor(char head)
 {
 #if defined(DENGINE_LINUX)
-    //Color ansi output
-    if(head == 'I')
-        printf(ANSI_Green);
-    else if(head == 'E')
-        printf(ANSI_Red);
-    else if(head == 'W')
-        printf(ANSI_Yellow);
-    else
+
+    if(!head)
+    {
         printf(ANSI_Reset);
+    }else
+    {
+        //Color ansi output
+        for(int i = 0; i < DENGINE_ARY_SZ(logcolorpairsANSI); i++)
+        {
+            if(logcolorpairsANSI[i][0][0] == head)
+            {
+                printf("%s", logcolorpairsANSI[i][1]);
+            }
+        }
+    }
 #elif defined(DENGINE_WIN32)
     //Win32 set console
     //TODO : Get current color instead of overriding user color
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    if(head == 'I')
-        SetConsoleTextAttribute(hConsole, WIN32_Green);
-    else if(head == 'E')
-        SetConsoleTextAttribute(hConsole, WIN32_Red);
-    else if(head == 'W')
-        SetConsoleTextAttribute(hConsole, WIN32_Yellow);
-    else
+
+    if(!head)
+    {
         SetConsoleTextAttribute(hConsole, WIN32_White);
+    }else
+    {
+        for(int i = 0; i < DENGINE_ARY_SZ(logcolorpairsWIN32); i++)
+        {
+            if(logcolorpairsWIN32[i][0] == head)
+            {
+                SetConsoleTextAttribute(hConsole, logcolorpairsWIN32[i][1]);
+            }
+        }
+    }
 #endif
 
 }
@@ -101,15 +137,12 @@ void dengineutils_logging_log(const char* message, ...)
         fclose(f);
     }
 
-    const char* delim;
-    if(LOG_BUFFER[0] == 'I')
-        delim = "INFO::";
-    else if(LOG_BUFFER[0] == 'E')
-        delim = "ERROR::";
-    else if(LOG_BUFFER[0] == 'W')
-        delim = "WARNING::";
-    else
-        delim = "";
+    const char* delim = "";
+    for(int i = 0; i < DENGINE_ARY_SZ(offsetneedles); i++)
+    {
+        if(strstr(LOG_BUFFER, offsetneedles[i]))
+            delim =  offsetneedles[i];
+    }
 
     dengineutils_logging_set_consolecolor(LOG_BUFFER[0]);
     printf("\n%s", LOG_BUFFER + strlen(delim));
