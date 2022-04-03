@@ -14,6 +14,8 @@ void draw_axis(Primitive* axis, Shader* shader)
 
 int main(int argc, char *argv[])
 {
+    DengineInitOpts* opts = dengine_init_get_opts();
+    opts->window_title = "testdengine-cube-skyboxcube";
     dengine_init();
 
     const size_t prtbf_sz = 2048;
@@ -108,8 +110,12 @@ int main(int argc, char *argv[])
 
         dengine_update();
     }
+
+    dengine_material_destroy(&cubemap_mat);
+
     free(prtbf);
     free(sky);
+    free(dft);
     dengine_terminate();
     return 0;
 }
