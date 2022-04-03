@@ -21,7 +21,7 @@ typedef struct
 {
     float projection_mat[16]; /*!< Projection 4x4 matrix */
     float view_mat[16]; /*!< View 4x4 matrix */
-    float uview_mat[9]; /*!< Untranslated view 3x3 matrix */
+    float uview_mat[16]; /*!< Untranslated view 4x4 matrix */
 
     float position[3]; /*!< X, Y, Z position */
 

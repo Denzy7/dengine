@@ -62,7 +62,8 @@ void dengine_camera_lookat(float* target, Camera* camera)
     DENGINE_DEBUG_ENTER;
 
     mat4 view;
-    mat3 uview;
+    mat3 view_3x3;
+    mat4 uview;
     vec3 up = {0.0f, 1.0f, 0.0f};
 
     float* _target = target;
@@ -71,9 +72,13 @@ void dengine_camera_lookat(float* target, Camera* camera)
     }
 
     glm_lookat(camera->position, _target, up, view);
-
     memcpy(camera->view_mat, view, sizeof(camera->view_mat));
-    memcpy(camera->uview_mat, view, sizeof(camera->uview_mat));
+
+    glm_mat4_pick3(view, view_3x3);
+    glm_mat4_zero(uview);
+    glm_mat4_ins3(view_3x3, uview);
+
+    memcpy(camera->uview_mat, uview, sizeof(camera->uview_mat));
 }
 
 void dengine_camera_apply(Shader* shader, Camera* camera)
