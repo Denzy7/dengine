@@ -58,6 +58,10 @@ void dengine_shader_destroy(Shader* shader);
 
 int dengine_shader_setup(Shader* shader);
 
+void* dengine_shader_get_binary(Shader* shader, int* length);
+
+int dengine_shader_set_binary(Shader* shader, void* binary, int length);
+
 int dengine_shader_link(Shader* shader);
 
 void dengine_shader_use(const Shader* shader);

@@ -17,6 +17,8 @@
 static
 float default_shader_col[3] = {1.0, 0.0, 0.0};
 
+static GLenum binfmt = 0;
+
 static const char *stdshaderssrcfiles[][3]=
 {
     //vertex_shader, fragment_shader, geometry_shader
@@ -29,6 +31,8 @@ static const char *stdshaderssrcfiles[][3]=
     {"skybox.vert.glsl", "skyboxcube.frag.glsl"},
     {"skybox.vert.glsl", "skybox2d.frag.glsl"},
 };
+
+void _dengine_shader_set_binfmt();
 
 void dengine_shader_create(Shader* shader)
 {
@@ -172,13 +176,20 @@ int dengine_shader_setup(Shader* shader)
             {
                 File2Mem f2m;
                 f2m.file = prtbf;
-                //dengineutils_filesys_file2mem_load(&f2m);
 
-                //load binary here and set to 1 on link success
-                //binload = 1;
-                dengineutils_logging_log("TODO::load binary %s", shader->cached_name);
+                if(!binfmt)
+                    _dengine_shader_set_binfmt();
 
-                //dengineutils_filesys_file2mem_free(&f2m);
+                if(binfmt)
+                {
+                    dengineutils_filesys_file2mem_load(&f2m);
+                    if(dengine_shader_set_binary(shader, f2m.mem, (int)f2m.size))
+                    {
+                        binload = 1;
+                        //dengineutils_logging_log("TODO::load binary %s, %d,%u", shader->cached_name, (int)f2m.size, binfmt);
+                    }
+                    dengineutils_filesys_file2mem_free(&f2m);
+                }
             }
         }
 
@@ -248,11 +259,26 @@ int dengine_shader_link(Shader* shader)
             snprintf(prtbf, prtbf_sz, "%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
                      DENGINE_SHADER_CACHE_DIR,
                      shader->cached_name, DENGINE_SHADER_CACHE_EXT);
-
             if(!fopen(prtbf, "rb") && shader->cached_name)
             {
                 //fopen and save binary here
-                dengineutils_logging_log("TODO::save binary %s", shader->cached_name);
+                if(!binfmt)
+                    _dengine_shader_set_binfmt();
+
+                if(binfmt)
+                {
+                    FILE* f_bin = fopen(prtbf, "wb");
+                    int len = 0;
+                    void* bin = dengine_shader_get_binary(shader, &len);
+                    if(f_bin)
+                    {
+                        fwrite(bin, len, 1, f_bin);
+                        fclose(f_bin);
+                        free(bin);
+                    }
+                }
+
+                //dengineutils_logging_log("TODO::save binary %s", shader->cached_name);
             }
 
             free(prtbf);
@@ -372,4 +398,64 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
     }
 
     return stdshdr;
+}
+
+int dengine_shader_set_binary(Shader* shader, void* binary, int length)
+{
+    if(!binfmt)
+        return 0;
+
+    int ok = 0;
+
+    if(glad_glProgramBinary)
+    {
+        glProgramBinary(shader->program_id, binfmt, binary, length); DENGINE_CHECKGL;
+        ok = 1;
+    }else if(glad_glProgramBinaryOES)
+    {
+        glProgramBinaryOES(shader->program_id, binfmt, binary, length); DENGINE_CHECKGL;
+        ok = 1;
+    }
+    return ok;
+}
+
+void* dengine_shader_get_binary(Shader* shader, int* length)
+{
+    void* bin = NULL;
+
+    if(glad_glGetProgramBinary)
+    {
+        glGetProgramiv(shader->program_id, GL_PROGRAM_BINARY_LENGTH, length); DENGINE_CHECKGL;
+        bin = malloc(*length);
+        glGetProgramBinary(shader->program_id, *length, NULL, &binfmt, bin); DENGINE_CHECKGL;
+    }else if(glad_glGetProgramBinaryOES)
+    {
+        glGetProgramiv(shader->program_id, GL_PROGRAM_BINARY_LENGTH_OES, length); DENGINE_CHECKGL;
+        bin = malloc(*length);
+        glGetProgramBinaryOES(shader->program_id, *length, NULL, &binfmt, bin); DENGINE_CHECKGL;
+    }else
+    {
+        dengineutils_logging_log("WARNING::Could not find a binary format. Shader cache disabled");
+    }
+
+    return bin;
+}
+
+void _dengine_shader_set_binfmt()
+{
+    Shader* binfmtshdr = calloc(1, sizeof (Shader));
+
+    binfmtshdr->vertex_code = "void main(){gl_Position = vec4(1.0);}";
+    binfmtshdr->fragment_code = "void main(){gl_FragColor = vec4(1.0);}";
+
+    dengine_shader_setup(binfmtshdr);
+
+    int len = 0;
+    void* bin = dengine_shader_get_binary(binfmtshdr, &len);
+
+    dengine_shader_destroy(binfmtshdr);
+
+    if(bin)
+        free(bin);
+    free(binfmtshdr);
 }
