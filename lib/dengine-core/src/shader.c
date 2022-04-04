@@ -159,8 +159,9 @@ int dengine_shader_setup(Shader* shader)
         char* prtbf = malloc(prtbf_sz);
         int binload = 0;
 
-        snprintf(prtbf, prtbf_sz, "%s/%s", dengineutils_filesys_get_cachedir(),
-                 DENGINE_SHADER_CACHE_DIR);
+        const char* GL = (const char*) glGetString(GL_VERSION);
+        snprintf(prtbf, prtbf_sz, "%s/%s/%s", dengineutils_filesys_get_cachedir(),
+                 DENGINE_SHADER_CACHE_DIR, GL);
 
         if(!dengineutils_os_direxist(prtbf))
             dengineutils_os_mkdir(prtbf);
@@ -168,8 +169,8 @@ int dengine_shader_setup(Shader* shader)
 
         if(shader->cached_name)
         {
-            snprintf(prtbf, prtbf_sz, "%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
-                     DENGINE_SHADER_CACHE_DIR,
+            snprintf(prtbf, prtbf_sz, "%s/%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
+                     DENGINE_SHADER_CACHE_DIR, GL,
                      shader->cached_name, DENGINE_SHADER_CACHE_EXT);
 
             if(fopen(prtbf, "rb"))
@@ -255,9 +256,9 @@ int dengine_shader_link(Shader* shader)
         {
             const size_t prtbf_sz = 4096;
             char* prtbf = malloc(prtbf_sz);
-
-            snprintf(prtbf, prtbf_sz, "%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
-                     DENGINE_SHADER_CACHE_DIR,
+            const char* GL = (const char*) glGetString(GL_VERSION);
+            snprintf(prtbf, prtbf_sz, "%s/%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
+                     DENGINE_SHADER_CACHE_DIR, GL,
                      shader->cached_name, DENGINE_SHADER_CACHE_EXT);
             if(!fopen(prtbf, "rb") && shader->cached_name)
             {
@@ -356,9 +357,9 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
     if(dengineutils_filesys_isinit())
     {
         int bin_success = 0;
-
-        snprintf(prtbuf, prtbuf_sz, "%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
-                 DENGINE_SHADER_CACHE_DIR,
+        const char* GL = (const char*) glGetString(GL_VERSION);
+        snprintf(prtbuf, prtbuf_sz, "%s/%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
+                 DENGINE_SHADER_CACHE_DIR,GL,
                  stdshdr->cached_name, DENGINE_SHADER_CACHE_EXT);
 
         if(fopen(prtbuf, "rb"))
