@@ -91,6 +91,11 @@ DENGINE_INLINE int dengine_init()
     if(DENGINE_INIT_OPTS.window_msaa)
         dengine_window_request_MSAA(DENGINE_INIT_OPTS.window_msaa);
 
+    if(DENGINE_INIT_OPTS.gl_max)
+        dengine_window_request_GL(DENGINE_INIT_OPTS.gl_max,
+                                  DENGINE_INIT_OPTS.gl_min,
+                                  DENGINE_INIT_OPTS.gl_core);
+
     //All this to GL initialization
     if(DENGINE_INIT_OPTS.window_createnative)
     {
