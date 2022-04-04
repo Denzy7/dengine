@@ -93,6 +93,8 @@ void dengine_framebuffer_attach2D(FramebufferAttachmentType attachment, Texture*
         glFramebufferTexture2D(GL_FRAMEBUFFER, attach, GL_TEXTURE_2D, texture->texture_id, 0);
     else if (glad_glFramebufferTexture2DEXT)
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER, attach, GL_TEXTURE_2D, texture->texture_id, 0);
+    else
+        dengineutils_logging_log("WARNING::Unable to find suitable glFramebufferTexture2D");
 #endif
 
     if(!DENGINE_CHECKGL)
