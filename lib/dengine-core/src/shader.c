@@ -347,10 +347,10 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
     const int prtbuf_sz=2048;
     char* prtbuf = malloc(prtbuf_sz);
 
-    //get cache name from vertex shader
-    const char* vertfile = strchr(stdshaderssrcfiles[stdshader][0], '.');
-    const size_t n = strlen(stdshaderssrcfiles[stdshader][0]) - strlen(vertfile);
-    char* cached = dengineutils_str_ndup(stdshaderssrcfiles[stdshader][0],
+    //get cache name from fragment shader
+    const char* fragfile = strchr(stdshaderssrcfiles[stdshader][1], '.');
+    const size_t n = strlen(stdshaderssrcfiles[stdshader][1]) - strlen(fragfile);
+    char* cached = dengineutils_str_ndup(stdshaderssrcfiles[stdshader][1],
             n);
     stdshdr->cached_name = cached;
 
