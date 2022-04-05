@@ -113,15 +113,20 @@ void dengine_framebuffer_attach2D(FramebufferAttachmentType attachment, Texture*
 
 void dengine_framebuffer_attachRB(FramebufferAttachmentType attachment, Renderbuffer* renderbuffer, Framebuffer* framebuffer)
 {
+    GLenum attach = GL_COLOR_ATTACHMENT0 + framebuffer->n_color;
+    if(attachment == DENGINE_FRAMEBUFFER_DEPTH)
+        attach = GL_DEPTH_ATTACHMENT;
+    else if (attachment == DENGINE_FRAMEBUFFER_STENCIL)
+        attach = GL_STENCIL_ATTACHMENT;
     DENGINE_DEBUG_ENTER;
 #ifdef DENGINE_GL_GLAD
     if(glad_glFramebufferRenderbuffer)
     {
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment,
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, attach,
                                   GL_RENDERBUFFER, renderbuffer->renderbuffer_id);
     }else if(glad_glFramebufferRenderbufferEXT)
     {
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, attachment,
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, attach,
                                   GL_RENDERBUFFER, renderbuffer->renderbuffer_id);
     }
     DENGINE_CHECKGL;
