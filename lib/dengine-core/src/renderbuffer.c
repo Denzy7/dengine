@@ -29,10 +29,13 @@ void dengine_renderbuffer_destroy(size_t count, Renderbuffer* renderbuffers)
 
 void dengine_renderbuffer_bind( Renderbuffer* renderbuffer)
 {
+    uint32_t bind = 0;
+    if(renderbuffer)
+        bind = renderbuffer->renderbuffer_id;
     if(glad_glBindRenderbuffer)
-        glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer->renderbuffer_id);
+        glBindRenderbuffer(GL_RENDERBUFFER, bind);
     else if(glad_glBindRenderbufferEXT)
-        glBindRenderbufferEXT(GL_RENDERBUFFER, renderbuffer->renderbuffer_id);
+        glBindRenderbufferEXT(GL_RENDERBUFFER, bind);
 
     DENGINE_CHECKGL;
 }
