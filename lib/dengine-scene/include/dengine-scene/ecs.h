@@ -80,7 +80,7 @@ void denginescene_ecs_set_entity_name(Entity* entity, const char* name);
  * \param parent Parent to use
  * \param child Child to use
  */
-void denginescene_ecs_parent(struct _Entity* parent, struct _Entity* child);
+void denginescene_ecs_parent(Entity* parent, Entity* child);
 
 void denginescene_ecs_get_model(Entity* entity,mat4 mat4x4);
 

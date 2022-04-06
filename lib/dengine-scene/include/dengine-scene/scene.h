@@ -6,7 +6,7 @@
 
 typedef struct _Scene
 {
-    struct _Entity** entities;
+    Entity** entities;
     uint32_t n_entities;
 }Scene;
 
@@ -27,7 +27,7 @@ void denginescene_destroy(Scene* scene);
  * \param scene Scene to use
  * \param entity Entity to add
  */
-void denginescene_add_entity(Scene* scene, struct _Entity* entity);
+void denginescene_add_entity(Scene* scene, Entity* entity);
 
 void denginescene_update(Scene* scene);
 

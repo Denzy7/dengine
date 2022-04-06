@@ -9,10 +9,10 @@
 
 Scene* denginescene_new()
 {
-    Scene* newscn = malloc(sizeof (Scene));
+    Scene* newscn = malloc(sizeof (struct _Scene));
     memset(newscn, 0, sizeof (Scene));
 
-    newscn->entities = malloc(DENGINE_ECS_MAXCHILDREN * sizeof (Entity*));
+    newscn->entities = malloc(DENGINE_ECS_MAXCHILDREN * sizeof (struct _Entity*));
 
     return newscn;
 }
@@ -26,7 +26,7 @@ void denginescene_destroy(Scene* scene)
     free(scene);
 }
 
-void denginescene_add_entity(Scene* scene, struct _Entity* entity)
+void denginescene_add_entity(Scene* scene, Entity* entity)
 {
     if (scene->n_entities >= DENGINE_ECS_MAXCHILDREN) {
         dengineutils_logging_log("WARNING::Scene limit reached! Recompile to increase limit. Free the allocated entity to avoid a memory leak!");

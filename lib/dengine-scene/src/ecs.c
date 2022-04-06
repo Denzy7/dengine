@@ -81,7 +81,7 @@ void denginescene_ecs_destroy_entity(Entity* root)
     free(root);
 }
 
-void denginescene_ecs_parent(struct _Entity* parent, struct _Entity* child)
+void denginescene_ecs_parent(Entity* parent, Entity* child)
 {
     if (parent->children_count >= DENGINE_ECS_MAXCHILDREN) {
         dengineutils_logging_log("WARNING::Parenting limit reached! Recompile to increase limit. Free the allocated entity to avoid a memory leak!");
