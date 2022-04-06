@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(dengine VERSION 0.3.0 LANGUAGES C)
+project(dengine VERSION 0.3.1 LANGUAGES C)
 
 if(NOT ANDROID)
     find_package(PkgConfig QUIET)
