@@ -139,7 +139,7 @@ DENGINE_INLINE int dengine_init()
     else
         snprintf(msaastr, 9, "NO MSAA");
 
-    dengineutils_logging_log("INFO::DENGINE : %s", DENGINE_VERSION);
+    dengineutils_logging_log("TODO::DENGINE : %s", DENGINE_VERSION);
     dengineutils_logging_log("INFO::GL : %s\nGLSL : %s\nVENDOR : %s\nRENDERDER : %s\n"
                              "VIEWPORT : %dx%d %s",
                              GL, GLSL, VENDOR, RENDERDER,
