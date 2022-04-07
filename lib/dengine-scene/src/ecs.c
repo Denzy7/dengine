@@ -102,9 +102,9 @@ void denginescene_ecs_get_model(Entity* entity,mat4 mat4x4)
 
     versor x,y,z;
 
-    glm_quat(x,entity->transform.rotation[0],1.0f,0.0f,0.0f);
-    glm_quat(y,entity->transform.rotation[1],0.0f,1.0f,0.0f);
-    glm_quat(z,entity->transform.rotation[2],0.0f,0.0f,1.0f);
+    glm_quat(x, glm_rad(entity->transform.rotation[0]),1.0f,0.0f,0.0f);
+    glm_quat(y, glm_rad(entity->transform.rotation[1]),0.0f,1.0f,0.0f);
+    glm_quat(z, glm_rad(entity->transform.rotation[2]),0.0f,0.0f,1.0f);
 
     glm_quat_rotate(mat4x4,x,mat4x4);
     glm_quat_rotate(mat4x4,y,mat4x4);
