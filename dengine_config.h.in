@@ -1,6 +1,8 @@
 #ifndef DENGINE_CONFIG_H_INCLUDED
 #define DENGINE_CONFIG_H_INCLUDED
 
+#cmakedefine DENGINE_VERSION "@DENGINE_VERSION@"
+
 /*
  * Uncomment to hide compile dir since it has sensitive info like
  * your username.

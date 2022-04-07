@@ -133,13 +133,13 @@ DENGINE_INLINE int dengine_init()
     const char* GLSL = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
     const char* VENDOR = (const char*)glGetString(GL_VENDOR);
     const char* RENDERDER = (const char*)glGetString(GL_RENDERER);
-
     char msaastr[9];
     if(samples)
         snprintf(msaastr, 9, "%dx MSAA", samples);
     else
         snprintf(msaastr, 9, "NO MSAA");
 
+    dengineutils_logging_log("INFO::DENGINE : %s", DENGINE_VERSION);
     dengineutils_logging_log("INFO::GL : %s\nGLSL : %s\nVENDOR : %s\nRENDERDER : %s\n"
                              "VIEWPORT : %dx%d %s",
                              GL, GLSL, VENDOR, RENDERDER,
@@ -194,5 +194,7 @@ DENGINE_INLINE void dengine_update()
     dengine_window_swapbuffers();
     dengine_input_pollevents();
 }
+
+
 
 #endif // DENGINE_H
