@@ -118,9 +118,16 @@ size_t dengineutils_confserialize_write(Conf* conf)
         ConfKV* kv = conf->keys_values.data;
         for(size_t i = 0; i < conf->keys_values.count; i++)
         {
-            //write space as separator if comment
-            char separator = kv[i].key[0] == '#' ? ' ' : conf->separator;
-            write += fprintf(f_conf, "%s%c%s\n", kv[i].key, separator, kv[i].value);
+            char sep[3];
+            snprintf(sep, sizeof(sep), "%c", conf->separator);
+
+            //write space as separator if comment # or [
+            if(kv[i].key[0] == '#')
+                snprintf(sep, sizeof(sep), "%s", " ");
+            else if(kv[i].key[0] == '[')
+                snprintf(sep, sizeof(sep), "%s", "");
+
+            write += fprintf(f_conf, "%s%s%s\n", kv[i].key, sep, kv[i].value);
         }
     }
     fclose(f_conf);
