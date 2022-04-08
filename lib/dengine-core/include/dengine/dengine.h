@@ -83,7 +83,7 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
     if(!dengineutils_os_direxist(prtbf))
         dengineutils_os_mkdir(prtbf);
 
-    snprintf(prtbf, prtbf_sz, "%s/dengine/dengine.conf", dengineutils_filesys_get_filesdir());
+    snprintf(prtbf, prtbf_sz, "%s/dengine/dengine.ini", dengineutils_filesys_get_filesdir());
 
     Conf* conf = dengineutils_confserialize_new(prtbf, '=');
     if(fopen(prtbf, "r"))
@@ -97,13 +97,39 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
         char* window_height = dengineutils_confserialize_get("window_height", conf);
         if(window_height)
             sscanf(window_height, "%d", &DENGINE_INIT_OPTS.window_height);
+
+        char* window_msaa = dengineutils_confserialize_get("window_msaa", conf);
+        if(window_msaa)
+            sscanf(window_msaa, "%d", &DENGINE_INIT_OPTS.window_msaa);
+
+        char* font_size = dengineutils_confserialize_get("font_size", conf);
+        if(font_size)
+            sscanf(font_size, "%f", &DENGINE_INIT_OPTS.font_size);
+
+        char* font_bitmapsize = dengineutils_confserialize_get("font_bitmapsize", conf);
+        if(font_bitmapsize)
+            sscanf(font_bitmapsize, "%d", &DENGINE_INIT_OPTS.font_bitmapsize);
     }else
     {
+        dengineutils_confserialize_put("[", "window]", conf);
         snprintf(prtbf, prtbf_sz, "%d", DENGINE_INIT_OPTS.window_width);
         dengineutils_confserialize_put("window_width", prtbf, conf);
 
         snprintf(prtbf, prtbf_sz, "%d", DENGINE_INIT_OPTS.window_height);
         dengineutils_confserialize_put("window_height", prtbf, conf);
+
+        snprintf(prtbf, prtbf_sz, "%d", DENGINE_INIT_OPTS.window_msaa);
+        dengineutils_confserialize_put("window_msaa", prtbf, conf);
+
+        dengineutils_confserialize_put("####", "\n", conf);
+
+        dengineutils_confserialize_put("[", "font]", conf);
+        snprintf(prtbf, prtbf_sz, "%.1f", DENGINE_INIT_OPTS.font_size);
+        dengineutils_confserialize_put("font_size", prtbf, conf);
+
+        snprintf(prtbf, prtbf_sz, "%d", DENGINE_INIT_OPTS.font_bitmapsize);
+        dengineutils_confserialize_put("font_bitmapsize", prtbf, conf);
+        dengineutils_confserialize_put("####", "\n", conf);
 
         dengineutils_confserialize_write(conf);
     }
