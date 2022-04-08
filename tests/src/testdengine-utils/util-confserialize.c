@@ -30,17 +30,21 @@ int main(int argc, char** argv)
     }
 
     //Create a conf
-    conf = dengineutils_confserialize_new("test.conf", '=');
+    conf = dengineutils_confserialize_new("test.ini", '=');
 
     if(conf)
     {
+        //put a block
+        dengineutils_confserialize_put_block("this is a block", conf);
         //put some strings
         dengineutils_confserialize_put("hello", "world", conf);
         dengineutils_confserialize_put("lorem", "ipsum", conf);
+        //put newline
+        dengineutils_confserialize_put_newline(conf);
         dengineutils_confserialize_put("some_int", "2", conf);
         dengineutils_confserialize_put("some_float", "2.3", conf);
-        dengineutils_confserialize_put("#", "this comment wont load", conf);
 
+        dengineutils_confserialize_put_comment("this comment wont load", conf);
         //mess with utf-8 a lil
         dengineutils_confserialize_put("ТУРБО", "ПУШКА", conf);
 
