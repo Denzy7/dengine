@@ -10,13 +10,19 @@
  *
  * # file.ini (can be really anything, .ini is widely accepted. unix like .conf )
  *
+ * # confserialize_put_block()
  * [this is a block for organization and is ignored]
  *
+ * # confserialize_put_newline()
+ *
+ *
+ * # confserialize_put()
  * # key<separator>pairs into a file
  * # e.g.
  * date=08-01-2022
  * time=19:22
  *
+ * # confserialize_put_comment()
  * # this comment line starts with a '#' and is ignored
  */
 
