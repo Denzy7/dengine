@@ -45,6 +45,7 @@ typedef struct
 #include <dengine-utils/os.h>
 #include <dengine-utils/rng.h>
 #include <dengine-utils/timer.h>
+#include <dengine-utils/confserialize.h>
 
 #include <dengine-gui/gui.h>
 
@@ -59,6 +60,9 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
 {
     memset(&DENGINE_INIT_OPTS, 0, sizeof(DENGINE_HAS_GOT_INIT_OPTS));
 
+    //ALLOCATE FILESYS DIRECTORIES
+    dengineutils_filesys_init();
+
     DENGINE_INIT_OPTS.window_height = 720;
     DENGINE_INIT_OPTS.window_width = 1280;
     DENGINE_INIT_OPTS.window_title = "Dengine!";
@@ -70,6 +74,42 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
 
     DENGINE_INIT_OPTS.enable_backfaceculling = 1;
     DENGINE_INIT_OPTS.enable_depth = 1;
+
+    const size_t prtbf_sz = 2048;
+    char* prtbf = (char*) malloc(prtbf_sz);
+
+    snprintf(prtbf, prtbf_sz, "%s/dengine", dengineutils_filesys_get_filesdir());
+
+    if(!dengineutils_os_direxist(prtbf))
+        dengineutils_os_mkdir(prtbf);
+
+    snprintf(prtbf, prtbf_sz, "%s/dengine/dengine.conf", dengineutils_filesys_get_filesdir());
+
+    Conf* conf = dengineutils_confserialize_new(prtbf, '=');
+    if(fopen(prtbf, "r"))
+    {
+        dengineutils_confserialize_load(conf, 1);
+
+        char* window_width = dengineutils_confserialize_get("window_width", conf);
+        if(window_width)
+            sscanf(window_width, "%d", &DENGINE_INIT_OPTS.window_width);
+
+        char* window_height = dengineutils_confserialize_get("window_height", conf);
+        if(window_height)
+            sscanf(window_height, "%d", &DENGINE_INIT_OPTS.window_height);
+    }else
+    {
+        snprintf(prtbf, prtbf_sz, "%d", DENGINE_INIT_OPTS.window_width);
+        dengineutils_confserialize_put("window_width", prtbf, conf);
+
+        snprintf(prtbf, prtbf_sz, "%d", DENGINE_INIT_OPTS.window_height);
+        dengineutils_confserialize_put("window_height", prtbf, conf);
+
+        dengineutils_confserialize_write(conf);
+    }
+    dengineutils_confserialize_free(conf);
+
+    free(prtbf);
 
     DENGINE_HAS_GOT_INIT_OPTS = 1;
 
@@ -143,9 +183,6 @@ DENGINE_INLINE int dengine_init()
 
     //DEBUGGING, INCASE OF SIGSEGV OR SIGABRT
     dengineutils_debug_init();
-
-    //ALLOCATE FILESYS DIRECTORIES
-    dengineutils_filesys_init();
 
 #ifdef DENGINE_ANDROID
     //Can safely set files and cachedirs
