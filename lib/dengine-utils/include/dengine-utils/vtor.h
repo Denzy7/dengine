@@ -28,9 +28,9 @@ typedef struct vtor
     size_t type_sz;
 } vtor;
 
-void vtor_create_alloc(vtor* vtor, size_t type_sz, size_t num);
+int vtor_create_alloc(vtor* vtor, size_t type_sz, size_t num);
 
-void vtor_create(vtor* vtor, size_t type_sz);
+int vtor_create(vtor* vtor, size_t type_sz);
 
 void vtor_pushback(vtor* vtor, const void* val);
 
@@ -48,7 +48,7 @@ void vtor_free(vtor* vtor);
 #include <stdio.h>
 #endif
 
-void vtor_create_alloc(vtor* vtor, size_t type_sz, size_t num)
+int vtor_create_alloc(vtor* vtor, size_t type_sz, size_t num)
 {
     vtor->data = malloc(num * type_sz);
     vtor->capacity = num;
@@ -58,9 +58,12 @@ void vtor_create_alloc(vtor* vtor, size_t type_sz, size_t num)
 #ifdef VTOR_VERBOSE
     printf("create_alloc vec type_sz : %zu, capacity : %zu\n", vtor->type_sz, vtor->capacity);
 #endif // VTOR_VERBOSE
+
+    if(vtor->data)
+        return 1;
 }
 
-void vtor_create(vtor* vtor, size_t type_sz)
+int vtor_create(vtor* vtor, size_t type_sz)
 {
     vtor->data = malloc(2 * type_sz);
     vtor->capacity = 2;
@@ -77,6 +80,8 @@ void vtor_create(vtor* vtor, size_t type_sz)
     }
 
 #endif // VTOR_VERBOSE
+    if(vtor->data)
+        return 1;
 }
 
 void vtor_pushback(vtor* vtor, const void* val)
