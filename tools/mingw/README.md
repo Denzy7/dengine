@@ -14,12 +14,14 @@ In a nutshell, install:
 **Ubuntu/Debian** : `mingw-w64`  
 **Arch** : `mingw-w64-gcc` 
 
+The following helpers can be used:  
+- **Arch User Repository** : `mingw-w64-cmake mingw-w64-environment mingw-w64-pkg-config`  
+  Simply replace any command with `cmake` with `<arch>-w64-mingw32-cmake` 
+  e.g.  
+  32-bit cmake : `i686-w64-mingw32-cmake -S . -B build`  
+  64-bit cmake : `x86_64-w64-mingw32-cmake -S . -B build`  
+
 # cmake
-**Take note of the architechture you selected when installing. It's usually x86_64 (64 bit) or i686 (32 bit)**
-
-Locate the installation folder. It typically has directories like `bin`, `include` and `lib`.
-
-On Linux, its usually located in `/usr/<arch>-w64-mingw` or `/usr/local/<arch>-w64-mingw`
 
 With that, run:  
 `cmake -S . -B build/desktop`
@@ -28,9 +30,15 @@ With that, run:
 
 If you are getting an error `CMAKE_MAKE_PROGRAM not set`, did you add the `bin` folder to `PATH`?
 
-**If you use the provided toolchain file pass the following too (REALLY NOT RECOMMENDED UNLESS USING REALLY OLD CMAKE!)**  
-`-DCMAKE_TOOLCHAIN_FILE=tools/mingw/mingw.toolchain.cmake -DMINGW_DIR=<location-of-mingw> -DMINGW_ARCH=<architecture>`
+Proceed with build  
 
-Proceed with build
+If you use the provided toolchain file (REALLY NOT RECOMMENDED UNLESS USING REALLY OLD CMAKE OR BUILDING IN LINUX WIHOUT MINGW-HELPERS!):
+- Take note of the architechture you selected when installing. It's usually x86_64 (64 bit) or i686 (32 bit)
+- Locate the installation folder. It typically has directories like `bin`, `include` and `lib`. On Linux, its usually located in `/usr/<arch>-w64-mingw` or `/usr/local/<arch>-w64-mingw`
+- pass the following to cmake : `-DCMAKE_TOOLCHAIN_FILE=tools/mingw/mingw.toolchain.cmake -DMINGW_DIR=<location-of-mingw> -DMINGW_ARCH=<architecture>`
+
+
+
+
 
 
