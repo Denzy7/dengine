@@ -6,44 +6,48 @@ int main(int argc, char** argv)
     {
         dengineutils_logging_log("ERROR::argv[1] = *.conf file, argv[2] = value to find");
     }
-    Conf conf;
-    conf.file = argv[1];
-    conf.separator = '=';
+    Conf* conf = NULL;
 
-    if(dengineutils_confserialize_load(&conf, 1))
+    if(argv[1])
     {
-        dengineutils_logging_log("INFO::keys : %zu", conf.keys_count);
-        char* asset = NULL;
+       conf = dengineutils_confserialize_new(argv[1], '=');
 
-        if(argv[2])
-            asset = dengineutils_confserialize_get(argv[2], &conf);
+       if(dengineutils_confserialize_load(conf, 1))
+       {
+           dengineutils_logging_log("INFO::keys : %u", (unsigned int) conf->keys_values.count);
+           char* asset = NULL;
 
-        if(asset)
-            dengineutils_logging_log("INFO::%s -> %s", argv[2], asset);
-        else
-            dengineutils_logging_log("ERROR::%s key not found!", argv[2]);
+           if(argv[2])
+               asset = dengineutils_confserialize_get(argv[2], conf);
 
-        dengineutils_confserialize_free(&conf);
+           if(asset)
+               dengineutils_logging_log("INFO::%s -> %s", argv[2], asset);
+           else
+               dengineutils_logging_log("ERROR::%s key not found!", argv[2]);
+
+           dengineutils_confserialize_free(conf);
+       }
     }
 
     //Create a conf
-    conf.file = "test.conf";
-    if(dengineutils_confserialize_new(&conf))
+    conf = dengineutils_confserialize_new("test.conf", '=');
+
+    if(conf)
     {
         //put some strings
-        dengineutils_confserialize_put("hello", "world", &conf);
-        dengineutils_confserialize_put("lorem", "ipsum", &conf);
-        dengineutils_confserialize_put("some_int", "2", &conf);
-        dengineutils_confserialize_put("some_float", "2.3", &conf);
-        dengineutils_confserialize_put("#", "this comment wont load", &conf);
+        dengineutils_confserialize_put("hello", "world", conf);
+        dengineutils_confserialize_put("lorem", "ipsum", conf);
+        dengineutils_confserialize_put("some_int", "2", conf);
+        dengineutils_confserialize_put("some_float", "2.3", conf);
+        dengineutils_confserialize_put("#", "this comment wont load", conf);
 
         //mess with utf-8 a lil
-        dengineutils_confserialize_put("ТУРБО", "ПУШКА", &conf);
+        dengineutils_confserialize_put("ТУРБО", "ПУШКА", conf);
 
         //write
-        size_t write = dengineutils_confserialize_write(&conf);
-        dengineutils_logging_log("INFO::write %zu bytes to %s", write, conf.file);
+        size_t write = dengineutils_confserialize_write(conf);
+        dengineutils_logging_log("INFO::write %zu bytes to %s", write, conf->file);
 
-        dengineutils_confserialize_free(&conf);
+        dengineutils_confserialize_free(conf);
     }
 }

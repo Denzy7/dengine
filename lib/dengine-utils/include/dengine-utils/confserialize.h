@@ -2,7 +2,7 @@
 #define CONFSERIALIZE_H
 
 #include <stddef.h> //size_t
-
+#include "vtor.h" //vtor for kv's
 /*
  * Serialize ASCII text,
  * key<separator>pairs into a file
@@ -13,21 +13,25 @@
  * # this line starts with a '#' and is ignored
  */
 
-typedef struct Conf
+typedef struct
+{
+    char* key;
+    char* value;
+}ConfKV;
+
+typedef struct
 {
     char* file;
     char separator;
 
-    char** keys;
-    char** values;
-    size_t keys_count;
+    vtor keys_values;
 }Conf;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int dengineutils_confserialize_new(Conf* conf);
+Conf* dengineutils_confserialize_new(const char* destfile, const char seperator);
 
 int dengineutils_confserialize_load(Conf* conf, int remove_new_line);
 

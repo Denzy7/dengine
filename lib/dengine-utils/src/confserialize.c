@@ -4,16 +4,18 @@
 #include <stdlib.h> //malloc
 #include "dengine-utils/logging.h" //log
 
-#define MAX_KV_SIZE 100
-
-int dengineutils_confserialize_new(Conf* conf)
+Conf* dengineutils_confserialize_new(const char* destfile, const char seperator)
 {
-    //TODO : No need to limit KV_SIZE. Implement a vector of sorts!
-    //NOT TO MENTION THIS USES MEMORY INEFFICIENTLY!
-    conf->keys = malloc(sizeof(char*) * MAX_KV_SIZE);
-    conf->values = malloc(sizeof(char*) * MAX_KV_SIZE);
-    conf->keys_count = 0;
-    return conf->keys && conf->values;
+    Conf* conf = malloc(sizeof(Conf));
+    memset(conf, 0, sizeof(Conf));
+    conf->file = strdup(destfile);
+    conf->separator = seperator;
+
+    if(conf)
+    {
+        vtor_create(&conf->keys_values, sizeof(ConfKV));
+    }
+    return conf;
 }
 
 
@@ -34,12 +36,6 @@ int dengineutils_confserialize_load(Conf* conf, int remove_new_line)
 
         size_t line_sz = 1024;
         char* line = malloc(line_sz);
-
-        //TODO : No need to limit KV_SIZE. Implement a vector of sorts!
-        //NOT TO MENTION THIS USES MEMORY INEFFICIENTLY!
-        conf->keys = malloc(sizeof(char*) * MAX_KV_SIZE);
-        conf->values = malloc(sizeof(char*) * MAX_KV_SIZE);
-        conf->keys_count = 0;
 
         while(!feof(f_conf))
         {
@@ -64,25 +60,20 @@ int dengineutils_confserialize_load(Conf* conf, int remove_new_line)
             if(line[strlen(line)] == '\n')
                 offset = 2;
 
+            ConfKV kv;
+            memset(&kv, 0, sizeof(ConfKV));
 
-            if(conf->keys_count == MAX_KV_SIZE)
-            {
-                dengineutils_logging_log("ERROR::DENGINE_UTILS::CONFSERIALIZE::Reached Max Size! [%d]", MAX_KV_SIZE);
-                break;
-            }
-            conf->keys[conf->keys_count] = malloc((line_size - value_size) + 1);
-            memset(conf->keys[conf->keys_count], 0, (line_size - value_size) + 1);
-            memcpy(conf->keys[conf->keys_count], line, line_size - value_size);
+            kv.key = calloc((line_size - value_size) + 1, 1);
+            memcpy(kv.key, line, line_size - value_size);
 
-            conf->values[conf->keys_count] = malloc((value_size - offset) + 1);
-            memset(conf->values[conf->keys_count], 0, (value_size - offset) + 1);
-            memcpy(conf->values[conf->keys_count], pos + 1, value_size - offset);
+            kv.value = calloc((value_size - offset) + 1, 1);
+            memcpy(kv.value, pos + 1, value_size - offset);
 
-            char* value = conf->values[conf->keys_count];
+            char* value = kv.value;
             if(remove_new_line && value[strlen(value) - 1] == '\n')
-                value[strlen(value) - 1] = 0;
+                kv.value[strlen(value) - 1] = 0;
 
-            conf->keys_count++;
+            vtor_pushback(&conf->keys_values, &kv);
         }
 
         fclose(f_conf);
@@ -95,23 +86,21 @@ int dengineutils_confserialize_load(Conf* conf, int remove_new_line)
 
 void dengineutils_confserialize_put(const char* key, const char* value, Conf* conf)
 {
-    if(conf->keys_count == MAX_KV_SIZE)
-    {
-        dengineutils_logging_log("ERROR::DENGINE_UTILS::CONFSERIALIZE::Reached Max Size! [%d]", MAX_KV_SIZE);
-        return;
-    }
-    conf->keys[conf->keys_count] = strdup(key);
-    conf->values[conf->keys_count] = strdup(value);
-    conf->keys_count++;
+    ConfKV kv;
+    memset(&kv, 0, sizeof(ConfKV));
+    kv.key = strdup(key);
+    kv.value = strdup(value);
+    vtor_pushback(&conf->keys_values, &kv);
 }
 
 char* dengineutils_confserialize_get(const char* key, Conf* conf)
 {
-    for(size_t i = 0; i < conf->keys_count; i++)
+    ConfKV* kv = conf->keys_values.data;
+    for(size_t i = 0; i < conf->keys_values.count; i++)
     {
-        if(!strcmp(key, conf->keys[i]))
+        if(!strcmp(key, kv[i].key))
         {
-            return conf->values[i];
+            return kv[i].value;
         }
     }
     return NULL;
@@ -126,11 +115,12 @@ size_t dengineutils_confserialize_write(Conf* conf)
         dengineutils_logging_log("ERROR::DENGINE_UTILS::CONFSERIALIZE::Cannot write to %s", conf->file);
     }else
     {
-        for(size_t i = 0; i < conf->keys_count; i++)
+        ConfKV* kv = conf->keys_values.data;
+        for(size_t i = 0; i < conf->keys_values.count; i++)
         {
             //write space as separator if comment
-            char separator = conf->keys[i][0] == '#' ? ' ' : conf->separator;
-            write += fprintf(f_conf, "%s%c%s\n", conf->keys[i], separator, conf->values[i]);
+            char separator = kv[i].key[0] == '#' ? ' ' : conf->separator;
+            write += fprintf(f_conf, "%s%c%s\n", kv[i].key, separator, kv[i].value);
         }
     }
     fclose(f_conf);
@@ -140,18 +130,18 @@ size_t dengineutils_confserialize_write(Conf* conf)
 
 void dengineutils_confserialize_free(Conf* conf)
 {
-    for(size_t i = 0; i < conf->keys_count; i++)
+    ConfKV* kv = conf->keys_values.data;
+    for(size_t i = 0; i < conf->keys_values.count; i++)
     {
-        if(conf->keys[i])
-            free(conf->keys[i]);
+        if(kv[i].key)
+            free(kv[i].key);
 
-        if(conf->values[i])
-            free(conf->values[i]);
+        if(kv[i].value)
+            free(kv[i].value);
     }
 
-    if(conf->keys)
-        free(conf->keys);
+    vtor_free(&conf->keys_values);
 
-    if(conf->values)
-        free(conf->values);
+    free(conf->file);
+    free(conf);
 }
