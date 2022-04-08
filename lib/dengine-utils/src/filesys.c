@@ -133,7 +133,7 @@ const char* dengineutils_filesys_get_assetsdir()
         return NULL;
     }
 
-    //Check for assets from compile dir, cwd & envvar
+    //Check for assets from compile dir, cwd , filedir & envvar
     if (_dengineutils_filesys_get_assetsdir_resolve(dengineutils_filesys_get_srcdir()))
         return assetdir;
 
@@ -162,11 +162,30 @@ const char* dengineutils_filesys_get_assetsdir()
             return assets;
     }
 
+    const size_t denginefilesdir_sz = 4096;
+    char* denginefilesdir = malloc(denginefilesdir_sz);
+    snprintf(denginefilesdir, denginefilesdir_sz, "%s/%s",dengineutils_filesys_get_filesdir(), "dengine");
+
+    if (_dengineutils_filesys_get_assetsdir_resolve(denginefilesdir))
+    {
+        //TODO : note the early free before return;
+        free(denginefilesdir);
+        denginefilesdir = NULL;
+        return assetdir;
+    }
+
     dengineutils_logging_log("ERROR::Could not find assets directory.\n"
                              "Try:\n\t"
                              "-moving it next to the executable\n\t"
+                             "-moving it to %s\n\t"
                              "-setting envvar DENGINEASSETS\n\t"
-                             "-recompiling sources on this machine");
+                             "-recompiling sources on this machine",
+                             denginefilesdir);
+
+    //TODO : just a reminder this memory may be early free'd! see above
+    if(denginefilesdir)
+        free(denginefilesdir);
+
     return NULL;
 }
 
