@@ -98,6 +98,11 @@ void dengineutils_confserialize_put_newline(Conf* conf)
     dengineutils_confserialize_put("", "", conf);
 }
 
+void dengineutils_confserialize_put_comment(const char* comment, Conf* conf)
+{
+    dengineutils_confserialize_put("#", comment, conf);
+}
+
 char* dengineutils_confserialize_get(const char* key, Conf* conf)
 {
     ConfKV* kv = conf->keys_values.data;

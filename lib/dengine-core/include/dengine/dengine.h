@@ -119,14 +119,19 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
         dengineutils_confserialize_put("window_height", prtbf, conf);
 
         snprintf(prtbf, prtbf_sz, "%d", DENGINE_INIT_OPTS.window_msaa);
+        dengineutils_confserialize_put_comment("would you like screen multisampled anti aliasing?", conf);
         dengineutils_confserialize_put("window_msaa", prtbf, conf);
 
         dengineutils_confserialize_put_newline(conf);
 
+        dengineutils_confserialize_put("[", "fontconfigs]", conf);
+
         snprintf(prtbf, prtbf_sz, "%.1f", DENGINE_INIT_OPTS.font_size);
+        dengineutils_confserialize_put_comment("fontsize in pixel size", conf);
         dengineutils_confserialize_put("font_size", prtbf, conf);
 
         snprintf(prtbf, prtbf_sz, "%d", DENGINE_INIT_OPTS.font_bitmapsize);
+        dengineutils_confserialize_put_comment("size of the initial font bitmap", conf);
         dengineutils_confserialize_put("font_bitmapsize", prtbf, conf);
 
         dengineutils_confserialize_put_newline(conf);
