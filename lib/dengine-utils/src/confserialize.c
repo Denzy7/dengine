@@ -42,8 +42,8 @@ int dengineutils_confserialize_load(Conf* conf, int remove_new_line)
             memset(line, 0, line_sz);
             fgets(line, line_sz, f_conf);
 
-            //skip #
-            if(line[0] == '#')
+            //skip #, [
+            if(line[0] == '#' || line[0] == '[')
                 continue;
 
             char* pos = strchr(line, conf->separator);
