@@ -52,12 +52,6 @@ typedef struct
 
 #include <dengine-scene/scene.h>
 
-#if defined(_MSC_VER)
-#  define DENGINE_INLINE __forceinline
-#else
-#  define DENGINE_INLINE static inline __attribute((always_inline))
-#endif
-
 static DengineInitOpts DENGINE_INIT_OPTS;
 static int DENGINE_HAS_GOT_INIT_OPTS = 0;
 
