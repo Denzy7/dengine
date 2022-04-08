@@ -111,7 +111,7 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
             sscanf(font_bitmapsize, "%d", &DENGINE_INIT_OPTS.font_bitmapsize);
     }else
     {
-        dengineutils_confserialize_put("[", "window]", conf);
+        dengineutils_confserialize_put_block("window", conf);
         snprintf(prtbf, prtbf_sz, "%d", DENGINE_INIT_OPTS.window_width);
         dengineutils_confserialize_put("window_width", prtbf, conf);
 
@@ -124,8 +124,7 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
 
         dengineutils_confserialize_put_newline(conf);
 
-        dengineutils_confserialize_put("[", "fontconfigs]", conf);
-
+        dengineutils_confserialize_put_block("fontconfigs", conf);
         snprintf(prtbf, prtbf_sz, "%.1f", DENGINE_INIT_OPTS.font_size);
         dengineutils_confserialize_put_comment("fontsize in pixel size", conf);
         dengineutils_confserialize_put("font_size", prtbf, conf);

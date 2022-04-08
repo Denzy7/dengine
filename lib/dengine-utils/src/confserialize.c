@@ -18,7 +18,6 @@ Conf* dengineutils_confserialize_new(const char* destfile, const char seperator)
     return conf;
 }
 
-
 int dengineutils_confserialize_load(Conf* conf, int remove_new_line)
 {
     FILE* f_conf = fopen(conf->file, "r");
@@ -101,6 +100,16 @@ void dengineutils_confserialize_put_newline(Conf* conf)
 void dengineutils_confserialize_put_comment(const char* comment, Conf* conf)
 {
     dengineutils_confserialize_put("#", comment, conf);
+}
+
+void dengineutils_confserialize_put_block(const char* name, Conf* conf)
+{
+    // +2 = ] + '0'
+    const size_t blksz = strlen(name) + 2;
+    char* blk = malloc(blksz);
+    snprintf(blk, blksz, "%s]", name);
+    dengineutils_confserialize_put("[", blk, conf);
+    free(blk);
 }
 
 char* dengineutils_confserialize_get(const char* key, Conf* conf)
