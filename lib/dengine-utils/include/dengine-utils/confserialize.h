@@ -3,14 +3,21 @@
 
 #include <stddef.h> //size_t
 #include "vtor.h" //vtor for kv's
+
 /*
- * Serialize ASCII text,
- * key<separator>pairs into a file
- * e.g.
+ * Serialize ASCII text to create a sort of configuration file
+ * eg.
+ *
+ * # file.ini (can be really anything, .ini is widely accepted. unix like .conf )
+ *
+ * [this is a block for organization and is ignored]
+ *
+ * # key<separator>pairs into a file
+ * # e.g.
  * date=08-01-2022
  * time=19:22
- * # <separator> is '='
- * # this line starts with a '#' and is ignored
+ *
+ * # this comment line starts with a '#' and is ignored
  */
 
 typedef struct
