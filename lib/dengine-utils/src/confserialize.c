@@ -93,6 +93,11 @@ void dengineutils_confserialize_put(const char* key, const char* value, Conf* co
     vtor_pushback(&conf->keys_values, &kv);
 }
 
+void dengineutils_confserialize_put_newline(Conf* conf)
+{
+    dengineutils_confserialize_put("", "", conf);
+}
+
 char* dengineutils_confserialize_get(const char* key, Conf* conf)
 {
     ConfKV* kv = conf->keys_values.data;
@@ -122,7 +127,7 @@ size_t dengineutils_confserialize_write(Conf* conf)
             snprintf(sep, sizeof(sep), "%c", conf->separator);
 
             //write space as separator if comment # or [
-            if(kv[i].key[0] == '#')
+            if(kv[i].key[0] == '#' || kv[i].key[0] == ' ' || !strlen(kv[i].key))
                 snprintf(sep, sizeof(sep), "%s", " ");
             else if(kv[i].key[0] == '[')
                 snprintf(sep, sizeof(sep), "%s", "");

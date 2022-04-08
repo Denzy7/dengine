@@ -35,6 +35,8 @@ Conf* dengineutils_confserialize_new(const char* destfile, const char seperator)
 
 int dengineutils_confserialize_load(Conf* conf, int remove_new_line);
 
+void dengineutils_confserialize_put_newline(Conf* conf);
+
 void dengineutils_confserialize_put(const char* key, const char* value, Conf* conf);
 
 char* dengineutils_confserialize_get(const char* key, Conf* conf);
