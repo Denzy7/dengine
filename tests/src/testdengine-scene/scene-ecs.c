@@ -158,14 +158,14 @@ int main(int argc, char *argv[])
     dLight.shadow.enable = 1;
     dLight.shadow.shadow_map_size = 1024;
     dengine_lighting_setup_dirlight(&dLight);
-    dLight.light.strength=0.55f;
+    dLight.light.strength=0.2f;
 
     PointLight pLight;
     memset(&pLight,0,sizeof (PointLight));
     dengine_lighting_setup_pointlight(&pLight);
     pLight.light.diffuse[2] = 0;
     pLight.light.specular[2] = 0;
-    pLight.light.strength=0.85f;
+    pLight.light.strength=0.95f;
 
     LightComponent* dlight_comp = denginescene_ecs_new_lightcomponent(DENGINE_LIGHT_DIR,
                                                                       &dLight);
