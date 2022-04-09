@@ -319,10 +319,15 @@ int main(int argc, char *argv[])
             elapsed=0.0;
         }
 
+        ent15->transform.rotation[1] += delta_s * speed;
+
         static double pingpong = 0.0;
         pingpong = sin(current / 1000.0);
 
-        ent_plight->transform.position[0] = pingpong * 5.0;
+        ent_plight->transform.position[0] = delta_s * pingpong * 500.0;
+
+        ent7->transform.scale[2] = fabs(pingpong) * 1.3;
+        ent7->transform.scale[1] = fabs(pingpong) * 0.3;
 
         denginescene_update(scene);
 
