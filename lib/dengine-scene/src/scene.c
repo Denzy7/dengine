@@ -7,7 +7,7 @@
 #include "dengine/loadgl.h" //getFBO
 #include "dengine_config.h"// DENGINE_ECS_MAXCHILDREN
 
-void _denginescene_do_camera(Entity* root, Scene* scene);
+void _denginescene_do_check_camera(Entity* root, Scene* scene);
 
 Scene* denginescene_new()
 {
@@ -42,7 +42,7 @@ void denginescene_update(Scene* scene)
 {
     for (uint32_t i = 0; i < scene->n_entities; i++) {
         Entity* root=scene->entities[i];
-        _denginescene_do_camera(root,scene);
+        _denginescene_do_check_camera(root,scene);
     }
 }
 
@@ -113,7 +113,7 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     //now bind what we entered with
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, bind); DENGINE_CHECKGL;
 }
-void _denginescene_ecs_do_camera_children(Entity* root, Scene* scene)
+void _denginescene_ecs_do_check_camera_children(Entity* root, Scene* scene)
 {
     size_t children_count = root->children_count;
     for (size_t i = 0; i < children_count; i++) {
@@ -122,10 +122,10 @@ void _denginescene_ecs_do_camera_children(Entity* root, Scene* scene)
         {
             denginescene_ecs_do_camera_scene(child,scene);
         }
-        _denginescene_ecs_do_camera_children(child,scene);
+        _denginescene_ecs_do_check_camera_children(child,scene);
     }
 }
-void _denginescene_do_camera(Entity* root, Scene* scene)
+void _denginescene_do_check_camera(Entity* root, Scene* scene)
 {
     //check camera comp
     if(root->camera_component)
@@ -133,5 +133,5 @@ void _denginescene_do_camera(Entity* root, Scene* scene)
         denginescene_ecs_do_camera_scene(root,scene);
     }
 
-    _denginescene_ecs_do_camera_children(root, scene);
+    _denginescene_ecs_do_check_camera_children(root, scene);
 }
