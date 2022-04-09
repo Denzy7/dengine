@@ -91,9 +91,34 @@ void _denginescene_ecs_do_camera_draw(Entity* camera,Entity* entity)
     _denginescene_ecs_do_camera_draw_children(camera,entity);
 }
 
+void _denginescene_ecs_do_check_camera_children(Entity* root, Scene* scene)
+{
+    size_t children_count = root->children_count;
+    for (size_t i = 0; i < children_count; i++) {
+        Entity* child = root->children[i];
+        if(child->camera_component)
+        {
+            denginescene_ecs_do_camera_scene(child,scene);
+        }
+        _denginescene_ecs_do_check_camera_children(child,scene);
+    }
+}
+
+void _denginescene_do_check_camera(Entity* root, Scene* scene)
+{
+    //check camera comp
+    if(root->camera_component)
+    {
+        denginescene_ecs_do_camera_scene(root,scene);
+    }
+
+    _denginescene_ecs_do_check_camera_children(root, scene);
+}
+
 void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
 {
     //apply position
+    //TODO : this is local position, use world pos
     memcpy(camera->camera_component->camera->position,
            camera->transform.position,
            sizeof(camera->camera_component->camera->position));
@@ -113,25 +138,8 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     //now bind what we entered with
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, bind); DENGINE_CHECKGL;
 }
-void _denginescene_ecs_do_check_camera_children(Entity* root, Scene* scene)
-{
-    size_t children_count = root->children_count;
-    for (size_t i = 0; i < children_count; i++) {
-        Entity* child = root->children[i];
-        if(child->camera_component)
-        {
-            denginescene_ecs_do_camera_scene(child,scene);
-        }
-        _denginescene_ecs_do_check_camera_children(child,scene);
-    }
-}
-void _denginescene_do_check_camera(Entity* root, Scene* scene)
-{
-    //check camera comp
-    if(root->camera_component)
-    {
-        denginescene_ecs_do_camera_scene(root,scene);
-    }
 
-    _denginescene_ecs_do_check_camera_children(root, scene);
+void denginescene_ecs_do_light_scene(Entity* light, Scene* scene)
+{
+
 }

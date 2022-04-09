@@ -33,4 +33,6 @@ void denginescene_update(Scene* scene);
 
 void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene);
 
+void denginescene_ecs_do_light_scene(Entity* light, Scene* scene);
+
 #endif // SCENE_H
