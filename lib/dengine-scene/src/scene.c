@@ -7,6 +7,8 @@
 #include "dengine/loadgl.h" //getFBO
 #include "dengine_config.h"// DENGINE_ECS_MAXCHILDREN
 
+void _denginescene_do_camera(Entity* root, Scene* scene);
+
 Scene* denginescene_new()
 {
     Scene* newscn = malloc(sizeof (struct _Scene));
@@ -40,7 +42,7 @@ void denginescene_update(Scene* scene)
 {
     for (uint32_t i = 0; i < scene->n_entities; i++) {
         Entity* root=scene->entities[i];
-        denginescene_do_camera(root,scene);
+        _denginescene_do_camera(root,scene);
     }
 }
 
@@ -89,7 +91,7 @@ void _denginescene_ecs_do_camera_draw(Entity* camera,Entity* entity)
     _denginescene_ecs_do_camera_draw_children(camera,entity);
 }
 
-void _denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
+void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
 {
     //apply position
     memcpy(camera->camera_component->camera->position,
@@ -118,17 +120,17 @@ void _denginescene_ecs_do_camera_children(Entity* root, Scene* scene)
         Entity* child = root->children[i];
         if(child->camera_component)
         {
-            _denginescene_ecs_do_camera_scene(child,scene);
+            denginescene_ecs_do_camera_scene(child,scene);
         }
         _denginescene_ecs_do_camera_children(child,scene);
     }
 }
-void denginescene_do_camera(Entity* root, Scene* scene)
+void _denginescene_do_camera(Entity* root, Scene* scene)
 {
     //check camera comp
     if(root->camera_component)
     {
-        _denginescene_ecs_do_camera_scene(root,scene);
+        denginescene_ecs_do_camera_scene(root,scene);
     }
 
     _denginescene_ecs_do_camera_children(root, scene);

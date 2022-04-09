@@ -31,6 +31,6 @@ void denginescene_add_entity(Scene* scene, Entity* entity);
 
 void denginescene_update(Scene* scene);
 
-void denginescene_do_camera(Entity* root, Scene* scene);
+void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene);
 
 #endif // SCENE_H
