@@ -146,3 +146,27 @@ CameraComponent* denginescene_ecs_new_cameracomponent(const Camera* camera)
 
     return cam_comp;
 }
+
+LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light)
+{
+    LightComponent* comp = calloc(1, sizeof(LightComponent));
+
+    if(!comp)
+        return NULL;
+
+    if(type == DENGINE_LIGHT_DIR)
+    {
+        comp->light = calloc(1, sizeof(DirLight));
+        memcpy(comp->light, light, sizeof(DirLight));
+    }else if(type == DENGINE_LIGHT_POINT)
+    {
+        comp->light = calloc(1, sizeof(PointLight));
+        memcpy(comp->light, light, sizeof(PointLight));
+    }else if(type == DENGINE_LIGHT_SPOT)
+    {
+        comp->light = calloc(1, sizeof(SpotLight));
+        memcpy(comp->light, light, sizeof(SpotLight));
+    }
+    comp->type = type;
+    return comp;
+}
