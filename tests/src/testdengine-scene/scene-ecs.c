@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
 
     dengineutils_filesys_init();
 
+    dengine_input_init();
+
     Entity* ent1 = denginescene_ecs_new_entity();
     Entity* ent2 = denginescene_ecs_new_entity();
     Entity* ent3 = denginescene_ecs_new_entity();
@@ -225,7 +227,7 @@ int main(int argc, char *argv[])
      */
 
 //    prt(ent1);
-    vec3 p={5.1f,6.18f,4.4f};
+    vec3 p={6.1f,7.18f,5.4f};
     memcpy(ent13->transform.position,p,sizeof (vec3));
 
     p[0]=1.3f,p[1]=2.9f,p[2]=1.0f;
@@ -270,6 +272,7 @@ int main(int argc, char *argv[])
     glEnable(GL_DEPTH_TEST);
 
     float viewportcol[4]={.0,.0,.0,1.};
+    vec4 yellow = {1.0, 1.0, 0.0, 1.0};
 
     while (dengine_window_isrunning()) {
         denginescene_ecs_do_light_scene(ent_dlight, scene);
@@ -281,6 +284,32 @@ int main(int argc, char *argv[])
 
         dengineutils_timer_update();
         double delta=dengineutils_timer_get_delta();
+        double delta_s = delta / 1000.0;
+        double speed = 4.0;
+
+        if(dengine_input_get_key('A'))
+            ent3->transform.position[0] -= delta_s * speed;
+
+        if(dengine_input_get_key('D'))
+            ent3->transform.position[0] += delta_s * speed;
+
+        if(dengine_input_get_key('E'))
+            ent3->transform.position[1] += delta_s * speed;
+
+        if(dengine_input_get_key('C'))
+            ent3->transform.position[1] -= delta_s * speed;
+
+        if(dengine_input_get_key('W'))
+            ent3->transform.position[2] -= delta_s * speed;
+
+        if(dengine_input_get_key('S'))
+            ent3->transform.position[2] += delta_s * speed;
+
+        if(dengine_input_get_key('Z'))
+            ent3->transform.rotation[1] += delta_s * speed * 30.0;
+
+        if(dengine_input_get_key('X'))
+            ent3->transform.rotation[1] -= delta_s * speed * 30.0;
 
         elapsed+=delta;
         if(elapsed>1000.0)
@@ -295,7 +324,11 @@ int main(int argc, char *argv[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         denginegui_panel(0,0,854,480,&cam.framebuffer.color[0],NULL,viewportcol);
-        denginegui_text(10,10,fpsstr,NULL);
+        denginegui_text(10,10,fpsstr, yellow);
+
+        denginegui_text(0, 480 - fontsz, "USE WASD, EC TO MOVE DUCKAROO!", NULL);
+
+        denginegui_text(0, 480 - 2 * fontsz, "USE ZX TO ROTATE DUCKAROO!", NULL);
 
         denginegui_panel(0, 480, 720 - 480, 720 - 480, &dLight.shadow.shadow_map.depth, NULL, NULL);
 
