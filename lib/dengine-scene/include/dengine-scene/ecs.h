@@ -14,6 +14,8 @@ typedef struct
     vec3 position;
     vec3 rotation;
     vec3 scale;
+
+    mat4 world_model;
 }TransformComponent;
 
 typedef struct
@@ -81,7 +83,7 @@ void denginescene_ecs_set_entity_name(Entity* entity, const char* name);
  */
 void denginescene_ecs_parent(Entity* parent, Entity* child);
 
-void denginescene_ecs_get_model(Entity* entity,mat4 mat4x4);
+void denginescene_ecs_get_model_local(Entity* entity,mat4 mat4x4);
 
 MeshComponent* denginescene_ecs_new_meshcomponent(const Primitive* mesh, const Material* material);
 

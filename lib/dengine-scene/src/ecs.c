@@ -95,7 +95,7 @@ void denginescene_ecs_parent(Entity* parent, Entity* child)
     //dengineutils_logging_log("parent %u (%p) to %u", child->entity_id, child, parent->entity_id);
 }
 
-void denginescene_ecs_get_model(Entity* entity,mat4 mat4x4)
+void denginescene_ecs_get_model_local(Entity* entity,mat4 mat4x4)
 {
     glm_mat4_identity(mat4x4);
     glm_translate(mat4x4,entity->transform.position);

@@ -52,18 +52,19 @@ void _denginescene_ecs_do_camera_draw_mesh(Entity* camera, Entity* mesh)
     dengine_material_use(mesh->mesh_component->material);
     dengine_camera_lookat(NULL, camera->camera_component->camera);
     dengine_camera_apply(&mesh->mesh_component->material->shader_color,camera->camera_component->camera);
-
-    mat4 model,model_parent;
-    denginescene_ecs_get_model(mesh,model);
+    mat4 parent_model;
+    denginescene_ecs_get_model_local(mesh, mesh->transform.world_model);
     if(mesh->parent)
     {
-        denginescene_ecs_get_model(mesh->parent,model_parent);
-        glm_mat4_mul(model_parent,model,model);
+        denginescene_ecs_get_model_local(mesh->parent,parent_model);
+        glm_mat4_mul(parent_model,
+                     mesh->transform.world_model,
+                     mesh->transform.world_model);
     }
 
     dengine_shader_set_mat4(&mesh->mesh_component->material->shader_color,
                             "model",
-                            model[0]
+                            mesh->transform.world_model[0]
                             );
     dengine_draw_primitive(mesh->mesh_component->mesh,&mesh->mesh_component->material->shader_color);
     dengine_material_use(NULL);
