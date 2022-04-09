@@ -281,9 +281,10 @@ int main(int argc, char *argv[])
         dengine_input_pollevents();
 
         static double elapsed=9999.0;
+        double current = dengineutils_timer_get_current();
 
         dengineutils_timer_update();
-        double delta=dengineutils_timer_get_delta();
+        double delta = dengineutils_timer_get_delta();
         double delta_s = delta / 1000.0;
         double speed = 4.0;
 
@@ -317,6 +318,11 @@ int main(int argc, char *argv[])
             snprintf(fpsstr,sizeof (fpsstr),"FPS : %.1f (%.2fms)",1/delta*1000,delta);
             elapsed=0.0;
         }
+
+        static double pingpong = 0.0;
+        pingpong = sin(current / 1000.0);
+
+        ent_plight->transform.position[0] = pingpong * 5.0;
 
         denginescene_update(scene);
 
