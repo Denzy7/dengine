@@ -1,6 +1,6 @@
 #include "dengine-utils/timer.h"
 
-double _last, _delta, _current;
+double _last, _delta, _current, _first = 0.0;
 #include <time.h> //clock_gettime
 
 struct timespec spec;
@@ -93,6 +93,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 void dengineutils_timer_set_current(double time)
 {
     _current = time;
+    _first = _current;
     _delta = _current - _last;
     _last = _current;
 }
@@ -105,6 +106,9 @@ void dengineutils_timer_update()
     _current = time;
     _delta = _current - _last;
     _last = _current;
+
+    if(_first == 0)
+        _first = _current;
 }
 
 double dengineutils_timer_get_delta()
@@ -114,5 +118,5 @@ double dengineutils_timer_get_delta()
 
 double dengineutils_timer_get_current()
 {
-    return _current;
+    return _current - _first;
 }
