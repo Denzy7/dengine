@@ -461,3 +461,33 @@ void dengine_lighting_terminate()
     if(lighting.sLights)
         free(lighting.sLights);
 }
+
+void dengine_lighting_light_setup(LightType type, Light light)
+{
+    if(type == DENGINE_LIGHT_DIR)
+        dengine_lighting_setup_dirlight(light);
+    else if(type == DENGINE_LIGHT_POINT)
+        dengine_lighting_setup_pointlight(light);
+    else if(type == DENGINE_LIGHT_SPOT)
+        dengine_lighting_setup_spotlight(light);
+}
+
+void dengine_lighting_light_apply(LightType type, Light light, Shader* shader)
+{
+    if(type == DENGINE_LIGHT_DIR)
+        dengine_lighting_apply_dirlight(light, shader);
+    else if(type == DENGINE_LIGHT_POINT)
+        dengine_lighting_apply_pointlight(light, shader);
+    else if(type == DENGINE_LIGHT_SPOT)
+        dengine_lighting_apply_spotlight(light, shader);
+}
+
+void dengine_lighting_light_shadow_draw(LightType type, Light light, Shader* shader, Primitive* primitive, float* modelmtx)
+{
+    if(type == DENGINE_LIGHT_DIR)
+        dengine_lighting_shadow_dirlight_draw(light, shader, primitive, modelmtx);
+    else if(type == DENGINE_LIGHT_POINT)
+        dengine_lighting_shadow_pointlight_draw(light, shader, primitive, modelmtx);
+    else if(type == DENGINE_LIGHT_SPOT)
+        dengine_lighting_shadow_spotlight_draw(light, shader, primitive, modelmtx);
+}

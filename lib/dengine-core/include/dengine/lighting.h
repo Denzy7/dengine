@@ -74,6 +74,15 @@ typedef struct Lighting
     uint32_t n_pLights, n_sLights;
 }Lighting;
 
+typedef enum
+{
+    DENGINE_LIGHT_DIR,
+    DENGINE_LIGHT_POINT,
+    DENGINE_LIGHT_SPOT,
+}LightType;
+
+typedef void* Light;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -81,6 +90,13 @@ extern "C" {
 int dengine_lighting_init(const uint32_t n_PL, const uint32_t n_SL);
 
 void dengine_lighting_terminate();
+
+
+void dengine_lighting_light_setup(LightType type, Light light);
+
+void dengine_lighting_light_apply(LightType type, Light light, Shader* shader);
+
+void dengine_lighting_light_shadow_draw(LightType type, Light light, Shader* shader, Primitive* primitive, float* modelmtx);
 
 
 void dengine_lighting_shadowop_clear(ShadowOp* shadowop);
