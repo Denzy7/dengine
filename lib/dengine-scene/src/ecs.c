@@ -170,3 +170,26 @@ LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light)
     comp->type = type;
     return comp;
 }
+
+void denginescene_ecs_transform_entity(Entity* entity)
+{
+    if(!entity->parent)
+        denginescene_ecs_get_model_local(entity, entity->transform.world_model);
+
+    for(size_t i = 0; i < entity->children_count; i++)
+    {
+        Entity* child = entity->children[i];
+
+        denginescene_ecs_get_model_local(child,
+                                         child->transform.world_model);
+
+        if(child->parent)
+        {
+            glm_mat4_mul(child->parent->transform.world_model,
+                         child->transform.world_model,
+                         child->transform.world_model);
+
+            denginescene_ecs_transform_entity(child);
+        }
+    }
+}
