@@ -63,8 +63,11 @@ void _denginescene_ecs_do_camera_draw_mesh(Entity* camera, Entity* mesh)
     dengine_material_use(NULL);
 }
 
-void _denginescene_ecs_do_camera_draw_children(Entity* camera,Entity* root)
+void _denginescene_ecs_do_camera_draw(Entity* camera,Entity* root)
 {
+    if(!root->parent && root->mesh_component)
+        _denginescene_ecs_do_camera_draw_mesh(camera,root);
+
     size_t children_count = root->children_count;
     for (size_t i = 0; i < children_count; i++) {
         Entity* child = root->children[i];
@@ -72,21 +75,18 @@ void _denginescene_ecs_do_camera_draw_children(Entity* camera,Entity* root)
         {
             _denginescene_ecs_do_camera_draw_mesh(camera,child);
         }
-        _denginescene_ecs_do_camera_draw_children(camera,child);
+        _denginescene_ecs_do_camera_draw(camera,child);
     }
 }
 
-void _denginescene_ecs_do_camera_draw(Entity* camera,Entity* entity)
+void _denginescene_do_check_camera(Entity* root, Scene* scene)
 {
-    if(entity->mesh_component)
+    //check camera comp and draw
+    if(!root->parent && root->camera_component)
     {
-        _denginescene_ecs_do_camera_draw_mesh(camera,entity);
+        denginescene_ecs_do_camera_scene(root,scene);
     }
-    _denginescene_ecs_do_camera_draw_children(camera,entity);
-}
 
-void _denginescene_ecs_do_check_camera_children(Entity* root, Scene* scene)
-{
     size_t children_count = root->children_count;
     for (size_t i = 0; i < children_count; i++) {
         Entity* child = root->children[i];
@@ -94,19 +94,8 @@ void _denginescene_ecs_do_check_camera_children(Entity* root, Scene* scene)
         {
             denginescene_ecs_do_camera_scene(child,scene);
         }
-        _denginescene_ecs_do_check_camera_children(child,scene);
+        _denginescene_do_check_camera(child, scene);
     }
-}
-
-void _denginescene_do_check_camera(Entity* root, Scene* scene)
-{
-    //check camera comp
-    if(root->camera_component)
-    {
-        denginescene_ecs_do_camera_scene(root,scene);
-    }
-
-    _denginescene_ecs_do_check_camera_children(root, scene);
 }
 
 void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
@@ -116,13 +105,19 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     memcpy(camera->camera_component->camera->position,
            camera->transform.position,
            sizeof(camera->camera_component->camera->position));
-    //dengineutils_logging_log("dcmp %f %f %f",t[0],t[1],t[2]);
 
     //we might not have entered with fb 0, save binding for later
     int bind;
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &bind); DENGINE_CHECKGL;
 
     dengine_camera_use(camera->camera_component->camera);
+
+    // TODO : strange case of camera with mesh comp??
+//    if(camera->mesh_component)
+//    {
+//        _denginescene_ecs_do_camera_draw_mesh(camera, camera);
+//    }
+
     //render scene recursive
     for (size_t i = 0; i < scene->n_entities; i++)
     {
@@ -133,3 +128,117 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, bind); DENGINE_CHECKGL;
 }
 
+void _denginescene_ecs_do_light_draw_shadow_mesh(Entity* light, Entity* mesh)
+{
+    Shader* shader = &mesh->mesh_component->material->shader_shadow;
+    if(light->light_component->type != DENGINE_LIGHT_DIR)
+        shader = &mesh->mesh_component->material->shader_shadow3d;
+
+    if(!shader->program_id)
+        return;
+
+    if(light->light_component->type == DENGINE_LIGHT_DIR)
+    {
+        DirLight* dl =  light->light_component->light;
+        dengine_material_set_texture(&dl->shadow.shadow_map.depth, "dLightShadow", mesh->mesh_component->material);
+    }else if(light->light_component->type == DENGINE_LIGHT_POINT)
+    {
+        PointLight* pl = light->light_component->light;
+        dengine_material_set_texture(&pl->shadow.shadow_map.depth, "pLightsShadow0", mesh->mesh_component->material);
+    }else if(light->light_component->type == DENGINE_LIGHT_SPOT)
+    {
+        SpotLight* sl = light->light_component->light;
+        dengine_material_set_texture(&sl->pointLight.shadow.shadow_map.depth, "sLightsShadow0", mesh->mesh_component->material);
+    }
+
+    dengine_lighting_light_shadow_draw(light->light_component->type,
+                                       light->light_component->light,
+                                       shader,
+                                       mesh->mesh_component->mesh,
+                                       mesh->transform.world_model[0]
+                                       );
+}
+
+void _denginescene_ecs_do_light_apply(Entity* light, Entity* mesh)
+{
+    if(mesh->mesh_component->material)
+    {
+        dengine_lighting_light_apply(light->light_component->type,
+                                     light->light_component->light,
+                                     &mesh->mesh_component->material->shader_color);
+    }
+}
+
+void _denginescene_ecs_rec_light_shadow(Entity* light, Entity* root)
+{
+    //draw root
+    if(!light->parent && root->mesh_component )
+    {
+        _denginescene_ecs_do_light_draw_shadow_mesh(light, root);
+    }
+
+    size_t children_count = root->children_count;
+    for (size_t i = 0; i < children_count; i++) {
+        Entity* child = root->children[i];
+        if(child->mesh_component)
+        {
+            _denginescene_ecs_do_light_draw_shadow_mesh(light, child);
+        }
+        _denginescene_ecs_rec_light_shadow(light, child);
+    }
+}
+
+void _denginescene_ecs_rec_light_apply(Entity* light, Entity* root)
+{
+    //draw root
+    if(!light->parent && root->mesh_component )
+    {
+        _denginescene_ecs_do_light_apply(light, root);
+    }
+
+    size_t children_count = root->children_count;
+    for (size_t i = 0; i < children_count; i++) {
+        Entity* child = root->children[i];
+        if(child->mesh_component)
+        {
+            _denginescene_ecs_do_light_apply(light, child);
+        }
+        _denginescene_ecs_rec_light_apply(light, child);
+    }
+}
+
+void denginescene_ecs_do_light_scene(Entity* light, Scene* scene)
+{
+    vec4 t;
+    vec3 s;
+    mat4 r;
+    glm_decompose(light->transform.world_model, t, r, s);
+
+    // resolve positions from ecs
+    if(light->light_component->type == DENGINE_LIGHT_DIR)
+    {
+        DirLight* dl = light->light_component->light;
+        memcpy(dl->position, t, sizeof(vec3));
+        dengine_lighting_shadowop_clear(&dl->shadow);
+    }else if(light->light_component->type == DENGINE_LIGHT_POINT)
+    {
+        PointLight* pl = light->light_component->light;
+        memcpy(pl->position, t, sizeof(vec3));
+        dengine_lighting_shadowop_clear(&pl->shadow);
+    }else if(light->light_component->type == DENGINE_LIGHT_SPOT)
+    {
+        SpotLight* sl = light->light_component->light;
+        memcpy(sl->pointLight.position, t, sizeof(vec3));
+        dengine_lighting_shadowop_clear(&sl->pointLight.shadow);
+    }
+
+    for (size_t i = 0; i < scene->n_entities; i++)
+    {
+        _denginescene_ecs_rec_light_shadow(light, scene->entities[i]);
+    }
+
+    for (size_t i = 0; i < scene->n_entities; i++)
+    {
+        _denginescene_ecs_rec_light_apply(light, scene->entities[i]);
+    }
+}
