@@ -30,6 +30,12 @@ void _denginescene_ecs_destroy_entity_components(Entity* root)
         free(root->camera_component);
         root->camera_component = NULL;
     }
+
+    if(root->light_component)
+    {
+        free(root->light_component->light);
+        free(root->light_component);
+    }
 }
 
 void _denginescene_ecs_new_entity_setup(Entity* ent)
