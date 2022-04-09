@@ -67,7 +67,6 @@ int main(int argc, char *argv[])
     denginescene_ecs_parent(ent4, ent6);
     denginescene_ecs_parent(ent2, ent3);
     denginescene_ecs_parent(ent2, ent4);
-    denginescene_ecs_parent(ent1, ent2);
 
     denginescene_ecs_parent(ent10, ent11);
     denginescene_ecs_parent(ent10, ent12);
@@ -186,8 +185,10 @@ int main(int argc, char *argv[])
      *            SCENE -- 13(camera),14=grid
      *            |    |
      *            1    10
-     *            |    / \
-     *            2   11 12
+     *                 / \
+     *                11 12
+     *           ...
+     *            2
      *           / \
      *          3   4
      *            / \
@@ -225,6 +226,7 @@ int main(int argc, char *argv[])
     Scene* scene = denginescene_new();
 
     denginescene_add_entity(scene, ent1);
+    denginescene_add_entity(scene, ent2);
     denginescene_add_entity(scene, ent10);
     denginescene_add_entity(scene, ent13);
     denginescene_add_entity(scene, ent14);
