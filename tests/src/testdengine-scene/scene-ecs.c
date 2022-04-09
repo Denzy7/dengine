@@ -74,12 +74,16 @@ int main(int argc, char *argv[])
     Camera cam;
     dengine_camera_setup(&cam);
     dengine_camera_set_rendermode(DENGINE_CAMERA_RENDER_FOWARD,&cam);
+    cam.clearcolor[0] = 0.2f;
+    cam.clearcolor[1] = 0.2f;
+    cam.clearcolor[2] = 0.2f;
 
     CameraComponent* camc = denginescene_ecs_new_cameracomponent(&cam);
     ent13->camera_component=camc;
 
     Shader* stdshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_STANDARD);
     Shader* dftshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_DEFAULT);
+    Shader* shadow2d = dengine_shader_new_shader_standard(DENGINE_SHADER_SHADOW2D);
 
     Material cube_mat,duck_mat,dft_mat;
 
@@ -90,6 +94,9 @@ int main(int argc, char *argv[])
     dengine_material_set_shader_color(stdshdr,&cube_mat);
     dengine_material_set_shader_color(stdshdr,&duck_mat);
     dengine_material_set_shader_color(dftshdr,&dft_mat);
+
+    dengine_material_set_shader_shadow(shadow2d, &cube_mat);
+    dengine_material_set_shader_shadow(shadow2d, &duck_mat);
 
     Primitive cube,plane,grid;
     dengine_primitive_gen_cube(&cube,stdshdr);
@@ -112,7 +119,9 @@ int main(int argc, char *argv[])
 
     Material sep_planes_mat;
     dengine_material_setup(&sep_planes_mat);
+
     dengine_material_set_shader_color(stdshdr,&sep_planes_mat);
+    dengine_material_set_shader_shadow(shadow2d, &sep_planes_mat);
 
     Texture sep_plane_tex;
     memset(&sep_plane_tex,0,sizeof (Texture));
@@ -144,19 +153,37 @@ int main(int argc, char *argv[])
 
     DirLight dLight;
     memset(&dLight,0,sizeof (DirLight));
+    dLight.shadow.enable = 1;
+    dLight.shadow.shadow_map_size = 1024;
     dengine_lighting_setup_dirlight(&dLight);
     dLight.light.strength=0.55f;
 
     PointLight pLight;
     memset(&pLight,0,sizeof (PointLight));
     dengine_lighting_setup_pointlight(&pLight);
-    pLight.position[1] = 5.5;
     pLight.light.diffuse[2] = 0;
     pLight.light.specular[2] = 0;
     pLight.light.strength=0.85f;
 
-    dengine_lighting_apply_dirlight(&dLight,stdshdr);
-    dengine_lighting_apply_pointlight(&pLight,stdshdr);
+    LightComponent* dlight_comp = denginescene_ecs_new_lightcomponent(DENGINE_LIGHT_DIR,
+                                                                      &dLight);
+
+    LightComponent* plight_comp = denginescene_ecs_new_lightcomponent(DENGINE_LIGHT_POINT,
+                                                                      &pLight);
+
+
+
+    Entity* ent_plight = denginescene_ecs_new_entity();
+    ent_plight->transform.position[0] = 5.5f;
+    ent_plight->transform.position[1] = 5.5f;
+    ent_plight->light_component = plight_comp;
+
+    Entity* ent_dlight = denginescene_ecs_new_entity();
+    ent_dlight->light_component = dlight_comp;
+    ent_dlight->transform.position[0] = 7.1f;
+    ent_dlight->transform.position[1] = 7.1f;
+    ent_dlight->transform.position[2] = 3.1f;
+
 
     MeshComponent* cube_mesh, * cube_mesh2,* plane_mesh,* duck_mesh,* grid_mesh;
     cube_mesh = denginescene_ecs_new_meshcomponent(&cube, &cube_mat);
@@ -198,7 +225,7 @@ int main(int argc, char *argv[])
      */
 
 //    prt(ent1);
-    vec3 p={4.1f,5.18f,3.4f};
+    vec3 p={5.1f,6.18f,4.4f};
     memcpy(ent13->transform.position,p,sizeof (vec3));
 
     p[0]=1.3f,p[1]=2.9f,p[2]=1.0f;
@@ -232,6 +259,9 @@ int main(int argc, char *argv[])
     denginescene_add_entity(scene, ent14);
     denginescene_add_entity(scene, ent15);
 
+    denginescene_add_entity(scene, ent_plight);
+    denginescene_add_entity(scene, ent_dlight);
+
     denginegui_init();
     static float fontsz=18.0f;
     denginegui_set_font(NULL,fontsz,512);
@@ -242,6 +272,9 @@ int main(int argc, char *argv[])
     float viewportcol[4]={.0,.0,.0,1.};
 
     while (dengine_window_isrunning()) {
+        denginescene_ecs_do_light_scene(ent_dlight, scene);
+        denginescene_ecs_do_light_scene(ent_plight, scene);
+
         dengine_input_pollevents();
 
         static double elapsed=9999.0;
@@ -264,6 +297,8 @@ int main(int argc, char *argv[])
         denginegui_panel(0,0,854,480,&cam.framebuffer.color[0],NULL,viewportcol);
         denginegui_text(10,10,fpsstr,NULL);
 
+        denginegui_panel(0, 480, 720 - 480, 720 - 480, &dLight.shadow.shadow_map.depth, NULL, NULL);
+
         dengine_window_swapbuffers();
     }
 
@@ -279,6 +314,7 @@ int main(int argc, char *argv[])
 
     free(stdshdr);
     free(dftshdr);
+    free(shadow2d);
 
     free(prtbf);
     free(duck);
