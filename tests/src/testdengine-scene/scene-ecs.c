@@ -273,6 +273,7 @@ int main(int argc, char *argv[])
     char fpsstr[30];
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
 
     float viewportcol[4]={.0,.0,.0,1.};
     vec4 yellow = {1.0, 1.0, 0.0, 1.0};
