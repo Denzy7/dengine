@@ -4,10 +4,18 @@
 #include "dengine-scene/ecs.h"
 #include <stdint.h> //uint32_t
 
+typedef struct
+{
+    Material* material;
+    Primitive* cube;
+}Skybox;
+
 typedef struct _Scene
 {
     Entity** entities;
     uint32_t n_entities;
+
+    Skybox* skybox;
 }Scene;
 
 /*!
@@ -15,6 +23,9 @@ typedef struct _Scene
  * \return An empty scene
  */
 Scene* denginescene_new();
+
+Skybox* denginescene_new_skybox(const Primitive* cube,
+                                const Material* material);
 
 /*!
  * \brief Destroy a scene. Free's all entities and their components
@@ -34,5 +45,7 @@ void denginescene_update(Scene* scene);
 void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene);
 
 void denginescene_ecs_do_light_scene(Entity* light, Scene* scene);
+
+void denginescene_ecs_do_skybox_scene(Scene* scene, Camera* camera);
 
 #endif // SCENE_H

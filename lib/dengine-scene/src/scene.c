@@ -19,6 +19,22 @@ Scene* denginescene_new()
     return newscn;
 }
 
+Skybox*
+denginescene_new_skybox(const Primitive* cube, const Material* material)
+{
+    Skybox* sky = calloc(1, sizeof(Skybox));
+    Primitive* c = calloc(1, sizeof(Primitive));
+    Material* m = calloc(1, sizeof(Material));
+
+    memcpy(c, cube, sizeof(Primitive));
+    memcpy(m, material, sizeof(Material));
+
+    sky->cube = c;
+    sky->material = m;
+
+    return sky;
+}
+
 void denginescene_destroy(Scene* scene)
 {
     for (uint32_t i = 0; i < scene->n_entities; i++) {
@@ -241,4 +257,25 @@ void denginescene_ecs_do_light_scene(Entity* light, Scene* scene)
     {
         _denginescene_ecs_rec_light_apply(light, scene->entities[i]);
     }
+}
+
+void denginescene_ecs_do_skybox_scene(Scene* scene, Camera* camera)
+{
+    if(!scene->skybox)
+        return;
+
+    // draw as the last entity
+
+    int entrydfunc;
+    glGetIntegerv(GL_DEPTH_FUNC, &entrydfunc);
+
+    glDepthFunc(GL_LEQUAL);
+
+    dengine_camera_apply(&scene->skybox->material->shader_color, camera);
+    dengine_material_use(scene->skybox->material);
+
+    dengine_draw_primitive(scene->skybox->cube, &scene->skybox->material->shader_color);
+
+    dengine_material_use(NULL);
+    glDepthFunc(entrydfunc);
 }
