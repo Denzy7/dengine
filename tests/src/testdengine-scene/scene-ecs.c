@@ -86,16 +86,19 @@ int main(int argc, char *argv[])
     Shader* stdshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_STANDARD);
     Shader* dftshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_DEFAULT);
     Shader* shadow2d = dengine_shader_new_shader_standard(DENGINE_SHADER_SHADOW2D);
+    Shader* skycube = dengine_shader_new_shader_standard(DENGINE_SHADER_SKYBOXCUBE);
 
-    Material cube_mat,duck_mat,dft_mat;
+    Material cube_mat,duck_mat,dft_mat, skymat;
 
     dengine_material_setup(&cube_mat);
     dengine_material_setup(&duck_mat);
     dengine_material_setup(&dft_mat);
+    dengine_material_setup(&skymat);
 
     dengine_material_set_shader_color(stdshdr,&cube_mat);
     dengine_material_set_shader_color(stdshdr,&duck_mat);
     dengine_material_set_shader_color(dftshdr,&dft_mat);
+    dengine_material_set_shader_color(skycube,&skymat);
 
     dengine_material_set_shader_shadow(shadow2d, &cube_mat);
     dengine_material_set_shader_shadow(shadow2d, &duck_mat);
@@ -274,6 +277,33 @@ int main(int argc, char *argv[])
     float viewportcol[4]={.0,.0,.0,1.};
     vec4 yellow = {1.0, 1.0, 0.0, 1.0};
 
+    Texture cubemap;
+    memset(&cubemap, 0, sizeof(Texture));
+    cubemap.type = GL_UNSIGNED_BYTE;
+    cubemap.filter_min = GL_LINEAR;
+    cubemap.interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
+
+    dengine_texture_gen(1, &cubemap);
+    dengine_texture_bind(GL_TEXTURE_CUBE_MAP, &cubemap);
+    for(int i = 0; i < 6; i++)
+    {
+        snprintf(prtbf, prtbf_sz, "%s/textures/cubemaps/sea/sea%d.jpg",
+                 dengineutils_filesys_get_assetsdir(),
+                 i + 1);
+        dengine_texture_load_file(prtbf, 0, &cubemap);
+        cubemap.format = cubemap.channels == 3 ? GL_RGB : GL_RGBA;
+        cubemap.internal_format = cubemap.format;
+        dengine_texture_data(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, &cubemap);
+        dengine_texture_free_data(&cubemap);
+    }
+    dengine_texture_set_params(GL_TEXTURE_CUBE_MAP, &cubemap);
+    dengine_texture_bind(GL_TEXTURE_CUBE_MAP, NULL);
+
+    dengine_material_set_texture(&cubemap, "cubemap", &skymat);
+
+    Skybox* sky = denginescene_new_skybox(&cube, &skymat);
+    scene->skybox = sky;
+
     while (dengine_window_isrunning()) {
         denginescene_ecs_do_light_scene(ent_dlight, scene);
         denginescene_ecs_do_light_scene(ent_plight, scene);
@@ -352,6 +382,7 @@ int main(int argc, char *argv[])
     dengine_material_destroy(&duck_mat);
     dengine_material_destroy(&dft_mat);
     dengine_material_destroy(&sep_planes_mat);
+    dengine_material_destroy(&skymat);
 
     dengine_shader_destroy(stdshdr);
     dengine_shader_destroy(dftshdr);
@@ -359,6 +390,7 @@ int main(int argc, char *argv[])
     free(stdshdr);
     free(dftshdr);
     free(shadow2d);
+    free(skycube);
 
     free(prtbf);
     free(duck);
