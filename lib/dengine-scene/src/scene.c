@@ -41,6 +41,14 @@ void denginescene_destroy(Scene* scene)
         denginescene_ecs_destroy_entity(scene->entities[i]);
     }
     free(scene->entities);
+
+    if(scene->skybox)
+    {
+        free(scene->skybox->cube);
+        free(scene->skybox->material);
+        free(scene->skybox);
+    }
+
     free(scene);
 }
 
@@ -139,6 +147,9 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     {
         _denginescene_ecs_do_camera_draw(camera,scene->entities[i]);
     }
+
+    // draw sky
+    denginescene_ecs_do_skybox_scene(scene, camera->camera_component->camera);
 
     //now bind what we entered with
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, bind); DENGINE_CHECKGL;
