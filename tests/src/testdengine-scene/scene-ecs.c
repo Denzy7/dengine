@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
      */
 
 //    prt(ent1);
-    vec3 p={6.1f,7.18f,5.4f};
+    vec3 p={6.1f,6.18f,5.4f};
     memcpy(ent13->transform.position,p,sizeof (vec3));
 
     p[0]=1.3f,p[1]=2.9f,p[2]=1.0f;
@@ -305,9 +305,13 @@ int main(int argc, char *argv[])
     Skybox* sky = denginescene_new_skybox(&cube, &skymat);
     scene->skybox = sky;
 
+    int poly = 1;
+
     while (dengine_window_isrunning()) {
         denginescene_ecs_do_light_scene(ent_dlight, scene);
         denginescene_ecs_do_light_scene(ent_plight, scene);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE + poly);
 
         dengine_input_pollevents();
 
@@ -343,6 +347,18 @@ int main(int argc, char *argv[])
         if(dengine_input_get_key('X'))
             ent3->transform.rotation[1] -= delta_s * speed * 30.0;
 
+        if(dengine_input_get_key_once('F'))
+            poly = !poly;
+
+        if(dengine_input_get_key_once('G'))
+        {
+            if(glIsEnabled(GL_CULL_FACE))
+                glDisable(GL_CULL_FACE);
+            else
+                glEnable(GL_CULL_FACE);
+        }
+
+
         elapsed+=delta;
         if(elapsed>1000.0)
         {
@@ -365,12 +381,20 @@ int main(int argc, char *argv[])
         glClearColor(0.1,0.1,0.1,1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
         denginegui_panel(0,0,854,480,&cam.framebuffer.color[0],NULL,viewportcol);
         denginegui_text(10,10,fpsstr, yellow);
 
         denginegui_text(0, 480 - fontsz, "USE WASD, EC TO MOVE DUCKAROO!", NULL);
 
         denginegui_text(0, 480 - 2 * fontsz, "USE ZX TO ROTATE DUCKAROO!", NULL);
+
+        snprintf(prtbf, prtbf_sz, "PRESS F TO SWITCH POLYGON MODE : %d", poly);
+        denginegui_text(0, 480 - 3 * fontsz, prtbf, NULL);
+
+        snprintf(prtbf, prtbf_sz, "PRESS G TO SWITCH FACE CULLING (Note FPS change) : %d", (int)glIsEnabled(GL_CULL_FACE));
+        denginegui_text(0, 480 - 4 * fontsz, prtbf, NULL);
 
         denginegui_panel(0, 480, 720 - 480, 720 - 480, &dLight.shadow.shadow_map.depth, NULL, NULL);
 
