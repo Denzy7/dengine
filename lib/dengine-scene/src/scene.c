@@ -280,6 +280,10 @@ void denginescene_ecs_do_skybox_scene(Scene* scene, Camera* camera)
     int entrydfunc;
     glGetIntegerv(GL_DEPTH_FUNC, &entrydfunc);
 
+    int entrycullface;
+    glGetIntegerv(GL_CULL_FACE_MODE, &entrycullface);
+
+    glCullFace(GL_FRONT);
     glDepthFunc(GL_LEQUAL);
 
     dengine_camera_apply(&scene->skybox->material->shader_color, camera);
@@ -288,5 +292,7 @@ void denginescene_ecs_do_skybox_scene(Scene* scene, Camera* camera)
     dengine_draw_primitive(scene->skybox->cube, &scene->skybox->material->shader_color);
 
     dengine_material_use(NULL);
+
     glDepthFunc(entrydfunc);
+    glCullFace(entrycullface);
 }
