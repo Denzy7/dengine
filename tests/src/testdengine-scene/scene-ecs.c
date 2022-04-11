@@ -8,6 +8,7 @@
 #include <dengine-utils/logging.h>
 #include <dengine-utils/timer.h>
 #include <dengine-utils/filesys.h>
+#include <dengine-utils/os.h>
 
 #include <dengine/input.h>
 #include <dengine/window.h>
@@ -350,6 +351,16 @@ int main(int argc, char *argv[])
         if(dengine_input_get_key_once('F'))
             poly = !poly;
 
+        if(dengine_input_get_key_once('T'))
+        {
+            Texture* rd = dengine_texture_new_canreadback_color(cam.render_width, cam.render_height);
+            dengine_framebuffer_readback(rd, &cam.framebuffer);
+            if(dengine_texture_writeout("fb.jpg", 1, rd))
+                dengineutils_os_dialog_messagebox( "screenshot successful","write to fb.jpg", 0);
+            dengine_texture_free_data(rd);
+            free(rd);
+        }
+
         if(dengine_input_get_key_once('G'))
         {
             if(glIsEnabled(GL_CULL_FACE))
@@ -395,6 +406,8 @@ int main(int argc, char *argv[])
 
         snprintf(prtbf, prtbf_sz, "PRESS G TO SWITCH FACE CULLING (Note FPS change) : %d", (int)glIsEnabled(GL_CULL_FACE));
         denginegui_text(0, 480 - 4 * fontsz, prtbf, NULL);
+
+        denginegui_text(0, 480 - 5 * fontsz, "PRESS T TO TAKE 'SCREENSHOT'", NULL);
 
         denginegui_panel(0, 480, 720 - 480, 720 - 480, &dLight.shadow.shadow_map.depth, NULL, NULL);
 
