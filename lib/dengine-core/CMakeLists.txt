@@ -16,6 +16,7 @@ src/vao.c
 src/renderbuffer.c
 src/stb_image.c
 src/stb_image_write.c
+src/viewport.c
 src/dengine.rc
 )
 
@@ -39,6 +40,7 @@ include/dengine/vao.h
 include/dengine/macros.h
 include/dengine/renderbuffer.h
 include/dengine/dengine.h
+include/dengine/viewport.h
 )
 
 if(ANDROID)
