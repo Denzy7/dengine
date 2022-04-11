@@ -34,6 +34,17 @@
 
 int main(int argc, char *argv[])
 {
+    int camscl = 0;
+
+    for(int i = 0; i < argc; i++)
+    {
+        char* arg = argv[i];
+        char* v = argv[i + 1];
+        if(arg && v && strstr("-camscl", arg))
+        {
+            camscl = strtod(v, NULL);
+        }
+    }
 
     Window window;
     dengine_window_init();
@@ -77,6 +88,16 @@ int main(int argc, char *argv[])
     Camera cam;
     dengine_camera_setup(&cam);
     dengine_camera_set_rendermode(DENGINE_CAMERA_RENDER_FOWARD,&cam);
+
+    if(camscl)
+    {
+        dengine_camera_resize(&cam, 16 * camscl, 9 * camscl);
+        dengineutils_logging_log("INFO::scaled to %dx%d", cam.render_width, cam.render_height);
+    }else
+    {
+        dengineutils_logging_log("pass a scaler 1 - 100 to scale camera aspect ratio with -camscl <scaler>");
+    }
+
     cam.clearcolor[0] = 0.2f;
     cam.clearcolor[1] = 0.2f;
     cam.clearcolor[2] = 0.2f;
@@ -407,7 +428,7 @@ int main(int argc, char *argv[])
         snprintf(prtbf, prtbf_sz, "PRESS G TO SWITCH FACE CULLING (Note FPS change) : %d", (int)glIsEnabled(GL_CULL_FACE));
         denginegui_text(0, 480 - 4 * fontsz, prtbf, NULL);
 
-        denginegui_text(0, 480 - 5 * fontsz, "PRESS T TO TAKE 'SCREENSHOT'", NULL);
+        denginegui_text(0, 480 - 5 * fontsz, "PRESS T TO TAKE A \"SCREENSHOT\"", NULL);
 
         denginegui_panel(0, 480, 720 - 480, 720 - 480, &dLight.shadow.shadow_map.depth, NULL, NULL);
 
