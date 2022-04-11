@@ -7,6 +7,8 @@
 #include "dengine/loadgl.h" //getFBO
 #include "dengine_config.h"// DENGINE_ECS_MAXCHILDREN
 
+#include "dengine/viewport.h" //get_view
+
 void _denginescene_do_check_camera(Entity* root, Scene* scene);
 
 Scene* denginescene_new()
@@ -134,6 +136,13 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     int bind;
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &bind); DENGINE_CHECKGL;
 
+    //store entry viewport
+    int x, y, w, h;
+    dengine_viewport_get(&x, &y, &w, &h);
+
+    dengine_viewport_set(0, 0,
+                         camera->camera_component->camera->render_width,camera->camera_component->camera->render_height);
+
     dengine_camera_use(camera->camera_component->camera);
 
     // TODO : strange case of camera with mesh comp??
@@ -153,6 +162,8 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
 
     //now bind what we entered with
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, bind); DENGINE_CHECKGL;
+
+    dengine_viewport_set(x, y, w, h);
 }
 
 void _denginescene_ecs_do_light_draw_shadow_mesh(Entity* light, Entity* mesh)
