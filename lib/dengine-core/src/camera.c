@@ -179,3 +179,32 @@ void dengine_camera_use(Camera* camera)
         dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
     }
 }
+
+void dengine_camera_resize(Camera* camera, int width, int height)
+{
+    for(uint32_t i = 0; i < camera->framebuffer.n_color; i++)
+    {
+        Texture* col = &camera->framebuffer.color[i];
+        if(col->texture_id)
+        {
+            dengine_texture_bind(GL_TEXTURE_2D, col);
+            col->width = width;
+            col->height = height;
+            dengine_texture_data(GL_TEXTURE_2D, col);
+            dengine_texture_bind(GL_TEXTURE_2D, NULL);
+        }
+    }
+
+    Texture* depth = &camera->framebuffer.depth;
+    if(depth->texture_id)
+    {
+        dengine_texture_bind(GL_TEXTURE_2D, depth);
+        depth->width = width;
+        depth->height = height;
+        dengine_texture_data(GL_TEXTURE_2D, depth);
+        dengine_texture_bind(GL_TEXTURE_2D, NULL);
+    }
+
+    camera->render_width = width;
+    camera->render_height = height;
+}

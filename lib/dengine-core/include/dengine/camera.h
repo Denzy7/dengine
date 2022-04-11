@@ -85,6 +85,14 @@ void dengine_camera_set_rendermode(CameraRenderMode mode, Camera* camera);
  */
 void dengine_camera_use(Camera* camera);
 
+/*!
+ * \brief Resize the camera framebuffer render output
+ * \param camera Camera to use
+ * \param width width
+ * \param height height
+ */
+void dengine_camera_resize(Camera* camera, int width, int height);
+
 #ifdef __cplusplus
 }
 #endif
