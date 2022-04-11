@@ -14,6 +14,7 @@
 #include <dengine/draw.h>
 #include <dengine/lighting.h>
 #include <dengine/material.h>
+#include <dengine/viewport.h>
 
 #include <dengine-utils/filesys.h>
 #include <dengine-utils/logging.h>
@@ -25,6 +26,19 @@
 
 int main(int argc, char *argv[])
 {
+    int camscl = 0;
+
+    for(int i = 0; i < argc; i++)
+    {
+        char* arg = argv[i];
+        char* v = argv[i + 1];
+        if(arg && v && strstr("-camscl", arg))
+        {
+            camscl = strtod(v, NULL);
+        }
+    }
+
+
     dengineutils_debug_init();
 
     Window window;
@@ -49,6 +63,23 @@ int main(int argc, char *argv[])
     Camera camera;
     dengine_camera_setup(&camera);
     dengine_camera_set_rendermode(DENGINE_CAMERA_RENDER_FOWARD, &camera);
+
+    if(camscl)
+    {
+        int max;
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max);
+        if(camscl * 16 > max)
+        {
+            dengineutils_logging_log("WARNING::you passed a scale your GPU cannot possibly handle!");
+        }
+
+        dengine_camera_resize(&camera, 16 * camscl, 9 * camscl);
+        dengineutils_logging_log("INFO::scaled to %dx%d", camera.render_width, camera.render_height);
+    }else
+    {
+        dengineutils_logging_log("pass a scaler 1 - 100 to scale camera aspect ratio with -camscl <scaler>");
+    }
+
     dengine_camera_apply(stdshader, &camera);
 
     Material cube_mat;
@@ -88,12 +119,12 @@ int main(int argc, char *argv[])
         if(denginegui_button(0,360,200,50,"Dump to fb.jpg",NULL))
         {
             dengine_framebuffer_bind(GL_FRAMEBUFFER,&camera.framebuffer);
-            uint8_t* rgb=calloc(1280*720*3,sizeof(uint8_t));
+            uint8_t* rgb=calloc(camera.render_width*camera.render_height*3,sizeof(uint8_t));
             glFinish();
-            glReadPixels(0,0,1280,720,GL_RGB,GL_UNSIGNED_BYTE,rgb);
+            glReadPixels(0,0,camera.render_width,camera.render_height,GL_RGB,GL_UNSIGNED_BYTE,rgb);
 
             stbi_flip_vertically_on_write(1);
-            stbi_write_jpg("fb.jpg",1280,720,3,rgb,95);
+            stbi_write_jpg("fb.jpg",camera.render_width,camera.render_height,3,rgb,95);
 
             free(rgb);
 
@@ -105,7 +136,12 @@ int main(int argc, char *argv[])
 
         if(denginegui_button(205,360,200,50,"render",NULL))
         {
+            int w, h;
+            dengine_viewport_get(NULL, NULL, &w, &h);
+
             dengine_camera_use(&camera);
+            dengine_viewport_set(0, 0, camera.render_width, camera.render_height);
+
             dengine_material_use(&cube_mat);
 
             for (int i = -1; i <= 1; i++) {
@@ -126,6 +162,8 @@ int main(int argc, char *argv[])
 
             dengine_material_use(NULL);
             dengine_camera_use(NULL);
+
+            dengine_viewport_set(0, 0, w, h);
         }
 
         dengine_input_pollevents();
