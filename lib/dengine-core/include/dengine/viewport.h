@@ -1,8 +1,6 @@
 #ifndef VIEWPORT_H
 #define VIEWPORT_H
 
-#include "dengine/loadgl.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

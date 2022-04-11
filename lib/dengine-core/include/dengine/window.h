@@ -62,8 +62,6 @@ void dengine_window_get_window_height(int* height);
 
 void dengine_window_get_window_dim(int* width, int* height);
 
-void dengine_window_set_viewport(int width, int height);
-
 void dengine_window_swapbuffers();
 
 int dengine_window_isrunning();

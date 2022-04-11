@@ -1,4 +1,5 @@
 #include "dengine/viewport.h"
+#include "dengine/loadgl.h" //glGet, glViewport
 
 void dengine_viewport_get(int* x, int* y, int* width, int* height)
 {

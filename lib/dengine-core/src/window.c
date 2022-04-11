@@ -1,7 +1,8 @@
 #include "dengine/window.h"
 
-#include "dengine/loadgl.h" //glViewport
 #include "dengine-utils/logging.h"//log
+#include "dengine/viewport.h" //set_view
+#include "dengine/loadgl.h" //glad
 
 #include <stdio.h>  //printf
 
@@ -187,14 +188,6 @@ void dengine_window_get_window_dim(int* width, int* height)
         dengine_window_get_window_width(width);
 }
 
-void dengine_window_set_viewport(int width, int height)
-{
-    #if !defined (DENGINE_GL_NONE)
-    if(glinit)
-        glViewport(0, 0, width, height);
-    #endif // DENGINE_GL_NONE
-}
-
 void dengine_window_swapbuffers()
 {
     #if defined(DENGINE_WIN_GLFW)
@@ -316,7 +309,10 @@ void dengine_window_glfw_set_swapinterval(int interval)
 
 void dengine_window_glfw_callback_fbsize(GLFWwindow* window, int width, int height)
 {
-    dengine_window_set_viewport(width, height);
+    #if !defined (DENGINE_GL_NONE)
+    if(glinit)
+        dengine_viewport_set(0, 0, width, height);
+    #endif // DENGINE_GL_NONE
 }
 
 void dengine_window_glfw_callback_windowclose(GLFWwindow* window)
