@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max);
         if(camscl * 16 > max)
         {
-            dengineutils_logging_log("WARNING::you passed a scale your GPU cannot possibly handle!");
+            dengineutils_logging_log("WARNING::you passed a scale your GPU cannot possibly handle. Try passing %d you madlad!", max / 16);
         }
 
         dengine_camera_resize(&camera, 16 * camscl, 9 * camscl);
