@@ -358,13 +358,13 @@ int dengine_texture_issupprorted(uint32_t target, uint32_t internal_format, uint
     if(target == GL_TEXTURE_2D)
     {
         glTexImage2D(target, 0, internal_format, width, height, 0,
-                     format, GL_UNSIGNED_BYTE, NULL);
+                     format, GL_UNSIGNED_SHORT, NULL);
     }else if(target == GL_TEXTURE_CUBE_MAP)
     {
         for(uint32_t i = 0; i < 6; i++)
         {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internal_format, width, height, 0,
-                         format, GL_UNSIGNED_BYTE, NULL);
+                         format, GL_UNSIGNED_SHORT, NULL);
         }
     }
 
