@@ -9,6 +9,8 @@ void dengineutils_logging_set_filelogging(int value);
 
 void dengineutils_logging_set_msgboxerror(int value);
 
+int dengineutils_logging_get_msgboxerror();
+
 void dengineutils_logging_set_consolecolor(char head);
 
 void dengineutils_logging_log(const char* message, ...);

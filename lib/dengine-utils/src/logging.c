@@ -166,3 +166,8 @@ void dengineutils_logging_set_msgboxerror(int value)
 {
     msgboxerr=value;
 }
+
+int dengineutils_logging_get_msgboxerror()
+{
+    return msgboxerr;
+}
