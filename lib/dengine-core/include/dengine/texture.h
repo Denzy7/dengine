@@ -187,6 +187,13 @@ int dengine_texture_writeout(const char* outfile, const int flip, Texture* textu
  */
 int dengine_texture_issupprorted(uint32_t target, uint32_t internal_format, uint32_t format);
 
+/*!
+ * \brief Return a human friendly string of a texture target
+ * \param target target to use
+ * \return Human friendly string of a texture target
+ */
+const char* dengine_texture_target2str(uint32_t target);
+
 
 #ifdef __cplusplus
 }

@@ -379,3 +379,13 @@ int dengine_texture_issupprorted(uint32_t target, uint32_t internal_format, uint
 
     return supported;
 }
+
+const char* dengine_texture_target2str(uint32_t target)
+{
+    if(target == GL_TEXTURE_2D)
+        return "TEXTURE_2D";
+    else if(target == GL_TEXTURE_CUBE_MAP)
+        return "TEXTURE_CUBE_MAP";
+    else
+        return "UNKNOWN";
+}
