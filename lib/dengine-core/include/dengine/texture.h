@@ -178,6 +178,16 @@ void dengine_texture_mipmap(uint32_t target, Texture* texture);
  */
 int dengine_texture_writeout(const char* outfile, const int flip, Texture* texture);
 
+/*!
+ * \brief Check if a texture format is supported by GPU
+ * \param target target to use
+ * \param internal_format internal_format to check
+ * \param format format to check
+ * \return Non-zero if supported
+ */
+int dengine_texture_issupprorted(uint32_t target, uint32_t internal_format, uint32_t format);
+
+
 #ifdef __cplusplus
 }
 #endif
