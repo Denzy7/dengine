@@ -5,6 +5,8 @@
 //#include "dengine/window.h" //get w,h
 #include "dengine/macros.h" //arr_sz
 
+#include "dengine-utils/logging.h"
+
 #include <string.h> //memset
 Lighting lighting;
 
@@ -64,6 +66,12 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
 
 void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shadowop)
 {
+    if(!dengine_texture_issupprorted(shadowmap_target, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT))
+    {
+        dengineutils_logging_log("WARNING::GPU does not support the depth texture supplied [%u]. Shadow map not generated", shadowmap_target);
+        return;
+    }
+
     Texture depth;
     memset(&depth, 0, sizeof(Texture));
     depth.height = shadowop->shadow_map_size;
