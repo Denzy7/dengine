@@ -181,11 +181,12 @@ int dengine_texture_writeout(const char* outfile, const int flip, Texture* textu
 /*!
  * \brief Check if a texture format is supported by GPU
  * \param target target to use
+ * \param type type of texture
  * \param internal_format internal_format to check
  * \param format format to check
  * \return Non-zero if supported
  */
-int dengine_texture_issupprorted(uint32_t target, uint32_t internal_format, uint32_t format);
+int dengine_texture_issupprorted(uint32_t target, uint32_t type, uint32_t internal_format, uint32_t format);
 
 /*!
  * \brief Return a human friendly string of a texture target

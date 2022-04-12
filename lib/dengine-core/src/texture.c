@@ -339,7 +339,7 @@ Texture* dengine_texture_new_normalmap(const int width, const int height)
     return tex;
 }
 
-int dengine_texture_issupprorted(uint32_t target, uint32_t internal_format, uint32_t format)
+int dengine_texture_issupprorted(uint32_t target, uint32_t type, uint32_t internal_format, uint32_t format)
 {
     int supported = 1;
     uint32_t tex;
@@ -358,13 +358,13 @@ int dengine_texture_issupprorted(uint32_t target, uint32_t internal_format, uint
     if(target == GL_TEXTURE_2D)
     {
         glTexImage2D(target, 0, internal_format, width, height, 0,
-                     format, GL_UNSIGNED_SHORT, NULL);
+                     format, type, NULL);
     }else if(target == GL_TEXTURE_CUBE_MAP)
     {
         for(uint32_t i = 0; i < 6; i++)
         {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internal_format, width, height, 0,
-                         format, GL_UNSIGNED_SHORT, NULL);
+                         format, type, NULL);
         }
     }
 

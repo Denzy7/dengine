@@ -66,7 +66,7 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
 
 void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shadowop)
 {
-    if(!dengine_texture_issupprorted(shadowmap_target, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT))
+    if(!dengine_texture_issupprorted(shadowmap_target, GL_UNSIGNED_SHORT, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT))
     {
         dengineutils_logging_log("WARNING::GPU does not support the depth texture supplied [%s]. Shadow map not generated", dengine_texture_target2str(shadowmap_target));
         return;
