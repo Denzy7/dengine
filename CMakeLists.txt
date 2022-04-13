@@ -66,6 +66,10 @@ option(DENGINE_FONT_EMBED_SOURCESANSPRO_REGULAR "Embed Source Sans Pro Regular i
 option(DENGINE_FONT_EMBED_SOURCESANSPRO_ITALIC "Embed Source Sans Pro Italic into dengine-gui" OFF)
 option(DENGINE_FONT_EMBED_SOURCESANSPRO_LIGHT "Embed Source Sans Pro Light into dengine-gui" OFF)
 
+option(DENGINE_FONT_EMBED_ROBOTO_REGULAR "Embed Roboto Regular into dengine-gui" OFF)
+option(DENGINE_FONT_EMBED_ROBOTO_ITALIC "Embed Roboto Italic into dengine-gui" OFF)
+option(DENGINE_FONT_EMBED_ROBOTO_LIGHT "Embed Roboto Light into dengine-gui" OFF)
+
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
 add_subdirectory(deps/glad "glad-build")

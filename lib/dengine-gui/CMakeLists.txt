@@ -6,6 +6,7 @@ set(dengine-gui-hdr
 include/dengine-gui/gui.h
 )
 
+#OPEN SANS
 if(DENGINE_FONT_EMBED_OPENSANS_REGULAR)
     list(APPEND dengine-gui-src src/embfonts/opensans/opensans_regular.c)
     list(APPEND dengine-gui-hdr include/dengine-gui/embfonts/opensans/opensans_regular.h)
@@ -21,6 +22,7 @@ if(DENGINE_FONT_EMBED_OPENSANS_LIGHT)
     list(APPEND dengine-gui-hdr include/dengine-gui/embfonts/opensans/opensans_light.h)
 endif()
 
+#SOURCE SANS PRO
 if(DENGINE_FONT_EMBED_SOURCESANSPRO_REGULAR)
     list(APPEND dengine-gui-src src/embfonts/sourcesanspro/sourcesanspro_regular.c)
     list(APPEND dengine-gui-hdr include/dengine-gui/embfonts/sourcesanspro/sourcesanspro_regular.h)
@@ -34,6 +36,22 @@ endif()
 if(DENGINE_FONT_EMBED_SOURCESANSPRO_LIGHT)
     list(APPEND dengine-gui-src src/embfonts/sourcesanspro/sourcesanspro_light.c)
     list(APPEND dengine-gui-hdr include/dengine-gui/embfonts/sourcesanspro/sourcesanspro_light.h)
+endif()
+
+# ROBOTO
+if(DENGINE_FONT_EMBED_ROBOTO_REGULAR)
+    list(APPEND dengine-gui-src src/embfonts/roboto/roboto_regular.c)
+    list(APPEND dengine-gui-hdr include/dengine-gui/embfonts/roboto/roboto_regular.h)
+endif()
+
+if(DENGINE_FONT_EMBED_ROBOTO_ITALIC)
+    list(APPEND dengine-gui-src src/embfonts/roboto/roboto_italic.c)
+    list(APPEND dengine-gui-hdr include/dengine-gui/embfonts/roboto/roboto_italic.h)
+endif()
+
+if(DENGINE_FONT_EMBED_ROBOTO_LIGHT)
+    list(APPEND dengine-gui-src src/embfonts/roboto/roboto_light.c)
+    list(APPEND dengine-gui-hdr include/dengine-gui/embfonts/roboto/roboto_light.h)
 endif()
 
 add_library(dengine-gui ${dengine-gui-hdr} ${dengine-gui-src})
