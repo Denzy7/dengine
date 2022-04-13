@@ -1,8 +1,8 @@
 # dengine
-Lightweight Renderer and Engine
+Lightweight Graphics Engine
 
 # building
-- **Desktop** (Linux, Windows) : Build with CMake. For Windows, MinGW is highly recommended. *Haven't tested on MSVC*
+- **Desktop** (Linux, Windows) : Build with CMake. For Windows, MinGW is highly recommended. *Haven't tested on MSVC with C99*
 
 	- Clone the repo:
 		

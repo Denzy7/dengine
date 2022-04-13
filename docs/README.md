@@ -1,9 +1,9 @@
 # dengine
 
-- Cross platform and lightweight game engine.
+- Cross platform and lightweight graphics engine.
 - Written in C99
-- Uses at least OpenGL 3.0 and OpenGL ES 2.0
-- Some features need GL 3.2 or ES 3.2
+- Uses at least OpenGL 2.1 and OpenGL ES 2.0
+- Some features need GL 3.2 or ES 3.2 but will be disabled with not avaliable
 - It's possible to use GL 2.1 provided the following generic extensions are available:
 	- `GL_*_vertex_array_object`
 	- `GL_*_framebuffer_object`
@@ -11,7 +11,7 @@
 - 3D graphics is the main focus
 
 # modules/libs
-Meta shared library `dengine` is split into:  
+
 1. **dengine-core** – Contains the basic functions to create context, textures, buffers and drawing  
 	**HEADERS**  
 	- dengine_config.h – Compile defines for compiling
@@ -31,6 +31,7 @@ Meta shared library `dengine` is split into:
 	- vao.h - Vertex array objects
 	- macros.h - Various macro defines
 	- renderbuffer.h - Renderbuffer objects
+	- dengine.h - Inlines some basic init and terminate functions
 
 	**DEPENDS**  
 	- GLFW – Context and Input for Desktop GL
@@ -81,7 +82,7 @@ Meta shared library `dengine` is split into:
 	**DEPENDS**  
 	- STB – stb_truetype.h to read TrueType fonts
 
-# programs
+# programs(tbd)
 1. **dengitor** – Scene editor for dengine-scene and dengine project manager. Incorporates most if not all libraries
 2. **dengibuild** – Compile and package a project to a platform  
 	**DEPENDS**  
