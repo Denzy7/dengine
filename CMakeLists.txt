@@ -62,6 +62,10 @@ option(DENGINE_FONT_EMBED_OPENSANS_REGULAR "Embed OpenSans Regular into dengine-
 option(DENGINE_FONT_EMBED_OPENSANS_ITALIC "Embed OpenSans Italic into dengine-gui" OFF)
 option(DENGINE_FONT_EMBED_OPENSANS_LIGHT "Embed OpenSans Light into dengine-gui" ON)
 
+option(DENGINE_FONT_EMBED_SOURCESANSPRO_REGULAR "Embed Source Sans Pro Regular into dengine-gui" OFF)
+option(DENGINE_FONT_EMBED_SOURCESANSPRO_ITALIC "Embed Source Sans Pro Italic into dengine-gui" OFF)
+option(DENGINE_FONT_EMBED_SOURCESANSPRO_LIGHT "Embed Source Sans Pro Light into dengine-gui" OFF)
+
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
 add_subdirectory(deps/glad "glad-build")
