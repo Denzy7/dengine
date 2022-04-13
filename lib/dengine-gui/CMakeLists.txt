@@ -6,6 +6,21 @@ set(dengine-gui-hdr
 include/dengine-gui/gui.h
 )
 
+if(DENGINE_FONT_EMBED_OPENSANS_REGULAR)
+    list(APPEND dengine-gui-src src/embfonts/opensans/opensans_regular.c)
+    list(APPEND dengine-gui-hdr include/dengine-gui/embfonts/opensans/opensans_regular.h)
+endif()
+
+if(DENGINE_FONT_EMBED_OPENSANS_ITALIC)
+    list(APPEND dengine-gui-src src/embfonts/opensans/opensans_italic.c)
+    list(APPEND dengine-gui-hdr include/dengine-gui/embfonts/opensans/opensans_italic.h)
+endif()
+
+if(DENGINE_FONT_EMBED_OPENSANS_LIGHT)
+    list(APPEND dengine-gui-src src/embfonts/opensans/opensans_light.c)
+    list(APPEND dengine-gui-hdr include/dengine-gui/embfonts/opensans/opensans_light.h)
+endif()
+
 add_library(dengine-gui ${dengine-gui-hdr} ${dengine-gui-src})
 set_target_properties(dengine-gui PROPERTIES
                       POSITION_INDEPENDENT_CODE ON)

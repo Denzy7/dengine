@@ -58,6 +58,10 @@ include_directories(
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 
+option(DENGINE_FONT_EMBED_OPENSANS_REGULAR "Embed OpenSans Regular into dengine-gui" OFF)
+option(DENGINE_FONT_EMBED_OPENSANS_ITALIC "Embed OpenSans Italic into dengine-gui" OFF)
+option(DENGINE_FONT_EMBED_OPENSANS_LIGHT "Embed OpenSans Light into dengine-gui" ON)
+
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
 add_subdirectory(deps/glad "glad-build")
