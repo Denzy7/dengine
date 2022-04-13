@@ -21,3 +21,13 @@ add_executable(testdengine-gui-button
 target_link_libraries(testdengine-gui-button
         dengine-core dengine-utils dengine-gui)
 set_property(TARGET testdengine-gui-button PROPERTY C_STANDARD 99)
+
+#load a embedded font
+add_executable(testdengine-gui-embfonts
+        embfonts.c
+        )
+target_link_libraries(testdengine-gui-embfonts
+        dengine-core dengine-utils dengine-gui)
+set_property(TARGET testdengine-gui-embfonts PROPERTY C_STANDARD 99)
+
+
