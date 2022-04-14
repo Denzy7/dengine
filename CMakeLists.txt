@@ -70,6 +70,8 @@ option(DENGINE_FONT_EMBED_ROBOTO_REGULAR "Embed Roboto Regular into dengine-gui"
 option(DENGINE_FONT_EMBED_ROBOTO_ITALIC "Embed Roboto Italic into dengine-gui" OFF)
 option(DENGINE_FONT_EMBED_ROBOTO_LIGHT "Embed Roboto Light into dengine-gui" OFF)
 
+option(DENGINE_BUILD_TESTS "Build the test suite and examples" ON)
+
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
 add_subdirectory(deps/glad "glad-build")
@@ -82,11 +84,14 @@ add_subdirectory(lib/dengine-scene "dengine-scene-build")
 
 set(dengine dengine-utils dengine-core dengine-gui dengine-scene)
 
-add_subdirectory(tests "tests-build")
+if(DENGINE_BUILD_TESTS)
+    add_subdirectory(tests "tests-build")
 
-#please ignore this
-if(DENGINE_BUILD_TESTS_PRIV)
-    add_subdirectory(testspriv)
+    #please ignore this
+    if(DENGINE_BUILD_TESTS_PRIV)
+        add_subdirectory(testspriv)
+    endif()
 endif()
+
 
 install(FILES ${PROJECT_BINARY_DIR}/dengine_config/dengine_config.h DESTINATION include/dengine-${DENGINE_VERSION}/dengine_config)
