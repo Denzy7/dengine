@@ -9,7 +9,7 @@
 #define LOADGL_H
 
 #include "dengine_config.h" //GL, WIN
-#include "checkgl.h"        //DENGINE_CHECKGL;
+#include "dengine/checkgl.h"        //DENGINE_CHECKGL;
 
 #if defined (DENGINE_GL_GLAD)
     //USE GLAD

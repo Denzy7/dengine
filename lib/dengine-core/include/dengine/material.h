@@ -11,8 +11,8 @@
 
 #include <stddef.h> //size_t
 
-#include "shader.h"
-#include "texture.h"
+#include "dengine/shader.h"
+#include "dengine/texture.h"
 
 typedef struct
 {

@@ -5,8 +5,8 @@
 #ifndef DRAW_H
 #define DRAW_H
 
-#include "primitive.h" //draw primitive
-#include "shader.h" //use_program
+#include "dengine/primitive.h" //draw primitive
+#include "dengine/shader.h" //use_program
 #include <stdint.h> //uint32_t
 
 #ifdef __cplusplus

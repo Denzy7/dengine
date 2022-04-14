@@ -6,8 +6,8 @@
 #ifndef PRIMITIVE_H
 #define PRIMITIVE_H
 
-#include "buffer.h"
-#include "vertex.h"
+#include "dengine/buffer.h"
+#include "dengine/vertex.h"
 #include "dengine/vao.h"
 
 #include <stdint.h> //uint32

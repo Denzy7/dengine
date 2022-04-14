@@ -2,7 +2,7 @@
 #define CONFSERIALIZE_H
 
 #include <stddef.h> //size_t
-#include "vtor.h" //vtor for kv's
+#include "dengine-utils/vtor.h" //vtor for kv's
 
 /*
  * Serialize ASCII text to create a sort of configuration file

@@ -7,7 +7,7 @@
 #include <stddef.h> //size_t
 #include <stdint.h> //uint32
 
-#include "shader.h" //Shader
+#include "dengine/shader.h" //Shader
 
 /*!
  * \struct VertexAttribute
