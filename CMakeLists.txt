@@ -92,6 +92,7 @@ if(DENGINE_BUILD_TESTS)
     endif()
 endif()
 
-
 install(FILES ${PROJECT_BINARY_DIR}/dengine_config/dengine_config.h DESTINATION include/dengine-${DENGINE_VERSION}/dengine_config)
-install(FILES deps/glad/include/glad/glad.h DESTINATION include/dengine-${DENGINE_VERSION}/glad)
+install(DIRECTORY deps/glad/include/glad DESTINATION include/dengine-${DENGINE_VERSION}/deps/glad)
+install(DIRECTORY deps/glad/include/KHR DESTINATION include/dengine-${DENGINE_VERSION}/deps/glad)
+install(DIRECTORY deps/cglm/include/cglm DESTINATION include/dengine-${DENGINE_VERSION}/deps/cglm)
