@@ -336,6 +336,9 @@ int main(int argc, char *argv[])
 
     int poly = 1;
 
+    vec3 gridcolor = {0.0f, 1.0f, 0.0f};
+    dengine_shader_set_vec3(dftshdr, "color", gridcolor);
+
     while (dengine_window_isrunning()) {
         denginescene_ecs_do_light_scene(ent_dlight, scene);
         denginescene_ecs_do_light_scene(ent_plight, scene);

@@ -116,6 +116,7 @@ int main(int argc, char *argv[])
         glm_mat4_identity(model);
         glm_translate(model, pLight.position);
         dengine_shader_set_mat4(dftshdr, "model", model[0]);
+        dengine_shader_set_vec3(dftshdr, "color", yellow);
         dengine_draw_primitive(&axis, dftshdr);
 
         denginegui_text(10, 10, GL, NULL);
