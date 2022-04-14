@@ -18,6 +18,7 @@ src/stb_image.c
 src/stb_image_write.c
 src/viewport.c
 src/dengine.rc
+${PROJECT_SOURCE_DIR}/deps/glad/src/glad.c
 )
 
 set(dengine-core-hdr
@@ -67,7 +68,7 @@ if(ANDROID)
 endif()
 
 #link everything here to avoid cmake link errors
-target_link_libraries(dengine-core dengine-utils glad)
+target_link_libraries(dengine-core dengine-utils)
 
 if(NOT ANDROID)
     target_link_libraries(dengine-core glfw)

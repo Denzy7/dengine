@@ -74,7 +74,6 @@ option(DENGINE_BUILD_TESTS "Build the test suite and examples" ON)
 
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
-add_subdirectory(deps/glad "glad-build")
 add_subdirectory(lib/dengine-utils "dengine-utils-build")
 add_subdirectory(lib/dengine-core "dengine-core-build")
 add_subdirectory(lib/dengine-gui "dengine-gui-build")
@@ -95,3 +94,4 @@ endif()
 
 
 install(FILES ${PROJECT_BINARY_DIR}/dengine_config/dengine_config.h DESTINATION include/dengine-${DENGINE_VERSION}/dengine_config)
+install(FILES deps/glad/include/glad/glad.h DESTINATION include/dengine-${DENGINE_VERSION}/glad)
