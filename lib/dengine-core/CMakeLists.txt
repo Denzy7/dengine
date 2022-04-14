@@ -52,6 +52,8 @@ endif()
 
 add_library(dengine-core ${dengine-core-hdr} ${dengine-core-src})
 set_target_properties(dengine-core PROPERTIES
+                      VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
+                      SOVERSION ${dengine_VERSION_MAJOR}
                       POSITION_INDEPENDENT_CODE ON)
 
 if(ANDROID)

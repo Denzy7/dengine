@@ -8,6 +8,8 @@ include/dengine-model/model.h
 
 add_library(dengine-model ${dengine-model-hdr} ${dengine-model-src})
 set_target_properties(dengine-model PROPERTIES
+                      VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
+                      SOVERSION ${dengine_VERSION_MAJOR}
                       POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(dengine-model dengine-core dengine-utils)

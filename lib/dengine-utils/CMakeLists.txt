@@ -24,6 +24,8 @@ include/dengine-utils/debug.h
 
 add_library(dengine-utils ${dengine-utils-hdr} ${dengine-utils-src})
 set_target_properties(dengine-utils PROPERTIES
+                      VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
+                      SOVERSION ${dengine_VERSION_MAJOR}
                       POSITION_INDEPENDENT_CODE ON)
 
 if(GTK3_LIBRARIES AND UNIX)

@@ -61,6 +61,8 @@ add_library(dengine-gui
     ${dengine-gui-hdr} ${dengine-gui-src}
     ${dengine-gui-embfonts-hdr} ${dengine-gui-embfonts-src})
 set_target_properties(dengine-gui PROPERTIES
+                      VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
+                      SOVERSION ${dengine_VERSION_MAJOR}
                       POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(dengine-gui dengine-core)
