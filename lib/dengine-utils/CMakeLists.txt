@@ -44,4 +44,4 @@ if(WIN32)
 endif()
 
 install(TARGETS dengine-utils DESTINATION lib)
-install(FILES ${dengine-utils-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/dengine-utils)
+install(FILES ${dengine-utils-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-utils)

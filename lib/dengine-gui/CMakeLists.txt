@@ -78,5 +78,5 @@ if(WIN32)
 endif()
 
 install(TARGETS dengine-gui DESTINATION lib)
-install(FILES ${dengine-gui-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/dengine-gui)
-install(FILES ${dengine-gui-embfonts-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/dengine-gui/embfonts)
+install(FILES ${dengine-gui-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-gui)
+install(FILES ${dengine-gui-embfonts-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-gui/embfonts)

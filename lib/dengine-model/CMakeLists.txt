@@ -21,4 +21,4 @@ if(WIN32)
 endif()
 
 install(TARGETS dengine-model DESTINATION lib)
-install(FILES ${dengine-model-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/dengine-model)
+install(FILES ${dengine-model-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-model)

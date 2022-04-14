@@ -23,4 +23,4 @@ if(WIN32)
 endif()
 
 install(TARGETS dengine-scene DESTINATION lib)
-install(FILES ${dengine-scene-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/dengine-scene)
+install(FILES ${dengine-scene-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-scene)

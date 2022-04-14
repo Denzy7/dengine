@@ -95,4 +95,4 @@ if(WIN32)
 endif()
 
 install(TARGETS dengine-core DESTINATION lib)
-install(FILES ${dengine-core-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/dengine)
+install(FILES ${dengine-core-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine)
