@@ -74,3 +74,7 @@ endif()
 if(WIN32)
     set_target_properties(dengine-gui PROPERTIES PREFIX "")
 endif()
+
+install(TARGETS dengine-gui DESTINATION lib)
+install(FILES ${dengine-gui-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/dengine-gui)
+install(FILES ${dengine-gui-embfonts-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/dengine-gui/embfonts)

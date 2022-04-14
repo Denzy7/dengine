@@ -17,3 +17,6 @@ set_property(TARGET dengine-model PROPERTY C_STANDARD 99)
 if(WIN32)
     set_target_properties(dengine-model PROPERTIES PREFIX "")
 endif()
+
+install(TARGETS dengine-model DESTINATION lib)
+install(FILES ${dengine-model-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/dengine-model)

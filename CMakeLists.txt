@@ -89,4 +89,4 @@ if(DENGINE_BUILD_TESTS_PRIV)
     add_subdirectory(testspriv)
 endif()
 
-
+install(FILES ${PROJECT_BINARY_DIR}/dengine_config/dengine_config.h DESTINATION include/dengine-${DENGINE_VERSION}/dengine_config)

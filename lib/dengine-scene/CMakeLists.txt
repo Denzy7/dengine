@@ -19,3 +19,6 @@ set_property(TARGET dengine-scene PROPERTY C_STANDARD 99)
 if(WIN32)
     set_target_properties(dengine-scene PROPERTIES PREFIX "")
 endif()
+
+install(TARGETS dengine-scene DESTINATION lib)
+install(FILES ${dengine-scene-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/dengine-scene)

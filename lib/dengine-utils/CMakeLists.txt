@@ -17,7 +17,6 @@ include/dengine-utils/filesys.h
 include/dengine-utils/vtor.h
 include/dengine-utils/os.h
 include/dengine-utils/rng.h
-#${PROJECT_BINARY_DIR}/dengine_config.h
 include/dengine-utils/timer.h
 include/dengine-utils/str.h
 include/dengine-utils/debug.h
@@ -26,8 +25,6 @@ include/dengine-utils/debug.h
 add_library(dengine-utils ${dengine-utils-hdr} ${dengine-utils-src})
 set_target_properties(dengine-utils PROPERTIES
                       POSITION_INDEPENDENT_CODE ON)
-
-
 
 if(GTK3_LIBRARIES AND UNIX)
     target_link_libraries(dengine-utils ${GTK3_LIBRARIES})
@@ -43,3 +40,6 @@ set_property(TARGET dengine-utils PROPERTY C_STANDARD 99)
 if(WIN32)
     set_target_properties(dengine-utils PROPERTIES PREFIX "")
 endif()
+
+install(TARGETS dengine-utils DESTINATION lib)
+install(FILES ${dengine-utils-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/dengine-utils)

@@ -90,3 +90,6 @@ set_property(TARGET dengine-core PROPERTY C_STANDARD 99)
 if(WIN32)
     set_target_properties(dengine-core PROPERTIES PREFIX "")
 endif()
+
+install(TARGETS dengine-core DESTINATION lib)
+install(FILES ${dengine-core-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/dengine)
