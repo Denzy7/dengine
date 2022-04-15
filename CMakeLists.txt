@@ -4,6 +4,10 @@ project(dengine VERSION 0.3.5 LANGUAGES C)
 
 #this is just a slight nuance with cmake rather than renaming the project
 set(DENGINE_VERSION "${dengine_VERSION}")
+include(GNUInstallDirs)
+
+set(DENGINE_PKG_LIBS)
+set(DENGINE_PKG_DEPS)
 
 if(NOT ANDROID)
     find_package(PkgConfig QUIET)
@@ -15,6 +19,7 @@ if(NOT ANDROID)
             include_directories(${GTK3_INCLUDE_DIRS})
             link_directories(${GTK3_LIBRARY_DIRS})
             set(DENGINE_HAS_GTK3 1)
+            string(APPEND DENGINE_PKG_DEPS "gtk+-3.0 ")
         else()
             message(WARNING ">>> Could not find GTK3. No OS GUI support!")
         endif()
@@ -25,6 +30,7 @@ if(NOT ANDROID)
             include_directories(${fontconfig_INCLUDE_DIRS})
             link_directories(${fontconfig_LIBRARY_DIRS})
             set(DENGINE_HAS_FONTCONFIG 1)
+            string(APPEND DENGINE_PKG_DEPS "fontconfig ")
         else()
             #most if not all distros have fontconfig
             message(WARNING ">>> Could not find fontconfig. Default font support will not work! Consider installing it")
@@ -91,6 +97,12 @@ if(DENGINE_BUILD_TESTS)
         add_subdirectory(testspriv)
     endif()
 endif()
+
+foreach(i ${dengine})
+    string(APPEND DENGINE_PKG_LIBS "-l${i} ")
+endforeach()
+
+configure_file(dengine.pc.in dengine.pc)
 
 install(FILES ${PROJECT_BINARY_DIR}/dengine_config/dengine_config.h DESTINATION include/dengine-${DENGINE_VERSION}/dengine_config)
 install(DIRECTORY deps/glad/include/glad DESTINATION include/dengine-${DENGINE_VERSION}/deps/glad)
