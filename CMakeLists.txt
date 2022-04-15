@@ -46,6 +46,7 @@ if(NOT ANDROID)
         message(">>> Compile GLFW3 sources")
         add_subdirectory(deps/glfw "glfw3-build")
         include_directories(deps/glfw/include)
+        string(APPEND DENGINE_PKG_DEPS "glfw3 ")
     endif()
 endif()
 
