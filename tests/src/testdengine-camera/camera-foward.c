@@ -1,9 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb_image_write.h>
-
 #include <cglm/cglm.h>
 
 #include <dengine/window.h>
@@ -119,14 +116,13 @@ int main(int argc, char *argv[])
         if(denginegui_button(0,360,200,50,"Dump to fb.jpg",NULL))
         {
             dengine_framebuffer_bind(GL_FRAMEBUFFER,&camera.framebuffer);
-            uint8_t* rgb=calloc(camera.render_width*camera.render_height*3,sizeof(uint8_t));
-            glFinish();
-            glReadPixels(0,0,camera.render_width,camera.render_height,GL_RGB,GL_UNSIGNED_BYTE,rgb);
+            Texture* readback = dengine_texture_new_canreadback_color(camera.render_width,
+                                                                      camera.render_height);
+            dengine_framebuffer_readback(readback, &camera.framebuffer);
+            dengine_texture_writeout("fb.jpg", 1, readback);
 
-            stbi_flip_vertically_on_write(1);
-            stbi_write_jpg("fb.jpg",camera.render_width,camera.render_height,3,rgb,95);
-
-            free(rgb);
+            dengine_texture_free_data(readback);
+            free(readback);
 
             snprintf(prtbf,prtbf_sz,"dumped to %s/fb.jpg",dengineutils_os_get_cwd());
             dengineutils_os_dialog_messagebox("dump success",prtbf,0);
