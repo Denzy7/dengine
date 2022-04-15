@@ -1,9 +1,6 @@
-Copyright (c) 2022- Dennis Maina
+zlib LICENSE applies to all code except in deps, lib/dengine-gui/src/embfonts unless stated otherwise in the license file
 
-zlib LICENSE applies to all code except in:
-    deps/
-    lib/dengine-gui/src/embfonts/ 
-unless stated otherwise in the license file
+Copyright (c) 2022- Dennis Maina
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
