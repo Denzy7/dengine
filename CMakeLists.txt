@@ -79,6 +79,9 @@ option(DENGINE_FONT_EMBED_ROBOTO_LIGHT "Embed Roboto Light into dengine-gui" OFF
 
 option(DENGINE_BUILD_TESTS "Build the test suite and examples" ON)
 
+include(CheckFunctionExists)
+check_function_exists(clock_gettime DENGINE_HAVE_CLOCK_GETTIME)
+
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
 add_subdirectory(lib/dengine-utils "dengine-utils-build")

@@ -32,6 +32,9 @@
     #define DENGINE_FONTCONFIG_MATCHPATTERN "monospace"
 #endif // defined
 
+// does time.h have clock_gettime?
+#cmakedefine DENGINE_HAVE_CLOCK_GETTIME
+
 //Size of log buffer for snprintf
 #define DENGINE_LOG_BUF_SIZE 2048
 

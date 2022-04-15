@@ -6,9 +6,10 @@ double _last, _delta, _current, _first = 0.0;
 struct timespec spec;
 
 #include "dengine_config.h"
+
 //Quick and dirty clock_gettime for Win32
 //https://github.com/Alexpux/mingw-w64/blob/master/mingw-w64-libraries/winpthreads/src/clock.c
-#ifdef DENGINE_WIN32
+#if defined(DENGINE_WIN32) && !defined(DENGINE_HAVE_CLOCK_GETTIME)
 #include <windows.h>
 #include <errno.h>
 #include <stdint.h>
