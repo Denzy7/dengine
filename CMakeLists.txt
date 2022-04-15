@@ -102,7 +102,7 @@ foreach(i ${dengine})
     string(APPEND DENGINE_PKG_LIBS "-l${i} ")
 endforeach()
 
-configure_file(dengine.pc.in dengine.pc)
+configure_file(dengine.pc.in dengine.pc @ONLY)
 
 install(FILES ${PROJECT_BINARY_DIR}/dengine_config/dengine_config.h DESTINATION include/dengine-${DENGINE_VERSION}/dengine_config)
 install(DIRECTORY deps/glad/include/glad DESTINATION include/dengine-${DENGINE_VERSION}/deps/glad)
