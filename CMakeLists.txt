@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(dengine VERSION 0.3.5 LANGUAGES C)
+project(dengine VERSION 0.3.6 LANGUAGES C)
 
 #this is just a slight nuance with cmake rather than renaming the project
 set(DENGINE_VERSION "${dengine_VERSION}")
@@ -95,11 +95,11 @@ set(dengine dengine-utils dengine-core dengine-gui dengine-scene)
 
 if(DENGINE_BUILD_TESTS)
     add_subdirectory(tests "tests-build")
+endif()
 
-    #please ignore this
-    if(DENGINE_BUILD_TESTS_PRIV)
-        add_subdirectory(testspriv)
-    endif()
+#please ignore this
+if(DENGINE_BUILD_TESTS_PRIV)
+    add_subdirectory(testspriv)
 endif()
 
 foreach(i ${dengine})
