@@ -7,8 +7,7 @@
 #include <dengine-utils/os.h> //fileopen
 
 #include <dengine-gui/gui.h>    //text
-//OpenSans Light is always embedded unless its not!
-#include <dengine-gui/embfonts/opensans/opensans_light.h>
+#include <dengine-gui/embfonts.h>
 #include <stdio.h> //snprintf
 #include <stdlib.h> //free
 float fontsz = 32.0;
@@ -31,6 +30,7 @@ int main(int argc, char** argv)
     dengineutils_filesys_init();
     dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
 
+    //OpenSans Light is always embedded unless its not!
     denginegui_set_font(OpenSans_Light_ttf, fontsz, 512);
 
     if(!denginegui_init())
