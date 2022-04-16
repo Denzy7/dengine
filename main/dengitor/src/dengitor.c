@@ -4,6 +4,15 @@ static Dengitor dengitor;
 
 int main(int argc, char *argv[])
 {
+    memset(&dengitor, 0, sizeof(Dengitor));
+    dengitor.scene_grid_scale = 10.0f;
+    dengitor.scene_grid_width = 2.0f;
+    dengitor.scene_grid_color[0] = 1.0f;
+    dengitor.scene_grid_color[1] = 1.0f;
+    dengitor.scene_grid_color[2] = 0.0f;
+
+    dengitor.scene_axis_scale = 2.0f;
+    dengitor.scene_axis_width = 3.5f;
 
     GtkApplication* app = gtk_application_new(
                 "com.denzygames.Dengitor", G_APPLICATION_FLAGS_NONE);
@@ -96,6 +105,10 @@ void dengitor_scene_glarea_onrealize(GtkGLArea* area)
     dengitor.shader_debug_normals = dengine_shader_new_shader_standard(DENGINE_SHADER_DEBUG_NORMALS);
     dengitor.shader_skybox_cube = dengine_shader_new_shader_standard(DENGINE_SHADER_SKYBOXCUBE);
     dengitor.shader_skybox_2d = dengine_shader_new_shader_standard(DENGINE_SHADER_SKYBOX2D);
+
+    dengine_primitive_gen_grid(10, &dengitor.scene_grid, dengitor.shader_default);
+    dengine_primitive_gen_axis(&dengitor.scene_axis, dengitor.shader_default);
+    dengitor.scene_axis.index_count = 2;
 }
 
 void dengitor_scene_glarea_onunrealize(GtkGLArea* area)
@@ -131,11 +144,58 @@ void dengitor_scene_glarea_onrender(GtkGLArea* area)
 
     int x, y, w, h;
     dengine_viewport_get(&x, &y, &w, &h);
+    Camera* scene_camera = dengitor.scene_camera->camera_component->camera;
 
     dengine_camera_project_perspective( (float)w / (float)h,
-                                        dengitor.scene_camera->camera_component->camera);
+                                        scene_camera);
     dengine_camera_lookat(NULL,
-                          dengitor.scene_camera->camera_component->camera);
+                          scene_camera);
+    dengine_camera_apply(dengitor.shader_default, scene_camera);
+
+    static mat4 mat_4;
+    glm_mat4_identity(mat_4);
+
+    // DRAW grid
+    vec3 vec_3 = {dengitor.scene_grid_scale,
+                             dengitor.scene_grid_scale,
+                             dengitor.scene_grid_scale};
+    glm_scale(mat_4, vec_3);
+    dengine_shader_set_vec3(dengitor.shader_default, "color", dengitor.scene_grid_color);
+    dengine_shader_set_mat4(dengitor.shader_default, "model",mat_4[0]);
+    float init_width;
+    glGetFloatv(GL_LINE_WIDTH, &init_width);
+    glLineWidth(dengitor.scene_grid_width);
+    dengine_draw_primitive(&dengitor.scene_grid, dengitor.shader_default);
+
+    glm_mat4_identity(mat_4);
+
+    vec_3[0] = 0.0f;
+    vec_3[1] = 0.01f;
+    vec_3[2] = 0.0f;
+    glm_translate(mat_4, vec_3);
+
+    vec_3[0] = dengitor.scene_axis_scale;
+    vec_3[1] = dengitor.scene_axis_scale;
+    vec_3[2] = dengitor.scene_axis_scale;
+    glm_scale(mat_4, vec_3);
+    dengine_shader_set_mat4(dengitor.shader_default, "model",mat_4[0]);
+
+    glLineWidth(dengitor.scene_axis_width);
+    dengitor_draw_axis(&dengitor.scene_axis, dengitor.shader_default);
+
+    glLineWidth(init_width);
+
     static float rgba[4] = {1.0, 1.0, 0.0, 1.0};
     denginegui_text(10, 10, (const char*)glGetString(GL_VERSION) , rgba);
+}
+
+void dengitor_draw_axis(Primitive* axis, Shader* shader)
+{
+    float color[3];
+    for (int i = 0; i < 3; i++) {
+        color[0] = i == 0 ? 1.0f : 0.0f, color[1] = i == 1 ? 1.0f : 0.0f, color[2] = i == 2 ? 1.0f : 0.0f;
+        axis->offset = (void*)(i*2*sizeof (uint16_t));
+        dengine_shader_set_vec3(shader, "color", color);
+        dengine_draw_primitive(axis, shader);
+    }
 }
