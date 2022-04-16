@@ -2,6 +2,7 @@
 #define DENGITOR_H
 
 #include <gtk/gtk.h>
+#include <dengine/dengine.h>
 
 typedef struct
 {
@@ -10,6 +11,9 @@ typedef struct
     GtkBuilder* builder;
 
     GtkGLArea* scene_glarea;
+
+    Entity* scene_camera;
+    Scene* scene_current;
 }Dengitor;
 
 void dengitor_onactivate(GtkApplication* app);

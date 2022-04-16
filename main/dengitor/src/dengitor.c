@@ -1,4 +1,3 @@
-#include <dengine/dengine.h>
 #include "dengitor/dengitor.h"
 
 static Dengitor dengitor;
@@ -77,6 +76,17 @@ void dengitor_scene_glarea_onrealize(GtkGLArea* area)
     g_free(alloc);
 
     dengine_init();
+
+    dengitor.scene_camera = denginescene_ecs_new_entity();
+    Camera camera;
+    dengine_camera_setup(&camera);
+    dengine_camera_set_rendermode(DENGINE_CAMERA_RENDER_FOWARD, &camera);
+
+    CameraComponent* camera_component = denginescene_ecs_new_cameracomponent(&camera);
+    dengitor.scene_camera->camera_component = camera_component;
+    dengitor.scene_camera->transform.position[0] = 7.0f;
+    dengitor.scene_camera->transform.position[1] = 7.0f;
+    dengitor.scene_camera->transform.position[2] = 7.0f;
 }
 
 void dengitor_scene_glarea_onunrealize(GtkGLArea* area)
@@ -91,11 +101,24 @@ void dengitor_scene_glarea_onunrealize(GtkGLArea* area)
         dengineutils_logging_log("INFO::GtkGLArea unrealized");
     }
 
+    // clean scene cam
+    denginescene_ecs_destroy_entity(dengitor.scene_camera);
+
     dengine_terminate();
 }
 
 void dengitor_scene_glarea_onrender(GtkGLArea* area)
 {
-    glClearColor(1.0, 0.5, 0.3, 1.0);
+    glClearColor(0.0, 0.5, 0.3, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    int x, y, w, h;
+    dengine_viewport_get(&x, &y, &w, &h);
+
+    dengine_camera_project_perspective( (float)w / (float)h,
+                                        dengitor.scene_camera->camera_component->camera);
+    dengine_camera_lookat(NULL,
+                          dengitor.scene_camera->camera_component->camera);
+    static float rgba[4] = {1.0, 1.0, 0.0, 1.0};
+    denginegui_text(10, 10, (const char*)glGetString(GL_VERSION) , rgba);
 }
