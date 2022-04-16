@@ -87,6 +87,15 @@ void dengitor_scene_glarea_onrealize(GtkGLArea* area)
     dengitor.scene_camera->transform.position[0] = 7.0f;
     dengitor.scene_camera->transform.position[1] = 7.0f;
     dengitor.scene_camera->transform.position[2] = 7.0f;
+
+    // compile some standard shaders
+    dengitor.shader_default = dengine_shader_new_shader_standard(DENGINE_SHADER_DEFAULT);
+    dengitor.shader_standard = dengine_shader_new_shader_standard(DENGINE_SHADER_STANDARD);
+    dengitor.shader_shadow2d = dengine_shader_new_shader_standard(DENGINE_SHADER_SHADOW2D);
+    dengitor.shader_shadow3d = dengine_shader_new_shader_standard(DENGINE_SHADER_SHADOW3D);
+    dengitor.shader_debug_normals = dengine_shader_new_shader_standard(DENGINE_SHADER_DEBUG_NORMALS);
+    dengitor.shader_skybox_cube = dengine_shader_new_shader_standard(DENGINE_SHADER_SKYBOXCUBE);
+    dengitor.shader_skybox_2d = dengine_shader_new_shader_standard(DENGINE_SHADER_SKYBOX2D);
 }
 
 void dengitor_scene_glarea_onunrealize(GtkGLArea* area)
@@ -103,6 +112,14 @@ void dengitor_scene_glarea_onunrealize(GtkGLArea* area)
 
     // clean scene cam
     denginescene_ecs_destroy_entity(dengitor.scene_camera);
+
+    free(dengitor.shader_default);
+    free(dengitor.shader_standard);
+    free(dengitor.shader_shadow2d);
+    free(dengitor.shader_shadow3d);
+    free(dengitor.shader_debug_normals);
+    free(dengitor.shader_skybox_cube);
+    free(dengitor.shader_skybox_2d);
 
     dengine_terminate();
 }
