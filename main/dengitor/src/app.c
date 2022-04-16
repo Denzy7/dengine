@@ -4,13 +4,14 @@
 
 void dengitor_app_onactivate(GtkApplication* app)
 {
-    GtkWidget* window = gtk_application_window_new(app);
-    gtk_window_set_default_size( GTK_WINDOW(window), 1280, 720);
-    gtk_window_set_title( GTK_WINDOW(window), "Dengitor");
+    //TODO : compile resources
+    const char* ui = "/home/denzy/dengine/main/dengitor/res/default/dengine-editor-ui.glade";
 
-    GtkWidget* about = gtk_button_new_with_label("WORK IN PROGRESS...");
-    g_signal_connect(about, "clicked", G_CALLBACK(dengitor_aboutdialog), NULL);
-    gtk_container_add(GTK_CONTAINER(window), about);
+    dengitor.builder = gtk_builder_new_from_file(ui);
+    dengitor.main = GTK_WIDGET(gtk_builder_get_object(dengitor.builder, "main"));
+    dengitor.about = GTK_WIDGET(gtk_builder_get_object(dengitor.builder, "about"));
 
-    gtk_widget_show_all(window);
+    gtk_application_add_window(app, GTK_WINDOW(dengitor.main));
+
+    gtk_widget_show_all(dengitor.main);
 }
