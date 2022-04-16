@@ -62,8 +62,21 @@ void dengitor_scene_glarea_onrealize(GtkGLArea* area)
     {
         int maj, min;
         gdk_gl_context_get_version( gtk_gl_area_get_context(area), &maj, &min);
-        dengineutils_logging_log("INFO::GL_AREA::%d.%d", maj, min);
+        dengineutils_logging_log("INFO::GtkGLArea %d.%d realized", maj, min);
     }
+
+    DengineInitOpts* opts = dengine_init_get_opts();
+    opts->gl_loaddefault = 1;
+    opts->window_createnative = 0;
+
+    // preload glad to set viewport
+    gladLoadGL();
+    GtkAllocation* alloc = g_new(GtkAllocation, 1);
+    gtk_widget_get_allocation(GTK_WIDGET(area), alloc);
+    glViewport(0, 0, alloc->width, alloc->height);
+    g_free(alloc);
+
+    dengine_init();
 }
 
 void dengitor_scene_glarea_onunrealize(GtkGLArea* area)
@@ -73,6 +86,9 @@ void dengitor_scene_glarea_onunrealize(GtkGLArea* area)
     {
         dengineutils_logging_log("ERROR::Cannot make_current glarea");
         return;
+    }else
+    {
+        dengineutils_logging_log("INFO::GtkGLArea unrealized");
     }
 }
 
