@@ -10,7 +10,7 @@ typedef struct
     GtkBuilder* builder;
 }Dengitor;
 
-static Dengitor dengitor;
+void dengitor_onactivate(GtkApplication* app);
 
 void dengitor_aboutdialog();
 
