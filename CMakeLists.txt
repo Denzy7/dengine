@@ -102,6 +102,8 @@ if(DENGINE_BUILD_TESTS_PRIV)
     add_subdirectory(testspriv)
 endif()
 
+add_subdirectory(main/dengitor)
+
 foreach(i ${dengine})
     string(APPEND DENGINE_PKG_LIBS "-l${i} ")
 endforeach()

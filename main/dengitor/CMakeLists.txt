@@ -1,0 +1,5 @@
+if(GTK3_LIBRARIES)
+    add_executable(dengitor src/dengitor.c)
+    target_include_directories(dengitor PRIVATE include)
+    target_link_libraries(dengitor ${dengine} ${GTK3_LIBRARIES})
+endif()
