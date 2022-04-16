@@ -108,6 +108,9 @@ void dengine_material_use(Material* material)
 
 void dengine_material_destroy(Material* material)
 {
+    if(material->destroyed)
+        return;
+
     if (material && material->textures) {
         for (size_t i = 0; i < material->textures_count; i++) {
             free(material->textures[i].sampler);
@@ -124,6 +127,8 @@ void dengine_material_destroy(Material* material)
         dengine_texture_destroy(1,material->normalmap);
         free(material->normalmap);
     }
+
+    material->destroyed = 1;
 }
 
 Texture* dengine_material_get_texture(const char* sampler, Material* material)

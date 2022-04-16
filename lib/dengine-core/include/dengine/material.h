@@ -35,6 +35,8 @@ typedef struct
 
     Texture* white; /*!< White texture this material uses */
     Texture* normalmap; /*!< Empty normal map texture this material uses */
+
+    int destroyed; /*!< HACK : Flag when material is destroyed to maintain compatibility */
 }Material;
 
 #ifdef __cplusplus
