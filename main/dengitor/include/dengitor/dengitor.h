@@ -12,6 +12,7 @@ typedef struct
 
 void dengitor_onactivate(GtkApplication* app);
 
-void dengitor_aboutdialog();
+void dengitor_aboutdialog_show();
 
+void dengitor_aboutdialog_hide();
 #endif // DENGITOR_H
