@@ -90,9 +90,12 @@ void dengitor_scene_glarea_onunrealize(GtkGLArea* area)
     {
         dengineutils_logging_log("INFO::GtkGLArea unrealized");
     }
+
+    dengine_terminate();
 }
 
 void dengitor_scene_glarea_onrender(GtkGLArea* area)
 {
-
+    glClearColor(1.0, 0.5, 0.3, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
