@@ -35,6 +35,7 @@ typedef struct
 #include <dengine/draw.h>
 #include <dengine/loadgl.h>
 #include <dengine/macros.h>
+#include <dengine/viewport.h>
 #ifdef DENGINE_ANDROID
 #include <dengine/android.h>
 #endif
