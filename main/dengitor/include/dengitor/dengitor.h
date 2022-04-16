@@ -6,7 +6,7 @@
 typedef struct
 {
     GtkWidget* main;
-    GtkWidget* about;
+    GtkAboutDialog* about;
     GtkBuilder* builder;
 }Dengitor;
 
