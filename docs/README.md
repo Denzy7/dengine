@@ -45,7 +45,7 @@
 	- filesys.h – File functions like read to a memory block
 	- os.h – OS specifics like mkdir, dialogs
 	- logging.h – Logging functions
-	- vtor.h – C++ like std::vector implemetation
+	- vtor.h – C++ like `std::vector` implemetation
 	- confserialize.h – Serialize ASCII text to key-value pairs
 	- rng.h – Random number generator
 	- timer.h – Time interface for delta and current
@@ -75,16 +75,19 @@
 
 	**DEPENDS**  
 	- PYTHON 3 – Very nice library :)
+	
 6. **dengine-gui** -    Render GUI items immediatly with no hidden state. GUI items are rendered immediately and have no state  
 	**HEADERS**  
 	- gui.h – All gui init and drawing operations and “widgets”
+	- embfonts.h - TrueType fonts converted to byte arrays
 
 	**DEPENDS**  
 	- STB – stb_truetype.h to read TrueType fonts
+	- `<various-fonts>` - .ttf fonts to embed
 
-# programs(tbd)
-1. **dengitor** – Scene editor for dengine-scene and dengine project manager. Incorporates most if not all libraries
-2. **dengibuild** – Compile and package a project to a platform  
+# programs (work in progress)
+1. **dengitor** – GTK 3 scene editor and project manager
+2. **dengibld** – Compile and package a project to a platform  
 	**DEPENDS**  
 	- A fast compression algo like LZ4
 	- Working C compiler. 
