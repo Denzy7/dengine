@@ -24,9 +24,9 @@ int main(int argc, char *argv[])
 void dengitor_onactivate(GtkApplication* app)
 {
     //TODO : compile resources
-    const char* ui = "/home/denzy/dengine/main/dengitor/res/default/dengine-editor-ui.glade";
+    //const char* ui = "/home/denzy/dengine/main/dengitor/res/default/dengine-editor-ui.glade";
 
-    dengitor.builder = gtk_builder_new_from_file(ui);
+    dengitor.builder = gtk_builder_new_from_resource("/com/denzygames/Dengitor/dengine-editor-ui.glade");
 
     dengitor.main = GTK_APPLICATION_WINDOW(gtk_builder_get_object(dengitor.builder, "main"));
 
