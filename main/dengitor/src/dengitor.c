@@ -90,7 +90,8 @@ void dengitor_scene_glarea_onrealize(GtkGLArea* area)
     Camera camera;
     dengine_camera_setup(&camera);
     dengine_camera_set_rendermode(DENGINE_CAMERA_RENDER_FOWARD, &camera);
-    camera.clearcolor[0] = 0.0f;
+    camera.clearcolor[0] = 0.5f;
+    camera.clearonuse = 0;
 
     CameraComponent* camera_component = denginescene_ecs_new_cameracomponent(&camera);
     dengitor.scene_camera->camera_component = camera_component;
@@ -110,6 +111,40 @@ void dengitor_scene_glarea_onrealize(GtkGLArea* area)
     dengine_primitive_gen_grid(10, &dengitor.scene_grid, dengitor.shader_default);
     dengine_primitive_gen_axis(&dengitor.scene_axis, dengitor.shader_default);
     dengitor.scene_axis.index_count = 2;
+
+#if 1
+    // A SIMPLE SCENE
+    Primitive cube;
+    dengine_primitive_gen_cube(&cube, dengitor.shader_debug_normals);
+
+    Material dbg_norm_mat;
+
+    // TODO : memory leak if not destroyed!
+    dengine_material_setup(&dbg_norm_mat);
+    dengine_material_set_shader_color(dengitor.shader_debug_normals, &dbg_norm_mat);
+
+    Entity* cube_ent = denginescene_ecs_new_entity();
+    MeshComponent* cube_mesh = denginescene_ecs_new_meshcomponent(&cube, &dbg_norm_mat);
+    cube_ent->mesh_component = cube_mesh;
+
+    dengitor.scene_current = denginescene_new();
+    denginescene_add_entity(dengitor.scene_current, cube_ent);
+
+    Primitive plane;
+    dengine_primitive_gen_plane(&plane, dengitor.shader_debug_normals);
+
+    Entity* plane_ent = denginescene_ecs_new_entity();
+    MeshComponent* plane_mesh = denginescene_ecs_new_meshcomponent(&plane, &dbg_norm_mat);
+    plane_ent->mesh_component = plane_mesh;
+
+    plane_ent->transform.position[1] = -1.0f;
+
+    plane_ent->transform.scale[0] = 5.0f;
+    plane_ent->transform.scale[1] = 5.0f;
+    plane_ent->transform.scale[2] = 5.0f;
+
+    denginescene_add_entity(dengitor.scene_current, plane_ent);
+#endif
 }
 
 void dengitor_scene_glarea_onunrealize(GtkGLArea* area)
@@ -135,6 +170,9 @@ void dengitor_scene_glarea_onunrealize(GtkGLArea* area)
     free(dengitor.shader_skybox_cube);
     free(dengitor.shader_skybox_2d);
 
+    if(dengitor.scene_current)
+        denginescene_destroy(dengitor.scene_current);
+
     dengine_terminate();
 }
 
@@ -149,7 +187,15 @@ void dengitor_scene_glarea_onrender(GtkGLArea* area)
 
     Camera* scene_camera = dengitor.scene_camera->camera_component->camera;
     dengine_camera_use(scene_camera);
-
+    float r,g,b,a;
+    dengine_framebuffer_get_clearcolor(&r, &g, &b, &a);
+    glClearColor(
+            scene_camera->clearcolor[0],
+            scene_camera->clearcolor[1],
+            scene_camera->clearcolor[2],
+            scene_camera->clearcolor[3]);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(r, g, b, a);
     dengine_viewport_set(0, 0,
                          scene_camera->render_width, scene_camera->render_height);
 
@@ -202,6 +248,12 @@ void dengitor_scene_glarea_onrender(GtkGLArea* area)
 
     glBindFramebuffer(GL_FRAMEBUFFER, last_fb);
     dengine_viewport_set(x, y, w, h);
+
+    if(dengitor.scene_current)
+    {
+        denginescene_ecs_do_camera_scene(dengitor.scene_camera, dengitor.scene_current);
+        denginescene_update(dengitor.scene_current);
+    }
 
     // SCREEN QUAD PASS
     glClearColor(0.0, 0.0, 0.0, 1.0);
