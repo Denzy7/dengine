@@ -15,6 +15,8 @@ typedef struct
 
     Entity* scene_camera;
     Scene* scene_current;
+    int scene_camera_last_w;
+    int scene_camera_last_h;
 
     Primitive scene_grid;
     float scene_grid_scale;

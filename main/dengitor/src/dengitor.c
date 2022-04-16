@@ -90,6 +90,7 @@ void dengitor_scene_glarea_onrealize(GtkGLArea* area)
     Camera camera;
     dengine_camera_setup(&camera);
     dengine_camera_set_rendermode(DENGINE_CAMERA_RENDER_FOWARD, &camera);
+    camera.clearcolor[0] = 0.0f;
 
     CameraComponent* camera_component = denginescene_ecs_new_cameracomponent(&camera);
     dengitor.scene_camera->camera_component = camera_component;
@@ -139,12 +140,26 @@ void dengitor_scene_glarea_onunrealize(GtkGLArea* area)
 
 void dengitor_scene_glarea_onrender(GtkGLArea* area)
 {
-    glClearColor(0.0, 0.5, 0.3, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    // SCENE CAMERA PASS
     int x, y, w, h;
     dengine_viewport_get(&x, &y, &w, &h);
+
+    int last_fb;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &last_fb);
+
     Camera* scene_camera = dengitor.scene_camera->camera_component->camera;
+    dengine_camera_use(scene_camera);
+
+    dengine_viewport_set(0, 0,
+                         scene_camera->render_width, scene_camera->render_height);
+
+    if(dengitor.scene_camera_last_w != w || dengitor.scene_camera_last_h != h)
+    {
+        dengine_camera_resize(scene_camera, w, h);
+        dengitor.scene_camera_last_w = w;
+        dengitor.scene_camera_last_h = h;
+        dengineutils_logging_log("INFO::resize scene camera to %dx%d", w, h);dengitor.scene_camera_last_w = w;
+    }
 
     dengine_camera_project_perspective( (float)w / (float)h,
                                         scene_camera);
@@ -185,8 +200,17 @@ void dengitor_scene_glarea_onrender(GtkGLArea* area)
 
     glLineWidth(init_width);
 
-    static float rgba[4] = {1.0, 1.0, 0.0, 1.0};
-    denginegui_text(10, 10, (const char*)glGetString(GL_VERSION) , rgba);
+    glBindFramebuffer(GL_FRAMEBUFFER, last_fb);
+    dengine_viewport_set(x, y, w, h);
+
+    // SCREEN QUAD PASS
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    static vec4 viewport_color = {0.0f, 0.0f, 0.0f, 1.0f};
+    denginegui_panel(0, 0, w, h, scene_camera->framebuffer.color, NULL, viewport_color);
+
+    denginegui_text(10, 10, (const char*)glGetString(GL_VERSION) , NULL);
 }
 
 void dengitor_draw_axis(Primitive* axis, Shader* shader)
