@@ -34,6 +34,7 @@ typedef struct
     int render_height; /*!< Height of framebuffer. Usually window height */
 
     float clearcolor[4]; /*!< Color used to clear framebuffer before drawing anything */
+    int clearonuse; /*!< Clear all buffers before using Camera */
 } Camera;
 
 #ifdef __cplusplus

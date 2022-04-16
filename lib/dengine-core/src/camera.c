@@ -51,6 +51,7 @@ void dengine_camera_setup(Camera* camera)
 
     dengine_camera_project_perspective( (float)camera->render_width / (float)camera->render_height, camera);
     dengine_camera_lookat(NULL, camera);
+    camera->clearonuse = 1;
 }
 
 void dengine_camera_project_perspective(float aspect, Camera* camera)
@@ -167,7 +168,8 @@ void dengine_camera_use(Camera* camera)
                 camera->clearcolor[1],
                 camera->clearcolor[2],
                 camera->clearcolor[3]);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        if(camera->clearonuse)
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(
                 orig_clear[0],
                 orig_clear[1],
