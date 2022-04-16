@@ -27,12 +27,13 @@ void dengitor_onactivate(GtkApplication* app)
 
 
     GObject* menu_action = gtk_builder_get_object(dengitor.builder, "menu_action");
-    g_signal_connect(menu_action, "select", G_CALLBACK(dengitor_aboutdialog), NULL);
+    g_signal_connect(menu_action, "activate", G_CALLBACK(dengitor_aboutdialog), NULL);
 
 }
 
 void dengitor_aboutdialog()
 {
+
     gtk_about_dialog_set_version(dengitor.about, DENGINE_VERSION);
     gtk_widget_show_all(GTK_WIDGET(dengitor.about));
 }
