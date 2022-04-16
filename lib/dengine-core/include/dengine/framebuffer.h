@@ -95,6 +95,15 @@ void dengine_framebuffer_attachRB(FramebufferAttachmentType attachment, Renderbu
  */
 void dengine_framebuffer_readback(Texture* dest, Framebuffer* framebuffer);
 
+/*!
+ * \brief Get the last glClearColor
+ * \param r red
+ * \param g green
+ * \param b blue
+ * \param a alpha
+ */
+void dengine_framebuffer_get_clearcolor(float* r, float* g, float* b, float* a);
+
 #ifdef __cplusplus
 }
 #endif

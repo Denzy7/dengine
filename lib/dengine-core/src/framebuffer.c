@@ -141,3 +141,17 @@ void dengine_framebuffer_readback(Texture* dest, Framebuffer* framebuffer)
     DENGINE_CHECKGL;
     dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
 }
+
+void dengine_framebuffer_get_clearcolor(float* r, float* g, float* b, float* a)
+{
+    float orig_clear[4];
+    glGetFloatv(GL_COLOR_CLEAR_VALUE, orig_clear);
+    if(r)
+        *r = orig_clear[0];
+    if(g)
+        *g = orig_clear[1];
+    if(b)
+        *b = orig_clear[2];
+    if(a)
+        *a = orig_clear[3];
+}
