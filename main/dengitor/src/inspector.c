@@ -37,4 +37,10 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
     // we outta here...
     if(!entity)
         return;
+
+    gtk_widget_show_all(inspector->transform_widget.transform);
+    if(entity->camera_component)
+    {
+        gtk_widget_show_all(inspector->camera_widget.camera);
+    }
 }
