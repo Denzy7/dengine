@@ -196,6 +196,16 @@ void dengitor_scene_glarea_onrealize(GtkGLArea* area)
 
     denginescene_add_entity(dengitor.scene_current, plane_ent);
 
+    Camera camera2;
+    dengine_camera_setup(&camera2);
+    dengine_camera_set_rendermode(DENGINE_CAMERA_RENDER_FOWARD, &camera2);
+
+    CameraComponent* cam2_comp = denginescene_ecs_new_cameracomponent(&camera2);
+    Entity* cam_ent = denginescene_ecs_new_entity();
+    cam_ent->camera_component = cam2_comp;
+    denginescene_ecs_set_entity_name(cam_ent, "this is a camera");
+    denginescene_add_entity(dengitor.scene_current, cam_ent);
+
     dengitor_scenetree_traverse(dengitor.scene_current, dengitor.scene_treeview_store);
 #endif
 }
@@ -346,8 +356,9 @@ void dengitor_scene_treeview_oncursorchange(GtkTreeView* tree)
 
         dengitor_inspector_do_entity(current, &dengitor.inspector);
 
+        gtk_widget_queue_draw( GTK_WIDGET(dengitor.inspector.inspector) );
+        gtk_widget_queue_draw( GTK_WIDGET(dengitor.scene_glarea) );
+
         free(name);
     }
-
-    gtk_widget_queue_draw( GTK_WIDGET(dengitor.scene_glarea) );
 }
