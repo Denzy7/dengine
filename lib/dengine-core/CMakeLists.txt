@@ -19,6 +19,7 @@ src/stb_image_write.c
 src/viewport.c
 src/dengine.rc
 ${PROJECT_SOURCE_DIR}/deps/glad/src/glad.c
+src/entrygl.c
 )
 
 set(dengine-core-hdr
@@ -42,6 +43,7 @@ include/dengine/macros.h
 include/dengine/renderbuffer.h
 include/dengine/dengine.h
 include/dengine/viewport.h
+include/dengine/entrygl.h
 )
 
 if(ANDROID)
