@@ -3,12 +3,14 @@ if(GTK3_LIBRARIES)
     include/dengitor/dengitor.h
     include/dengitor/scenetree.h
     include/dengitor/utils.h
+    include/dengitor/inspector.h
     )
 
     set(dengitor-src
     src/dengitor.c
     src/scenetree.c
     src/utils.c
+    src/inspector.c
     )
 
     add_custom_command(

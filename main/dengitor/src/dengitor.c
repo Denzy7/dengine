@@ -49,6 +49,8 @@ void dengitor_onactivate(GtkApplication* app)
     dengitor_scenetree_setup(dengitor.scene_treeview);
     dengitor.scene_treeview_store = GTK_TREE_STORE(gtk_tree_view_get_model(dengitor.scene_treeview));
 
+    dengitor_inspector_setup(dengitor.builder, &dengitor.inspector);
+
     gtk_application_add_window(app, GTK_WINDOW(dengitor.main));
     gtk_widget_show_all(GTK_WIDGET(dengitor.main));
 }
