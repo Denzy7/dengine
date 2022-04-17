@@ -72,15 +72,16 @@ void dengitor_aboutdialog_hide()
 
 void dengitor_scene_glarea_onrealize(GtkGLArea* area)
 {
-    gtk_gl_area_make_current(area);
+    GdkGLContext* context = gtk_gl_area_get_context(area);
+    gdk_gl_context_make_current(context);
     if(gtk_gl_area_get_error(area) != NULL)
     {
-        dengineutils_logging_log("ERROR::Cannot make_current glarea");
+        dengineutils_logging_log("ERROR::glarea error");
         return;
     }else
     {
         int maj, min;
-        gdk_gl_context_get_version( gtk_gl_area_get_context(area), &maj, &min);
+        gdk_gl_context_get_version( context, &maj, &min);
         dengineutils_logging_log("INFO::GtkGLArea %d.%d realized", maj, min);
     }
 
@@ -212,10 +213,11 @@ void dengitor_scene_glarea_onrealize(GtkGLArea* area)
 
 void dengitor_scene_glarea_onunrealize(GtkGLArea* area)
 {
-    gtk_gl_area_make_current(area);
+    GdkGLContext* context = gtk_gl_area_get_context(area);
+    gdk_gl_context_make_current(context);
     if(gtk_gl_area_get_error(area) != NULL)
     {
-        dengineutils_logging_log("ERROR::Cannot make_current glarea");
+        dengineutils_logging_log("ERROR::glarea error unrealize");
         return;
     }else
     {
@@ -241,12 +243,15 @@ void dengitor_scene_glarea_onunrealize(GtkGLArea* area)
 
 void dengitor_scene_glarea_onrender(GtkGLArea* area)
 {
+    GdkGLContext* context = gtk_gl_area_get_context(area);
+    gdk_gl_context_make_current(context);
+
     // SCENE CAMERA PASS
     int x, y, w, h;
     dengine_viewport_get(&x, &y, &w, &h);
 
-    int last_fb;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &last_fb);
+    Framebuffer entry_fb;
+    dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entry_fb);
 
     Camera* scene_camera = dengitor.scene_camera->camera_component->camera;
     dengine_camera_use(scene_camera);
@@ -309,7 +314,7 @@ void dengitor_scene_glarea_onrender(GtkGLArea* area)
 
     glLineWidth(init_width);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, last_fb);
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, &entry_fb);
     dengine_viewport_set(x, y, w, h);
 
     if(dengitor.scene_current)
