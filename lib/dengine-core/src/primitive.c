@@ -8,6 +8,12 @@
 
 void dengine_primitive_setup(Primitive* primitive, Shader* shader)
 {
+    VAO entry_vao;
+    Buffer entry_ibo, entry_vbo;
+    glGetIntegerv(GL_VERTEX_ARRAY_BINDING, (int*) &entry_vao.vao);
+    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (int*) &entry_vbo.buffer_id);
+    glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, (int*) &entry_ibo.buffer_id);
+
     dengine_vao_gen(1, &primitive->vao);
     dengine_vao_bind(&primitive->vao);
 
@@ -54,10 +60,10 @@ void dengine_primitive_setup(Primitive* primitive, Shader* shader)
         dengine_vertex_attribute_enable(&primitive->aBiTangent);
     }
 
-    dengine_buffer_bind(GL_ELEMENT_ARRAY_BUFFER, NULL);
-    dengine_buffer_bind(GL_ARRAY_BUFFER, NULL);
+    dengine_buffer_bind(GL_ELEMENT_ARRAY_BUFFER, &entry_ibo);
+    dengine_buffer_bind(GL_ARRAY_BUFFER, &entry_vbo);
 
-    dengine_vao_bind(NULL);
+    dengine_vao_bind(&entry_vao);
 
     primitive->offset = NULL;
 }
