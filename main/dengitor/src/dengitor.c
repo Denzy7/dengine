@@ -148,7 +148,23 @@ void dengitor_scene_glarea_onrealize(GtkGLArea* area)
     plane_ent->transform.scale[1] = 5.0f;
     plane_ent->transform.scale[2] = 5.0f;
 
+    Entity* ch = denginescene_ecs_new_entity();
+    MeshComponent* ch_mesh = denginescene_ecs_new_meshcomponent(&cube, &dbg_norm_mat);
+    ch->mesh_component = ch_mesh;
+    ch->transform.scale[0] = 0.5f;
+    ch->transform.scale[1] = 0.5f;
+    ch->transform.scale[2] = 0.5f;
+
+    ch->transform.position[1] = 2.5f;
+
+    denginescene_ecs_set_entity_name(ch, "child entity");
+    denginescene_ecs_set_entity_name(cube_ent, "parent entity");
+
+    denginescene_ecs_parent(cube_ent, ch);
+
     denginescene_add_entity(dengitor.scene_current, plane_ent);
+
+    dengitor_scenetree_traverse(dengitor.scene_current, dengitor.scene_treeview_store);
 #endif
 }
 
