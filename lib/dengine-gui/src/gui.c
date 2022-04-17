@@ -205,10 +205,14 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
     }
 
     _bmp_sz = bitmap_size;
+
+    Texture entry_tex;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, (int*) &entry_tex.texture_id);
+
     dengine_texture_bind(GL_TEXTURE_2D, &fontmap);
     dengine_texture_data(GL_TEXTURE_2D, &fontmap);
     dengine_texture_set_params(GL_TEXTURE_2D, &fontmap);
-    dengine_texture_bind(GL_TEXTURE_2D, NULL);
+    dengine_texture_bind(GL_TEXTURE_2D, &entry_tex);
 
     _fontsz = fontsize;
 
@@ -312,16 +316,28 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
 
             quad.array.data = vertices;
 
+            // get entry stuff
+            Buffer entry_vbo;
+            glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (int*) &entry_vbo.buffer_id);
+
+            Texture entry_tex;
+            glGetIntegerv(GL_TEXTURE_BINDING_2D, (int*)&entry_tex.texture_id);
+
+            int entry_activetex;
+            glGetIntegerv(GL_ACTIVE_TEXTURE, &entry_activetex);
+
+            // draw our stuff
             dengine_buffer_bind(GL_ARRAY_BUFFER, &quad.array);
             dengine_buffer_data(GL_ARRAY_BUFFER, &quad.array);
-            dengine_buffer_bind(GL_ARRAY_BUFFER, NULL);
 
             glActiveTexture(GL_TEXTURE0);
             dengine_texture_bind(GL_TEXTURE_2D, &fontmap);
-
             _denginegui_drawquad();
 
-            dengine_texture_bind(GL_TEXTURE_2D, NULL);
+            // return entry stuff
+            dengine_texture_bind(GL_TEXTURE_2D, &entry_tex);
+            glActiveTexture(entry_activetex);
+            dengine_buffer_bind(GL_ARRAY_BUFFER, &entry_vbo);
         }
     }
 }
@@ -344,9 +360,18 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
 
     quad.array.data = vertices;
 
+    // get entry stuff
+    Buffer entry_vbo;
+    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (int*) &entry_vbo.buffer_id);
+
+    Texture entry_tex;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, (int*)&entry_tex.texture_id);
+
+    int entry_activetex;
+    glGetIntegerv(GL_ACTIVE_TEXTURE, &entry_activetex);
+
     dengine_buffer_bind(GL_ARRAY_BUFFER, &quad.array);
     dengine_buffer_data(GL_ARRAY_BUFFER, &quad.array);
-    dengine_buffer_bind(GL_ARRAY_BUFFER, NULL);
 
     float white[4] = {0.0f, 0.0f, 0.0f, PANEL_ALPHA};
 
@@ -363,7 +388,10 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
 
     _denginegui_drawquad();
 
-    dengine_texture_bind(GL_TEXTURE_2D, NULL);
+    // return entry stuff
+    dengine_texture_bind(GL_TEXTURE_2D, &entry_tex);
+    glActiveTexture(entry_activetex);
+    dengine_buffer_bind(GL_ARRAY_BUFFER, &entry_vbo);
 
 }
 
