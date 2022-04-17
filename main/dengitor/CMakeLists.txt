@@ -2,11 +2,13 @@ if(GTK3_LIBRARIES)
     set(dengitor-hdr
     include/dengitor/dengitor.h
     include/dengitor/scenetree.h
+    include/dengitor/utils.h
     )
 
     set(dengitor-src
     src/dengitor.c
     src/scenetree.c
+    src/utils.c
     )
 
     add_custom_command(
