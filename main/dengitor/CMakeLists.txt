@@ -7,13 +7,15 @@ if(GTK3_LIBRARIES)
     src/dengitor.c
     )
 
-    if(WIN32)
-        list(APPEND dengitor-src res/default/win32/dengine-editor-res.c)
-    elseif(UNIX)
-        list(APPEND dengitor-src res/default/linux/dengine-editor-res.c)
-    endif()
+    add_custom_command(
+        OUTPUT dengine-editor-res.c
+        COMMAND glib-compile-resources ${CMAKE_CURRENT_SOURCE_DIR}/res/default/dengine-editor-res.xml --target=${CMAKE_CURRENT_BINARY_DIR}/dengine-editor-res.c --generate-source
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/res/default
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/res/default/dengine-editor-res.xml
+        VERBATIM
+    )
 
-    add_executable(dengitor ${dengitor-hdr} ${dengitor-src})
+    add_executable(dengitor ${dengitor-hdr} ${dengitor-src} dengine-editor-res.c)
     target_include_directories(dengitor PRIVATE include)
     target_link_libraries(dengitor ${dengine} ${GTK3_LIBRARIES})
 endif()
