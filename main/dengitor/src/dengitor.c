@@ -170,13 +170,13 @@ void dengitor_scene_glarea_onrealize(GtkGLArea* area)
     for(int i = 0; i < 2; i++)
     {
         Entity* ch_l1 = denginescene_ecs_new_entity();
-        snprintf(nm, sizeof(nm), "child lv %d", i);
+        g_snprintf(nm, sizeof(nm), "child lv %d", i);
         denginescene_ecs_set_entity_name(ch_l1, nm);
         denginescene_ecs_parent(ch, ch_l1);
         for(int j = 0; j < 3; j++)
         {
             Entity* ch_l2 = denginescene_ecs_new_entity();
-            snprintf(nm, sizeof(nm), "child lv %d:%d", i, j);
+            g_snprintf(nm, sizeof(nm), "child lv %d:%d", i, j);
             denginescene_ecs_set_entity_name(ch_l2, nm);
             denginescene_ecs_parent(ch_l1, ch_l2);
             if(i == 1)
@@ -184,7 +184,7 @@ void dengitor_scene_glarea_onrealize(GtkGLArea* area)
                 for(int k = 0; k < 4; k++)
                 {
                     Entity* ch_l3 = denginescene_ecs_new_entity();
-                    snprintf(nm, sizeof(nm), "child lv %d:%d:%d", i, j, k);
+                    g_snprintf(nm, sizeof(nm), "child lv %d:%d:%d", i, j, k);
                     denginescene_ecs_set_entity_name(ch_l3, nm);
                     denginescene_ecs_parent(ch_l2, ch_l3);
                 }
