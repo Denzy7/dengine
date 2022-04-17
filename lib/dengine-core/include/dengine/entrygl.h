@@ -6,6 +6,10 @@
 #include "dengine/buffer.h"
 #include "dengine/vao.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void dengine_entrygl_texture(uint32_t target, Texture* texture);
 
 void dengine_entrygl_texture_active(int* texture_active);
@@ -15,5 +19,9 @@ void dengine_entrygl_framebuffer(uint32_t target, Framebuffer* framebuffer);
 void dengine_entrygl_buffer(uint32_t target, Buffer* buffer);
 
 void dengine_entrygl_vao(VAO* vao);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ENTRYGL_H
