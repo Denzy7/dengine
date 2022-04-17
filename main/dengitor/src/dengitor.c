@@ -1,4 +1,5 @@
 #include "dengitor/dengitor.h"
+#include "dengitor/scenetree.h"
 
 static Dengitor dengitor;
 
@@ -43,6 +44,10 @@ void dengitor_onactivate(GtkApplication* app)
                      "unrealize", G_CALLBACK(dengitor_scene_glarea_onunrealize), NULL);
     g_signal_connect(dengitor.scene_glarea,
                      "render", G_CALLBACK(dengitor_scene_glarea_onrender), NULL);
+
+    dengitor.scene_treeview = GTK_TREE_VIEW(gtk_builder_get_object(dengitor.builder, "scene_treeview"));
+    dengitor_scenetree_setup(dengitor.scene_treeview);
+    dengitor.scene_treeview_store = GTK_TREE_STORE(gtk_tree_view_get_model(dengitor.scene_treeview));
 
     gtk_application_add_window(app, GTK_WINDOW(dengitor.main));
     gtk_widget_show_all(GTK_WIDGET(dengitor.main));
@@ -275,3 +280,4 @@ void dengitor_draw_axis(Primitive* axis, Shader* shader)
         dengine_draw_primitive(axis, shader);
     }
 }
+

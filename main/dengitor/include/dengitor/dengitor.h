@@ -27,6 +27,9 @@ typedef struct
     float scene_axis_width;
     float scene_axis_scale;
 
+    GtkTreeView* scene_treeview;
+    GtkTreeStore* scene_treeview_store;
+
     Shader* shader_default;
     Shader* shader_standard;
     Shader* shader_shadow2d;
