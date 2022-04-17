@@ -2,6 +2,7 @@
 #define DENGITOR_INSPECTOR_H
 
 #include <gtk/gtk.h>
+#include <dengine/dengine.h>
 
 typedef struct
 {
@@ -31,5 +32,7 @@ typedef struct
 }Inspector;
 
 void dengitor_inspector_setup(GtkBuilder* builder, Inspector* inspector);
+
+void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector);
 
 #endif // DENGITOR_INSPECTOR_H

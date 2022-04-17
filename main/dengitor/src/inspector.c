@@ -27,3 +27,14 @@ void dengitor_inspector_setup(GtkBuilder* builder, Inspector* inspector)
                                    camera_widget_root, inspector->inspector);
     g_object_unref(camera_widget_root);
 }
+
+void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
+{
+    // hide all. only show if we have the component
+    gtk_widget_hide(inspector->camera_widget.camera);
+    gtk_widget_hide(inspector->transform_widget.transform);
+
+    // we outta here...
+    if(!entity)
+        return;
+}
