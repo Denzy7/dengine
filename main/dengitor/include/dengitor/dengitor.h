@@ -7,6 +7,31 @@
 
 typedef struct
 {
+    GtkWidget* transform;
+
+    GtkContainer* transform_position;
+    GtkContainer* transform_rotation;
+    GtkContainer* transform_scale;
+}TransformWidget;
+
+typedef struct
+{
+    GtkWidget* camera;
+
+    GtkAdjustment* camera_fov;
+    GtkEntry* camera_near;
+    GtkEntry* camera_far;
+    GtkColorButton* camera_clearcolour;
+}CameraWidget;
+
+typedef struct
+{
+    TransformWidget transform_widget;
+    CameraWidget camera_widget;
+}InspectorWidgets;
+
+typedef struct
+{
     GtkApplicationWindow* main;
     GtkAboutDialog* about;
     GtkBuilder* builder;
