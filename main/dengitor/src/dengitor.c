@@ -53,6 +53,8 @@ void dengitor_onactivate(GtkApplication* app)
 
     gtk_application_add_window(app, GTK_WINDOW(dengitor.main));
     gtk_widget_show_all(GTK_WIDGET(dengitor.main));
+
+    dengitor_inspector_do_entity(NULL, &dengitor.inspector);
 }
 
 void dengitor_aboutdialog_show()
