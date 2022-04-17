@@ -2,6 +2,7 @@
 
 #include "dengine/macros.h"
 #include "dengine/loadgl.h"
+#include "dengine/entrygl.h"
 
 #include "dengine-utils/debug.h"
 
@@ -112,6 +113,13 @@ void dengine_camera_set_rendermode(CameraRenderMode mode, Camera* camera)
 {
     DENGINE_DEBUG_ENTER;
 
+    // get entry stuff
+    Texture entry_tex;
+    dengine_entrygl_texture(GL_TEXTURE_2D, &entry_tex);
+
+    Framebuffer entry_fb;
+    dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entry_fb);
+
     if (mode == DENGINE_CAMERA_RENDER_FOWARD) {
         Texture rgba_depth[2];
         memset(&rgba_depth,0,sizeof (rgba_depth));
@@ -148,7 +156,9 @@ void dengine_camera_set_rendermode(CameraRenderMode mode, Camera* camera)
         dengine_framebuffer_bind(GL_FRAMEBUFFER, &camera->framebuffer);
         dengine_framebuffer_attach2D(DENGINE_FRAMEBUFFER_COLOR, rgba, &camera->framebuffer);
         dengine_framebuffer_attach2D(DENGINE_FRAMEBUFFER_DEPTH, depth, &camera->framebuffer);
-        dengine_framebuffer_bind(GL_FRAMEBUFFER,NULL);
+
+        dengine_texture_bind(GL_TEXTURE_2D, &entry_tex);
+        dengine_framebuffer_bind(GL_FRAMEBUFFER, &entry_fb);
     }
 }
 
