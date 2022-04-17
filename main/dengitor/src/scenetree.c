@@ -1,13 +1,5 @@
 #include "dengitor/scenetree.h"
 
-enum
-{
-    DENGITOR_SCENETREE_ENTNAME = 0,
-    DENGITOR_SCENETREE_ENTPTR,
-    DENGITOR_SCENETREE_COLCNT
-};
-
-
 void _dengitor_scenetree_traverse_entity(GtkTreeIter* root, GtkTreeStore* store, Entity* entity);
 
 void _dengitor_scenetree_onkeypress(GtkTreeView* tree, GdkEventKey* ev);
