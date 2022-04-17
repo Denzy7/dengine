@@ -508,22 +508,9 @@
                 <property name="can-focus">True</property>
                 <property name="wide-handle">True</property>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkNotebook">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="orientation">vertical</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Scene</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
+                    <property name="can-focus">True</property>
                     <child>
                       <object class="GtkGLArea" id="scene_glarea">
                         <property name="visible">True</property>
@@ -533,11 +520,46 @@
                         <property name="has-depth-buffer">True</property>
                         <property name="use-es">True</property>
                       </object>
+                    </child>
+                    <child type="tab">
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Scene</property>
+                      </object>
                       <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
+                        <property name="tab-fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkGLArea" id="game_glarea">
+                        <property name="visible">True</property>
+                        <property name="app-paintable">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="has-alpha">True</property>
+                        <property name="has-depth-buffer">True</property>
+                        <property name="use-es">True</property>
+                      </object>
+                      <packing>
                         <property name="position">1</property>
                       </packing>
+                    </child>
+                    <child type="tab">
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Game</property>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                        <property name="tab-fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child type="tab">
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>
@@ -580,6 +602,9 @@
                                   <object class="GtkTreeView" id="scene_treeview">
                                     <property name="visible">True</property>
                                     <property name="can-focus">True</property>
+                                    <child internal-child="selection">
+                                      <object class="GtkTreeSelection"/>
+                                    </child>
                                   </object>
                                 </child>
                               </object>
