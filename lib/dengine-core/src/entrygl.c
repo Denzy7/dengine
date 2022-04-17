@@ -55,3 +55,10 @@ void dengine_entrygl_vao(VAO* vao)
 
     DENGINE_CHECKGL;
 }
+
+void dengine_entrygl_shader(Shader* shader)
+{
+    glGetIntegerv(GL_CURRENT_PROGRAM, (int*) &shader->program_id);
+
+    DENGINE_CHECKGL;
+}
