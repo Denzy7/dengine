@@ -48,6 +48,8 @@ void dengitor_onactivate(GtkApplication* app)
     dengitor.scene_treeview = GTK_TREE_VIEW(gtk_builder_get_object(dengitor.builder, "scene_treeview"));
     dengitor_scenetree_setup(dengitor.scene_treeview);
     dengitor.scene_treeview_store = GTK_TREE_STORE(gtk_tree_view_get_model(dengitor.scene_treeview));
+    g_signal_connect(dengitor.scene_treeview,
+                     "cursor-changed", G_CALLBACK(dengitor_scene_treeview_oncursorchange), NULL);
 
     dengitor_inspector_setup(dengitor.builder, &dengitor.inspector);
 
@@ -327,3 +329,25 @@ void dengitor_draw_axis(Primitive* axis, Shader* shader)
     }
 }
 
+void dengitor_scene_treeview_oncursorchange(GtkTreeView* tree)
+{
+    GtkTreeModel* model = gtk_tree_view_get_model(tree);
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(tree);
+    GtkTreeIter iter;
+    if(gtk_tree_selection_get_selected(selection, &model,&iter))
+    {
+        char* name;
+        gtk_tree_model_get(model, &iter,
+                           DENGITOR_SCENETREE_ENTNAME, &name, -1);
+        Entity* current = NULL;
+        gtk_tree_model_get(model, &iter,
+                           DENGITOR_SCENETREE_ENTPTR, &current, -1);
+        dengineutils_logging_log("selected %s %p %u", name, current, current->entity_id);
+
+        dengitor_inspector_do_entity(current, &dengitor.inspector);
+
+        free(name);
+    }
+
+    gtk_widget_queue_draw( GTK_WIDGET(dengitor.scene_glarea) );
+}

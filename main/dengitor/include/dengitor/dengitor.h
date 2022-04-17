@@ -53,5 +53,7 @@ void dengitor_scene_glarea_onunrealize(GtkGLArea* area);
 
 void dengitor_scene_glarea_onrender(GtkGLArea* area);
 
+void dengitor_scene_treeview_oncursorchange(GtkTreeView* tree);
+
 void dengitor_draw_axis(Primitive* axis, Shader* shader);
 #endif // DENGITOR_H
