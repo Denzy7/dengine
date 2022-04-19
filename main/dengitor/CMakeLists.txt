@@ -22,6 +22,7 @@ if(GTK3_LIBRARIES)
         DEPENDS
             ${CMAKE_CURRENT_SOURCE_DIR}/res/default/dengine-editor-ui.glade
             ${CMAKE_CURRENT_SOURCE_DIR}/res/default/dengine-editor-prefs.glade
+            ${CMAKE_CURRENT_SOURCE_DIR}/res/default/dengine-editor-res.xml
         VERBATIM
     )
 
