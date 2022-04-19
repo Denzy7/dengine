@@ -8,6 +8,7 @@ typedef struct
     GtkWidget* prefs;
 
     GtkComboBox* theme;
+    GtkCssProvider* provider;
 
     GtkButton* ok;
     GtkButton* cancel;
