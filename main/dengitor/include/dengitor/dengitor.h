@@ -6,6 +6,7 @@
 #include <cglm/cglm.h>
 
 #include "dengitor/inspector.h"
+#include "dengitor/prefs.h"
 typedef struct
 {
     GtkApplicationWindow* main;
@@ -13,7 +14,9 @@ typedef struct
     GtkBuilder* builder;
 
     GtkGLArea* scene_glarea;
+
     Inspector inspector;
+    Prefs prefs;
 
     Entity* scene_camera;
     Scene* scene_current;

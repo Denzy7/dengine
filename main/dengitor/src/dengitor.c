@@ -52,6 +52,8 @@ void dengitor_onactivate(GtkApplication* app)
                      "cursor-changed", G_CALLBACK(dengitor_scene_treeview_oncursorchange), NULL);
 
     dengitor_inspector_setup(dengitor.builder, &dengitor.inspector);
+    dengitor.prefs.builder = gtk_builder_new_from_resource("/com/denzygames/Dengitor/dengine-editor-prefs.glade");
+    dengitor_prefs_setup(dengitor.prefs.builder, &dengitor.prefs);
 
     gtk_application_add_window(app, GTK_WINDOW(dengitor.main));
     gtk_widget_show_all(GTK_WIDGET(dengitor.main));

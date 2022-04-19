@@ -4,6 +4,7 @@ if(GTK3_LIBRARIES)
     include/dengitor/scenetree.h
     include/dengitor/utils.h
     include/dengitor/inspector.h
+    include/dengitor/prefs.h
     )
 
     set(dengitor-src
@@ -11,13 +12,16 @@ if(GTK3_LIBRARIES)
     src/scenetree.c
     src/utils.c
     src/inspector.c
+    src/prefs.c
     )
 
     add_custom_command(
         OUTPUT dengine-editor-res.c
         COMMAND glib-compile-resources ${CMAKE_CURRENT_SOURCE_DIR}/res/default/dengine-editor-res.xml --target=${CMAKE_CURRENT_BINARY_DIR}/dengine-editor-res.c --generate-source
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/res/default
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/res/default/dengine-editor-res.xml
+        DEPENDS
+            ${CMAKE_CURRENT_SOURCE_DIR}/res/default/dengine-editor-ui.glade
+            ${CMAKE_CURRENT_SOURCE_DIR}/res/default/dengine-editor-prefs.glade
         VERBATIM
     )
 

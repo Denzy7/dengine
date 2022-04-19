@@ -2,5 +2,6 @@
 <gresources>
   <gresource prefix="/com/denzygames/Dengitor">
     <file preprocess="xml-stripblanks" >dengine-editor-ui.glade</file>
+    <file preprocess="xml-stripblanks" >dengine-editor-prefs.glade</file>
   </gresource>
 </gresources>

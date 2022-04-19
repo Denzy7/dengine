@@ -394,6 +394,15 @@
                             <property name="use-stock">True</property>
                           </object>
                         </child>
+                        <child>
+                          <object class="GtkImageMenuItem" id="menu_prefs">
+                            <property name="label">gtk-preferences</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="use-underline">True</property>
+                            <property name="use-stock">True</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>
