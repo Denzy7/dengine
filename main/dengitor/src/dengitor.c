@@ -54,6 +54,9 @@ void dengitor_onactivate(GtkApplication* app)
     dengitor_inspector_setup(dengitor.builder, &dengitor.inspector);
     dengitor.prefs.builder = gtk_builder_new_from_resource("/com/denzygames/Dengitor/dengine-editor-prefs.glade");
     dengitor_prefs_setup(dengitor.prefs.builder, &dengitor.prefs);
+    // menu button prefs
+    g_signal_connect(gtk_builder_get_object(dengitor.builder, "menu_prefs"),
+                     "activate", G_CALLBACK(dengitor_prefs_show), &dengitor.prefs);
 
     gtk_application_add_window(app, GTK_WINDOW(dengitor.main));
     gtk_widget_show_all(GTK_WIDGET(dengitor.main));
