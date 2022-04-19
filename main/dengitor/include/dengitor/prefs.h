@@ -7,7 +7,7 @@ typedef struct
     GtkBuilder* builder;
     GtkWidget* prefs;
 
-    GtkComboBoxText* theme;
+    GtkComboBox* theme;
 
     GtkButton* ok;
     GtkButton* cancel;
@@ -17,5 +17,7 @@ typedef struct
 void dengitor_prefs_setup(GtkBuilder* builder, Prefs* prefs);
 
 void dengitor_prefs_show(GtkWidget* widget, Prefs* prefs);
+
+void dengitor_prefs_hide(GtkWidget* widget, Prefs* prefs);
 
 #endif // DENGITOR_PREFS_H
