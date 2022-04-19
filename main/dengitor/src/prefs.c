@@ -48,7 +48,7 @@ void dengitor_prefs_setup(GtkBuilder* builder, Prefs* prefs)
 {
     prefs->prefs = GTK_WIDGET( gtk_builder_get_object(builder, "prefs") );
     prefs->theme = GTK_COMBO_BOX( gtk_builder_get_object(builder, "theme") );
-    g_signal_connect(prefs->theme, "changed", G_CALLBACK(_dengitor_prefs_theme), NULL);
+    g_signal_connect(prefs->theme, "changed", G_CALLBACK(_dengitor_prefs_theme), prefs);
 
     prefs->ok = GTK_BUTTON( gtk_builder_get_object(builder, "ok") );
     g_signal_connect(prefs->ok, "clicked", G_CALLBACK(_dengitor_prefs_ok), prefs);
