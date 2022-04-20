@@ -11,6 +11,7 @@ typedef struct
     GtkCssProvider* provider;
 
     GtkFontChooser* font;
+    GtkButton* font_change;
 
     GtkButton* ok;
     GtkButton* cancel;

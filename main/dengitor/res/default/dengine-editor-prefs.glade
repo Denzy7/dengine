@@ -104,7 +104,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="font-change">
+              <object class="GtkButton" id="font_change">
                 <property name="label" translatable="yes">...</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>

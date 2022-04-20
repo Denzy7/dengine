@@ -63,10 +63,13 @@ void dengitor_prefs_setup(GtkBuilder* builder, Prefs* prefs)
     g_signal_connect(prefs->cancel, "clicked", G_CALLBACK(_dengitor_prefs_cancel), prefs);
 
     prefs->font = GTK_FONT_CHOOSER( gtk_builder_get_object(builder, "font") );
-    g_signal_connect(prefs->font, "response", G_CALLBACK(_dengitor_prefs_fontset), prefs);
+    prefs->font_change = GTK_BUTTON( gtk_builder_get_object(builder, "font_change") );
+
     g_signal_connect_swapped(
-                gtk_builder_get_object(builder, "font-change"),
+                prefs->font_change,
                 "clicked", G_CALLBACK(gtk_widget_show_all), prefs->font);
+    g_signal_connect(prefs->font, "response", G_CALLBACK(_dengitor_prefs_fontset), prefs);
+
 
     prefs->builder = builder;
 }
@@ -74,6 +77,13 @@ void dengitor_prefs_setup(GtkBuilder* builder, Prefs* prefs)
 void dengitor_prefs_show(GtkWidget* widget, Prefs* prefs)
 {
     gtk_widget_show_all(prefs->prefs);
+
+    char* font;
+    g_object_get(gtk_settings_get_default(), "gtk-font-name", &font, NULL);
+
+    gtk_button_set_label(prefs->font_change, font);
+
+    g_free(font);
 }
 
 
