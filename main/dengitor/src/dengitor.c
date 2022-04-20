@@ -63,6 +63,11 @@ void dengitor_onactivate(GtkApplication* app)
     gtk_widget_show_all(GTK_WIDGET(dengitor.main));
 
     dengitor_inspector_do_entity(NULL, &dengitor.inspector);
+
+    GtkSettings* settings = gtk_settings_get_default();
+    g_object_set(settings, "gtk-xft-antialias", 1, NULL);
+    g_object_set(settings, "gtk-xft-hinting", 1, NULL);
+    g_object_set(settings, "gtk-xft-hintstyle", "hintslight", NULL);
 }
 
 void dengitor_aboutdialog_show()
