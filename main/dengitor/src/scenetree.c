@@ -4,6 +4,20 @@ void _dengitor_scenetree_traverse_entity(GtkTreeIter* root, GtkTreeStore* store,
 
 void _dengitor_scenetree_onkeypress(GtkTreeView* tree, GdkEventKey* ev);
 
+void _dengitor_scenetree_onrowactivated(GtkTreeView* tree);
+
+void _dengitor_scenetree_onrowactivated(GtkTreeView* tree)
+{
+    GtkTreeModel* model = gtk_tree_view_get_model(tree);
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(tree);
+    GtkTreeIter iter;
+    if(gtk_tree_selection_get_selected(selection, &model,&iter))
+    {
+        GtkTreePath* path = gtk_tree_model_get_path(model, &iter);
+        gtk_tree_view_expand_row(tree, path, false);
+    }
+}
+
 void _dengitor_scenetree_onkeypress(GtkTreeView* tree, GdkEventKey* ev)
 {
     GtkTreeModel* model = gtk_tree_view_get_model(tree);
@@ -77,4 +91,6 @@ void dengitor_scenetree_setup(GtkTreeView* tree)
                                                 DENGITOR_SCENETREE_ENTNAME, NULL);
 
     g_signal_connect(tree, "key-press-event", G_CALLBACK(_dengitor_scenetree_onkeypress), NULL);
+    g_signal_connect(tree, "row-activated", G_CALLBACK(_dengitor_scenetree_onrowactivated), NULL);
+
 }
