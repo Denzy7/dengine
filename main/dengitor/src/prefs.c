@@ -40,6 +40,15 @@ void _dengitor_prefs_theme(GtkComboBox* combo, Prefs* prefs)
     }
 }
 
+void _dengitor_prefs_fontset(GtkFontChooser* font_chooser, Prefs* prefs)
+{
+    const char* font = gtk_font_chooser_get_font(font_chooser);
+    gtk_widget_hide( GTK_WIDGET(font_chooser) );
+
+    GtkSettings* settings = gtk_settings_get_for_screen(gdk_screen_get_default());
+    g_object_set(settings, "gtk-font-name", font, NULL);
+}
+
 void dengitor_prefs_setup(GtkBuilder* builder, Prefs* prefs)
 {
     prefs->prefs = GTK_WIDGET( gtk_builder_get_object(builder, "prefs") );
@@ -52,6 +61,12 @@ void dengitor_prefs_setup(GtkBuilder* builder, Prefs* prefs)
 
     prefs->cancel= GTK_BUTTON( gtk_builder_get_object(builder, "cancel") );
     g_signal_connect(prefs->cancel, "clicked", G_CALLBACK(_dengitor_prefs_cancel), prefs);
+
+    prefs->font = GTK_FONT_CHOOSER( gtk_builder_get_object(builder, "font") );
+    g_signal_connect(prefs->font, "response", G_CALLBACK(_dengitor_prefs_fontset), prefs);
+    g_signal_connect_swapped(
+                gtk_builder_get_object(builder, "font-change"),
+                "clicked", G_CALLBACK(gtk_widget_show_all), prefs->font);
 
     prefs->builder = builder;
 }

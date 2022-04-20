@@ -10,6 +10,8 @@ typedef struct
     GtkComboBox* theme;
     GtkCssProvider* provider;
 
+    GtkFontChooser* font;
+
     GtkButton* ok;
     GtkButton* cancel;
 
