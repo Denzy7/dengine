@@ -144,9 +144,10 @@ void dengineutils_logging_log(const char* message, ...)
             delim =  offsetneedles[i];
     }
 
+    printf("\n");
     dengineutils_logging_set_consolecolor(LOG_BUFFER[0]);
-    printf("\n%s", LOG_BUFFER + strlen(delim));
-    dengineutils_logging_set_consolecolor('0');
+    printf("%s", LOG_BUFFER + strlen(delim));
+    dengineutils_logging_set_consolecolor(0);
     printf("\n");
 
     #ifdef DENGINE_ANDROID
