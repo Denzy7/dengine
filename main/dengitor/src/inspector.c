@@ -90,12 +90,31 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
         //rot
         entry = GTK_ENTRY(rot_nth->data);
         buffer = gtk_entry_get_buffer(entry);
+
+        //sigchanged
+        sigid = &inspector->transform_widget.sigids_transform_rotation[i];
+        if(*sigid)
+        {
+            g_signal_handler_disconnect(entry, *sigid);
+        }
+        *sigid = g_signal_connect(entry, "changed",
+                         G_CALLBACK(_dengine_inspector_float), &entity->transform.rotation[i]);
+
         g_snprintf(prtbf, sizeof(prtbf), "%.1f", entity->transform.rotation[i]);
         gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
 
         //scl
         entry = GTK_ENTRY(scl_nth->data);
         buffer = gtk_entry_get_buffer(entry);
+
+        sigid = &inspector->transform_widget.sigids_transform_scale[i];
+        if(*sigid)
+        {
+            g_signal_handler_disconnect(entry, *sigid);
+        }
+        *sigid = g_signal_connect(entry, "changed",
+                         G_CALLBACK(_dengine_inspector_float), &entity->transform.scale[i]);
+
         g_snprintf(prtbf, sizeof(prtbf), "%.1f", entity->transform.scale[i]);
         gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
     }

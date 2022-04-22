@@ -10,8 +10,12 @@ typedef struct
 
     GtkContainer* transform_position;
     gulong sigids_transform_position[3];
+
     GtkContainer* transform_rotation;
+    gulong sigids_transform_rotation[3];
+
     GtkContainer* transform_scale;
+    gulong sigids_transform_scale[3];
 }TransformWidget;
 
 typedef struct
