@@ -7,6 +7,13 @@
 
 #include "dengitor/inspector.h"
 #include "dengitor/prefs.h"
+
+typedef enum
+{
+    DENGITOR_SCENE_GLAREA_MODE_SCENE,
+    DENGITOR_SCENE_GLAREA_MODE_GAME
+}SceneGLAreaMode;
+
 typedef struct
 {
     GtkApplicationWindow* main;
@@ -14,6 +21,9 @@ typedef struct
     GtkBuilder* builder;
 
     GtkGLArea* scene_glarea;
+    GtkToggleButton* scene_toggle;
+    GtkToggleButton* game_toggle;
+    SceneGLAreaMode scene_glarea_mode;
 
     Inspector inspector;
     Prefs prefs;
