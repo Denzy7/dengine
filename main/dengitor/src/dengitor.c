@@ -282,85 +282,99 @@ void dengitor_glarea_onrender(GtkGLArea* area)
     int x, y, w, h;
     dengine_viewport_get(&x, &y, &w, &h);
 
-    Framebuffer entry_fb;
-    dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entry_fb);
+    Camera* out = NULL;
 
-    Camera* scene_camera = dengitor.scene_camera->camera_component->camera;
-    dengine_camera_use(scene_camera);
-    float r,g,b,a;
-    dengine_framebuffer_get_clearcolor(&r, &g, &b, &a);
-    glClearColor(
-            scene_camera->clearcolor[0],
-            scene_camera->clearcolor[1],
-            scene_camera->clearcolor[2],
-            scene_camera->clearcolor[3]);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(r, g, b, a);
-    dengine_viewport_set(0, 0,
-                         scene_camera->render_width, scene_camera->render_height);
-
-    if(dengitor.scene_camera_last_w != w || dengitor.scene_camera_last_h != h)
+    if(dengitor.glarea_mode == DENGITOR_GLAREA_MODE_SCENE)
     {
-        dengine_camera_resize(scene_camera, w, h);
-        dengitor.scene_camera_last_w = w;
-        dengitor.scene_camera_last_h = h;
-        dengineutils_logging_log("INFO::resize scene camera to %dx%d", w, h);dengitor.scene_camera_last_w = w;
+        Framebuffer entry_fb;
+        dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entry_fb);
+
+        Camera* scene_camera = dengitor.scene_camera->camera_component->camera;
+        out = scene_camera;
+        dengine_camera_use(scene_camera);
+        float r,g,b,a;
+        dengine_framebuffer_get_clearcolor(&r, &g, &b, &a);
+        glClearColor(
+                scene_camera->clearcolor[0],
+                scene_camera->clearcolor[1],
+                scene_camera->clearcolor[2],
+                scene_camera->clearcolor[3]);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(r, g, b, a);
+        dengine_viewport_set(0, 0,
+                             scene_camera->render_width, scene_camera->render_height);
+
+        if(dengitor.scene_camera_last_w != w || dengitor.scene_camera_last_h != h)
+        {
+            dengine_camera_resize(scene_camera, w, h);
+            dengitor.scene_camera_last_w = w;
+            dengitor.scene_camera_last_h = h;
+            dengineutils_logging_log("INFO::resize scene camera to %dx%d", w, h);dengitor.scene_camera_last_w = w;
+        }
+
+        dengine_camera_project_perspective( (float)w / (float)h,
+                                            scene_camera);
+        dengine_camera_lookat(NULL,
+                              scene_camera);
+        dengine_camera_apply(dengitor.shader_default, scene_camera);
+
+        static mat4 mat_4;
+        glm_mat4_identity(mat_4);
+
+        // DRAW grid
+        vec3 vec_3 = {dengitor.scene_grid_scale,
+                                 dengitor.scene_grid_scale,
+                                 dengitor.scene_grid_scale};
+        glm_scale(mat_4, vec_3);
+        dengine_shader_set_vec3(dengitor.shader_default, "color", dengitor.scene_grid_color);
+        dengine_shader_set_mat4(dengitor.shader_default, "model",mat_4[0]);
+        float init_width;
+        glGetFloatv(GL_LINE_WIDTH, &init_width);
+        glLineWidth(dengitor.scene_grid_width);
+        dengine_draw_primitive(&dengitor.scene_grid, dengitor.shader_default);
+
+        glm_mat4_identity(mat_4);
+
+        vec_3[0] = 0.0f;
+        vec_3[1] = 0.01f;
+        vec_3[2] = 0.0f;
+        glm_translate(mat_4, vec_3);
+
+        vec_3[0] = dengitor.scene_axis_scale;
+        vec_3[1] = dengitor.scene_axis_scale;
+        vec_3[2] = dengitor.scene_axis_scale;
+        glm_scale(mat_4, vec_3);
+        dengine_shader_set_mat4(dengitor.shader_default, "model",mat_4[0]);
+
+        glLineWidth(dengitor.scene_axis_width);
+        dengitor_draw_axis(&dengitor.scene_axis, dengitor.shader_default);
+
+        glLineWidth(init_width);
+
+        dengine_framebuffer_bind(GL_FRAMEBUFFER, &entry_fb);
+        dengine_viewport_set(x, y, w, h);
+
+        if(dengitor.scene_current)
+        {
+            denginescene_ecs_do_camera_scene(dengitor.scene_camera, dengitor.scene_current);
+            denginescene_update(dengitor.scene_current);
+        }
+    }else
+    {
+
     }
 
-    dengine_camera_project_perspective( (float)w / (float)h,
-                                        scene_camera);
-    dengine_camera_lookat(NULL,
-                          scene_camera);
-    dengine_camera_apply(dengitor.shader_default, scene_camera);
-
-    static mat4 mat_4;
-    glm_mat4_identity(mat_4);
-
-    // DRAW grid
-    vec3 vec_3 = {dengitor.scene_grid_scale,
-                             dengitor.scene_grid_scale,
-                             dengitor.scene_grid_scale};
-    glm_scale(mat_4, vec_3);
-    dengine_shader_set_vec3(dengitor.shader_default, "color", dengitor.scene_grid_color);
-    dengine_shader_set_mat4(dengitor.shader_default, "model",mat_4[0]);
-    float init_width;
-    glGetFloatv(GL_LINE_WIDTH, &init_width);
-    glLineWidth(dengitor.scene_grid_width);
-    dengine_draw_primitive(&dengitor.scene_grid, dengitor.shader_default);
-
-    glm_mat4_identity(mat_4);
-
-    vec_3[0] = 0.0f;
-    vec_3[1] = 0.01f;
-    vec_3[2] = 0.0f;
-    glm_translate(mat_4, vec_3);
-
-    vec_3[0] = dengitor.scene_axis_scale;
-    vec_3[1] = dengitor.scene_axis_scale;
-    vec_3[2] = dengitor.scene_axis_scale;
-    glm_scale(mat_4, vec_3);
-    dengine_shader_set_mat4(dengitor.shader_default, "model",mat_4[0]);
-
-    glLineWidth(dengitor.scene_axis_width);
-    dengitor_draw_axis(&dengitor.scene_axis, dengitor.shader_default);
-
-    glLineWidth(init_width);
-
-    dengine_framebuffer_bind(GL_FRAMEBUFFER, &entry_fb);
-    dengine_viewport_set(x, y, w, h);
-
-    if(dengitor.scene_current)
-    {
-        denginescene_ecs_do_camera_scene(dengitor.scene_camera, dengitor.scene_current);
-        denginescene_update(dengitor.scene_current);
-    }
 
     // SCREEN QUAD PASS
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     static vec4 viewport_color = {0.0f, 0.0f, 0.0f, 1.0f};
-    denginegui_panel(0, 0, w, h, scene_camera->framebuffer.color, NULL, viewport_color);
+    static vec4 red = {1.0f, 0.0f, 0.0f, 1.0f};
+    if(out)
+        denginegui_panel(0, 0, w, h, out->framebuffer.color, NULL, viewport_color);
+    else
+        denginegui_text(10, (float)h / 2.0f, "NO CAMERA FOUND!", red);
 
     denginegui_text(10, 10, (const char*)glGetString(GL_VERSION) , NULL);
 }
