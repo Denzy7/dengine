@@ -10,9 +10,9 @@
 
 typedef enum
 {
-    DENGITOR_SCENE_GLAREA_MODE_SCENE,
-    DENGITOR_SCENE_GLAREA_MODE_GAME
-}SceneGLAreaMode;
+    DENGITOR_GLAREA_MODE_SCENE,
+    DENGITOR_GLAREA_MODE_GAME
+}GLAreaMode;
 
 typedef struct
 {
@@ -20,10 +20,10 @@ typedef struct
     GtkAboutDialog* about;
     GtkBuilder* builder;
 
-    GtkGLArea* scene_glarea;
+    GtkGLArea* glarea;
+    GLAreaMode glarea_mode;
     GtkToggleButton* scene_toggle;
     GtkToggleButton* game_toggle;
-    SceneGLAreaMode scene_glarea_mode;
 
     Inspector inspector;
     Prefs prefs;
@@ -60,11 +60,11 @@ void dengitor_aboutdialog_show();
 
 void dengitor_aboutdialog_hide();
 
-void dengitor_scene_glarea_onrealize(GtkGLArea* area);
+void dengitor_glarea_onrealize(GtkGLArea* area);
 
-void dengitor_scene_glarea_onunrealize(GtkGLArea* area);
+void dengitor_glarea_onunrealize(GtkGLArea* area);
 
-void dengitor_scene_glarea_onrender(GtkGLArea* area);
+void dengitor_glarea_onrender(GtkGLArea* area);
 
 void dengitor_scene_treeview_oncursorchange(GtkTreeView* tree);
 

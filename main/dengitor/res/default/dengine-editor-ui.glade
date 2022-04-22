@@ -560,7 +560,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkGLArea" id="scene_glarea">
+                      <object class="GtkGLArea" id="glarea">
                         <property name="visible">True</property>
                         <property name="app-paintable">True</property>
                         <property name="can-focus">False</property>

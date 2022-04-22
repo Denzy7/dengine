@@ -37,13 +37,13 @@ void dengitor_onactivate(GtkApplication* app)
                      "activate", G_CALLBACK(dengitor_aboutdialog_show), NULL);
 
     // GL AREA, ALL THE MAGIC IS HERE!
-    dengitor.scene_glarea = GTK_GL_AREA(gtk_builder_get_object(dengitor.builder, "scene_glarea"));
-    g_signal_connect(dengitor.scene_glarea,
-                     "realize", G_CALLBACK(dengitor_scene_glarea_onrealize), NULL);
-    g_signal_connect(dengitor.scene_glarea,
-                     "unrealize", G_CALLBACK(dengitor_scene_glarea_onunrealize), NULL);
-    g_signal_connect(dengitor.scene_glarea,
-                     "render", G_CALLBACK(dengitor_scene_glarea_onrender), NULL);
+    dengitor.glarea = GTK_GL_AREA(gtk_builder_get_object(dengitor.builder, "glarea"));
+    g_signal_connect(dengitor.glarea,
+                     "realize", G_CALLBACK(dengitor_glarea_onrealize), NULL);
+    g_signal_connect(dengitor.glarea,
+                     "unrealize", G_CALLBACK(dengitor_glarea_onunrealize), NULL);
+    g_signal_connect(dengitor.glarea,
+                     "render", G_CALLBACK(dengitor_glarea_onrender), NULL);
 
     //  TREE VIEW TO SHOW SCENE ENTITIES
     dengitor.scene_treeview = GTK_TREE_VIEW(gtk_builder_get_object(dengitor.builder, "scene_treeview"));
@@ -85,7 +85,7 @@ void dengitor_aboutdialog_hide()
     gtk_widget_hide(GTK_WIDGET(dengitor.about));
 }
 
-void dengitor_scene_glarea_onrealize(GtkGLArea* area)
+void dengitor_glarea_onrealize(GtkGLArea* area)
 {
     GdkGLContext* context = gtk_gl_area_get_context(area);
     gdk_gl_context_make_current(context);
@@ -234,7 +234,7 @@ void dengitor_scene_glarea_onrealize(GtkGLArea* area)
 //    }
 }
 
-void dengitor_scene_glarea_onunrealize(GtkGLArea* area)
+void dengitor_glarea_onunrealize(GtkGLArea* area)
 {
     GdkGLContext* context = gtk_gl_area_get_context(area);
     gdk_gl_context_make_current(context);
@@ -264,7 +264,7 @@ void dengitor_scene_glarea_onunrealize(GtkGLArea* area)
     dengine_terminate();
 }
 
-void dengitor_scene_glarea_onrender(GtkGLArea* area)
+void dengitor_glarea_onrender(GtkGLArea* area)
 {
     GdkGLContext* context = gtk_gl_area_get_context(area);
     gdk_gl_context_make_current(context);
@@ -385,7 +385,7 @@ void dengitor_scene_treeview_oncursorchange(GtkTreeView* tree)
         dengitor_inspector_do_entity(current, &dengitor.inspector);
 
         gtk_widget_queue_draw( GTK_WIDGET(dengitor.inspector.inspector) );
-        gtk_widget_queue_draw( GTK_WIDGET(dengitor.scene_glarea) );
+        gtk_widget_queue_draw( GTK_WIDGET(dengitor.glarea) );
 
         free(name);
     }
