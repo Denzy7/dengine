@@ -31,5 +31,10 @@ Get default deps
 `# pacman -S glfw-x11 gtk3`
 **Substitute glfw-x11 for glfw3-wayland if on wayland**
 
+# dengitor and gtk3
+Building GTK+ 3 is really complicated. However [some really smart people in the AUR](https://aur.archlinux.org/packages/mingw-w64-gtk3) have already figured it out.
+
+On Windows, you can use the `MSYS2` commandline to install GTK and build `dengitor` (I haven't actually tested this but [it seems to be in the package list](https://packages.msys2.org/base/mingw-w64-gtk3))
+
 # others
 Your distro probably has the packages you need. If not, get all optional deps. This might results in a slightly longer and larger build time
