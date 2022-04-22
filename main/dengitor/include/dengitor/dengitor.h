@@ -22,8 +22,8 @@ typedef struct
 
     GtkGLArea* glarea;
     GLAreaMode glarea_mode;
-    GtkToggleButton* scene_toggle;
-    GtkToggleButton* game_toggle;
+    GtkToggleButton* toggle_scene;
+    GtkToggleButton* toggle_game;
 
     Inspector inspector;
     Prefs prefs;

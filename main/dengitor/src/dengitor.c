@@ -44,6 +44,9 @@ void dengitor_onactivate(GtkApplication* app)
                      "unrealize", G_CALLBACK(dengitor_glarea_onunrealize), NULL);
     g_signal_connect(dengitor.glarea,
                      "render", G_CALLBACK(dengitor_glarea_onrender), NULL);
+    dengitor.glarea_mode = DENGITOR_GLAREA_MODE_SCENE;
+    dengitor.toggle_scene = GTK_TOGGLE_BUTTON( gtk_builder_get_object(dengitor.builder, "toggle_scene") );
+    dengitor.toggle_game = GTK_TOGGLE_BUTTON( gtk_builder_get_object(dengitor.builder, "toggle_game") );
 
     //  TREE VIEW TO SHOW SCENE ENTITIES
     dengitor.scene_treeview = GTK_TREE_VIEW(gtk_builder_get_object(dengitor.builder, "scene_treeview"));
