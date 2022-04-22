@@ -144,11 +144,11 @@ MeshComponent* denginescene_ecs_new_meshcomponent(const Primitive* mesh, const M
 CameraComponent* denginescene_ecs_new_cameracomponent(const Camera* camera)
 {
     CameraComponent* cam_comp = calloc(1, sizeof(CameraComponent));
-
     Camera* cam = calloc(1, sizeof(Camera));
     memcpy(cam, camera, sizeof(Camera));
 
     cam_comp->camera = cam;
+    cam_comp->last_cam = 1;
 
     return cam_comp;
 }

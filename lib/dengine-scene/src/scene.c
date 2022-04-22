@@ -132,7 +132,8 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
            camera->transform.position,
            sizeof(camera->camera_component->camera->position));
 
-    scene->last_cam = camera->camera_component->camera;
+    if(camera->camera_component->last_cam)
+        scene->last_cam = camera->camera_component->camera;
 
     //we might not have entered with fb 0, save binding for later
     int bind;

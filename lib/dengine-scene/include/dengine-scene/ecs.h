@@ -34,6 +34,7 @@ typedef struct
 typedef struct
 {
     Camera* camera;
+    int last_cam;
 }CameraComponent;
 
 typedef struct _Entity
