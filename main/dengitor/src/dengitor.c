@@ -67,7 +67,7 @@ void dengitor_onactivate(GtkApplication* app)
                      "activate", G_CALLBACK(dengitor_prefs_show), &dengitor.prefs); 
 
     // setup inspector
-    dengitor_inspector_setup(dengitor.builder, &dengitor.inspector);
+    dengitor_inspector_setup(dengitor.builder, &dengitor.inspector, dengitor.glarea);
 
     // app setup complete..., show window and apply settings
 

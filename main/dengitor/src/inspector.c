@@ -1,6 +1,8 @@
 #include "dengitor/inspector.h"
 #include "dengitor/utils.h"
 
+GtkGLArea* glarea = NULL;
+
 void _dengine_inspector_float(GtkEntry* entry, float* val)
 {
     const char* text;
@@ -8,10 +10,14 @@ void _dengine_inspector_float(GtkEntry* entry, float* val)
     buffer = gtk_entry_get_buffer(entry);
     text = gtk_entry_buffer_get_text(buffer);
     *val = strtof(text, NULL);
+
+    if(glarea)
+        gtk_widget_queue_draw( GTK_WIDGET(glarea) );
 }
 
-void dengitor_inspector_setup(GtkBuilder* builder, Inspector* inspector)
+void dengitor_inspector_setup(GtkBuilder* builder, Inspector* inspector, GtkGLArea* glarea_to_redraw_on_change)
 {
+    glarea = glarea_to_redraw_on_change;
     GtkContainer* transform_widget_root,* camera_widget_root;
     inspector->inspector = GTK_CONTAINER(gtk_builder_get_object(builder, "inspector_vbox"));
 

@@ -32,7 +32,7 @@ typedef struct
     CameraWidget camera_widget;
 }Inspector;
 
-void dengitor_inspector_setup(GtkBuilder* builder, Inspector* inspector);
+void dengitor_inspector_setup(GtkBuilder* builder, Inspector* inspector, GtkGLArea* glarea_to_redraw_on_change);
 
 void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector);
 
