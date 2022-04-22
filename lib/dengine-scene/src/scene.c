@@ -77,7 +77,6 @@ void _denginescene_ecs_do_camera_draw_mesh(Entity* camera, Entity* mesh)
 {
     //dengineutils_logging_log("drw %u",mesh->entity_id);
     dengine_material_use(mesh->mesh_component->material);
-    dengine_camera_lookat(NULL, camera->camera_component->camera);
     dengine_camera_apply(&mesh->mesh_component->material->shader_color,camera->camera_component->camera);
 
     dengine_shader_set_mat4(&mesh->mesh_component->material->shader_color,
@@ -126,9 +125,10 @@ void _denginescene_do_check_camera(Entity* root, Scene* scene)
 
 void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
 {
+    Camera* cam = camera->camera_component->camera;
     //apply position
     //TODO : this is local position, use world pos
-    memcpy(camera->camera_component->camera->position,
+    memcpy(cam->position,
            camera->transform.position,
            sizeof(camera->camera_component->camera->position));
 
@@ -144,9 +144,11 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     dengine_viewport_get(&x, &y, &w, &h);
 
     dengine_viewport_set(0, 0,
-                         camera->camera_component->camera->render_width,camera->camera_component->camera->render_height);
-
-    dengine_camera_use(camera->camera_component->camera);
+                         cam->render_width,cam->render_height);
+    dengine_camera_lookat(NULL, cam);
+    dengine_camera_project_perspective((float)cam->render_width / (float)cam->render_height,
+                                       camera->camera_component->camera);
+    dengine_camera_use(cam);
 
     // TODO : strange case of camera with mesh comp??
 //    if(camera->mesh_component)
@@ -157,7 +159,7 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     //render scene recursive
     for (size_t i = 0; i < scene->n_entities; i++)
     {
-        _denginescene_ecs_do_camera_draw(camera,scene->entities[i]);
+        _denginescene_ecs_do_camera_draw(camera, scene->entities[i]);
     }
 
     // draw sky
