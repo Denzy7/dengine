@@ -46,7 +46,11 @@ void dengitor_onactivate(GtkApplication* app)
                      "render", G_CALLBACK(dengitor_glarea_onrender), NULL);
     dengitor.glarea_mode = DENGITOR_GLAREA_MODE_SCENE;
     dengitor.toggle_scene = GTK_TOGGLE_BUTTON( gtk_builder_get_object(dengitor.builder, "toggle_scene") );
+    g_signal_connect(dengitor.toggle_scene, "toggled",
+                     G_CALLBACK( dengitor_toggle_scenegame_ontoggle ), dengitor.toggle_scene);
     dengitor.toggle_game = GTK_TOGGLE_BUTTON( gtk_builder_get_object(dengitor.builder, "toggle_game") );
+    g_signal_connect(dengitor.toggle_game, "toggled",
+                     G_CALLBACK( dengitor_toggle_scenegame_ontoggle ), NULL);
 
     //  TREE VIEW TO SHOW SCENE ENTITIES
     dengitor.scene_treeview = GTK_TREE_VIEW(gtk_builder_get_object(dengitor.builder, "scene_treeview"));
@@ -359,6 +363,22 @@ void dengitor_glarea_onrender(GtkGLArea* area)
     denginegui_panel(0, 0, w, h, scene_camera->framebuffer.color, NULL, viewport_color);
 
     denginegui_text(10, 10, (const char*)glGetString(GL_VERSION) , NULL);
+}
+
+void dengitor_toggle_scenegame_ontoggle(GtkToggleButton* toggle_btn, gpointer flag)
+{
+    if(gtk_toggle_button_get_active(toggle_btn))
+    {
+        if(flag)
+        {
+            gtk_toggle_button_set_active(dengitor.toggle_game, false);
+            dengitor.glarea_mode = DENGITOR_GLAREA_MODE_SCENE;
+        }else
+        {
+            gtk_toggle_button_set_active(dengitor.toggle_scene, false);
+            dengitor.glarea_mode = DENGITOR_GLAREA_MODE_GAME;
+        }
+    }
 }
 
 void dengitor_draw_axis(Primitive* axis, Shader* shader)

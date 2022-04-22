@@ -66,6 +66,8 @@ void dengitor_glarea_onunrealize(GtkGLArea* area);
 
 void dengitor_glarea_onrender(GtkGLArea* area);
 
+void dengitor_toggle_scenegame_ontoggle(GtkToggleButton* toggle_btn, gpointer flag);
+
 void dengitor_scene_treeview_oncursorchange(GtkTreeView* tree);
 
 void dengitor_draw_axis(Primitive* axis, Shader* shader);
