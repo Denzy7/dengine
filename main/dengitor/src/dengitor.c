@@ -357,12 +357,16 @@ void dengitor_glarea_onrender(GtkGLArea* area)
         if(dengitor.scene_current)
         {
             denginescene_ecs_do_camera_scene(dengitor.scene_camera, dengitor.scene_current);
-            denginescene_update(dengitor.scene_current);
         }
     }else
     {
-
+        if(dengitor.scene_current)
+        {
+            out = dengitor.scene_current->last_cam;
+        }
     }
+
+    denginescene_update(dengitor.scene_current);
 
 
     // SCREEN QUAD PASS
