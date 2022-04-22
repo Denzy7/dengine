@@ -379,6 +379,8 @@ void dengitor_toggle_scenegame_ontoggle(GtkToggleButton* toggle_btn, gpointer fl
             dengitor.glarea_mode = DENGITOR_GLAREA_MODE_GAME;
         }
     }
+
+    gtk_widget_queue_draw( GTK_WIDGET( dengitor.glarea ) );
 }
 
 void dengitor_draw_axis(Primitive* axis, Shader* shader)
