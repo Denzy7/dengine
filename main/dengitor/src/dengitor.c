@@ -64,12 +64,14 @@ void dengitor_onactivate(GtkApplication* app)
 
     // setup inspector
     dengitor_inspector_setup(dengitor.builder, &dengitor.inspector);
-    dengitor_inspector_do_entity(NULL, &dengitor.inspector);
 
     // app setup complete..., show window and apply settings
 
     gtk_application_add_window(app, GTK_WINDOW(dengitor.main));
     gtk_widget_show_all(GTK_WIDGET(dengitor.main));
+
+    // hide inspector
+    dengitor_inspector_do_entity(NULL, &dengitor.inspector);
 
     GtkSettings* settings = gtk_settings_get_default();
     g_object_set(settings, "gtk-xft-antialias", 1, NULL);
