@@ -29,12 +29,14 @@ void dengitor_onactivate(GtkApplication* app)
 
     dengitor.main = GTK_APPLICATION_WINDOW(gtk_builder_get_object(dengitor.builder, "main"));
 
+    //  ABOUT WINDOW
     dengitor.about = GTK_ABOUT_DIALOG(gtk_builder_get_object(dengitor.builder, "about"));
     g_signal_connect(dengitor.about, "response", G_CALLBACK(dengitor_aboutdialog_hide), NULL);
     // menu button
     g_signal_connect(gtk_builder_get_object(dengitor.builder, "menu_action"),
                      "activate", G_CALLBACK(dengitor_aboutdialog_show), NULL);
 
+    // GL AREA, ALL THE MAGIC IS HERE!
     dengitor.scene_glarea = GTK_GL_AREA(gtk_builder_get_object(dengitor.builder, "scene_glarea"));
     g_signal_connect(dengitor.scene_glarea,
                      "realize", G_CALLBACK(dengitor_scene_glarea_onrealize), NULL);
@@ -43,14 +45,12 @@ void dengitor_onactivate(GtkApplication* app)
     g_signal_connect(dengitor.scene_glarea,
                      "render", G_CALLBACK(dengitor_scene_glarea_onrender), NULL);
 
+    //  TREE VIEW TO SHOW SCENE ENTITIES
     dengitor.scene_treeview = GTK_TREE_VIEW(gtk_builder_get_object(dengitor.builder, "scene_treeview"));
     dengitor_scenetree_setup(dengitor.scene_treeview);
     dengitor.scene_treeview_store = GTK_TREE_STORE(gtk_tree_view_get_model(dengitor.scene_treeview));
     g_signal_connect(dengitor.scene_treeview,
                      "cursor-changed", G_CALLBACK(dengitor_scene_treeview_oncursorchange), NULL);
-
-    dengitor_inspector_setup(dengitor.builder, &dengitor.inspector);
-
 
     //  PREFS WINDOW
     dengitor.prefs.builder = gtk_builder_new_from_resource("/com/denzygames/Dengitor/dengine-editor-prefs.glade");
@@ -60,6 +60,7 @@ void dengitor_onactivate(GtkApplication* app)
                      "activate", G_CALLBACK(dengitor_prefs_show), &dengitor.prefs); 
 
     // setup inspector
+    dengitor_inspector_setup(dengitor.builder, &dengitor.inspector);
     dengitor_inspector_do_entity(NULL, &dengitor.inspector);
 
     // app setup complete..., show window and apply settings
