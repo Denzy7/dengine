@@ -130,6 +130,7 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     camera.clearonuse = 0;
 
     CameraComponent* camera_component = denginescene_ecs_new_cameracomponent(&camera);
+    camera_component->last_cam = 0;
     dengitor.scene_camera->camera_component = camera_component;
     dengitor.scene_camera->transform.position[0] = 7.0f;
     dengitor.scene_camera->transform.position[1] = 7.0f;
@@ -227,6 +228,9 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
 
     CameraComponent* cam2_comp = denginescene_ecs_new_cameracomponent(&camera2);
     Entity* cam_ent = denginescene_ecs_new_entity();
+    cam_ent->transform.position[0] = 7.0f;
+    cam_ent->transform.position[1] = 7.0f;
+    cam_ent->transform.position[2] = -3.5f;
     cam_ent->camera_component = cam2_comp;
     denginescene_ecs_set_entity_name(cam_ent, "this is a camera");
     denginescene_add_entity(dengitor.scene_current, cam_ent);
