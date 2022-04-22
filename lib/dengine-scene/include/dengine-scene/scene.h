@@ -15,6 +15,8 @@ typedef struct _Scene
     Entity** entities;
     uint32_t n_entities;
 
+    Camera* last_cam;
+
     Skybox* skybox;
 }Scene;
 
