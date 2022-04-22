@@ -1,4 +1,5 @@
 #include "dengine-gui/gui.h"
+#include "dengine-gui/embfonts.h"
 
 #include "dengine/texture.h"
 #include "dengine/loadgl.h"
@@ -139,8 +140,13 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
         const char* file = _denginegui_get_defaultfont();
         FILE* f = fopen(file, "rb");
         if (!f) {
-            dengineutils_logging_log("cannot read default font %s\n", file);
+            dengineutils_logging_log("WARNING::cannot read default font %s", file);
+#ifdef DENGINE_FONT_EMBED_OPENSANS_LIGHT
+            mem = OpenSans_Light_ttf;
+            dengineutils_logging_log("WARNING::Load embfont OpenSans_Light");
+#else
             return 0;
+#endif
         }else
         {
             fseek(f, 0, SEEK_END);
