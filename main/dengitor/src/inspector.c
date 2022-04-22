@@ -1,6 +1,15 @@
 #include "dengitor/inspector.h"
 #include "dengitor/utils.h"
 
+void _dengine_inspector_float(GtkEntry* entry, float* val)
+{
+    const char* text;
+    GtkEntryBuffer* buffer;
+    buffer = gtk_entry_get_buffer(entry);
+    text = gtk_entry_buffer_get_text(buffer);
+    *val = strtof(text, NULL);
+}
+
 void dengitor_inspector_setup(GtkBuilder* builder, Inspector* inspector)
 {
     GtkContainer* transform_widget_root,* camera_widget_root;
@@ -59,6 +68,16 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
         // pos
         entry = GTK_ENTRY(pos_nth->data);
         buffer = gtk_entry_get_buffer(entry);
+
+        // sigchange
+        gulong* sigid = &inspector->transform_widget.sigids_transform_position[i];
+        if(*sigid)
+        {
+            g_signal_handler_disconnect(entry, *sigid);
+        }
+        *sigid = g_signal_connect(entry, "changed",
+                         G_CALLBACK(_dengine_inspector_float), &entity->transform.position[i]);
+
         g_snprintf(prtbf, sizeof(prtbf), "%.1f", entity->transform.position[i]);
         gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
 

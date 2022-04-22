@@ -9,6 +9,7 @@ typedef struct
     GtkWidget* transform;
 
     GtkContainer* transform_position;
+    gulong sigids_transform_position[3];
     GtkContainer* transform_rotation;
     GtkContainer* transform_scale;
 }TransformWidget;
