@@ -252,11 +252,23 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     Entity* dLight_ent = denginescene_ecs_new_entity();
     denginescene_ecs_set_entity_name(dLight_ent, "this is a dir light");
     dLight_ent->transform.position[0] = 3.0f;
-
     dLight_ent->transform.position[1] = 3.0f;
     dLight_ent->transform.position[2] = -3.0f;
     dLight_ent->light_component = light_comp;
     denginescene_add_entity(dengitor.scene_current, dLight_ent);
+
+    PointLight pLight;
+    memset(&pLight, 0, sizeof(PointLight));
+    dengine_lighting_light_setup(DENGINE_LIGHT_POINT, &pLight);
+    pLight.light.diffuse[0] = 0;
+    light_comp = denginescene_ecs_new_lightcomponent(DENGINE_LIGHT_POINT, &pLight);
+    Entity* pLight_ent = denginescene_ecs_new_entity();
+    denginescene_ecs_set_entity_name(pLight_ent, "this is a point light");
+    pLight_ent->light_component = light_comp;
+    pLight_ent->transform.position[0] = -3.0f;
+    pLight_ent->transform.position[1] = 3.0f;
+    pLight_ent->transform.position[2] = 3.0f;
+    denginescene_add_entity(dengitor.scene_current, pLight_ent);
 
     dengitor_scenetree_traverse(dengitor.scene_current, dengitor.scene_treeview_store);
 #endif
