@@ -31,6 +31,12 @@ typedef struct
     GtkEntry* camera_far;
     gulong sigid_camera_far;
 
+    GtkEntry* camera_width;
+    GtkEntry* camera_height;
+
+    GtkButton* camera_resize;
+    gulong sigid_camera_resize;
+
     GtkColorButton* camera_clearcolour;
 }CameraWidget;
 

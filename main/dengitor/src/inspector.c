@@ -2,6 +2,7 @@
 #include "dengitor/utils.h"
 
 GtkGLArea* glarea = NULL;
+Entity* current = NULL;
 
 void _dengine_inspector_entry_float(GtkEntry* entry, float* val)
 {
@@ -18,6 +19,25 @@ void _dengine_inspector_entry_float(GtkEntry* entry, float* val)
 void _dengine_inspector_adjustment_float(GtkAdjustment* adjustment, float* val)
 {
     *val = gtk_adjustment_get_value(adjustment);
+
+    if(glarea)
+        gtk_widget_queue_draw( GTK_WIDGET(glarea) );
+}
+
+void _dengine_inspector_camera_resize(GtkButton* button, Inspector* inspector)
+{
+    int w, h;
+    GtkEntryBuffer* buffer = gtk_entry_get_buffer(inspector->camera_widget.camera_width);
+    sscanf(gtk_entry_buffer_get_text( buffer ), "%d", &w);
+
+    buffer = gtk_entry_get_buffer(inspector->camera_widget.camera_height);
+    sscanf(gtk_entry_buffer_get_text( buffer ), "%d", &h);
+
+    if(current && current->camera_component)
+    {
+        dengine_camera_resize(current->camera_component->camera, w, h);
+        dengineutils_logging_log("INFO::resize camera to %dx%d", w, h);
+    }
 
     if(glarea)
         gtk_widget_queue_draw( GTK_WIDGET(glarea) );
@@ -43,6 +63,9 @@ void dengitor_inspector_setup(GtkBuilder* builder, Inspector* inspector, GtkGLAr
     inspector->camera_widget.camera_fov = GTK_ADJUSTMENT( gtk_builder_get_object(builder, "camera_component_scale_adjustment") );
     inspector->camera_widget.camera_near = GTK_ENTRY( gtk_builder_get_object(builder, "camera_component_near") );
     inspector->camera_widget.camera_far = GTK_ENTRY( gtk_builder_get_object(builder, "camera_component_far") );
+    inspector->camera_widget.camera_width = GTK_ENTRY( gtk_builder_get_object(builder, "camera_component_width") );
+    inspector->camera_widget.camera_height = GTK_ENTRY( gtk_builder_get_object(builder, "camera_component_height") );
+    inspector->camera_widget.camera_resize = GTK_BUTTON( gtk_builder_get_object(builder, "camera_component_resize") );
     inspector->camera_widget.camera_clearcolour = GTK_COLOR_BUTTON( gtk_builder_get_object(builder, "camera_component_clearcol") );
 
     camera_widget_root = GTK_CONTAINER(  gtk_widget_get_parent(inspector->camera_widget.camera) );
@@ -56,6 +79,8 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
     // hide all. only show if we have the component
     gtk_widget_hide(inspector->camera_widget.camera);
     gtk_widget_hide(inspector->transform_widget.transform);
+
+    current = entity;
 
     // we outta here...
     if(!entity)
@@ -176,6 +201,25 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
         g_snprintf(prtbf, sizeof(prtbf), "%.2f", camera->far);
         gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
 
+        //width
+        entry = inspector->camera_widget.camera_width;
+        buffer = gtk_entry_get_buffer(entry);
+        g_snprintf(prtbf, sizeof(prtbf), "%d", camera->render_width);
+        gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
+
+        //height
+        entry = inspector->camera_widget.camera_height;
+        buffer = gtk_entry_get_buffer(entry);
+        g_snprintf(prtbf, sizeof(prtbf), "%d", camera->render_height);
+        gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
+
+        sigid = &inspector->camera_widget.sigid_camera_resize;
+        if(*sigid)
+        {
+            g_signal_handler_disconnect(inspector->camera_widget.camera_resize, *sigid);
+        }
+        *sigid = g_signal_connect(inspector->camera_widget.camera_resize, "clicked",
+                         G_CALLBACK(_dengine_inspector_camera_resize), inspector);
         //clear
         GdkRGBA rgba = {camera->clearcolor[0],
                         camera->clearcolor[1],
