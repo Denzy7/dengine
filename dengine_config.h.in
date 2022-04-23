@@ -30,6 +30,8 @@
     #cmakedefine DENGINE_HAS_FONTCONFIG @DENGINE_HAS_FONTCONFIG@
     //Match pattern to pass to FcNameParse. run fc-match "<pattern>" in terminal
     #define DENGINE_FONTCONFIG_MATCHPATTERN "monospace"
+#else
+    #warning  "This platform is not officially supported!"
 #endif // defined
 
 // does time.h have clock_gettime?
