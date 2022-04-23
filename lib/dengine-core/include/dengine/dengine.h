@@ -95,6 +95,7 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
     Conf* conf = dengineutils_confserialize_new(prtbf, '=');
     if(fopen(prtbf, "r"))
     {
+        dengineutils_logging_log("INFO::loaded init conf %s", prtbf);
         dengineutils_confserialize_load(conf, 1);
 
         // WINDOW
@@ -127,10 +128,10 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
         char* cache_shaders = dengineutils_confserialize_get("cache_shaders", conf);
         if(cache_shaders)
             sscanf(cache_shaders, "%d", &DENGINE_INIT_OPTS.cache_shaders);
-
-
     }else
     {
+        dengineutils_logging_log("INFO::creating init at conf %s", prtbf);
+
         dengineutils_confserialize_put_block("window", conf);
         snprintf(prtbf, prtbf_sz, "%d", DENGINE_INIT_OPTS.window_width);
         dengineutils_confserialize_put("window_width", prtbf, conf);
