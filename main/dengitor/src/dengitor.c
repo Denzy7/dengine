@@ -213,8 +213,32 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     Primitive plane;
     dengine_primitive_gen_plane(&plane, dengitor.shader_standard);
 
+    Material plane_mat;
+    dengine_material_setup(&plane_mat);
+    dengine_material_set_shader_color(dengitor.shader_standard, &plane_mat);
+    dengine_material_set_shader_shadow(dengitor.shader_shadow2d, &plane_mat);
+
+    static const char* plane_tex_files_tgt[][2]=
+    {
+        {"brickwall.jpg", "diffuseTex"},
+        {"brickwall_normal.jpg", "normalTex"}
+    };
+
+    Texture plane_tex[2];
+    memset(plane_tex, 0, sizeof(plane_tex));
+
+    for(int i = 0; i < DENGINE_ARY_SZ(plane_tex_files_tgt); i++)
+    {
+        Texture* tex = &plane_tex[i];
+        tex->auto_dataonload=1;
+        tex->interface=DENGINE_TEXTURE_INTERFACE_8_BIT;
+        snprintf(prtbf,prtbf_sz,"%s/textures/2d/%s",dengineutils_filesys_get_assetsdir(), plane_tex_files_tgt[i][0]);
+        dengine_texture_load_file(prtbf,1, tex);
+        dengine_material_set_texture(tex, plane_tex_files_tgt[i][1], &plane_mat);
+    }
+
     Entity* plane_ent = denginescene_ecs_new_entity();
-    MeshComponent* plane_mesh = denginescene_ecs_new_meshcomponent(&plane, &std_mat);
+    MeshComponent* plane_mesh = denginescene_ecs_new_meshcomponent(&plane, &plane_mat);
     plane_ent->mesh_component = plane_mesh;
 
     plane_ent->transform.position[1] = -1.0f;
