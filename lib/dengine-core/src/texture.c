@@ -8,6 +8,8 @@
 
 #include "dengine_config.h" //DENGINE_TEX_WHITESZ
 #include "dengine-utils/debug.h"
+#include "dengine-utils/filesys.h"
+#include "dengine-utils/os.h"
 
 void _dengine_texture_autoload(Texture* texture);
 
@@ -76,9 +78,61 @@ int dengine_texture_load_mem(void* mem, size_t size, int flip, Texture* texture)
     }
 }
 
+
+
 int dengine_texture_load_file(const char* file, int flip, Texture* texture)
 {
     DENGINE_DEBUG_ENTER;
+
+    const char* texfileondisk = strrchr(file, DENGINE_PATH_SEP) + 1;
+    char texcacheprtbf[2048];
+    uint32_t cache_blk_sz = 0;
+
+    if(dengineutils_filesys_isinit())
+    {
+        snprintf(texcacheprtbf, sizeof(texcacheprtbf),
+                 "%s/%s/%s",
+                 dengineutils_filesys_get_cachedir(),
+                 "dengine/texture_cache", DENGINE_VERSION);
+        if(!dengineutils_os_direxist(texcacheprtbf))
+            dengineutils_os_mkdir(texcacheprtbf);
+
+        snprintf(texcacheprtbf, sizeof(texcacheprtbf),
+                 "%s/%s/%s/%s%s",
+                 dengineutils_filesys_get_cachedir(),
+                 "dengine/texture_cache", DENGINE_VERSION,
+                 texfileondisk, ".texture");
+
+        FILE* ftex_cache_read = fopen(texcacheprtbf, "rb");
+        if(ftex_cache_read)
+        {
+            //read blksz
+            fread(&cache_blk_sz, sizeof(cache_blk_sz), 1, ftex_cache_read);
+
+            //read w, h, and channels
+            fread(&texture->width, sizeof(texture->width), 1, ftex_cache_read);
+            fread(&texture->height, sizeof(texture->height), 1, ftex_cache_read);
+            fread(&texture->channels, sizeof(texture->channels), 1, ftex_cache_read);
+
+            texture->data = malloc(cache_blk_sz * texture->width * texture->height * texture->channels);
+            //read data
+            fread(texture->data,
+                    cache_blk_sz * texture->width * texture->height * texture->channels,
+                    1,
+                    ftex_cache_read);
+
+            dengineutils_logging_log("TODO::load tex bin %d-byte %dx%d %dch : %s",
+                                      (int)cache_blk_sz,
+                                      texture->width, texture->height,
+                                      texture->channels,
+                                      texfileondisk);
+            //autodata
+            if(texture->auto_dataonload)
+                _dengine_texture_autoload(texture);
+
+            return 1;
+        }
+    }
 
     stbi_set_flip_vertically_on_load(flip);
 
@@ -94,16 +148,19 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture)
         texture->data = stbi_load_from_file(fp,
                                           &texture->width, &texture->height,&texture->channels,
                                           0);
+        cache_blk_sz = sizeof(uint8_t);
     }else if (texture->interface == DENGINE_TEXTURE_INTERFACE_16_BIT)
     {
         texture->data = stbi_load_from_file_16(fp,
                                               &texture->width, &texture->height,&texture->channels,
                                               0);
+        cache_blk_sz = sizeof(uint16_t);
     }else if (texture->interface == DENGINE_TEXTURE_INTERFACE_FLOAT)
     {
         texture->data = stbi_loadf_from_file(fp,
                                               &texture->width, &texture->height,&texture->channels,
                                               0);
+        cache_blk_sz = sizeof(float);
     }else
     {
         dengineutils_logging_log("ERROR::TEXTURE::INVALID_INTERFACE");
@@ -116,6 +173,31 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture)
         return 0;
     }else
     {
+        FILE* ftex_cache_write = fopen(texcacheprtbf, "wb");
+        if(ftex_cache_write && dengineutils_filesys_isinit())
+        {
+            //write blksz
+            fwrite(&cache_blk_sz, sizeof(cache_blk_sz), 1, ftex_cache_write);
+
+            //write w, h, and channels
+            fwrite(&texture->width, sizeof(texture->width), 1, ftex_cache_write);
+            fwrite(&texture->height, sizeof(texture->height), 1, ftex_cache_write);
+            fwrite(&texture->channels, sizeof(texture->channels), 1, ftex_cache_write);
+
+            //write data
+            fwrite(texture->data,
+                    cache_blk_sz * texture->width * texture->height * texture->channels,
+                    1,
+                    ftex_cache_write);
+
+            dengineutils_logging_log("TODO::save tex bin %d-byte %dx%d %dch : %s",
+                                      (int)cache_blk_sz,
+                                      texture->width, texture->height,
+                                      texture->channels,
+                                      texfileondisk);
+            fclose(ftex_cache_write);
+        }
+
         if(texture->auto_dataonload)
             _dengine_texture_autoload(texture);
         return 1;
