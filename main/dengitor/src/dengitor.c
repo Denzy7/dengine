@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
 
     dengitor.scene_axis_scale = 2.0f;
     dengitor.scene_axis_width = 3.5f;
+    dengitor.scene_entity_current_axis_width = 1.5;
 
     GtkApplication* app = gtk_application_new(
                 "com.denzygames.Dengitor", G_APPLICATION_FLAGS_NONE);
@@ -389,10 +390,9 @@ void dengitor_glarea_onrender(GtkGLArea* area)
         //draw a local axis for current entity
         if(current_ent)
         {
-
+            glLineWidth(dengitor.scene_entity_current_axis_width);
             dengine_shader_set_mat4(dengitor.shader_default, "model", current_ent->transform.world_model[0]);
             dengitor_draw_axis(&dengitor.scene_axis, dengitor.shader_default);
-
         }
         glDepthFunc(dfunc);
 

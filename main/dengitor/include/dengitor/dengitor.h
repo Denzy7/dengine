@@ -31,6 +31,7 @@ typedef struct
     Entity* scene_camera;
     Scene* scene_current;
     Entity* scene_entity_current;
+    float scene_entity_current_axis_width;
     int scene_camera_last_w;
     int scene_camera_last_h;
 
