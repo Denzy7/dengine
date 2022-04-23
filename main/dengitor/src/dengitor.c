@@ -288,6 +288,9 @@ void dengitor_glarea_onrender(GtkGLArea* area)
 
     Camera* out = NULL;
 
+    // process scene
+    denginescene_update(dengitor.scene_current);
+
     if(dengitor.glarea_mode == DENGITOR_GLAREA_MODE_SCENE)
     {
         Framebuffer entry_fb;
@@ -369,9 +372,6 @@ void dengitor_glarea_onrender(GtkGLArea* area)
             out = dengitor.scene_current->last_cam;
         }
     }
-
-    denginescene_update(dengitor.scene_current);
-
 
     // SCREEN QUAD PASS
     glClearColor(0.0, 0.0, 0.0, 1.0);
