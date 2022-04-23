@@ -85,14 +85,13 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
     const size_t prtbf_sz = 2048;
     char* prtbf = (char*) malloc(prtbf_sz);
 
-    snprintf(prtbf, prtbf_sz, "%s/dengine/%s", dengineutils_filesys_get_filesdir(),
-             DENGINE_VERSION);
+    snprintf(prtbf, prtbf_sz, "%s/dengine", dengineutils_filesys_get_filesdir());
 
     if(!dengineutils_os_direxist(prtbf))
         dengineutils_os_mkdir(prtbf);
 
-    snprintf(prtbf, prtbf_sz, "%s/dengine/%s/dengine.ini",
-             dengineutils_filesys_get_filesdir(), DENGINE_VERSION);
+    snprintf(prtbf, prtbf_sz, "%s/dengine/dengine.ini",
+             dengineutils_filesys_get_filesdir());
 
     Conf* conf = dengineutils_confserialize_new(prtbf, '=');
     if(fopen(prtbf, "r"))
