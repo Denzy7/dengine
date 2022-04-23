@@ -243,10 +243,16 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     dLight.shadow.shadow_map_size = 512;
     dengine_lighting_light_setup(DENGINE_LIGHT_DIR, &dLight);
     dLight.light.strength = 1.2f;
+    //sun? (https://www.htmlcsscolor.com/hex/EF8E38) : 239.0 / 255.0, 142.0 / 255.0, 56.0 / 255.0
+    dLight.light.diffuse[0] = 239.0f / 255.0f;
+    dLight.light.diffuse[1] =  142.0f / 255.0f;
+    dLight.light.diffuse[2] = 56.0f / 255.0f;
+
     LightComponent* light_comp = denginescene_ecs_new_lightcomponent(DENGINE_LIGHT_DIR, &dLight);
     Entity* dLight_ent = denginescene_ecs_new_entity();
     denginescene_ecs_set_entity_name(dLight_ent, "this is a dir light");
     dLight_ent->transform.position[0] = 3.0f;
+
     dLight_ent->transform.position[1] = 3.0f;
     dLight_ent->transform.position[2] = -3.0f;
     dLight_ent->light_component = light_comp;
