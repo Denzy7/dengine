@@ -376,19 +376,25 @@ void dengitor_glarea_onrender(GtkGLArea* area)
             denginescene_ecs_do_camera_scene(dengitor.scene_camera, dengitor.scene_current);
         }
 
+        // draw scene origin axis
+        int dfunc;
+        glGetIntegerv(GL_DEPTH_FUNC, &dfunc);
+
+        // these axes will always be drawn on top of everything
+        glDepthFunc(GL_ALWAYS);
+
         glLineWidth(dengitor.scene_axis_width);
         dengitor_draw_axis(&dengitor.scene_axis, dengitor.shader_default);
 
         //draw a local axis for current entity
         if(current_ent)
         {
-            int dfunc;
-            glGetIntegerv(GL_DEPTH_FUNC, &dfunc);
-            glDepthFunc(GL_ALWAYS);
+
             dengine_shader_set_mat4(dengitor.shader_default, "model", current_ent->transform.world_model[0]);
             dengitor_draw_axis(&dengitor.scene_axis, dengitor.shader_default);
-            glDepthFunc(dfunc);
+
         }
+        glDepthFunc(dfunc);
 
         glLineWidth(init_width);
 
