@@ -78,6 +78,8 @@ void dengine_shader_set_int(const Shader* shader, const char* name, int value);
 
 Shader* dengine_shader_new_shader_standard(StandardShader stdshader);
 
+void dengine_shader_set_shadercache(int state);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

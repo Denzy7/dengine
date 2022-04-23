@@ -19,6 +19,8 @@ float default_shader_col[3] = {1.0, 0.0, 0.0};
 
 static GLenum binfmt = 0;
 
+static int shadercache = 1;
+
 static const char *stdshaderssrcfiles[][3]=
 {
     //vertex_shader, fragment_shader, geometry_shader
@@ -153,7 +155,7 @@ int dengine_shader_setup(Shader* shader)
 
     shader->program_id = glCreateProgram(); DENGINE_CHECKGL;
 
-    if(dengineutils_filesys_isinit())
+    if(dengineutils_filesys_isinit() && shadercache)
     {
         const size_t prtbf_sz = 4096;
         char* prtbf = malloc(prtbf_sz);
@@ -252,7 +254,7 @@ int dengine_shader_link(Shader* shader)
         free(info_log);
     }else
     {
-        if(dengineutils_filesys_isinit())
+        if(dengineutils_filesys_isinit() && shadercache)
         {
             const size_t prtbf_sz = 4096;
             char* prtbf = malloc(prtbf_sz);
@@ -354,7 +356,7 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
             n);
     stdshdr->cached_name = cached;
 
-    if(dengineutils_filesys_isinit())
+    if(dengineutils_filesys_isinit() && shadercache)
     {
         int bin_success = 0;
         const char* GL = (const char*) glGetString(GL_VERSION);
@@ -482,4 +484,9 @@ void _dengine_shader_set_binfmt()
     if(bin)
         free(bin);
     free(binfmtshdr);
+}
+
+void dengine_shader_set_shadercache(int state)
+{
+     shadercache = state;
 }
