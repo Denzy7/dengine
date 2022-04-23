@@ -2,6 +2,8 @@
 #include "dengitor/scenetree.h"
 
 static Dengitor dengitor;
+const int prtbf_sz = 1024;
+static char prtbf[1024];
 
 int main(int argc, char *argv[])
 {
@@ -151,22 +153,61 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     dengitor.scene_axis.index_count = 2;
 
 #if 1
+    dengitor.scene_current = denginescene_new();
+
     // A SIMPLE SCENE
     Primitive cube;
     dengine_primitive_gen_cube(&cube, dengitor.shader_standard);
 
     Material std_mat;
+    Material sky_equireq;
+
+    dengine_material_setup(&sky_equireq);
+    dengine_material_set_shader_color(dengitor.shader_skybox_2d, &sky_equireq);
 
     // TODO : memory leak if not destroyed!
     dengine_material_setup(&std_mat);
     dengine_material_set_shader_color(dengitor.shader_standard, &std_mat);
     dengine_material_set_shader_shadow(dengitor.shader_shadow2d, &std_mat);
 
+    //skybox
+    Texture equireq;
+    memset(&equireq, 0, sizeof(Texture));
+
+    snprintf(prtbf, prtbf_sz,
+             "%s/textures/hdri/sunset.hdr",
+             dengineutils_filesys_get_assetsdir());
+
+    uint32_t type = GL_FLOAT;
+    equireq.interface = DENGINE_TEXTURE_INTERFACE_FLOAT;
+    if(!dengine_texture_issupprorted(GL_TEXTURE_2D, GL_FLOAT, GL_RGB, GL_RGB))
+    {
+        dengineutils_logging_log("WARNING::GPU has no float texture support! Falling back to 8-bit");
+        equireq.interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
+        type = GL_UNSIGNED_BYTE;
+    }
+
+    dengine_texture_load_file(prtbf, 1, &equireq);
+
+    equireq.type = type;
+    equireq.filter_min = GL_LINEAR;
+    equireq.format = GL_RGB;
+    equireq.internal_format = GL_RGB;
+    dengine_texture_gen(1, &equireq);
+    dengine_texture_bind(GL_TEXTURE_2D, &equireq);
+    dengine_texture_data(GL_TEXTURE_2D, &equireq);
+    dengine_texture_set_params(GL_TEXTURE_2D, &equireq);
+    dengine_texture_bind(GL_TEXTURE_2D, NULL);
+    dengine_texture_free_data(&equireq);
+
+    dengine_material_set_texture(&equireq, "eqireqMap", &sky_equireq);
+    Skybox* skybox = denginescene_new_skybox(&cube, &sky_equireq);
+    dengitor.scene_current->skybox = skybox;
+
     Entity* cube_ent = denginescene_ecs_new_entity();
     MeshComponent* cube_mesh = denginescene_ecs_new_meshcomponent(&cube, &std_mat);
     cube_ent->mesh_component = cube_mesh;
 
-    dengitor.scene_current = denginescene_new();
     denginescene_add_entity(dengitor.scene_current, cube_ent);
 
     Primitive plane;
