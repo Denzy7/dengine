@@ -11,6 +11,8 @@
 #include "dengine-utils/filesys.h"
 #include "dengine-utils/os.h"
 
+static int texturecache = 0;
+
 void _dengine_texture_autoload(Texture* texture);
 
 void dengine_texture_gen(size_t count, Texture* textures)
@@ -88,7 +90,7 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture)
     char texcacheprtbf[2048];
     uint32_t cache_blk_sz = 0;
 
-    if(dengineutils_filesys_isinit())
+    if(dengineutils_filesys_isinit() && texturecache)
     {
         snprintf(texcacheprtbf, sizeof(texcacheprtbf),
                  "%s/%s/%s",
@@ -175,7 +177,7 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture)
     }else
     {
         FILE* ftex_cache_write = fopen(texcacheprtbf, "wb");
-        if(ftex_cache_write && dengineutils_filesys_isinit())
+        if(ftex_cache_write && dengineutils_filesys_isinit() && texturecache)
         {
             //write blksz
             fwrite(&cache_blk_sz, sizeof(cache_blk_sz), 1, ftex_cache_write);
@@ -471,4 +473,9 @@ const char* dengine_texture_target2str(uint32_t target)
         return "TEXTURE_CUBE_MAP";
     else
         return "UNKNOWN";
+}
+
+void dengine_texture_set_texturecache(int state)
+{
+    texturecache = state;
 }

@@ -195,6 +195,12 @@ int dengine_texture_issupprorted(uint32_t target, uint32_t type, uint32_t intern
  */
 const char* dengine_texture_target2str(uint32_t target);
 
+/*!
+ * \brief Set texture cache state. 0 = disable, 1 = enable
+ * \param state State
+ */
+void dengine_texture_set_texturecache(int state);
+
 
 #ifdef __cplusplus
 }
