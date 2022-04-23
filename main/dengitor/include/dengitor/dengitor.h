@@ -30,6 +30,7 @@ typedef struct
 
     Entity* scene_camera;
     Scene* scene_current;
+    Entity* scene_entity_current;
     int scene_camera_last_w;
     int scene_camera_last_h;
 

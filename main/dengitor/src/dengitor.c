@@ -291,6 +291,8 @@ void dengitor_glarea_onrender(GtkGLArea* area)
     // process scene
     denginescene_update(dengitor.scene_current);
 
+    Entity* current_ent = dengitor.scene_entity_current;
+
     if(dengitor.glarea_mode == DENGITOR_GLAREA_MODE_SCENE)
     {
         Framebuffer entry_fb;
@@ -353,18 +355,29 @@ void dengitor_glarea_onrender(GtkGLArea* area)
         glm_scale(mat_4, vec_3);
         dengine_shader_set_mat4(dengitor.shader_default, "model",mat_4[0]);
 
+        if(dengitor.scene_current)
+        {
+            denginescene_ecs_do_camera_scene(dengitor.scene_camera, dengitor.scene_current);
+        }
+
         glLineWidth(dengitor.scene_axis_width);
         dengitor_draw_axis(&dengitor.scene_axis, dengitor.shader_default);
+
+        //draw a local axis for current entity
+        if(current_ent)
+        {
+            int dfunc;
+            glGetIntegerv(GL_DEPTH_FUNC, &dfunc);
+            glDepthFunc(GL_ALWAYS);
+            dengine_shader_set_mat4(dengitor.shader_default, "model", current_ent->transform.world_model[0]);
+            dengitor_draw_axis(&dengitor.scene_axis, dengitor.shader_default);
+            glDepthFunc(dfunc);
+        }
 
         glLineWidth(init_width);
 
         dengine_framebuffer_bind(GL_FRAMEBUFFER, &entry_fb);
         dengine_viewport_set(x, y, w, h);
-
-        if(dengitor.scene_current)
-        {
-            denginescene_ecs_do_camera_scene(dengitor.scene_camera, dengitor.scene_current);
-        }
     }else
     {
         if(dengitor.scene_current)
@@ -433,8 +446,11 @@ void dengitor_scene_treeview_oncursorchange(GtkTreeView* tree)
 
         dengitor_inspector_do_entity(current, &dengitor.inspector);
 
+
         gtk_widget_queue_draw( GTK_WIDGET(dengitor.inspector.inspector) );
         gtk_widget_queue_draw( GTK_WIDGET(dengitor.glarea) );
+
+        dengitor.scene_entity_current = current;
 
         free(name);
     }
