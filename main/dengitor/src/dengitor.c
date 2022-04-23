@@ -152,26 +152,26 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
 #if 1
     // A SIMPLE SCENE
     Primitive cube;
-    dengine_primitive_gen_cube(&cube, dengitor.shader_debug_normals);
+    dengine_primitive_gen_cube(&cube, dengitor.shader_standard);
 
-    Material dbg_norm_mat;
+    Material std_mat;
 
     // TODO : memory leak if not destroyed!
-    dengine_material_setup(&dbg_norm_mat);
-    dengine_material_set_shader_color(dengitor.shader_debug_normals, &dbg_norm_mat);
+    dengine_material_setup(&std_mat);
+    dengine_material_set_shader_color(dengitor.shader_standard, &std_mat);
 
     Entity* cube_ent = denginescene_ecs_new_entity();
-    MeshComponent* cube_mesh = denginescene_ecs_new_meshcomponent(&cube, &dbg_norm_mat);
+    MeshComponent* cube_mesh = denginescene_ecs_new_meshcomponent(&cube, &std_mat);
     cube_ent->mesh_component = cube_mesh;
 
     dengitor.scene_current = denginescene_new();
     denginescene_add_entity(dengitor.scene_current, cube_ent);
 
     Primitive plane;
-    dengine_primitive_gen_plane(&plane, dengitor.shader_debug_normals);
+    dengine_primitive_gen_plane(&plane, dengitor.shader_standard);
 
     Entity* plane_ent = denginescene_ecs_new_entity();
-    MeshComponent* plane_mesh = denginescene_ecs_new_meshcomponent(&plane, &dbg_norm_mat);
+    MeshComponent* plane_mesh = denginescene_ecs_new_meshcomponent(&plane, &std_mat);
     plane_ent->mesh_component = plane_mesh;
 
     plane_ent->transform.position[1] = -1.0f;
@@ -181,7 +181,7 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     plane_ent->transform.scale[2] = 5.0f;
 
     Entity* ch = denginescene_ecs_new_entity();
-    MeshComponent* ch_mesh = denginescene_ecs_new_meshcomponent(&cube, &dbg_norm_mat);
+    MeshComponent* ch_mesh = denginescene_ecs_new_meshcomponent(&cube, &std_mat);
     ch->mesh_component = ch_mesh;
     ch->transform.scale[0] = 0.5f;
     ch->transform.scale[1] = 0.5f;
@@ -234,6 +234,19 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     cam_ent->camera_component = cam2_comp;
     denginescene_ecs_set_entity_name(cam_ent, "this is a camera");
     denginescene_add_entity(dengitor.scene_current, cam_ent);
+
+    DirLight dLight;
+    memset(&dLight, 0, sizeof(DirLight));
+    dengine_lighting_light_setup(DENGINE_LIGHT_DIR, &dLight);
+    dLight.light.strength = 1.2f;
+    LightComponent* light_comp = denginescene_ecs_new_lightcomponent(DENGINE_LIGHT_DIR, &dLight);
+    Entity* dLight_ent = denginescene_ecs_new_entity();
+    denginescene_ecs_set_entity_name(dLight_ent, "this is a dir light");
+    dLight_ent->transform.position[0] = 3.0f;
+    dLight_ent->transform.position[1] = 3.0f;
+    dLight_ent->transform.position[2] = 3.0f;
+    dLight_ent->light_component = light_comp;
+    denginescene_add_entity(dengitor.scene_current, dLight_ent);
 
     dengitor_scenetree_traverse(dengitor.scene_current, dengitor.scene_treeview_store);
 #endif
