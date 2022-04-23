@@ -93,15 +93,16 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture)
         snprintf(texcacheprtbf, sizeof(texcacheprtbf),
                  "%s/%s/%s",
                  dengineutils_filesys_get_cachedir(),
-                 "dengine/texture_cache", DENGINE_VERSION);
+                 DENGINE_TEXTURE_CACHE_DIR, DENGINE_VERSION);
+
         if(!dengineutils_os_direxist(texcacheprtbf))
             dengineutils_os_mkdir(texcacheprtbf);
 
         snprintf(texcacheprtbf, sizeof(texcacheprtbf),
                  "%s/%s/%s/%s%s",
                  dengineutils_filesys_get_cachedir(),
-                 "dengine/texture_cache", DENGINE_VERSION,
-                 texfileondisk, ".texture");
+                 DENGINE_TEXTURE_CACHE_DIR, DENGINE_VERSION,
+                 texfileondisk, DENGINE_TEXTURE_CACHE_EXT);
 
         FILE* ftex_cache_read = fopen(texcacheprtbf, "rb");
         if(ftex_cache_read)

@@ -75,6 +75,14 @@
 //Extension to save cached binary of shaders in SHADER_CACHE_DIR
 #define DENGINE_SHADER_CACHE_EXT ".shader"
 
+/*
+ * Directory relative to filesys_get_cachedir() where cached textures
+ * are stored. cachedir if filled during in runtime and is OS-dependant
+ */
+#define DENGINE_TEXTURE_CACHE_DIR "dengine/texture_cache"
+
+//Extension to save cached binary and attributes of texture in TEXTURE_CACHE_DIR
+#define DENGINE_TEXTURE_CACHE_EXT ".texture"
 
 //Embedded fonts
 
