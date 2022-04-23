@@ -159,6 +159,7 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     // TODO : memory leak if not destroyed!
     dengine_material_setup(&std_mat);
     dengine_material_set_shader_color(dengitor.shader_standard, &std_mat);
+    dengine_material_set_shader_shadow(dengitor.shader_shadow2d, &std_mat);
 
     Entity* cube_ent = denginescene_ecs_new_entity();
     MeshComponent* cube_mesh = denginescene_ecs_new_meshcomponent(&cube, &std_mat);
@@ -237,6 +238,8 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
 
     DirLight dLight;
     memset(&dLight, 0, sizeof(DirLight));
+    dLight.shadow.enable = 1;
+    dLight.shadow.shadow_map_size = 512;
     dengine_lighting_light_setup(DENGINE_LIGHT_DIR, &dLight);
     dLight.light.strength = 1.2f;
     LightComponent* light_comp = denginescene_ecs_new_lightcomponent(DENGINE_LIGHT_DIR, &dLight);
@@ -244,7 +247,7 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     denginescene_ecs_set_entity_name(dLight_ent, "this is a dir light");
     dLight_ent->transform.position[0] = 3.0f;
     dLight_ent->transform.position[1] = 3.0f;
-    dLight_ent->transform.position[2] = 3.0f;
+    dLight_ent->transform.position[2] = -3.0f;
     dLight_ent->light_component = light_comp;
     denginescene_add_entity(dengitor.scene_current, dLight_ent);
 
