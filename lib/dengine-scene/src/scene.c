@@ -11,6 +11,8 @@
 
 void _denginescene_do_check_camera(Entity* root, Scene* scene);
 
+void _denginescene_do_check_light(Entity* root, Scene* scene);
+
 Scene* denginescene_new()
 {
     Scene* newscn = malloc(sizeof (struct _Scene));
@@ -70,6 +72,7 @@ void denginescene_update(Scene* scene)
         Entity* root=scene->entities[i];
         denginescene_ecs_transform_entity(root);
         _denginescene_do_check_camera(root,scene);
+        _denginescene_do_check_light(root, scene);
     }
 }
 
@@ -120,6 +123,25 @@ void _denginescene_do_check_camera(Entity* root, Scene* scene)
             denginescene_ecs_do_camera_scene(child,scene);
         }
         _denginescene_do_check_camera(child, scene);
+    }
+}
+
+void _denginescene_do_check_light(Entity* root, Scene* scene)
+{
+    //check lightcomp comp and draw
+    if(!root->parent && root->light_component)
+    {
+        denginescene_ecs_do_light_scene(root,scene);
+    }
+
+    size_t children_count = root->children_count;
+    for (size_t i = 0; i < children_count; i++) {
+        Entity* child = root->children[i];
+        if(child->camera_component)
+        {
+            denginescene_ecs_do_light_scene(child,scene);
+        }
+        _denginescene_do_check_light(child, scene);
     }
 }
 
