@@ -27,6 +27,7 @@ typedef struct
     int font_bitmapsize;
 
     int cache_textures;
+    int cache_shaders;
 }DengineInitOpts;
 
 #include <dengine/window.h>
@@ -79,6 +80,8 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
     DENGINE_INIT_OPTS.enable_backfaceculling = 1;
     DENGINE_INIT_OPTS.enable_depth = 1;
 
+    DENGINE_INIT_OPTS.cache_shaders = 1;
+
     const size_t prtbf_sz = 2048;
     char* prtbf = (char*) malloc(prtbf_sz);
 
@@ -121,6 +124,11 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
         if(cache_textures)
             sscanf(cache_textures, "%d", &DENGINE_INIT_OPTS.cache_textures);
 
+        char* cache_shaders = dengineutils_confserialize_get("cache_shaders", conf);
+        if(cache_shaders)
+            sscanf(cache_shaders, "%d", &DENGINE_INIT_OPTS.cache_shaders);
+
+
     }else
     {
         dengineutils_confserialize_put_block("window", conf);
@@ -152,6 +160,12 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
         dengineutils_confserialize_put_comment("cache textures to disk. may improve loading speeds "
                                                "at the cost of higher disk usage", conf);
         dengineutils_confserialize_put("cache_textures", prtbf, conf);
+
+        snprintf(prtbf, prtbf_sz, "%d", DENGINE_INIT_OPTS.cache_shaders);
+        dengineutils_confserialize_put_comment("cache shaders to disk. always use this option "
+                                               "if your hardware supports it", conf);
+        dengineutils_confserialize_put("cache_shaders", prtbf, conf);
+
         dengineutils_confserialize_put_newline(conf);
 
         dengineutils_confserialize_write(conf);
@@ -207,6 +221,10 @@ DENGINE_INLINE int dengine_init()
             return 0;
     }
 
+    //caching
+    dengine_texture_set_texturecache(DENGINE_INIT_OPTS.cache_textures);
+    dengine_shader_set_shadercache(DENGINE_INIT_OPTS.cache_shaders);
+
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
@@ -255,10 +273,6 @@ DENGINE_INLINE int dengine_init()
     //backface culling. save draw calls ✅
     if(DENGINE_INIT_OPTS.enable_backfaceculling)
         glEnable(GL_CULL_FACE);
-
-    //caching
-    dengine_texture_set_texturecache(DENGINE_INIT_OPTS.cache_textures);
-
 
     return 1;
 }
