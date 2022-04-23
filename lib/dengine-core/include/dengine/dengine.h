@@ -25,6 +25,8 @@ typedef struct
 
     float font_size;
     int font_bitmapsize;
+
+    int cache_textures;
 }DengineInitOpts;
 
 #include <dengine/window.h>
@@ -92,6 +94,7 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
     {
         dengineutils_confserialize_load(conf, 1);
 
+        // WINDOW
         char* window_width = dengineutils_confserialize_get("window_width", conf);
         if(window_width)
             sscanf(window_width, "%d", &DENGINE_INIT_OPTS.window_width);
@@ -104,6 +107,7 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
         if(window_msaa)
             sscanf(window_msaa, "%d", &DENGINE_INIT_OPTS.window_msaa);
 
+        // FONT
         char* font_size = dengineutils_confserialize_get("font_size", conf);
         if(font_size)
             sscanf(font_size, "%f", &DENGINE_INIT_OPTS.font_size);
@@ -111,6 +115,12 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
         char* font_bitmapsize = dengineutils_confserialize_get("font_bitmapsize", conf);
         if(font_bitmapsize)
             sscanf(font_bitmapsize, "%d", &DENGINE_INIT_OPTS.font_bitmapsize);
+
+        //CACHING
+        char* cache_textures = dengineutils_confserialize_get("cache_textures", conf);
+        if(cache_textures)
+            sscanf(cache_textures, "%d", &DENGINE_INIT_OPTS.cache_textures);
+
     }else
     {
         dengineutils_confserialize_put_block("window", conf);
@@ -135,6 +145,13 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
         dengineutils_confserialize_put_comment("size of the initial font bitmap", conf);
         dengineutils_confserialize_put("font_bitmapsize", prtbf, conf);
 
+        dengineutils_confserialize_put_newline(conf);
+
+        dengineutils_confserialize_put_block("caching", conf);
+        snprintf(prtbf, prtbf_sz, "%d", DENGINE_INIT_OPTS.cache_textures);
+        dengineutils_confserialize_put_comment("cache textures to disk. may improve loading speeds "
+                                               "at the cost of higher disk usage", conf);
+        dengineutils_confserialize_put("cache_textures", prtbf, conf);
         dengineutils_confserialize_put_newline(conf);
 
         dengineutils_confserialize_write(conf);
@@ -238,6 +255,10 @@ DENGINE_INLINE int dengine_init()
     //backface culling. save draw calls ✅
     if(DENGINE_INIT_OPTS.enable_backfaceculling)
         glEnable(GL_CULL_FACE);
+
+    //caching
+    dengine_texture_set_texturecache(DENGINE_INIT_OPTS.cache_textures);
+
 
     return 1;
 }
