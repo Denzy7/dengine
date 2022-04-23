@@ -340,9 +340,6 @@ int main(int argc, char *argv[])
     dengine_shader_set_vec3(dftshdr, "color", gridcolor);
 
     while (dengine_window_isrunning()) {
-        denginescene_ecs_do_light_scene(ent_dlight, scene);
-        denginescene_ecs_do_light_scene(ent_plight, scene);
-
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE + poly);
 
         dengine_input_pollevents();
