@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     memset(&dengitor, 0, sizeof(Dengitor));
     dengitor.scene_grid_scale = 10.0f;
-    dengitor.scene_grid_width = 2.0f;
+    dengitor.scene_grid_width = 0.5;
     dengitor.scene_grid_color[0] = 1.0f;
     dengitor.scene_grid_color[1] = 1.0f;
     dengitor.scene_grid_color[2] = 0.0f;
