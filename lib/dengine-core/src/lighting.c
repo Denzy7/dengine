@@ -4,6 +4,7 @@
 #include "dengine/draw.h" //draw
 //#include "dengine/window.h" //get w,h
 #include "dengine/macros.h" //arr_sz
+#include "dengine/entrygl.h" //entryfb
 
 #include "dengine-utils/logging.h"
 
@@ -72,6 +73,12 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
         return;
     }
 
+    Framebuffer entry_fb;
+    dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entry_fb);
+
+    Texture entry_tex;
+    dengine_entrygl_texture(shadowmap_target, &entry_tex);
+
     Texture depth;
     memset(&depth, 0, sizeof(Texture));
     depth.height = shadowop->shadow_map_size;
@@ -113,8 +120,8 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
         glDrawBuffers(1, none); DENGINE_CHECKGL;
     }
 
-    dengine_texture_bind(shadowmap_target, NULL);
-    dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
+    dengine_texture_bind(shadowmap_target, &entry_tex);
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, &entry_fb);
 
     shadowop->near_shadow = 0.01f;
     shadowop->far_shadow = 25.0f;
@@ -147,16 +154,14 @@ void dengine_lighting_shadowop_clear(ShadowOp* shadowop)
         return;
 
     //we might not have entered with fb 0, save binding for later
-    int bind;
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &bind); DENGINE_CHECKGL;
+    Framebuffer entry_fb;
+    dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entry_fb);
 
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &shadowop->shadow_map);
     glClear(GL_DEPTH_BUFFER_BIT); DENGINE_CHECKGL;
 
     //bind entry fb
-    glBindFramebuffer(GL_FRAMEBUFFER, bind); DENGINE_CHECKGL;
-
-    dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, &entry_fb);
 }
 
 void dengine_lighting_setup_dirlight(DirLight* dirLight)
