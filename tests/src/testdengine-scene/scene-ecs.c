@@ -261,6 +261,8 @@ int main(int argc, char *argv[])
 //    prt(ent1);
     vec3 p={6.1f,6.18f,5.4f};
     memcpy(ent13->transform.position,p,sizeof (vec3));
+    p[0] = -45.0f, p[1] = 225.0f, p[2] = 0.0f;
+    memcpy(ent13->transform.rotation,p,sizeof (vec3));
 
     p[0]=1.3f,p[1]=2.9f,p[2]=1.0f;
     memcpy(ent6->transform.position,p,sizeof (vec3));
