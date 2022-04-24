@@ -351,6 +351,12 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     dengitor_scenetree_traverse(dengitor.scene_current, dengitor.scene_treeview_store);
 #endif
 
+    snprintf(prtbf, prtbf_sz, "Dengitor - v%s --  GL : %s, RENDERER : %s",
+             DENGINE_VERSION,
+             (char*)glGetString(GL_VERSION),
+             (char*)glGetString(GL_RENDERER));;
+    gtk_window_set_title( GTK_WINDOW(dengitor.main), prtbf);
+
 //    LOGGING ENV
 //    uint32_t i = 0;
 //    while(g_get_environ()[i])
