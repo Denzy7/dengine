@@ -13,7 +13,7 @@ void dengitor_w2v_entry2float(GtkEntry* entry, float* var)
     GtkEntryBuffer* buffer;
     buffer = gtk_entry_get_buffer(entry);
     text = gtk_entry_buffer_get_text(buffer);
-    *var = strtof(text, NULL);
+    sscanf(text, "%f", var);
 
     if(_area)
         gtk_widget_queue_draw( GTK_WIDGET(_area) );
