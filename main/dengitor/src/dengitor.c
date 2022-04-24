@@ -142,9 +142,9 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     camera_component->last_cam = 0;
     dengitor.scene_camera->camera_component = camera_component;
     dengitor.scene_camera->transform.position[0] = 7.0f;
-    dengitor.scene_camera->transform.position[1] = 5.0f;
+    dengitor.scene_camera->transform.position[1] = 7.0f;
     dengitor.scene_camera->transform.position[2] = 7.0f;
-    dengitor.scene_camera->transform.rotation[0] = -22.5;
+    dengitor.scene_camera->transform.rotation[0] = -45.0;
     dengitor.scene_camera->transform.rotation[1] = -135.0;
     g_signal_connect(dengitor.viewport_opts_fov,
                      "value-changed",
