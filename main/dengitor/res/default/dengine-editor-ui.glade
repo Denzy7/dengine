@@ -1303,6 +1303,19 @@
     <property name="step-increment">1</property>
     <property name="page-increment">0.5</property>
   </object>
+  <object class="GtkAdjustment" id="viewport_opts_grid_scale">
+    <property name="lower">5</property>
+    <property name="upper">100</property>
+    <property name="step-increment">0.10</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="viewport_opts_grid_width">
+    <property name="lower">1</property>
+    <property name="upper">10</property>
+    <property name="value">1</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">0.5</property>
+  </object>
   <object class="GtkDialog" id="viewport_opts">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Viewport Options</property>
@@ -1318,7 +1331,7 @@
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
             <child>
-              <object class="GtkButton" id="viewport_options_ok">
+              <object class="GtkButton" id="viewport_opts_ok">
                 <property name="label" translatable="yes">OK</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
@@ -1331,17 +1344,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="viewport_options_cancel">
-                <property name="label" translatable="yes">Cancel</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -1367,7 +1370,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkScale" id="viewport_options_fov">
+              <object class="GtkScale" id="viewport_opts_fov">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="adjustment">viewport_opts_fov_adjustment</property>
@@ -1405,10 +1408,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry">
+              <object class="GtkScale">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="width-chars">0</property>
+                <property name="adjustment">viewport_opts_grid_width</property>
+                <property name="fill-level">10</property>
+                <property name="round-digits">1</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -1440,7 +1445,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton">
+              <object class="GtkColorButton" id="viewport_opts_grid_colour">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
@@ -1476,10 +1481,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry">
+              <object class="GtkScale">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="width-chars">0</property>
+                <property name="adjustment">viewport_opts_grid_scale</property>
+                <property name="round-digits">1</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -1511,7 +1517,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkCheckButton">
+              <object class="GtkCheckButton" id="viewport_opts_grid_draw">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">False</property>
