@@ -157,15 +157,8 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     if(camera->camera_component->last_cam)
         scene->last_cam = camera->camera_component->camera;
 
-    //yaw = y;
-    //pitch = x;
-    vec3 front =
-    {
-        cosf(glm_rad(camera->transform.rotation[1])) * cosf(glm_rad(camera->transform.rotation[0])),
-        sinf(glm_rad(camera->transform.rotation[0])),
-        sinf(glm_rad(camera->transform.rotation[1])) * cosf(glm_rad(camera->transform.rotation[0]))
-    };
-    glm_vec3_add(camera->transform.position, front, front);
+    vec3 front;
+    denginescene_ecs_get_front(camera, front);
 
     //we might not have entered with fb 0, save binding for later
     int bind;
