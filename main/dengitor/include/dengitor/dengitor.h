@@ -28,6 +28,13 @@ typedef struct
     Inspector inspector;
     Prefs prefs;
 
+    GtkDialog* viewport_opts;
+    GtkAdjustment* viewport_opts_fov;
+    GtkAdjustment* viewport_opts_grid_width;
+    GtkAdjustment* viewport_opts_grid_scale;
+    GtkColorButton* viewport_opts_grid_colour;
+    GtkToggleButton* viewport_opts_grid_draw;
+
     Entity* scene_camera;
     Scene* scene_current;
     Entity* scene_entity_current;
@@ -36,6 +43,7 @@ typedef struct
     int scene_camera_last_h;
 
     Primitive scene_grid;
+    int scene_grid_draw;
     float scene_grid_scale;
     float scene_grid_width;
     vec3 scene_grid_color;
@@ -73,4 +81,11 @@ void dengitor_toggle_scenegame_ontoggle(GtkToggleButton* toggle_btn, gpointer fl
 void dengitor_scene_treeview_oncursorchange(GtkTreeView* tree);
 
 void dengitor_draw_axis(Primitive* axis, Shader* shader);
+
+void dengitor_viewport_opts_setup(GtkBuilder* builder);
+
+void dengitor_viewport_opts_grid_draw_ontoggle(GtkToggleButton* toggle_btn);
+
+void dengitor_viewport_opts_show(GtkDialog* viewportopts);
+
 #endif // DENGITOR_H

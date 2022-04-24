@@ -1,5 +1,6 @@
 #include "dengitor/dengitor.h"
 #include "dengitor/scenetree.h"
+#include "dengitor/w2v.h"
 
 static Dengitor dengitor;
 const int prtbf_sz = 1024;
@@ -13,6 +14,7 @@ int main(int argc, char *argv[])
     dengitor.scene_grid_color[0] = 1.0f;
     dengitor.scene_grid_color[1] = 1.0f;
     dengitor.scene_grid_color[2] = 0.0f;
+    dengitor.scene_grid_draw = 1;
 
     dengitor.scene_axis_scale = 2.0f;
     dengitor.scene_axis_width = 3.5f;
@@ -41,6 +43,7 @@ void dengitor_onactivate(GtkApplication* app)
 
     // GL AREA, ALL THE MAGIC IS HERE!
     dengitor.glarea = GTK_GL_AREA(gtk_builder_get_object(dengitor.builder, "glarea"));
+    dengitor_w2v_set_glarea(dengitor.glarea);
     g_signal_connect(dengitor.glarea,
                      "realize", G_CALLBACK(dengitor_glarea_onrealize), NULL);
     g_signal_connect(dengitor.glarea,
@@ -71,6 +74,9 @@ void dengitor_onactivate(GtkApplication* app)
 
     // setup inspector
     dengitor_inspector_setup(dengitor.builder, &dengitor.inspector, dengitor.glarea);
+
+    // setup viewportopts
+    dengitor_viewport_opts_setup(dengitor.builder);
 
     // app setup complete..., show window and apply settings
 
@@ -138,6 +144,10 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     dengitor.scene_camera->transform.position[0] = 7.0f;
     dengitor.scene_camera->transform.position[1] = 7.0f;
     dengitor.scene_camera->transform.position[2] = 7.0f;
+    g_signal_connect(dengitor.viewport_opts_fov,
+                     "value-changed",
+                     G_CALLBACK(dengitor_w2v_adjustment2float),
+                     &camera_component->camera->fov);
 
     // compile some standard shaders
     dengitor.shader_default = dengine_shader_new_shader_standard(DENGINE_SHADER_DEFAULT);
@@ -428,19 +438,24 @@ void dengitor_glarea_onrender(GtkGLArea* area)
         dengine_camera_apply(dengitor.shader_default, scene_camera);
 
         static mat4 mat_4;
-        glm_mat4_identity(mat_4);
-
-        // DRAW grid
-        vec3 vec_3 = {dengitor.scene_grid_scale,
-                                 dengitor.scene_grid_scale,
-                                 dengitor.scene_grid_scale};
-        glm_scale(mat_4, vec_3);
-        dengine_shader_set_vec3(dengitor.shader_default, "color", dengitor.scene_grid_color);
-        dengine_shader_set_mat4(dengitor.shader_default, "model",mat_4[0]);
+        static vec3 vec_3;
         float init_width;
         glGetFloatv(GL_LINE_WIDTH, &init_width);
-        glLineWidth(dengitor.scene_grid_width);
-        dengine_draw_primitive(&dengitor.scene_grid, dengitor.shader_default);
+        if(dengitor.scene_grid_draw)
+        {
+            glm_mat4_identity(mat_4);
+            // DRAW grid
+            vec_3[0] = dengitor.scene_grid_scale;
+            vec_3[1] = dengitor.scene_grid_scale;
+            vec_3[2] = dengitor.scene_grid_scale;
+
+            glm_scale(mat_4, vec_3);
+            dengine_shader_set_vec3(dengitor.shader_default, "color", dengitor.scene_grid_color);
+            dengine_shader_set_mat4(dengitor.shader_default, "model",mat_4[0]);
+
+            glLineWidth(dengitor.scene_grid_width);
+            dengine_draw_primitive(&dengitor.scene_grid, dengitor.shader_default);
+        }
 
         glm_mat4_identity(mat_4);
 
@@ -559,4 +574,61 @@ void dengitor_scene_treeview_oncursorchange(GtkTreeView* tree)
 
         free(name);
     }
+}
+
+void dengitor_viewport_opts_setup(GtkBuilder* builder)
+{
+    dengitor.viewport_opts = GTK_DIALOG( gtk_builder_get_object(builder, "viewport_opts") );
+
+    dengitor.viewport_opts_fov = GTK_ADJUSTMENT( gtk_builder_get_object(builder, "viewport_opts_fov_adjustment") );
+    dengitor.viewport_opts_grid_colour = GTK_COLOR_BUTTON( gtk_builder_get_object(builder, "viewport_opts_grid_color") );
+    dengitor.viewport_opts_grid_scale = GTK_ADJUSTMENT( gtk_builder_get_object(builder, "viewport_opts_grid_scale") );
+    g_signal_connect(dengitor.viewport_opts_grid_scale,
+                     "value-changed",
+                     G_CALLBACK(dengitor_w2v_adjustment2float),
+                     &dengitor.scene_grid_scale);
+    dengitor.viewport_opts_grid_width = GTK_ADJUSTMENT( gtk_builder_get_object(builder, "viewport_opts_grid_width") );
+    g_signal_connect(dengitor.viewport_opts_grid_width,
+                     "value-changed",
+                     G_CALLBACK(dengitor_w2v_adjustment2float),
+                     &dengitor.scene_grid_width);
+    dengitor.viewport_opts_grid_draw = GTK_TOGGLE_BUTTON( gtk_builder_get_object(builder, "viewport_opts_grid_draw") );
+    g_signal_connect(
+                dengitor.viewport_opts_grid_draw,
+                "toggled",
+                G_CALLBACK(dengitor_viewport_opts_grid_draw_ontoggle),
+                NULL);
+
+    g_signal_connect_swapped(
+                gtk_builder_get_object(builder, "viewport_opts_btn"),
+                "clicked",
+                G_CALLBACK(dengitor_viewport_opts_show),
+                dengitor.viewport_opts
+                );
+
+    g_signal_connect_swapped(
+                gtk_builder_get_object(builder, "viewport_opts_ok"),
+                "clicked",
+                G_CALLBACK(gtk_widget_hide),
+                dengitor.viewport_opts
+                );
+}
+
+void dengitor_viewport_opts_show(GtkDialog* viewportopts)
+{
+    gtk_widget_show_all( GTK_WIDGET(viewportopts) );
+    Camera* scene_cam = dengitor.scene_camera->camera_component->camera;
+
+    //set opts
+    gtk_toggle_button_set_active(dengitor.viewport_opts_grid_draw, dengitor.scene_grid_draw);
+    gtk_adjustment_set_value(dengitor.viewport_opts_fov, scene_cam->fov);
+    gtk_adjustment_set_value(dengitor.viewport_opts_grid_width, dengitor.scene_grid_width);
+    gtk_adjustment_set_value(dengitor.viewport_opts_grid_scale, dengitor.scene_grid_scale);
+}
+
+void dengitor_viewport_opts_grid_draw_ontoggle(GtkToggleButton* toggle_btn)
+{
+    dengitor.scene_grid_draw = gtk_toggle_button_get_active( toggle_btn);
+
+    gtk_widget_queue_draw(GTK_WIDGET( dengitor.glarea ));
 }
