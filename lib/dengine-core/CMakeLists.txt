@@ -1,3 +1,5 @@
+configure_file(src/dengine.rc.in src/dengine.rc)
+
 set(dengine-core-src
 src/window.c
 src/shader.c
@@ -17,7 +19,7 @@ src/renderbuffer.c
 src/stb_image.c
 src/stb_image_write.c
 src/viewport.c
-src/dengine.rc
+${CMAKE_CURRENT_BINARY_DIR}/src/dengine.rc
 ${PROJECT_SOURCE_DIR}/deps/glad/src/glad.c
 src/entrygl.c
 )
