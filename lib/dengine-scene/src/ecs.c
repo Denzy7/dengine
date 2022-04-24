@@ -199,3 +199,11 @@ void denginescene_ecs_transform_entity(Entity* entity)
         }
     }
 }
+
+void denginescene_ecs_get_front(Entity* entity, vec3 front)
+{
+    front[0] = cosf(glm_rad(entity->transform.rotation[1])) * cosf(glm_rad(entity->transform.rotation[0]));
+    front[1] = sinf(glm_rad(entity->transform.rotation[0]));
+    front[2] = sinf(glm_rad(entity->transform.rotation[1])) * cosf(glm_rad(entity->transform.rotation[0]));
+    glm_vec3_add(entity->transform.position, front, front);
+}
