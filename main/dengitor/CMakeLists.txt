@@ -5,6 +5,7 @@ if(GTK3_LIBRARIES)
     include/dengitor/utils.h
     include/dengitor/inspector.h
     include/dengitor/prefs.h
+    include/dengitor/w2v.h
     )
 
     set(dengitor-src
@@ -13,6 +14,7 @@ if(GTK3_LIBRARIES)
     src/utils.c
     src/inspector.c
     src/prefs.c
+    src/w2v.c
     )
 
     add_custom_command(
