@@ -1,4 +1,6 @@
 if(GTK3_LIBRARIES)
+
+    configure_file(dengitor.rc.in dengitor.rc)
     set(dengitor-hdr
     include/dengitor/dengitor.h
     include/dengitor/scenetree.h
@@ -15,6 +17,7 @@ if(GTK3_LIBRARIES)
     src/inspector.c
     src/prefs.c
     src/w2v.c
+    ${CMAKE_CURRENT_BINARY_DIR}/dengitor.rc
     )
 
     add_custom_command(
