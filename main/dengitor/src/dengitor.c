@@ -144,6 +144,8 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     dengitor.scene_camera->transform.position[0] = 7.0f;
     dengitor.scene_camera->transform.position[1] = 7.0f;
     dengitor.scene_camera->transform.position[2] = 7.0f;
+    dengitor.scene_camera->transform.rotation[0] = -45.0;
+    dengitor.scene_camera->transform.rotation[1] = -135.0;
     g_signal_connect(dengitor.viewport_opts_fov,
                      "value-changed",
                      G_CALLBACK(dengitor_w2v_adjustment2float),
@@ -306,8 +308,9 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     CameraComponent* cam2_comp = denginescene_ecs_new_cameracomponent(&camera2);
     Entity* cam_ent = denginescene_ecs_new_entity();
     cam_ent->transform.position[0] = 7.0f;
-    cam_ent->transform.position[1] = 7.0f;
-    cam_ent->transform.position[2] = -3.5f;
+    cam_ent->transform.position[1] = 5.0f;
+    cam_ent->transform.rotation[0] = -45.0;
+    cam_ent->transform.rotation[1] = 180.0;
     cam_ent->camera_component = cam2_comp;
     denginescene_ecs_set_entity_name(cam_ent, "this is a camera");
     denginescene_add_entity(dengitor.scene_current, cam_ent);
@@ -433,7 +436,9 @@ void dengitor_glarea_onrender(GtkGLArea* area)
 
         dengine_camera_project_perspective( (float)w / (float)h,
                                             scene_camera);
-        dengine_camera_lookat(NULL,
+        vec3 front;
+        denginescene_ecs_get_front(dengitor.scene_camera, front);
+        dengine_camera_lookat(front,
                               scene_camera);
         dengine_camera_apply(dengitor.shader_default, scene_camera);
 
