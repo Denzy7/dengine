@@ -157,6 +157,16 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     if(camera->camera_component->last_cam)
         scene->last_cam = camera->camera_component->camera;
 
+    //yaw = y;
+    //pitch = x;
+    vec3 front =
+    {
+        cosf(glm_rad(camera->transform.rotation[1])) * cosf(glm_rad(camera->transform.rotation[0])),
+        sinf(glm_rad(camera->transform.rotation[0])),
+        sinf(glm_rad(camera->transform.rotation[1])) * cosf(glm_rad(camera->transform.rotation[0]))
+    };
+    glm_vec3_add(camera->transform.position, front, front);
+
     //we might not have entered with fb 0, save binding for later
     int bind;
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &bind); DENGINE_CHECKGL;
@@ -167,7 +177,7 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
 
     dengine_viewport_set(0, 0,
                          cam->render_width,cam->render_height);
-    dengine_camera_lookat(NULL, cam);
+    dengine_camera_lookat(front, cam);
     dengine_camera_project_perspective((float)cam->render_width / (float)cam->render_height,
                                        camera->camera_component->camera);
     dengine_camera_use(cam);
