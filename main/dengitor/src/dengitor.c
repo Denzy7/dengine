@@ -408,35 +408,40 @@ void dengitor_glarea_onunrealize(GtkGLArea* area)
 
 void dengitor_glarea_evbox_onmotion(GtkEventBox* evbox, GdkEventMotion* motion)
 {
-    gtk_widget_get_allocation(GTK_WIDGET(dengitor.glarea), dengitor.glarea_alloc);
-    //h for inverting gdk window coords
-    double h = dengitor.glarea_alloc->height;
-    if(!dengitor.glarea_evbox_first)
+    if(dengitor.glarea_evbox_rot)
     {
+        gtk_widget_get_allocation(GTK_WIDGET(dengitor.glarea), dengitor.glarea_alloc);
+        //h for inverting gdk window coords
+        double h = dengitor.glarea_alloc->height;
+        if(!dengitor.glarea_evbox_first)
+        {
+            dengitor.glarea_evbox_x = motion->x;
+            dengitor.glarea_evbox_y = h - motion->y;
+            dengitor.glarea_evbox_first = 1;
+        }
+
+        dengitor.glarea_evbox_dx = motion->x - dengitor.glarea_evbox_x;
+        dengitor.glarea_evbox_dy = (h - motion->y) - dengitor.glarea_evbox_y;
         dengitor.glarea_evbox_x = motion->x;
         dengitor.glarea_evbox_y = h - motion->y;
-        dengitor.glarea_evbox_first = 1;
+
+        dengitor.scene_camera->transform.rotation[0] += dengitor.glarea_evbox_dy;
+        dengitor.scene_camera->transform.rotation[1] += dengitor.glarea_evbox_dx;
+
+        gtk_widget_queue_draw(GTK_WIDGET(dengitor.glarea));
     }
-
-    dengitor.glarea_evbox_dx = motion->x - dengitor.glarea_evbox_x;
-    dengitor.glarea_evbox_dy = (h - motion->y) - dengitor.glarea_evbox_y;
-    dengitor.glarea_evbox_x = motion->x;
-    dengitor.glarea_evbox_y = h - motion->y;
-
-    dengitor.scene_camera->transform.rotation[0] += dengitor.glarea_evbox_dy;
-    dengitor.scene_camera->transform.rotation[1] += dengitor.glarea_evbox_dx;
-
-    gtk_widget_queue_draw(GTK_WIDGET(dengitor.glarea));
 }
 
 void dengitor_glarea_evbox_onbtnpress(GtkEventBox* evbox, GdkEventButton* button)
 {
-    //dengineutils_logging_log("press");
+    if(button->button == GDK_BUTTON_SECONDARY)
+        dengitor.glarea_evbox_rot = 1;
 }
 
 void dengitor_glarea_evbox_onbtnrelease(GtkEventBox* evbox, GdkEventButton* button)
 {
     dengitor.glarea_evbox_first = 0;
+    dengitor.glarea_evbox_rot = 0;
 }
 
 void dengitor_glarea_onrender(GtkGLArea* area)

@@ -25,6 +25,7 @@ typedef struct
 
     GtkEventBox* glarea_evbox;
     int glarea_evbox_first;
+    int glarea_evbox_rot;
     double glarea_evbox_x;
     double glarea_evbox_y;
     double glarea_evbox_dx;
