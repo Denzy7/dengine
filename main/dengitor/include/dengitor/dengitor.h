@@ -22,7 +22,14 @@ typedef struct
 
     GtkGLArea* glarea;
     GtkAllocation* glarea_alloc;
+
     GtkEventBox* glarea_evbox;
+    int glarea_evbox_first;
+    double glarea_evbox_x;
+    double glarea_evbox_y;
+    double glarea_evbox_dx;
+    double glarea_evbox_dy;
+
     GLAreaMode glarea_mode;
     GtkToggleButton* toggle_scene;
     GtkToggleButton* toggle_game;
@@ -77,6 +84,8 @@ void dengitor_glarea_onrealize(GtkGLArea* area);
 void dengitor_glarea_onunrealize(GtkGLArea* area);
 
 void dengitor_glarea_onrender(GtkGLArea* area);
+
+void dengitor_glarea_onevmotion(GtkWidget* widget, GdkEventMotion* motion);
 
 void dengitor_toggle_scenegame_ontoggle(GtkToggleButton* toggle_btn, gpointer flag);
 
