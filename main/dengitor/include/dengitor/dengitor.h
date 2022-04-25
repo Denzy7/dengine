@@ -85,7 +85,7 @@ void dengitor_glarea_onunrealize(GtkGLArea* area);
 
 void dengitor_glarea_onrender(GtkGLArea* area);
 
-void dengitor_glarea_onevmotion(GtkWidget* widget, GdkEventMotion* motion);
+void dengitor_glarea_evbox_onmotion(GtkWidget* widget, GdkEventMotion* motion);
 
 void dengitor_toggle_scenegame_ontoggle(GtkToggleButton* toggle_btn, gpointer flag);
 

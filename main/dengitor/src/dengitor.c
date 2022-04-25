@@ -52,7 +52,7 @@ void dengitor_onactivate(GtkApplication* app)
     g_signal_connect(dengitor.glarea,
                      "render", G_CALLBACK(dengitor_glarea_onrender), NULL);
     g_signal_connect(dengitor.glarea_evbox, "motion-notify-event",
-                     G_CALLBACK(dengitor_glarea_onevmotion), NULL);
+                     G_CALLBACK(dengitor_glarea_evbox_onmotion), NULL);
     dengitor.glarea_mode = DENGITOR_GLAREA_MODE_SCENE;
     dengitor.toggle_scene = GTK_TOGGLE_BUTTON( gtk_builder_get_object(dengitor.builder, "toggle_scene") );
     g_signal_connect(dengitor.toggle_scene, "toggled",
@@ -400,7 +400,7 @@ void dengitor_glarea_onunrealize(GtkGLArea* area)
     dengine_terminate();
 }
 
-void dengitor_glarea_onevmotion(GtkWidget* widget, GdkEventMotion* motion)
+void dengitor_glarea_evbox_onmotion(GtkWidget* widget, GdkEventMotion* motion)
 {
     gtk_widget_get_allocation(GTK_WIDGET(dengitor.glarea), dengitor.glarea_alloc);
     //h for inverting gdk window coords
