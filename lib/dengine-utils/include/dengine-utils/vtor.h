@@ -84,6 +84,8 @@ int vtor_create(vtor* vtor, size_t type_sz)
 #endif // VTOR_VERBOSE
     if(vtor->data)
         return 1;
+    else
+        return 0;
 }
 
 void vtor_pushback(vtor* vtor, const void* val)
