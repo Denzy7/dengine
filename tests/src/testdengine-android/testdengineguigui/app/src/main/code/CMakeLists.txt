@@ -28,5 +28,5 @@ target_include_directories(GFX PUBLIC
 		${DENGINE_DIR}/deps/glad/include
 		)
 
-target_link_libraries(GFX PUBLIC log EGL glad dengine-core dengine-utils dengine-gui)
+target_link_libraries(GFX PUBLIC dengine-core dengine-utils dengine-gui)
 

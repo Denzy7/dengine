@@ -5,12 +5,12 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="Shadow2D"
+        android:label="DT-Shad2D"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:hasCode="false">
         <activity
             android:name="android.app.NativeActivity"
-            android:label="Shadow2D"
+            android:label="DT-Shad2D"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="sensorLandscape"
             android:exported="true">

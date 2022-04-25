@@ -4,6 +4,7 @@
 
 #include <dengine-utils/timer.h>
 #include <dengine-utils/logging.h>
+#include <dengine-utils/filesys.h>
 
 #include <dengine-gui/gui.h>
 
@@ -21,7 +22,9 @@ static void init(struct android_app* app)
     {
         window_init = 1;
 		
-	dengine_window_loadgl();
+        dengine_window_loadgl();
+
+        dengineutils_filesys_init();
 
         dengineutils_logging_log("init window success");
 

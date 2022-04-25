@@ -27,5 +27,5 @@ target_include_directories(GFX PUBLIC
 		)
 
 
-target_link_libraries(GFX PUBLIC log EGL glad android dengine-core dengine-utils)
+target_link_libraries(GFX PUBLIC dengine-core dengine-utils)
 

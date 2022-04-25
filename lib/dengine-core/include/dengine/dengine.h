@@ -68,6 +68,12 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
     //ALLOCATE FILESYS DIRECTORIES
     dengineutils_filesys_init();
 
+#ifdef DENGINE_ANDROID
+    //Can safely set files and cachedirs
+    dengine_android_set_filesdir();
+    dengine_android_set_cachedir();
+#endif
+
     DENGINE_INIT_OPTS.window_height = 720;
     DENGINE_INIT_OPTS.window_width = 1280;
     DENGINE_INIT_OPTS.window_title = "Dengine!";
@@ -252,12 +258,6 @@ DENGINE_INLINE int dengine_init()
 
     //DEBUGGING, INCASE OF SIGSEGV OR SIGABRT
     dengineutils_debug_init();
-
-#ifdef DENGINE_ANDROID
-    //Can safely set files and cachedirs
-    dengine_android_set_filesdir();
-    dengine_android_set_cachedir();
-#endif
 
     //GUI. SET FONT TOO
     if(!denginegui_init())
