@@ -438,6 +438,10 @@ void dengitor_glarea_evbox_onmotion(GtkEventBox* evbox, GdkEventMotion* motion)
         dengitor.scene_camera->transform.rotation[0] += dengitor.glarea_evbox_dy;
         dengitor.scene_camera->transform.rotation[1] += dengitor.glarea_evbox_dx;
 
+        float max_x = 89.9f;
+        dengitor.scene_camera->transform.rotation[0] = glm_clamp(dengitor.scene_camera->transform.rotation[0],
+                -max_x, max_x);
+
         gtk_widget_queue_draw(GTK_WIDGET(dengitor.glarea));
     }
 }
