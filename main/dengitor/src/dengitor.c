@@ -51,8 +51,14 @@ void dengitor_onactivate(GtkApplication* app)
                      "unrealize", G_CALLBACK(dengitor_glarea_onunrealize), NULL);
     g_signal_connect(dengitor.glarea,
                      "render", G_CALLBACK(dengitor_glarea_onrender), NULL);
+
     g_signal_connect(dengitor.glarea_evbox, "motion-notify-event",
                      G_CALLBACK(dengitor_glarea_evbox_onmotion), NULL);
+    g_signal_connect(dengitor.glarea_evbox, "button-press-event",
+                     G_CALLBACK(dengitor_glarea_evbox_onbtnpress), NULL);
+    g_signal_connect(dengitor.glarea_evbox, "button-release-event",
+                     G_CALLBACK(dengitor_glarea_evbox_onbtnrelease), NULL);
+
     dengitor.glarea_mode = DENGITOR_GLAREA_MODE_SCENE;
     dengitor.toggle_scene = GTK_TOGGLE_BUTTON( gtk_builder_get_object(dengitor.builder, "toggle_scene") );
     g_signal_connect(dengitor.toggle_scene, "toggled",
@@ -400,7 +406,7 @@ void dengitor_glarea_onunrealize(GtkGLArea* area)
     dengine_terminate();
 }
 
-void dengitor_glarea_evbox_onmotion(GtkWidget* widget, GdkEventMotion* motion)
+void dengitor_glarea_evbox_onmotion(GtkEventBox* evbox, GdkEventMotion* motion)
 {
     gtk_widget_get_allocation(GTK_WIDGET(dengitor.glarea), dengitor.glarea_alloc);
     //h for inverting gdk window coords
@@ -421,6 +427,16 @@ void dengitor_glarea_evbox_onmotion(GtkWidget* widget, GdkEventMotion* motion)
     dengitor.scene_camera->transform.rotation[1] += dengitor.glarea_evbox_dx;
 
     gtk_widget_queue_draw(GTK_WIDGET(dengitor.glarea));
+}
+
+void dengitor_glarea_evbox_onbtnpress(GtkEventBox* evbox, GdkEventButton* button)
+{
+    //dengineutils_logging_log("press");
+}
+
+void dengitor_glarea_evbox_onbtnrelease(GtkEventBox* evbox, GdkEventButton* button)
+{
+    dengitor.glarea_evbox_first = 0;
 }
 
 void dengitor_glarea_onrender(GtkGLArea* area)
