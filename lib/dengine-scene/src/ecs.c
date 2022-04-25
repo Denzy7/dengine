@@ -207,3 +207,19 @@ void denginescene_ecs_get_front(Entity* entity, vec3 front)
     front[2] = sinf(glm_rad(entity->transform.rotation[1])) * cosf(glm_rad(entity->transform.rotation[0]));
     glm_vec3_add(entity->transform.position, front, front);
 }
+
+void denginescene_ecs_get_right(Entity* entity, vec3 right)
+{
+    vec3 front;
+    vec3 y = {0.0f, 1.0f, 0.0f};
+    denginescene_ecs_get_front(entity, front);
+    glm_vec3_cross(front, y, right);
+}
+
+void denginescene_ecs_get_up(Entity* entity, vec3 up)
+{
+    vec3 right, front;
+    denginescene_ecs_get_right(entity, right);
+    denginescene_ecs_get_front(entity, front);
+    glm_vec3_cross(right, front, up);
+}

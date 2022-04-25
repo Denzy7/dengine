@@ -88,6 +88,10 @@ void denginescene_ecs_get_model_local(Entity* entity,mat4 mat4x4);
 
 void denginescene_ecs_get_front(Entity* entity, vec3 front);
 
+void denginescene_ecs_get_right(Entity* entity, vec3 right);
+
+void denginescene_ecs_get_up(Entity* entity, vec3 up);
+
 void denginescene_ecs_transform_entity(Entity* entity);
 
 MeshComponent* denginescene_ecs_new_meshcomponent(const Primitive* mesh, const Material* material);
