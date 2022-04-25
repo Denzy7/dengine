@@ -57,12 +57,15 @@ void dengitor_onactivate(GtkApplication* app)
     g_signal_connect(dengitor.glarea,
                      "render", G_CALLBACK(dengitor_glarea_onrender), NULL);
 
+    //event box for glarea
     g_signal_connect(dengitor.glarea_evbox, "motion-notify-event",
                      G_CALLBACK(dengitor_glarea_evbox_onmotion), NULL);
     g_signal_connect(dengitor.glarea_evbox, "button-press-event",
                      G_CALLBACK(dengitor_glarea_evbox_onbtnpress), NULL);
     g_signal_connect(dengitor.glarea_evbox, "button-release-event",
                      G_CALLBACK(dengitor_glarea_evbox_onbtnrelease), NULL);
+    g_signal_connect(dengitor.main, "key-press-event",
+                     G_CALLBACK(dengitor_glarea_evbox_onkeypress), NULL);
 
     dengitor.glarea_mode = DENGITOR_GLAREA_MODE_SCENE;
     dengitor.toggle_scene = GTK_TOGGLE_BUTTON( gtk_builder_get_object(dengitor.builder, "toggle_scene") );
@@ -447,6 +450,8 @@ void dengitor_glarea_evbox_onbtnpress(GtkEventBox* evbox, GdkEventButton* button
 
         GdkWindow* window = gtk_widget_get_window( GTK_WIDGET(dengitor.glarea) );
         gdk_window_set_cursor(window, dengitor.cursor_blank);
+
+        gtk_widget_queue_draw( GTK_WIDGET(dengitor.glarea) );
     }
 }
 
@@ -456,6 +461,23 @@ void dengitor_glarea_evbox_onbtnrelease(GtkEventBox* evbox, GdkEventButton* butt
     dengitor.glarea_evbox_rot = 0;
     GdkWindow* window = gtk_widget_get_window( GTK_WIDGET(dengitor.glarea) );
     gdk_window_set_cursor(window, dengitor.cursor_arrow);
+
+    gtk_widget_queue_draw( GTK_WIDGET(dengitor.glarea) );
+}
+
+void dengitor_glarea_evbox_onkeypress(GtkEventBox* evbox, GdkEventKey* key)
+{
+    vec3 front;
+    denginescene_ecs_get_front(dengitor.scene_camera, front);
+
+    if(dengitor.glarea_evbox_rot && key->keyval == GDK_KEY_w || key->keyval == GDK_KEY_W)
+    {
+        for(int i = 0; i < 3; i++)
+        {
+            dengitor.scene_camera->transform.position[i] = front[i];
+        }
+        gtk_widget_queue_draw( GTK_WIDGET(dengitor.glarea) );
+    }
 }
 
 void dengitor_glarea_onrender(GtkGLArea* area)

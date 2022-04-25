@@ -95,6 +95,8 @@ void dengitor_glarea_evbox_onbtnpress(GtkEventBox* evbox, GdkEventButton* button
 
 void dengitor_glarea_evbox_onbtnrelease(GtkEventBox* evbox, GdkEventButton* button);
 
+void dengitor_glarea_evbox_onkeypress(GtkEventBox* evbox, GdkEventKey* key);
+
 void dengitor_toggle_scenegame_ontoggle(GtkToggleButton* toggle_btn, gpointer flag);
 
 void dengitor_scene_treeview_oncursorchange(GtkTreeView* tree);
