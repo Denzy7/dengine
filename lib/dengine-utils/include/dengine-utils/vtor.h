@@ -61,6 +61,8 @@ int vtor_create_alloc(vtor* vtor, size_t type_sz, size_t num)
 
     if(vtor->data)
         return 1;
+    else
+        return 0;
 }
 
 int vtor_create(vtor* vtor, size_t type_sz)
