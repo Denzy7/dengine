@@ -43,6 +43,7 @@ void dengitor_onactivate(GtkApplication* app)
 
     // GL AREA, ALL THE MAGIC IS HERE!
     dengitor.glarea = GTK_GL_AREA(gtk_builder_get_object(dengitor.builder, "glarea"));
+    dengitor.glarea_evbox = GTK_EVENT_BOX( gtk_widget_get_parent( GTK_WIDGET(dengitor.glarea) ) );
     dengitor_w2v_set_glarea(dengitor.glarea);
     g_signal_connect(dengitor.glarea,
                      "realize", G_CALLBACK(dengitor_glarea_onrealize), NULL);
@@ -124,10 +125,9 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
 
     // preload glad to set viewport
     gladLoadGL();
-    GtkAllocation* alloc = g_new(GtkAllocation, 1);
-    gtk_widget_get_allocation(GTK_WIDGET(area), alloc);
-    glViewport(0, 0, alloc->width, alloc->height);
-    g_free(alloc);
+    dengitor.glarea_alloc = g_new(GtkAllocation, 1);
+    gtk_widget_get_allocation(GTK_WIDGET(area), dengitor.glarea_alloc);
+    glViewport(0, 0, dengitor.glarea_alloc->width, dengitor.glarea_alloc->height);
 
     dengine_init();
 
@@ -389,6 +389,8 @@ void dengitor_glarea_onunrealize(GtkGLArea* area)
     free(dengitor.shader_debug_normals);
     free(dengitor.shader_skybox_cube);
     free(dengitor.shader_skybox_2d);
+
+    g_free(dengitor.glarea_alloc);
 
     if(dengitor.scene_current)
         denginescene_destroy(dengitor.scene_current);

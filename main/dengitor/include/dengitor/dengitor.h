@@ -21,6 +21,8 @@ typedef struct
     GtkBuilder* builder;
 
     GtkGLArea* glarea;
+    GtkAllocation* glarea_alloc;
+    GtkEventBox* glarea_evbox;
     GLAreaMode glarea_mode;
     GtkToggleButton* toggle_scene;
     GtkToggleButton* toggle_game;
