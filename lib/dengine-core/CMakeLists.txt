@@ -1,4 +1,6 @@
-configure_file(src/dengine.rc.in src/dengine.rc)
+set(DENGINE_DLL_FILENAME "dengine-core.dll")
+set(DENGINE_DLL_FILEDESC "Core")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../dengine-lib.rc.in src/dengine-core.rc)
 
 set(dengine-core-src
 src/window.c
@@ -19,7 +21,7 @@ src/renderbuffer.c
 src/stb_image.c
 src/stb_image_write.c
 src/viewport.c
-${CMAKE_CURRENT_BINARY_DIR}/src/dengine.rc
+${CMAKE_CURRENT_BINARY_DIR}/src/dengine-core.rc
 ${PROJECT_SOURCE_DIR}/deps/glad/src/glad.c
 src/entrygl.c
 )

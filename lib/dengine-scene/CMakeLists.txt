@@ -1,6 +1,11 @@
+set(DENGINE_DLL_FILENAME "dengine-scene.dll")
+set(DENGINE_DLL_FILEDESC "Scene structures and parsing")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../dengine-lib.rc.in src/dengine-scene.rc)
+
 set(dengine-scene-src
 src/ecs.c
 src/scene.c
+${CMAKE_CURRENT_BINARY_DIR}/src/dengine-scene.rc
 )
 
 set(dengine-scene-hdr

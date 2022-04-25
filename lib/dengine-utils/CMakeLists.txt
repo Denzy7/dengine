@@ -1,3 +1,7 @@
+set(DENGINE_DLL_FILENAME "dengine-utils.dll")
+set(DENGINE_DLL_FILEDESC "Core Utilities DLL")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../dengine-lib.rc.in src/dengine-utils.rc)
+
 set(dengine-utils-src
 src/logging.c
 src/confserialize.c
@@ -8,6 +12,7 @@ src/timer.c
 src/vtor.c
 src/str.c
 src/debug.c
+${CMAKE_CURRENT_BINARY_DIR}/src/dengine-utils.rc
 )
 
 set(dengine-utils-hdr

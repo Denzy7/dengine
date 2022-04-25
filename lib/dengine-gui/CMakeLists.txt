@@ -1,5 +1,10 @@
+set(DENGINE_DLL_FILENAME "dengine-gui.dll")
+set(DENGINE_DLL_FILEDESC "Native GUI")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../dengine-lib.rc.in src/dengine-gui.rc)
+
 set(dengine-gui-src
 src/gui.c
+${CMAKE_CURRENT_BINARY_DIR}/src/dengine-gui.rc
 )
 
 set(dengine-gui-hdr

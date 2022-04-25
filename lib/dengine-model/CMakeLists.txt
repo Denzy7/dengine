@@ -1,5 +1,10 @@
+set(DENGINE_DLL_FILENAME "dengine-model.dll")
+set(DENGINE_DLL_FILEDESC "3D Models")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../dengine-lib.rc.in src/dengine-model.rc)
+
 set(dengine-model-src
 src/model.c
+${CMAKE_CURRENT_BINARY_DIR}/src/dengine-model.rc
 )
 
 set(dengine-model-hdr
