@@ -34,6 +34,11 @@ void dengitor_onactivate(GtkApplication* app)
 
     dengitor.main = GTK_APPLICATION_WINDOW(gtk_builder_get_object(dengitor.builder, "main"));
 
+    // a blank cursor for hiding when dragging glarea
+    // TODO : will this cause issues with multi-displays?
+    dengitor.cursor_blank = gdk_cursor_new_for_display( gdk_display_get_default(), GDK_BLANK_CURSOR);
+    dengitor.cursor_arrow = gdk_cursor_new_for_display( gdk_display_get_default(), GDK_ARROW);
+
     //  ABOUT WINDOW
     dengitor.about = GTK_ABOUT_DIALOG(gtk_builder_get_object(dengitor.builder, "about"));
     g_signal_connect(dengitor.about, "response", G_CALLBACK(dengitor_aboutdialog_hide), NULL);
@@ -399,6 +404,8 @@ void dengitor_glarea_onunrealize(GtkGLArea* area)
     free(dengitor.shader_skybox_2d);
 
     g_free(dengitor.glarea_alloc);
+    g_object_unref(dengitor.cursor_blank);
+    g_object_unref(dengitor.cursor_arrow);
 
     if(dengitor.scene_current)
         denginescene_destroy(dengitor.scene_current);
@@ -435,13 +442,20 @@ void dengitor_glarea_evbox_onmotion(GtkEventBox* evbox, GdkEventMotion* motion)
 void dengitor_glarea_evbox_onbtnpress(GtkEventBox* evbox, GdkEventButton* button)
 {
     if(button->button == GDK_BUTTON_SECONDARY)
+    {
         dengitor.glarea_evbox_rot = 1;
+
+        GdkWindow* window = gtk_widget_get_window( GTK_WIDGET(dengitor.glarea) );
+        gdk_window_set_cursor(window, dengitor.cursor_blank);
+    }
 }
 
 void dengitor_glarea_evbox_onbtnrelease(GtkEventBox* evbox, GdkEventButton* button)
 {
     dengitor.glarea_evbox_first = 0;
     dengitor.glarea_evbox_rot = 0;
+    GdkWindow* window = gtk_widget_get_window( GTK_WIDGET(dengitor.glarea) );
+    gdk_window_set_cursor(window, dengitor.cursor_arrow);
 }
 
 void dengitor_glarea_onrender(GtkGLArea* area)

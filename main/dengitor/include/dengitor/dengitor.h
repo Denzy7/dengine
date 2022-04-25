@@ -20,6 +20,9 @@ typedef struct
     GtkAboutDialog* about;
     GtkBuilder* builder;
 
+    GdkCursor* cursor_blank;
+    GdkCursor* cursor_arrow;
+
     GtkGLArea* glarea;
     GtkAllocation* glarea_alloc;
 
