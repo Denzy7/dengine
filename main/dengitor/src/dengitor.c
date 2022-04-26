@@ -448,7 +448,7 @@ void dengitor_glarea_evbox_onmotion(GtkEventBox* evbox, GdkEventMotion* motion)
 
 void dengitor_glarea_evbox_onbtnpress(GtkEventBox* evbox, GdkEventButton* button)
 {
-    if(button->button == GDK_BUTTON_SECONDARY)
+    if(button->button == GDK_BUTTON_SECONDARY && dengitor.glarea_mode == DENGITOR_GLAREA_MODE_SCENE)
     {
         dengitor.glarea_evbox_rot = 1;
 
