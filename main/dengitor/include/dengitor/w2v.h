@@ -5,10 +5,6 @@
  * W2V provides a signal function
  * to convert data in a widget
  * to a variable
- *
- * also provides a GtkGLArea to
- * redraw once data is parsed to
- * variable
  */
 
 #include <gtk/gtk.h>
