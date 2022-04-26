@@ -3,7 +3,7 @@
 #include "dengitor/w2v.h"
 
 static Dengitor dengitor;
-const int prtbf_sz = 1024;
+static const int prtbf_sz = 1024;
 static char prtbf[1024];
 
 int main(int argc, char *argv[])
@@ -31,7 +31,7 @@ gboolean dengitor_main_ontick(GtkWidget* widget, GdkFrameClock* clock, gpointer 
 {
     // this runs every frame cycle for the main GtkApplicationWindow
     // you can think of it as a "infinite while loop" until app closes
-    gtk_widget_queue_draw( GTK_WIDGET(dengitor.glarea) );
+    gtk_widget_queue_draw( widget );
     return TRUE;
 }
 
@@ -41,6 +41,7 @@ void dengitor_onactivate(GtkApplication* app)
     dengitor.builder = gtk_builder_new_from_resource("/com/denzygames/Dengitor/dengine-editor-ui.glade");
 
     dengitor.main = GTK_APPLICATION_WINDOW(gtk_builder_get_object(dengitor.builder, "main"));
+    gtk_widget_add_tick_callback( GTK_WIDGET(dengitor.main), dengitor_main_ontick, NULL, NULL);
 
     // a blank cursor for hiding when dragging glarea
     // TODO : will this cause issues with multi-displays?
@@ -64,7 +65,6 @@ void dengitor_onactivate(GtkApplication* app)
                      "unrealize", G_CALLBACK(dengitor_glarea_onunrealize), NULL);
     g_signal_connect(dengitor.glarea,
                      "render", G_CALLBACK(dengitor_glarea_onrender), NULL);
-    gtk_widget_add_tick_callback( GTK_WIDGET(dengitor.main), dengitor_main_ontick, NULL, NULL);
 
     //event box for glarea
     g_signal_connect(dengitor.glarea_evbox, "motion-notify-event",
@@ -381,14 +381,6 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
              (char*)glGetString(GL_VERSION),
              (char*)glGetString(GL_RENDERER));;
     gtk_window_set_title( GTK_WINDOW(dengitor.main), prtbf);
-
-//    LOGGING ENV
-//    uint32_t i = 0;
-//    while(g_get_environ()[i])
-//    {
-//        dengineutils_logging_log("%s", g_get_environ()[i]);
-//        i++;
-//    }
 }
 
 void dengitor_glarea_onunrealize(GtkGLArea* area)
