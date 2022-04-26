@@ -1,7 +1,6 @@
 #include "dengitor/inspector.h"
 #include "dengitor/utils.h"
 
-GtkGLArea* glarea = NULL;
 Entity* current = NULL;
 
 void _dengine_inspector_entry_float(GtkEntry* entry, float* val)
@@ -11,17 +10,11 @@ void _dengine_inspector_entry_float(GtkEntry* entry, float* val)
     buffer = gtk_entry_get_buffer(entry);
     text = gtk_entry_buffer_get_text(buffer);
     *val = strtof(text, NULL);
-
-    if(glarea)
-        gtk_widget_queue_draw( GTK_WIDGET(glarea) );
 }
 
 void _dengine_inspector_adjustment_float(GtkAdjustment* adjustment, float* val)
 {
     *val = gtk_adjustment_get_value(adjustment);
-
-    if(glarea)
-        gtk_widget_queue_draw( GTK_WIDGET(glarea) );
 }
 
 void _dengine_inspector_camera_resize(GtkButton* button, Inspector* inspector)
@@ -38,14 +31,10 @@ void _dengine_inspector_camera_resize(GtkButton* button, Inspector* inspector)
         dengine_camera_resize(current->camera_component->camera, w, h);
         dengineutils_logging_log("INFO::resize camera to %dx%d", w, h);
     }
-
-    if(glarea)
-        gtk_widget_queue_draw( GTK_WIDGET(glarea) );
 }
 
-void dengitor_inspector_setup(GtkBuilder* builder, Inspector* inspector, GtkGLArea* glarea_to_redraw_on_change)
+void dengitor_inspector_setup(GtkBuilder* builder, Inspector* inspector)
 {
-    glarea = glarea_to_redraw_on_change;
     GtkContainer* transform_widget_root,* camera_widget_root;
     inspector->inspector = GTK_CONTAINER(gtk_builder_get_object(builder, "inspector_vbox"));
 

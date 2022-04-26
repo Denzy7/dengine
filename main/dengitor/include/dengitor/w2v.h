@@ -13,8 +13,6 @@
 
 #include <gtk/gtk.h>
 
-void dengitor_w2v_set_glarea(GtkGLArea* area);
-
 void dengitor_w2v_entry2float(GtkEntry* entry, float* var);
 
 void dengitor_w2v_adjustment2float(GtkAdjustment* adjustment, float* var);

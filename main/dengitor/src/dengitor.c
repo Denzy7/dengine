@@ -58,7 +58,6 @@ void dengitor_onactivate(GtkApplication* app)
     // GL AREA, ALL THE MAGIC IS HERE!
     dengitor.glarea = GTK_GL_AREA(gtk_builder_get_object(dengitor.builder, "glarea"));
     dengitor.glarea_evbox = GTK_EVENT_BOX( gtk_widget_get_parent( GTK_WIDGET(dengitor.glarea) ) );
-    dengitor_w2v_set_glarea(dengitor.glarea);
     g_signal_connect(dengitor.glarea,
                      "realize", G_CALLBACK(dengitor_glarea_onrealize), NULL);
     g_signal_connect(dengitor.glarea,
@@ -99,7 +98,7 @@ void dengitor_onactivate(GtkApplication* app)
                      "activate", G_CALLBACK(dengitor_prefs_show), &dengitor.prefs); 
 
     // setup inspector
-    dengitor_inspector_setup(dengitor.builder, &dengitor.inspector, dengitor.glarea);
+    dengitor_inspector_setup(dengitor.builder, &dengitor.inspector);
 
     // setup viewportopts
     dengitor_viewport_opts_setup(dengitor.builder);
@@ -442,8 +441,6 @@ void dengitor_glarea_evbox_onmotion(GtkEventBox* evbox, GdkEventMotion* motion)
         float max_x = 89.9f;
         dengitor.scene_camera->transform.rotation[0] = glm_clamp(dengitor.scene_camera->transform.rotation[0],
                 -max_x, max_x);
-
-        gtk_widget_queue_draw(GTK_WIDGET(dengitor.glarea));
     }
 }
 
@@ -455,8 +452,6 @@ void dengitor_glarea_evbox_onbtnpress(GtkEventBox* evbox, GdkEventButton* button
 
         GdkWindow* window = gtk_widget_get_window( GTK_WIDGET(dengitor.glarea) );
         gdk_window_set_cursor(window, dengitor.cursor_blank);
-
-        gtk_widget_queue_draw( GTK_WIDGET(dengitor.glarea) );
     }
 }
 
@@ -466,8 +461,6 @@ void dengitor_glarea_evbox_onbtnrelease(GtkEventBox* evbox, GdkEventButton* butt
     dengitor.glarea_evbox_rot = 0;
     GdkWindow* window = gtk_widget_get_window( GTK_WIDGET(dengitor.glarea) );
     gdk_window_set_cursor(window, dengitor.cursor_arrow);
-
-    gtk_widget_queue_draw( GTK_WIDGET(dengitor.glarea) );
 }
 
 void dengitor_glarea_evbox_onkeypress(GtkEventBox* evbox, GdkEventKey* key)
@@ -481,7 +474,6 @@ void dengitor_glarea_evbox_onkeypress(GtkEventBox* evbox, GdkEventKey* key)
         {
             dengitor.scene_camera->transform.position[i] = front[i];
         }
-        gtk_widget_queue_draw( GTK_WIDGET(dengitor.glarea) );
     }
 }
 
@@ -634,8 +626,6 @@ void dengitor_toggle_scenegame_ontoggle(GtkToggleButton* toggle_btn, gpointer fl
             dengitor.glarea_mode = DENGITOR_GLAREA_MODE_GAME;
         }
     }
-
-    gtk_widget_queue_draw( GTK_WIDGET( dengitor.glarea ) );
 }
 
 void dengitor_draw_axis(Primitive* axis, Shader* shader)
@@ -665,10 +655,6 @@ void dengitor_scene_treeview_oncursorchange(GtkTreeView* tree)
         dengineutils_logging_log("selected %s %p %u", name, current, current->entity_id);
 
         dengitor_inspector_do_entity(current, &dengitor.inspector);
-
-
-        gtk_widget_queue_draw( GTK_WIDGET(dengitor.inspector.inspector) );
-        gtk_widget_queue_draw( GTK_WIDGET(dengitor.glarea) );
 
         dengitor.scene_entity_current = current;
 
@@ -729,6 +715,4 @@ void dengitor_viewport_opts_show(GtkDialog* viewportopts)
 void dengitor_viewport_opts_grid_draw_ontoggle(GtkToggleButton* toggle_btn)
 {
     dengitor.scene_grid_draw = gtk_toggle_button_get_active( toggle_btn);
-
-    gtk_widget_queue_draw(GTK_WIDGET( dengitor.glarea ));
 }
