@@ -17,4 +17,6 @@ void dengitor_w2v_entry2float(GtkEntry* entry, float* var);
 
 void dengitor_w2v_adjustment2float(GtkAdjustment* adjustment, float* var);
 
+void dengitor_w2v_colorbtn2float4(GtkColorButton* colbtn, float* var);
+
 #endif // W2V_H
