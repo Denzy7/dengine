@@ -39,6 +39,7 @@ void dengitor_onactivate(GtkApplication* app)
 {
     // MAIN UI
     dengitor.builder = gtk_builder_new_from_resource("/com/denzygames/Dengitor/dengine-editor-ui.glade");
+    gtk_builder_connect_signals(dengitor.builder, NULL);
 
     dengitor.main = GTK_APPLICATION_WINDOW(gtk_builder_get_object(dengitor.builder, "main"));
     gtk_widget_add_tick_callback( GTK_WIDGET(dengitor.main), dengitor_main_ontick, NULL, NULL);
@@ -92,6 +93,7 @@ void dengitor_onactivate(GtkApplication* app)
 
     //  PREFS WINDOW
     dengitor.prefs.builder = gtk_builder_new_from_resource("/com/denzygames/Dengitor/dengine-editor-prefs.glade");
+    gtk_builder_connect_signals(dengitor.prefs.builder, NULL);
     dengitor_prefs_setup(dengitor.prefs.builder, &dengitor.prefs);
     // menu button prefs
     g_signal_connect(gtk_builder_get_object(dengitor.builder, "menu_prefs"),

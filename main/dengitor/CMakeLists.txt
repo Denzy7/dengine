@@ -34,5 +34,7 @@ if(GTK3_LIBRARIES)
     add_executable(dengitor ${dengitor-hdr} ${dengitor-src} dengine-editor-res.c)
     target_include_directories(dengitor PRIVATE include)
     target_link_libraries(dengitor ${dengine} ${GTK3_LIBRARIES})
+    #export all. useful for connecting g_signal
+    set_target_properties(dengitor PROPERTIES ENABLE_EXPORTS TRUE)
     set_property(TARGET dengitor PROPERTY C_STANDARD 99)
 endif()
