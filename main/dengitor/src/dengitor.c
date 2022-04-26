@@ -61,6 +61,7 @@ void dengitor_onactivate(GtkApplication* app)
     // menu button
     g_signal_connect(gtk_builder_get_object(dengitor->builder, "menu_action"),
                      "activate", G_CALLBACK(dengitor_aboutdialog_show), NULL);
+    gtk_about_dialog_set_license(dengitor->about, DENGINE_LICENSE);
 
     // GL AREA, ALL THE MAGIC IS HERE!
     dengitor->glarea = GTK_GL_AREA(gtk_builder_get_object(dengitor->builder, "glarea"));
