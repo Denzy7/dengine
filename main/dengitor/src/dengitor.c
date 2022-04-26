@@ -667,7 +667,11 @@ void dengitor_viewport_opts_setup(GtkBuilder* builder)
     dengitor.viewport_opts = GTK_DIALOG( gtk_builder_get_object(builder, "viewport_opts") );
 
     dengitor.viewport_opts_fov = GTK_ADJUSTMENT( gtk_builder_get_object(builder, "viewport_opts_fov_adjustment") );
-    dengitor.viewport_opts_grid_colour = GTK_COLOR_BUTTON( gtk_builder_get_object(builder, "viewport_opts_grid_color") );
+    dengitor.viewport_opts_grid_colour = GTK_COLOR_BUTTON( gtk_builder_get_object(builder, "viewport_opts_grid_colour") );
+    g_signal_connect(dengitor.viewport_opts_grid_colour,
+                     "color-set",
+                     G_CALLBACK(dengitor_w2v_colorbtn2float4),
+                     dengitor.scene_grid_color);
     dengitor.viewport_opts_grid_scale = GTK_ADJUSTMENT( gtk_builder_get_object(builder, "viewport_opts_grid_scale") );
     g_signal_connect(dengitor.viewport_opts_grid_scale,
                      "value-changed",

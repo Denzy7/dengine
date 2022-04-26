@@ -59,7 +59,7 @@ typedef struct
     int scene_grid_draw;
     float scene_grid_scale;
     float scene_grid_width;
-    vec3 scene_grid_color;
+    vec4 scene_grid_color;
 
     Primitive scene_axis;
     float scene_axis_width;
