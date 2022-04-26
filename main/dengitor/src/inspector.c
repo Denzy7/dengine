@@ -75,6 +75,28 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
     GtkEntryBuffer* buffer;
     char prtbf[1024];
 
+    /*
+     * NOTE:
+     *
+     * Inspector uses a combination of diconnecting
+     * and connecting signals to work
+     *
+     * This approach allows more flexibility with w2v
+     * so that values can be instantly mapped to a widget
+     *
+     * This does come at the cost of disconnecting previous
+     * signal and connecting a new one with selected entity (its
+     * important it occurs in that order)
+     *
+     * Then pull its data (from ecs or core structs)
+     * to the widget. Failure to will cause the selected
+     * entity to pull data from previous entity (WHICH YOU
+     * DONT BASICALLY WANT) or multiple callbacks!
+     *
+     * Some widgets just need to pull ecs data (like getting camera
+     * render width) these do not need to connect any signals
+     */
+
     for(guint i = 0; i < 3; i++)
     {
         GList* pos_nth = g_list_nth(pos_list, i);
@@ -119,9 +141,7 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
         dengitor_utils_disconnect(gtk_adjustment_get_type(), adjustment, "value-changed");
         g_signal_connect(adjustment, "value-changed",
                          G_CALLBACK(dengitor_w2v_adjustment2float),&camera->fov);
-        gtk_adjustment_set_value(
-                    inspector->camera_widget.camera_fov,
-                    camera->fov);
+        gtk_adjustment_set_value(adjustment, camera->fov);
 
         //near
         entry = inspector->camera_widget.camera_near;
