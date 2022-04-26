@@ -27,10 +27,11 @@ int main(int argc, char *argv[])
     return run;
 }
 
-gboolean dengitor_glarea_ontick(GtkWidget* widget, GdkFrameClock* clock, gpointer data)
+gboolean dengitor_main_ontick(GtkWidget* widget, GdkFrameClock* clock, gpointer data)
 {
-    // this runs every frame cycle.
-    //gtk_widget_queue_draw( widget );
+    // this runs every frame cycle for the main GtkApplicationWindow
+    // you can think of it as a "infinite while loop" until app closes
+    gtk_widget_queue_draw( GTK_WIDGET(dengitor.glarea) );
     return TRUE;
 }
 
@@ -63,7 +64,7 @@ void dengitor_onactivate(GtkApplication* app)
                      "unrealize", G_CALLBACK(dengitor_glarea_onunrealize), NULL);
     g_signal_connect(dengitor.glarea,
                      "render", G_CALLBACK(dengitor_glarea_onrender), NULL);
-    gtk_widget_add_tick_callback( GTK_WIDGET(dengitor.glarea), dengitor_glarea_ontick, NULL, NULL);
+    gtk_widget_add_tick_callback( GTK_WIDGET(dengitor.main), dengitor_main_ontick, NULL, NULL);
 
     //event box for glarea
     g_signal_connect(dengitor.glarea_evbox, "motion-notify-event",

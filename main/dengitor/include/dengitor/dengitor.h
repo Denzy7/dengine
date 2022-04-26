@@ -83,13 +83,13 @@ void dengitor_aboutdialog_show();
 
 void dengitor_aboutdialog_hide();
 
+gboolean dengitor_main_ontick(GtkWidget* widget, GdkFrameClock* clock, gpointer data);
+
 void dengitor_glarea_onrealize(GtkGLArea* area);
 
 void dengitor_glarea_onunrealize(GtkGLArea* area);
 
 void dengitor_glarea_onrender(GtkGLArea* area);
-
-gboolean dengitor_glarea_ontick(GtkWidget* widget, GdkFrameClock* clock, gpointer data);
 
 void dengitor_glarea_evbox_onmotion(GtkEventBox* evbox, GdkEventMotion* motion);
 
