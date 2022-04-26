@@ -61,6 +61,9 @@ typedef struct
 static DengineInitOpts DENGINE_INIT_OPTS;
 static int DENGINE_HAS_GOT_INIT_OPTS = 0;
 
+extern char DENGINE_LICENSE[];
+extern unsigned int DENGINE_LICENSE_LEN;
+
 DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
 {
     memset(&DENGINE_INIT_OPTS, 0, sizeof(DENGINE_HAS_GOT_INIT_OPTS));
@@ -294,7 +297,5 @@ DENGINE_INLINE void dengine_update()
     dengine_window_swapbuffers();
     dengine_input_pollevents();
 }
-
-
 
 #endif // DENGINE_H

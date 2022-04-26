@@ -24,6 +24,7 @@ src/viewport.c
 ${CMAKE_CURRENT_BINARY_DIR}/src/dengine-core.rc
 ${PROJECT_SOURCE_DIR}/deps/glad/src/glad.c
 src/entrygl.c
+${PROJECT_SOURCE_DIR}/LICENSE.c
 )
 
 set(dengine-core-hdr
