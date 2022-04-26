@@ -9,13 +9,8 @@ typedef struct
     GtkWidget* transform;
 
     GtkContainer* transform_position;
-    gulong sigids_transform_position[3];
-
     GtkContainer* transform_rotation;
-    gulong sigids_transform_rotation[3];
-
     GtkContainer* transform_scale;
-    gulong sigids_transform_scale[3];
 }TransformWidget;
 
 typedef struct
@@ -23,19 +18,13 @@ typedef struct
     GtkWidget* camera;
 
     GtkAdjustment* camera_fov;
-    gulong sigid_camera_fov;
 
     GtkEntry* camera_near;
-    gulong sigid_camera_near;
-
     GtkEntry* camera_far;
-    gulong sigid_camera_far;
 
     GtkEntry* camera_width;
     GtkEntry* camera_height;
-
     GtkButton* camera_resize;
-    gulong sigid_camera_resize;
 
     GtkColorButton* camera_clearcolour;
 }CameraWidget;

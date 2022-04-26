@@ -69,10 +69,11 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
     GList* scl_list = gtk_container_get_children(inspector->transform_widget.transform_scale);
 
     GtkEntry* entry;
+    GtkAdjustment* adjustment;
+    GtkButton* button;
     //const char* text;
     GtkEntryBuffer* buffer;
     char prtbf[1024];
-    gulong* sigid;
 
     for(guint i = 0; i < 3; i++)
     {
@@ -83,47 +84,27 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
         // pos
         entry = GTK_ENTRY(pos_nth->data);
         buffer = gtk_entry_get_buffer(entry);
-
-        // sigchange
-        sigid = &inspector->transform_widget.sigids_transform_position[i];
-        if(*sigid)
-        {
-            g_signal_handler_disconnect(entry, *sigid);
-        }
-        *sigid = g_signal_connect(entry, "changed",
+        dengitor_utils_disconnect(gtk_entry_get_type(), entry, "changed");
+        g_signal_connect(entry, "changed",
                          G_CALLBACK(dengitor_w2v_entry2float), &entity->transform.position[i]);
-
         g_snprintf(prtbf, sizeof(prtbf), "%.1f", entity->transform.position[i]);
         gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
 
         //rot
         entry = GTK_ENTRY(rot_nth->data);
         buffer = gtk_entry_get_buffer(entry);
-
-        //sigchanged
-        sigid = &inspector->transform_widget.sigids_transform_rotation[i];
-        if(*sigid)
-        {
-            g_signal_handler_disconnect(entry, *sigid);
-        }
-        *sigid = g_signal_connect(entry, "changed",
+        dengitor_utils_disconnect(gtk_entry_get_type(), entry, "changed");
+        g_signal_connect(entry, "changed",
                          G_CALLBACK(dengitor_w2v_entry2float), &entity->transform.rotation[i]);
-
         g_snprintf(prtbf, sizeof(prtbf), "%.1f", entity->transform.rotation[i]);
         gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
 
         //scl
         entry = GTK_ENTRY(scl_nth->data);
         buffer = gtk_entry_get_buffer(entry);
-
-        sigid = &inspector->transform_widget.sigids_transform_scale[i];
-        if(*sigid)
-        {
-            g_signal_handler_disconnect(entry, *sigid);
-        }
-        *sigid = g_signal_connect(entry, "changed",
+        dengitor_utils_disconnect(gtk_entry_get_type(), entry, "changed");
+        g_signal_connect(entry, "changed",
                          G_CALLBACK(dengitor_w2v_entry2float), &entity->transform.scale[i]);
-
         g_snprintf(prtbf, sizeof(prtbf), "%.1f", entity->transform.scale[i]);
         gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
     }
@@ -133,15 +114,11 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
         Camera* camera = entity->camera_component->camera;
         gtk_widget_show_all(inspector->camera_widget.camera);
 
-        sigid = &inspector->camera_widget.sigid_camera_fov;
-        if(*sigid)
-        {
-            g_signal_handler_disconnect(
-                        inspector->camera_widget.camera_fov, *sigid);
-        }
-        *sigid = g_signal_connect(inspector->camera_widget.camera_fov, "value-changed",
-                         G_CALLBACK(dengitor_w2v_adjustment2float), &camera->fov);
         // fov
+        adjustment = inspector->camera_widget.camera_fov;
+        dengitor_utils_disconnect(gtk_adjustment_get_type(), adjustment, "value-changed");
+        g_signal_connect(adjustment, "value-changed",
+                         G_CALLBACK(dengitor_w2v_adjustment2float),&camera->fov);
         gtk_adjustment_set_value(
                     inspector->camera_widget.camera_fov,
                     camera->fov);
@@ -149,30 +126,18 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
         //near
         entry = inspector->camera_widget.camera_near;
         buffer = gtk_entry_get_buffer(entry);
-
-        sigid = &inspector->camera_widget.sigid_camera_near;
-        if(*sigid)
-        {
-            g_signal_handler_disconnect(entry, *sigid);
-        }
-        *sigid = g_signal_connect(entry, "changed",
+        dengitor_utils_disconnect(gtk_entry_get_type(), entry, "changed");
+        g_signal_connect(entry, "changed",
                          G_CALLBACK(dengitor_w2v_entry2float), &camera->near);
-
         g_snprintf(prtbf, sizeof(prtbf), "%.2f", camera->near);
         gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
 
         //far
         entry = inspector->camera_widget.camera_far;
         buffer = gtk_entry_get_buffer(entry);
-
-        sigid = &inspector->camera_widget.sigid_camera_far;
-        if(*sigid)
-        {
-            g_signal_handler_disconnect(entry, *sigid);
-        }
-        *sigid = g_signal_connect(entry, "changed",
+        dengitor_utils_disconnect(gtk_entry_get_type(), entry, "changed");
+        g_signal_connect(entry, "changed",
                          G_CALLBACK(dengitor_w2v_entry2float), &camera->far);
-
         g_snprintf(prtbf, sizeof(prtbf), "%.2f", camera->far);
         gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
 
@@ -188,12 +153,9 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
         g_snprintf(prtbf, sizeof(prtbf), "%d", camera->render_height);
         gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
 
-        sigid = &inspector->camera_widget.sigid_camera_resize;
-        if(*sigid)
-        {
-            g_signal_handler_disconnect(inspector->camera_widget.camera_resize, *sigid);
-        }
-        *sigid = g_signal_connect(inspector->camera_widget.camera_resize, "clicked",
+        button = inspector->camera_widget.camera_resize;
+        dengitor_utils_disconnect(gtk_button_get_type(), button, "clicked");
+        g_signal_connect(button, "clicked",
                          G_CALLBACK(_dengine_inspector_camera_resize), inspector);
         //clear
         GdkRGBA rgba = {camera->clearcolor[0],
