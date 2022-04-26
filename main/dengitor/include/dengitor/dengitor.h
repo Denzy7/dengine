@@ -89,6 +89,8 @@ void dengitor_glarea_onunrealize(GtkGLArea* area);
 
 void dengitor_glarea_onrender(GtkGLArea* area);
 
+gboolean dengitor_glarea_ontick(GtkWidget* widget, GdkFrameClock* clock, gpointer data);
+
 void dengitor_glarea_evbox_onmotion(GtkEventBox* evbox, GdkEventMotion* motion);
 
 void dengitor_glarea_evbox_onbtnpress(GtkEventBox* evbox, GdkEventButton* button);
