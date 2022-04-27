@@ -86,12 +86,12 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
      *
      * This does come at the cost of disconnecting previous
      * signal and connecting a new one with selected entity (its
-     * important it occurs in that order)
+     * important it occurs in that order). Failure to will cause
+     * the selected entity to pull data from previous entity
+     * (WHICH YOU DONT BASICALLY WANT) or multiple callbacks!
      *
      * Then pull its data (from ecs or core structs)
-     * to the widget. Failure to will cause the selected
-     * entity to pull data from previous entity (WHICH YOU
-     * DONT BASICALLY WANT) or multiple callbacks!
+     * to the widget.
      *
      * Some widgets just need to pull ecs data (like getting camera
      * render width) these do not need to connect any signals
