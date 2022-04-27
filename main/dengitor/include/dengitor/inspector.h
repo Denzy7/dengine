@@ -31,10 +31,30 @@ typedef struct
 
 typedef struct
 {
+    GtkWidget* light;
+
+    GtkComboBox* light_type;
+
+    GtkColorButton* light_ambient;
+    GtkColorButton* light_diffuse;
+    GtkColorButton* light_specular;
+    GtkAdjustment* light_strength;
+
+    GtkEntry* light_shadow_size;
+    GtkButton* light_shadow_resize;
+
+    GtkToggleButton* light_shadow_pcf;
+    GtkAdjustment* light_shadow_pcf_samples;
+
+}LightWidget;
+
+typedef struct
+{
     GtkContainer* inspector;
 
     TransformWidget transform_widget;
     CameraWidget camera_widget;
+    LightWidget light_widget;
 }Inspector;
 
 void dengitor_inspector_setup(GtkBuilder* builder, Inspector* inspector);
