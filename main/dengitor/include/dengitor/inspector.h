@@ -40,6 +40,7 @@ typedef struct
     GtkColorButton* light_specular;
     GtkAdjustment* light_strength;
 
+    GtkComboBox* light_shadow_mode;
     GtkEntry* light_shadow_size;
     GtkButton* light_shadow_resize;
 

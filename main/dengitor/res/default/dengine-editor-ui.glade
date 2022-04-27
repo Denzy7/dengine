@@ -474,7 +474,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkComboBoxText">
+                      <object class="GtkComboBoxText" id="light_component_type">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="active">0</property>
@@ -691,7 +691,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkComboBoxText">
+                              <object class="GtkComboBoxText" id="light_component_shadow_mode">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="active">0</property>

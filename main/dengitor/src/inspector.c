@@ -65,10 +65,12 @@ void dengitor_inspector_setup(GtkBuilder* builder, Inspector* inspector)
     g_object_unref(camera_widget_root);
 
     inspector->light_widget.light = GTK_WIDGET( gtk_builder_get_object(builder, "light_component") );
+    inspector->light_widget.light_type = GTK_COMBO_BOX( gtk_builder_get_object(builder, "light_component_type") );
     inspector->light_widget.light_ambient = GTK_COLOR_BUTTON( gtk_builder_get_object(builder, "light_component_ambient") );
     inspector->light_widget.light_diffuse = GTK_COLOR_BUTTON( gtk_builder_get_object(builder, "light_component_diffuse") );
     inspector->light_widget.light_specular = GTK_COLOR_BUTTON( gtk_builder_get_object(builder, "light_component_specular") );
     inspector->light_widget.light_strength = GTK_ADJUSTMENT( gtk_builder_get_object(builder, "light_component_strength_adjustment") );
+    inspector->light_widget.light_shadow_mode = GTK_COMBO_BOX( gtk_builder_get_object(builder, "light_component_shadow_mode") );
     inspector->light_widget.light_shadow_size = GTK_ENTRY( gtk_builder_get_object(builder, "light_component_shadow_size") );
     inspector->light_widget.light_shadow_resize = GTK_BUTTON ( gtk_builder_get_object(builder, "light_component_shadow_resize") );
     inspector->light_widget.light_shadow_pcf = GTK_TOGGLE_BUTTON( gtk_builder_get_object(builder, "light_component_shadow_pcf") );
@@ -223,6 +225,7 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
     {
         LightOp* light_op = NULL;
         ShadowOp* shadow_op = NULL;
+        gint active_type = 0, active_shadow = 0;
 
         if(entity->light_component->type == DENGINE_LIGHT_DIR)
         {
@@ -231,15 +234,18 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
             current_shadowop_tgt = GL_TEXTURE_2D;
         }else if(entity->light_component->type == DENGINE_LIGHT_POINT)
         {
+            active_type = 1;
             light_op = &((PointLight*)entity->light_component->light)->light;
             shadow_op = &((PointLight*)entity->light_component->light)->shadow;
             current_shadowop_tgt = GL_TEXTURE_CUBE_MAP;
         }else if(entity->light_component->type == DENGINE_LIGHT_SPOT)
         {
+            active_type = 2;
             light_op = &((SpotLight*)entity->light_component->light)->pointLight.light;
             shadow_op = &((SpotLight*)entity->light_component->light)->pointLight.shadow;
             current_shadowop_tgt = GL_TEXTURE_CUBE_MAP;
         }
+        gtk_combo_box_set_active( inspector->light_widget.light_type, active_type);
 
         gtk_widget_show_all(inspector->light_widget.light);
 
@@ -282,6 +288,15 @@ void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
         if(shadow_op)
         {
             current_shadowop = shadow_op;
+
+            if(shadow_op->enable)
+                active_shadow = 0;
+            else if(shadow_op->invisiblemesh)
+                active_shadow = 1;
+            else if(!shadow_op->enable)
+                active_shadow = 2;
+
+            gtk_combo_box_set_active( inspector->light_widget.light_shadow_mode, active_shadow);
 
             //shadow sz
             entry = inspector->light_widget.light_shadow_size;
