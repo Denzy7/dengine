@@ -73,6 +73,8 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
         return;
     }
 
+    shadowop->invisiblemesh = 0;
+
     Framebuffer entry_fb;
     dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entry_fb);
 

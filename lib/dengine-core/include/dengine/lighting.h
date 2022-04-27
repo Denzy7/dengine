@@ -7,6 +7,13 @@
 #include "dengine/shader.h" //set_mat4, bind_blocks?
 #include "dengine/primitive.h" //draw
 
+typedef enum
+{
+    DENGINE_LIGHT_DIR,
+    DENGINE_LIGHT_POINT,
+    DENGINE_LIGHT_SPOT,
+}LightType;
+
 typedef struct LightOp
 {
     int enable;
@@ -21,6 +28,7 @@ typedef struct LightOp
 typedef struct ShadowOp
 {
     int enable;
+    int invisiblemesh;
 
     Framebuffer shadow_map;
     int shadow_map_size;
@@ -73,13 +81,6 @@ typedef struct Lighting
 
     uint32_t n_pLights, n_sLights;
 }Lighting;
-
-typedef enum
-{
-    DENGINE_LIGHT_DIR,
-    DENGINE_LIGHT_POINT,
-    DENGINE_LIGHT_SPOT,
-}LightType;
 
 typedef void* Light;
 
