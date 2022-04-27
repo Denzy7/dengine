@@ -416,6 +416,13 @@
       </object>
     </child>
   </object>
+  <object class="GtkAdjustment" id="light_component_shadow_pcf_samples">
+    <property name="lower">2</property>
+    <property name="upper">16</property>
+    <property name="value">2</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">1</property>
+  </object>
   <object class="GtkAdjustment" id="light_component_strength_adjustment">
     <property name="upper">100</property>
     <property name="value">1</property>
@@ -811,7 +818,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkCheckButton" id="light_component_shdow_pcf">
+                                      <object class="GtkCheckButton" id="light_component_shadow_pcf">
                                         <property name="visible">True</property>
                                         <property name="can-focus">True</property>
                                         <property name="receives-default">False</property>
@@ -848,16 +855,14 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkComboBoxText" id="light_component_shdow_pcf_samples">
+                                      <object class="GtkScale">
                                         <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <property name="active">0</property>
-                                        <items>
-                                          <item translatable="yes">2</item>
-                                          <item translatable="yes">4</item>
-                                          <item translatable="yes">8</item>
-                                          <item translatable="yes">16</item>
-                                        </items>
+                                        <property name="can-focus">True</property>
+                                        <property name="adjustment">light_component_shadow_pcf_samples</property>
+                                        <property name="show-fill-level">True</property>
+                                        <property name="fill-level">16</property>
+                                        <property name="round-digits">1</property>
+                                        <property name="digits">0</property>
                                       </object>
                                       <packing>
                                         <property name="expand">True</property>
