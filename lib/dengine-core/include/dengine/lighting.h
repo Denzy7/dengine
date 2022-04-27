@@ -99,8 +99,11 @@ void dengine_lighting_light_apply(LightType type, Light light, Shader* shader);
 
 void dengine_lighting_light_shadow_draw(LightType type, Light light, Shader* shader, Primitive* primitive, float* modelmtx);
 
+//Shadow op
 
 void dengine_lighting_shadowop_clear(ShadowOp* shadowop);
+
+void dengine_lighting_shadowop_resize(uint32_t shadowmap_target, ShadowOp* shadowop, int size);
 
 //DirLight
 

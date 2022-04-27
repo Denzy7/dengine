@@ -166,6 +166,34 @@ void dengine_lighting_shadowop_clear(ShadowOp* shadowop)
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &entry_fb);
 }
 
+void dengine_lighting_shadowop_resize(uint32_t shadowmap_target, ShadowOp* shadowop, int size)
+{
+    Texture entry_tex;
+    dengine_entrygl_texture(shadowmap_target, &entry_tex);
+
+    Texture* depth = &shadowop->shadow_map.depth;
+    if(depth->texture_id)
+    {
+        dengine_texture_bind(shadowmap_target, depth);
+        depth->width = size;
+        depth->height = size;
+
+        if(shadowmap_target == GL_TEXTURE_CUBE_MAP)
+        {
+            for(int i = GL_TEXTURE_CUBE_MAP_POSITIVE_X; i < 6; i++)
+            {
+                dengine_texture_data(i, depth);
+            }
+        }else
+        {
+            dengine_texture_data(shadowmap_target, depth);
+        }
+    }
+
+    shadowop->shadow_map_size = size;
+    dengine_texture_bind(shadowmap_target, &entry_tex);
+}
+
 void dengine_lighting_setup_dirlight(DirLight* dirLight)
 {
     if(dirLight->shadow.enable)
