@@ -22,3 +22,19 @@ void dengitor_utils_disconnect(GType type, gpointer instance, const char* signal
     if(sig)
         g_signal_handler_disconnect(instance, sig);
 }
+
+void dengitor_utils_rgba_to_float4(GdkRGBA* rgba, float* float4)
+{
+    float4[0] = rgba->red;
+    float4[1] = rgba->green;
+    float4[2] = rgba->blue;
+    float4[3] = rgba->alpha;
+}
+
+void dengitor_utils_float4_to_rgba(float* float4, GdkRGBA* rgba)
+{
+    rgba->red = float4[0];
+    rgba->green = float4[1];
+    rgba->blue = float4[2];
+    rgba->alpha = float4[3];
+}
