@@ -36,19 +36,19 @@ static vec3 ups_3d[] = {
     {0.0f, -1.0f, 0.0f},
 };
 
-static const float default_ambient[3]=
+static const float default_ambient[]=
 {
-    .1f,.1f,.1f
+    .1f,.1f,.1f,1.0f
 };
 
-static const float default_specular[3]=
+static const float default_specular[]=
 {
-    .75f,.75f,.75f
+    .75f,.75f,.75f,1.0f
 };
 
-static const float default_diffuse[3]=
+static const float default_diffuse[]=
 {
-    .75f,.75f,.75f
+    .75f,.75f,.75f,1.0f
 };
 
 const char* LightOpShaderStr=
