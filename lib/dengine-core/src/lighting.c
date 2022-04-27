@@ -283,6 +283,7 @@ void dengine_lighting_apply_dirlight(DirLight* dirLight, Shader* shader)
     dengine_shader_set_int(shader, "dLight.shadow.enable", dirLight->shadow.enable);
     dengine_shader_set_int(shader, "dLight.shadow.pcf", dirLight->shadow.pcf);
     dengine_shader_set_int(shader, "dLight.shadow.pcf_samples", dirLight->shadow.pcf_samples);
+    dengine_shader_set_int(shader, "dLight.shadow.shadow_map_size", dirLight->shadow.shadow_map_size);
     dengine_shader_set_mat4(shader, "dLight.shadow_projview", dirLight->shadow_projview);
 
 }
