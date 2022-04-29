@@ -86,7 +86,8 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture)
 {
     DENGINE_DEBUG_ENTER;
 
-    const char* texfileondisk = strrchr(file, DENGINE_PATH_SEP) + 1;
+    // TODO : use DENGINE_PATHSEP. BUT MOST libs conform to using it
+    const char* texfileondisk = strrchr(file, '/') + 1;
     char texcacheprtbf[2048];
     uint32_t cache_blk_sz = 0;
 
