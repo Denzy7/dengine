@@ -1,5 +1,5 @@
 # dengine
-Lightweight Graphics Engine
+Simple 3D Graphics Engine
 
 # building
 - **Desktop** (Linux, Windows) : Build with CMake. For Windows, MinGW is highly recommended. *Haven't tested on MSVC with C99*
