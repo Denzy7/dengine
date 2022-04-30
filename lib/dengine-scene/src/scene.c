@@ -18,7 +18,7 @@ Scene* denginescene_new()
     Scene* newscn = malloc(sizeof (struct _Scene));
     memset(newscn, 0, sizeof (Scene));
 
-    newscn->entities = malloc(DENGINE_ECS_MAXCHILDREN * sizeof (struct _Entity*));
+    vtor_create(&newscn->entities, sizeof(EntityChild));
 
     return newscn;
 }
@@ -41,10 +41,12 @@ denginescene_new_skybox(const Primitive* cube, const Material* material)
 
 void denginescene_destroy(Scene* scene)
 {
-    for (uint32_t i = 0; i < scene->n_entities; i++) {
-        denginescene_ecs_destroy_entity(scene->entities[i]);
+    EntityChild* ec = scene->entities.data;
+    for (uint32_t i = 0; i < scene->entities.count; i++) {
+        denginescene_ecs_destroy_entity(ec[i].child);
     }
-    free(scene->entities);
+
+    vtor_free(&scene->entities);
 
     if(scene->skybox)
     {
@@ -58,18 +60,15 @@ void denginescene_destroy(Scene* scene)
 
 void denginescene_add_entity(Scene* scene, Entity* entity)
 {
-    if (scene->n_entities >= DENGINE_ECS_MAXCHILDREN) {
-        dengineutils_logging_log("WARNING::Scene limit reached! Recompile to increase limit. Free the allocated entity to avoid a memory leak!");
-        return;
-    }
-    scene->entities[scene->n_entities] = entity;
-    scene->n_entities++;
+    EntityChild ec = { entity };
+    vtor_pushback(&scene->entities, &ec);
 }
 
 void denginescene_update(Scene* scene)
 {
-    for (uint32_t i = 0; i < scene->n_entities; i++) {
-        Entity* root=scene->entities[i];
+    EntityChild* ec = scene->entities.data;
+    for (uint32_t i = 0; i < scene->entities.count; i++) {
+        Entity* root = ec[i].child;
         denginescene_ecs_transform_entity(root);
         _denginescene_do_check_camera(root,scene);
         _denginescene_do_check_light(root, scene);
@@ -96,9 +95,10 @@ void _denginescene_ecs_do_camera_draw(Entity* camera,Entity* root)
     if(!root->parent && root->mesh_component)
         _denginescene_ecs_do_camera_draw_mesh(camera,root);
 
-    size_t children_count = root->children_count;
+    size_t children_count = root->children.count;
+    EntityChild* ec = root->children.data;
     for (size_t i = 0; i < children_count; i++) {
-        Entity* child = root->children[i];
+        Entity* child = ec[i].child;
         if(child->mesh_component)
         {
             _denginescene_ecs_do_camera_draw_mesh(camera,child);
@@ -115,9 +115,10 @@ void _denginescene_do_check_camera(Entity* root, Scene* scene)
         denginescene_ecs_do_camera_scene(root,scene);
     }
 
-    size_t children_count = root->children_count;
+    size_t children_count = root->children.count;
+    EntityChild* ec = root->children.data;
     for (size_t i = 0; i < children_count; i++) {
-        Entity* child = root->children[i];
+        Entity* child = ec[i].child;
         if(child->camera_component)
         {
             denginescene_ecs_do_camera_scene(child,scene);
@@ -134,9 +135,10 @@ void _denginescene_do_check_light(Entity* root, Scene* scene)
         denginescene_ecs_do_light_scene(root,scene);
     }
 
-    size_t children_count = root->children_count;
+    size_t children_count = root->children.count;
+    EntityChild* ec = root->children.data;
     for (size_t i = 0; i < children_count; i++) {
-        Entity* child = root->children[i];
+        Entity* child = ec[i].child;
         if(child->camera_component)
         {
             denginescene_ecs_do_light_scene(child,scene);
@@ -182,9 +184,10 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
 //    }
 
     //render scene recursive
-    for (size_t i = 0; i < scene->n_entities; i++)
+    EntityChild* ec = scene->entities.data;
+    for (size_t i = 0; i < scene->entities.count; i++)
     {
-        _denginescene_ecs_do_camera_draw(camera, scene->entities[i]);
+        _denginescene_ecs_do_camera_draw(camera, ec[i].child);
     }
 
     // draw sky
@@ -245,9 +248,10 @@ void _denginescene_ecs_rec_light_shadow(Entity* light, Entity* root)
         _denginescene_ecs_do_light_draw_shadow_mesh(light, root);
     }
 
-    size_t children_count = root->children_count;
+    size_t children_count = root->children.count;
+    EntityChild* ec = root->children.data;
     for (size_t i = 0; i < children_count; i++) {
-        Entity* child = root->children[i];
+        Entity* child = ec[i].child;
         if(child->mesh_component)
         {
             _denginescene_ecs_do_light_draw_shadow_mesh(light, child);
@@ -264,9 +268,10 @@ void _denginescene_ecs_rec_light_apply(Entity* light, Entity* root)
         _denginescene_ecs_do_light_apply(light, root);
     }
 
-    size_t children_count = root->children_count;
+    EntityChild* ec = root->children.data;
+    size_t children_count = root->children.count;
     for (size_t i = 0; i < children_count; i++) {
-        Entity* child = root->children[i];
+        Entity* child = ec[i].child;
         if(child->mesh_component)
         {
             _denginescene_ecs_do_light_apply(light, child);
@@ -300,14 +305,17 @@ void denginescene_ecs_do_light_scene(Entity* light, Scene* scene)
         dengine_lighting_shadowop_clear(&sl->pointLight.shadow);
     }
 
-    for (size_t i = 0; i < scene->n_entities; i++)
+    EntityChild* ec = scene->entities.data;
+    size_t children_count = scene->entities.count;
+
+    for (size_t i = 0; i < children_count; i++)
     {
-        _denginescene_ecs_rec_light_shadow(light, scene->entities[i]);
+        _denginescene_ecs_rec_light_shadow(light, ec[i].child);
     }
 
-    for (size_t i = 0; i < scene->n_entities; i++)
+    for (size_t i = 0; i < children_count; i++)
     {
-        _denginescene_ecs_rec_light_apply(light, scene->entities[i]);
+        _denginescene_ecs_rec_light_apply(light, ec[i].child);
     }
 }
 

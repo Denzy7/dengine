@@ -53,7 +53,7 @@
  * This limitation may be removed in the future once vtor is extended
  * to hold pointer of arrays
  */
-#define DENGINE_ECS_MAXCHILDREN 128
+//#define DENGINE_ECS_MAXCHILDREN 128
 
 //Size of buffer with the name of the entity
 #define DENGINE_ECS_MAXNAME 1024

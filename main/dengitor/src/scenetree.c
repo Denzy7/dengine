@@ -53,9 +53,10 @@ void _dengitor_scenetree_traverse_entity(GtkTreeIter* root, GtkTreeStore* store,
         iter_p = *gtk_tree_iter_copy(root);
     }
 
-    for(size_t i = 0; i < entity->children_count; i++)
+    EntityChild* ec = entity->children.data;
+    for(size_t i = 0; i < entity->children.count; i++)
     {
-        Entity* child = entity->children[i];
+        Entity* child = ec[i].child;
         gtk_tree_store_append(store, &iter_c, &iter_p);
         gtk_tree_store_set(store, &iter_c,
                            DENGITOR_SCENETREE_ENTNAME, child->name,
@@ -68,9 +69,10 @@ void _dengitor_scenetree_traverse_entity(GtkTreeIter* root, GtkTreeStore* store,
 void dengitor_scenetree_traverse(Scene* scene, GtkTreeStore* store)
 {
     gtk_tree_store_clear(store);
-    for(size_t i = 0; i < scene->n_entities; i++)
+    EntityChild* ec = scene->entities.data;
+    for(size_t i = 0; i < scene->entities.count; i++)
     {
-       _dengitor_scenetree_traverse_entity(NULL, store, scene->entities[i]);
+       _dengitor_scenetree_traverse_entity(NULL, store, ec[i].child);
     }
 }
 

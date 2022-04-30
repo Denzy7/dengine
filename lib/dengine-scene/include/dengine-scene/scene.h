@@ -12,9 +12,7 @@ typedef struct
 
 typedef struct _Scene
 {
-    Entity** entities;
-    uint32_t n_entities;
-
+    vtor entities;
     Camera* last_cam;
 
     Skybox* skybox;

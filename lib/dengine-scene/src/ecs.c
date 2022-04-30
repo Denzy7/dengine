@@ -45,7 +45,7 @@ void _denginescene_ecs_new_entity_setup(Entity* ent)
     //dengineutils_logging_log("new ent : %u, %p", entity_count, ent);
     ent->active = 1;
     ent->transform.scale[0]=1.0f,ent->transform.scale[1]=1.0f,ent->transform.scale[2]=1.0f;
-    ent->children = malloc(DENGINE_ECS_MAXCHILDREN * sizeof (Entity*));
+    vtor_create(&ent->children, sizeof(EntityChild));
     ent->name =  malloc(DENGINE_ECS_MAXNAME);
     snprintf(ent->name, DENGINE_ECS_MAXNAME, "Entity %u",ent->entity_id);
 }
@@ -66,16 +66,17 @@ Entity* denginescene_ecs_new_entity()
 
 void _denginescene_ecs_destroy_entity_children(Entity* root)
 {
-    size_t children_count = root->children_count;
+    size_t children_count = root->children.count;
+    EntityChild* ec = root->children.data;
     for (size_t i = 0; i < children_count; i++) {
-        Entity* child = root->children[i];
+        Entity* child = ec[i].child;
         _denginescene_ecs_destroy_entity_components(child);
         _denginescene_ecs_destroy_entity_children(child);
         //dengineutils_logging_log("destroy child %u. parent %u", child->entity_id, child->parent->entity_id);
         free(child->name);
         free(child);
     }
-    free(root->children);
+    vtor_free(&root->children);
 }
 
 void denginescene_ecs_destroy_entity(Entity* root)
@@ -89,14 +90,10 @@ void denginescene_ecs_destroy_entity(Entity* root)
 
 void denginescene_ecs_parent(Entity* parent, Entity* child)
 {
-    if (parent->children_count >= DENGINE_ECS_MAXCHILDREN) {
-        dengineutils_logging_log("WARNING::Parenting limit reached! Recompile to increase limit. Free the allocated entity to avoid a memory leak!");
-        return;
-    }
     child->parent = parent;
 
-    parent->children[parent->children_count] = child;
-    parent->children_count++;
+    EntityChild ec = { child };
+    vtor_pushback(&parent->children, &ec);
 
     //dengineutils_logging_log("parent %u (%p) to %u", child->entity_id, child, parent->entity_id);
 }
@@ -182,9 +179,10 @@ void denginescene_ecs_transform_entity(Entity* entity)
     if(!entity->parent)
         denginescene_ecs_get_model_local(entity, entity->transform.world_model);
 
-    for(size_t i = 0; i < entity->children_count; i++)
+    EntityChild* ec = entity->children.data;
+    for(size_t i = 0; i < entity->children.count; i++)
     {
-        Entity* child = entity->children[i];
+        Entity* child = ec[i].child;
 
         denginescene_ecs_get_model_local(child,
                                          child->transform.world_model);

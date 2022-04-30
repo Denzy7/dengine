@@ -9,6 +9,8 @@
 #include "dengine/lighting.h"
 #include "dengine/camera.h"
 
+#include "dengine-utils/vtor.h"
+
 typedef struct
 {
     vec3 position;
@@ -47,8 +49,7 @@ typedef struct _Entity
     /* PARENT-CHILD R/SHIPS */
 
     struct _Entity* parent;
-    struct _Entity** children;
-    uint32_t children_count;
+    vtor children;
 
     /* MORE COMPONENTS HERE */
 
@@ -57,6 +58,11 @@ typedef struct _Entity
     CameraComponent* camera_component;
 
 }Entity;
+
+typedef struct
+{
+    Entity* child;
+}EntityChild;
 
 /*!
  * \brief Create a new empty entity
