@@ -58,6 +58,8 @@ typedef struct
 
 #include <dengine-scene/scene.h>
 
+#include <dengine-script/script.h>
+
 static DengineInitOpts DENGINE_INIT_OPTS;
 static int DENGINE_HAS_GOT_INIT_OPTS = 0;
 
