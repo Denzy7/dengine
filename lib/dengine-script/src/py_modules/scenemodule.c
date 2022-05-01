@@ -43,6 +43,7 @@ PyObject* EntityObject_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
     EntityObject* self;
     self = (EntityObject*) type->tp_alloc(type, 0);
+    self->name = PyUnicode_FromString("");
     self->transform = (TransformObject*)TransformObject_Type.tp_new(&TransformObject_Type, NULL, NULL);
     //printf("alloc entity\n");
     return (PyObject*) self;
@@ -52,6 +53,7 @@ static
 PyMemberDef EntityObject_Members[]=
 {
     {"transform", T_OBJECT_EX, offsetof(EntityObject, transform), 0, "Transform component"},
+    {"name", T_OBJECT_EX, offsetof(EntityObject, name), 0, "Name of the entity"},
     {NULL}
 };
 
@@ -96,6 +98,8 @@ void denginescript_pymod_scene_entity_pull(PyObject* object, Entity* entity)
     obj->transform->scale->x = entity->transform.scale[0];
     obj->transform->scale->y = entity->transform.scale[1];
     obj->transform->scale->z = entity->transform.scale[2];
+
+    obj->name = PyUnicode_FromString(entity->name);
 }
 
 void  denginescript_pymod_scene_entity_push(PyObject* object, Entity* entity)
@@ -113,6 +117,8 @@ void  denginescript_pymod_scene_entity_push(PyObject* object, Entity* entity)
     entity->transform.scale[0] = obj->transform->scale->x;
     entity->transform.scale[1] = obj->transform->scale->y;
     entity->transform.scale[2] = obj->transform->scale->z;
+
+    //TODO: Push name
 }
 
 PyMODINIT_FUNC PyInit_scene()

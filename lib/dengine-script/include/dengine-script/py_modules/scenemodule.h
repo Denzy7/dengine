@@ -17,6 +17,7 @@ typedef struct
 {
     PyObject_HEAD
     TransformObject* transform;
+    PyObject* name;
 }EntityObject;
 PyAPI_DATA(PyTypeObject) EntityObject_Type;
 
