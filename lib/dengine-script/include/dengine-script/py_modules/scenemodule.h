@@ -2,6 +2,7 @@
 #define SCENEMODULE_H
 
 #include "commonmodule.h"
+#include "dengine-scene/scene.h"
 
 typedef struct
 {
@@ -18,5 +19,14 @@ typedef struct
     TransformObject* transform;
 }EntityObject;
 PyAPI_DATA(PyTypeObject) EntityObject_Type;
+
+// new Python Object as an entity
+PyAPI_FUNC(PyObject *) denginescript_pymod_scene_entity_new();
+
+// pull data from ecs
+PyAPI_FUNC(void) denginescript_pymod_scene_entity_pull(PyObject*, Entity*);
+
+//push/commit changes to PyObject to ecs
+PyAPI_FUNC(void) denginescript_pymod_scene_entity_push(PyObject*, Entity*);
 
 #endif // SCENEMODULE_H

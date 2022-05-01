@@ -20,6 +20,7 @@ PyObject* TransformObject_new(PyTypeObject* type, PyObject* args, PyObject* kwds
     self->position = (Vec3Object*) Vec3Object_Type.tp_new(&Vec3Object_Type, NULL, NULL);
     self->rotation= (Vec3Object*) Vec3Object_Type.tp_new(&Vec3Object_Type, NULL, NULL);
     self->scale = (Vec3Object*) Vec3Object_Type.tp_new(&Vec3Object_Type, NULL, NULL);
+    //printf("create transform\n");
     return (PyObject*)self;
 }
 
@@ -36,8 +37,6 @@ PyTypeObject TransformObject_Type =
     .tp_new = TransformObject_new,
     .tp_alloc = PyType_GenericAlloc,
 };
-
-
 
 static
 PyObject* EntityObject_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
@@ -76,6 +75,45 @@ static PyModuleDef scenemodule =
     "Dengine scene scripting and types",
     -1
 };
+
+PyObject* denginescript_pymod_scene_entity_new()
+{
+    return PyObject_CallObject((PyObject*) &EntityObject_Type, NULL);
+}
+
+void denginescript_pymod_scene_entity_pull(PyObject* object, Entity* entity)
+{
+    EntityObject* obj = (EntityObject*)object;
+
+    obj->transform->position->x = entity->transform.position[0];
+    obj->transform->position->y = entity->transform.position[1];
+    obj->transform->position->z = entity->transform.position[2];
+
+    obj->transform->rotation->x = entity->transform.rotation[0];
+    obj->transform->rotation->y = entity->transform.rotation[1];
+    obj->transform->rotation->z = entity->transform.rotation[2];
+
+    obj->transform->scale->x = entity->transform.scale[0];
+    obj->transform->scale->y = entity->transform.scale[1];
+    obj->transform->scale->z = entity->transform.scale[2];
+}
+
+void  denginescript_pymod_scene_entity_push(PyObject* object, Entity* entity)
+{
+    EntityObject* obj = (EntityObject*)object;
+
+    entity->transform.position[0] = obj->transform->position->x;
+    entity->transform.position[1] = obj->transform->position->y;
+    entity->transform.position[2] = obj->transform->position->z;
+
+    entity->transform.rotation[0] = obj->transform->rotation->x;
+    entity->transform.rotation[1] = obj->transform->rotation->y;
+    entity->transform.rotation[2] = obj->transform->rotation->z;
+
+    entity->transform.scale[0] = obj->transform->scale->x;
+    entity->transform.scale[1] = obj->transform->scale->y;
+    entity->transform.scale[2] = obj->transform->scale->z;
+}
 
 PyMODINIT_FUNC PyInit_scene()
 {
