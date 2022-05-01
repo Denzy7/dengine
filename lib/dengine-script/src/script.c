@@ -7,6 +7,9 @@ PyMODINIT_FUNC PyInit_timer(); //timer_mod
 PyMODINIT_FUNC PyInit_logging(); //logging_mod
 PyMODINIT_FUNC PyInit_filesys(); //filesys_mod
 
+PyMODINIT_FUNC PyInit_common(); //common_mod
+PyMODINIT_FUNC PyInit_scene(); //scene_mod
+
 static PyObject* dengineinit(PyObject* self, PyObject* args)
 {
     const char* famouswords = "Hello World!";
@@ -44,6 +47,8 @@ int denginescript_init()
     PyImport_AppendInittab("dengine.timer", &PyInit_timer);
     PyImport_AppendInittab("dengine.logging", &PyInit_logging);
     PyImport_AppendInittab("dengine.filesys", &PyInit_filesys);
+    PyImport_AppendInittab("dengine.common", &PyInit_common);
+    PyImport_AppendInittab("dengine.scene", &PyInit_scene);
 
     Py_Initialize();
 

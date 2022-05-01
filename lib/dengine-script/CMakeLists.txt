@@ -16,6 +16,7 @@ set(dengine-script-py_modules
     src/py_modules/loggingmodule.c
     src/py_modules/timermodule.c
     src/py_modules/filesysmodule.c
+    src/py_modules/commonmodule.c
     src/py_modules/scenemodule.c
 )
 
