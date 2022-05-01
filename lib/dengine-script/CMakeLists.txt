@@ -1,5 +1,10 @@
+set(DENGINE_DLL_FILENAME "dengine-script.dll")
+set(DENGINE_DLL_FILEDESC "Scripting with Python3")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../dengine-lib.rc.in src/dengine-script.rc)
+
 set(dengine-script-src
 src/script.c
+${CMAKE_CURRENT_BINARY_DIR}/src/dengine-script.rc
 )
 
 set(dengine-script-hdr
@@ -18,10 +23,10 @@ add_library(dengine-script ${dengine-script-hdr} ${dengine-script-src} ${dengine
 set_target_properties(dengine-script PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
                       SOVERSION ${dengine_VERSION_MAJOR}
-                      POSITION_INDEPENDENT_CODE ON)
+                      POSITION_INDEPENDENT_CODE ON
+                      C_STANDARD 99)
 
 target_link_libraries(dengine-script dengine-core dengine-utils dengine-scene)
-set_property(TARGET dengine-script PROPERTY C_STANDARD 99)
 
 if(python3_LIBRARIES)
 target_link_libraries(dengine-script ${python3_LIBRARIES})
