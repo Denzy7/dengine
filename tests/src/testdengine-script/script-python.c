@@ -1,5 +1,5 @@
 #include <dengine/dengine.h>
-
+#include <dengine-script/py_modules/scenemodule.h>
 int main(int argc, char *argv[])
 {
     DengineInitOpts* opts = dengine_init_get_opts();
@@ -18,12 +18,16 @@ int main(int argc, char *argv[])
     PyScript* script = denginescript_python_new(f2m.mem, script_file);
     dengineutils_filesys_file2mem_free(&f2m);
 
+    Entity* dummy_entitiy = denginescene_ecs_new_entity();
+    PyObject* dummy_object = denginescript_pymod_scene_entity_new();
+    denginescript_pymod_scene_entity_pull(dummy_object, dummy_entitiy);
+
     if(script)
-        denginescript_python_call(script, DENGINE_SCRIPT_FUNC_START, NULL);
+        denginescript_python_call(script, DENGINE_SCRIPT_FUNC_START, dummy_object);
 
     while (dengine_window_isrunning()) {
         if(script)
-            denginescript_python_call(script, DENGINE_SCRIPT_FUNC_UPDATE, NULL);
+            denginescript_python_call(script, DENGINE_SCRIPT_FUNC_UPDATE, dummy_object);
         dengine_update();
     }
     free(script);
