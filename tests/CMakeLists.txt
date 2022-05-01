@@ -16,7 +16,7 @@ add_subdirectory(src/testdengine-scene "scene-build")
 add_subdirectory(src/testdengine-tooling "tooling-build")
 add_subdirectory(src/testdengine-triangle "triangle-build")
 add_subdirectory(src/testdengine-window "window-build")
-#add_subdirectory(src/testdengine-script "script-build")
+add_subdirectory(src/testdengine-script "script-build")
 endif()
 
 get_directory_property(subdirs SUBDIRECTORIES)
