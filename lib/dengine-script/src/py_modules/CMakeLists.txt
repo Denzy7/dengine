@@ -18,7 +18,7 @@ add_library(common SHARED commonmodule.c commonmodule.h)
 set_target_properties(common PROPERTIES PREFIX "")
 target_link_libraries(common dengine-core dengine-utils dengine-scene)
 
-add_library(scene SHARED scenemodule.h scenemodule.c)
+add_library(scene SHARED scenemodule.c)
 set_target_properties(scene PROPERTIES PREFIX "")
 target_link_libraries(scene dengine-utils dengine-scene common)
 
