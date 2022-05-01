@@ -30,11 +30,6 @@ static PyMemberDef Vec3Object_Members[]=
     {NULL}
 };
 
-//static PyMethodDef Vec3Object_Methods[] =
-//{
-
-//};
-
 static PyTypeObject Vec3Object_Type=
 {
     PyVarObject_HEAD_INIT(NULL, 0)
@@ -43,8 +38,12 @@ static PyTypeObject Vec3Object_Type=
     .tp_basicsize = sizeof(Vec3Object),
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
+    .tp_members = Vec3Object_Members,
+
     .tp_new = PyType_GenericNew,
-    .tp_members = Vec3Object_Members
+    .tp_alloc = PyType_GenericAlloc,
+    .tp_getattro = PyObject_GenericGetAttr,
+    .tp_setattro = PyObject_GenericSetAttr
 };
 
 static PyModuleDef commonmodule=
