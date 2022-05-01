@@ -1,5 +1,8 @@
-#include "scenemodule.h"
-#include "commonmodule.h"
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
+#include <structmember.h>
+
+#include "commonmodule.h" //Vec3Object
 
 typedef struct
 {
@@ -16,7 +19,6 @@ static PyMemberDef TransformObject_Members[]=
     {"scale", T_OBJECT_EX, offsetof(TransformObject, scale), 0, "XYZ world scale"},
     {NULL}
 };
-
 
 PyObject* TransformObject_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
@@ -48,6 +50,7 @@ typedef struct
     TransformObject* transform;
 }EntityObject;
 
+static
 PyObject* EntityObject_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
     EntityObject* self;
@@ -68,12 +71,13 @@ static PyTypeObject EntityObject_Type=
 {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "scene.Entity",
-    .tp_doc = "Entity type",
+    .tp_doc = "Entity type with set of components",
     .tp_basicsize = sizeof (EntityObject),
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-    .tp_new = EntityObject_new,
     .tp_members = EntityObject_Members,
+
+    .tp_new = EntityObject_new,
 };
 
 static PyModuleDef scenemodule =
