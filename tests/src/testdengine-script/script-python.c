@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
     dengineutils_filesys_file2mem_free(&f2m);
 
     Entity* dummy_entitiy = denginescene_ecs_new_entity();
+    denginescene_ecs_set_entity_name(dummy_entitiy, "this is a dummy entity with a script attached");
     PyObject* dummy_object = denginescript_pymod_scene_entity_new();
     denginescript_pymod_scene_entity_pull(dummy_object, dummy_entitiy);
 
