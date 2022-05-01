@@ -14,12 +14,10 @@ set(dengine-script-py_modules
     src/py_modules/scenemodule.c
 )
 
-if(BUILD_SHARED_LIBS AND DENGINE_MERGE_LIBS)
-    add_library(dengine-script STATIC ${dengine-script-hdr} ${dengine-script-src} ${dengine-script-py_modules})
-else()
-    add_library(dengine-script ${dengine-script-hdr} ${dengine-script-src} ${dengine-script-py_modules})
-endif()
+add_library(dengine-script ${dengine-script-hdr} ${dengine-script-src} ${dengine-script-py_modules})
 set_target_properties(dengine-script PROPERTIES
+                      VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
+                      SOVERSION ${dengine_VERSION_MAJOR}
                       POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(dengine-script dengine-core dengine-utils dengine-scene)
@@ -35,3 +33,6 @@ endif()
 if(WIN32)
     set_target_properties(dengine-script PROPERTIES PREFIX "")
 endif()
+
+install(TARGETS dengine-script DESTINATION lib)
+install(FILES ${dengine-script-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-script)
