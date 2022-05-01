@@ -13,8 +13,8 @@ static PyObject* filesys_get_filesdir(PyObject* self, PyObject* args)
 
 static PyMethodDef DengineFileSysModuleMethods[]=
 {
-    {"get_filesdir", filesys_get_filesdir, METH_VARARGS, "Get the accessible directory for perisitent files"},
-    {"get_cachedir", filesys_get_cachedir, METH_VARARGS, "Get the accessible directory for cached files"},
+    {"get_filesdir", filesys_get_filesdir, METH_NOARGS, "Get the accessible directory for perisitent files"},
+    {"get_cachedir", filesys_get_cachedir, METH_NOARGS, "Get the accessible directory for cached files"},
     {NULL, NULL, 0, NULL},
 };
 
