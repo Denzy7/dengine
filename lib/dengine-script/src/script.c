@@ -131,7 +131,7 @@ void denginescript_python_call(const PyScript* script, PyScriptFunc func, PyObje
 
     if(callable)
     {
-        PyObject_CallObject(callable, args);
+        PyObject_CallFunctionObjArgs(callable, args, NULL);
         PyErr_Print();
     }
 }
