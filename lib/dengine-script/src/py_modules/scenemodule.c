@@ -2,15 +2,7 @@
 #include <Python.h>
 #include <structmember.h>
 
-#include "dengine-script/py_modules/commonmodule.h" //Vec3Object
-
-typedef struct
-{
-    PyObject_HEAD
-    Vec3Object* position;
-    Vec3Object* rotation;
-    Vec3Object* scale;
-}TransformObject;
+#include "dengine-script/py_modules/scenemodule.h" //Vec3Object
 
 static PyMemberDef TransformObject_Members[]=
 {
@@ -20,6 +12,7 @@ static PyMemberDef TransformObject_Members[]=
     {NULL}
 };
 
+static
 PyObject* TransformObject_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
     TransformObject* self;
@@ -30,7 +23,7 @@ PyObject* TransformObject_new(PyTypeObject* type, PyObject* args, PyObject* kwds
     return (PyObject*)self;
 }
 
-static PyTypeObject TransformObject_Type=
+PyTypeObject TransformObject_Type =
 {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "scene.Transform",
@@ -44,11 +37,7 @@ static PyTypeObject TransformObject_Type=
     .tp_alloc = PyType_GenericAlloc,
 };
 
-typedef struct
-{
-    PyObject_HEAD
-    TransformObject* transform;
-}EntityObject;
+
 
 static
 PyObject* EntityObject_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
@@ -67,7 +56,7 @@ PyMemberDef EntityObject_Members[]=
     {NULL}
 };
 
-static PyTypeObject EntityObject_Type=
+PyTypeObject EntityObject_Type=
 {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "scene.Entity",

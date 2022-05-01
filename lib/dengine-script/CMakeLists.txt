@@ -10,6 +10,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/src/dengine-script.rc
 set(dengine-script-hdr
 include/dengine-script/script.h
 include/dengine-script/py_modules/commonmodule.h
+include/dengine-script/py_modules/scenemodule.h
 )
 
 set(dengine-script-py_modules
