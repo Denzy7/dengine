@@ -2,10 +2,18 @@ import dengine.inpt as inpt
 import dengine.timer as timer
 import dengine.logging as logging
 import dengine.filesys as filesys
+import dengine.scene as scene
+import dengine.common as common
 import time
 elapsed = 0.0
 
-def start():
+
+def start(entity):
+    entity.transform.position.x = 23.1
+    print(f"Name: {entity.name}")
+    print(f"pos:{entity.transform.position}")
+    print(f"rot:{entity.transform.rotation}")
+    print(f"scl:{entity.transform.scale}")
     logging.log("INFO::start called")
     cd = filesys.get_cachedir()
     fd = filesys.get_filesdir()
@@ -15,10 +23,10 @@ def start():
         f.write("hello!"+t)
 
 
-def update():
+def update(entity):
     global elapsed
     elapsed += timer.get_delta()
-    if(elapsed > 1000.0):
+    if(elapsed > 3000.0):
         x = "mouse x " + str(inpt.get_mousex())
         logging.log(x)
 
