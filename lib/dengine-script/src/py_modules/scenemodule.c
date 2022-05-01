@@ -2,7 +2,7 @@
 #include <Python.h>
 #include <structmember.h>
 
-#include "commonmodule.h" //Vec3Object
+#include "dengine-script/py_modules/commonmodule.h" //Vec3Object
 
 typedef struct
 {

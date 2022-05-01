@@ -1,4 +1,4 @@
-#include "commonmodule.h"
+#include "dengine-script/py_modules/commonmodule.h"
 #include <structmember.h>
 
 static PyMemberDef Vec3Object_Members[]=

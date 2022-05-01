@@ -14,7 +14,7 @@ add_library(filesys SHARED filesysmodule.c)
 set_target_properties(filesys PROPERTIES PREFIX "")
 target_link_libraries(filesys dengine-utils)
 
-add_library(common SHARED commonmodule.c commonmodule.h)
+add_library(common SHARED commonmodule.c)
 set_target_properties(common PROPERTIES PREFIX "")
 target_link_libraries(common dengine-core dengine-utils dengine-scene)
 
