@@ -9,6 +9,13 @@ static PyMemberDef Vec3Object_Members[]=
     {NULL}
 };
 
+PyObject* Vec3Object_str(Vec3Object* self)
+{
+    char tmp[64];
+    snprintf(tmp, sizeof(tmp), "%f,%f,%f", self->x, self->y, self->z);
+    return PyUnicode_FromString(tmp);
+}
+
 PyTypeObject Vec3Object_Type=
 {
     PyVarObject_HEAD_INIT(NULL, 0)
@@ -22,7 +29,8 @@ PyTypeObject Vec3Object_Type=
     .tp_new = PyType_GenericNew,
     .tp_alloc = PyType_GenericAlloc,
     .tp_getattro = PyObject_GenericGetAttr,
-    .tp_setattro = PyObject_GenericSetAttr
+    .tp_setattro = PyObject_GenericSetAttr,
+    .tp_str = (reprfunc)Vec3Object_str
 };
 
 static PyModuleDef commonmodule=
