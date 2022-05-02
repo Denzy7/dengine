@@ -22,12 +22,12 @@ typedef struct
 extern PyTypeObject EntityObject_Type;
 
 // new Python Object as an entity
-PyAPI_FUNC(PyObject *) denginescript_pymod_scene_entity_new();
+PyObject* denginescript_pymod_scene_entity_new();
 
 // pull data from ecs
-PyAPI_FUNC(void) denginescript_pymod_scene_entity_pull(PyObject*, Entity*);
+void denginescript_pymod_scene_entity_pull(PyObject* object, Entity* entity);
 
 //push/commit changes to PyObject to ecs
-PyAPI_FUNC(void) denginescript_pymod_scene_entity_push(PyObject*, Entity*);
+void denginescript_pymod_scene_entity_push(PyObject* object, Entity* entity);
 
 #endif // SCENEMODULE_H
