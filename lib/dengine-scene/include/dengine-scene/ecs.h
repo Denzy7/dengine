@@ -11,6 +11,8 @@
 
 #include "dengine-utils/vtor.h"
 
+#include "dengine-script/script.h"
+
 typedef struct
 {
     vec3 position;
@@ -39,6 +41,11 @@ typedef struct
     int last_cam;
 }CameraComponent;
 
+typedef struct
+{
+    PyScript* script;
+}ScriptComponent;
+
 typedef struct _Entity
 {
     uint32_t entity_id;
@@ -56,7 +63,7 @@ typedef struct _Entity
     MeshComponent* mesh_component;
     LightComponent* light_component;
     CameraComponent* camera_component;
-
+    vtor script_components;
 }Entity;
 
 typedef struct
@@ -105,6 +112,10 @@ MeshComponent* denginescene_ecs_new_meshcomponent(const Primitive* mesh, const M
 CameraComponent* denginescene_ecs_new_cameracomponent(const Camera* camera);
 
 LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light);
+
+ScriptComponent* denginescene_ecs_new_scriptcomponent(const PyScript* script);
+
+void denginescene_ecs_add_script(Entity* entity, const ScriptComponent* script);
 
 #ifdef __cplusplus
 extern "C" {

@@ -48,6 +48,8 @@ void _denginescene_ecs_new_entity_setup(Entity* ent)
     vtor_create(&ent->children, sizeof(EntityChild));
     ent->name =  malloc(DENGINE_ECS_MAXNAME);
     snprintf(ent->name, DENGINE_ECS_MAXNAME, "Entity %u",ent->entity_id);
+
+    vtor_create(&ent->script_components, sizeof(ScriptComponent));
 }
 
 Entity* denginescene_ecs_new_entity()
@@ -172,6 +174,19 @@ LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light)
     }
     comp->type = type;
     return comp;
+}
+
+ScriptComponent* denginescene_ecs_new_scriptcomponent(const PyScript* script)
+{
+    ScriptComponent* comp = calloc(1, sizeof(ScriptComponent));
+    comp->script = calloc(1, sizeof(PyScript));
+    memcpy(comp->script, script, sizeof(PyScript));
+    return comp;
+}
+
+void denginescene_ecs_add_script(Entity* entity, const ScriptComponent* script)
+{
+    vtor_pushback(&entity->script_components, script);
 }
 
 void denginescene_ecs_transform_entity(Entity* entity)
