@@ -67,6 +67,7 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/cglm/include
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/glad/include
         ${PROJECT_BINARY_DIR}/dengine_config #dengine_config.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine_state #dengine_state.h
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-core/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-utils/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-gui/include
@@ -128,6 +129,7 @@ endforeach()
 configure_file(dengine.pc.in dengine.pc @ONLY)
 
 install(FILES ${PROJECT_BINARY_DIR}/dengine_config/dengine_config.h DESTINATION include/dengine-${DENGINE_VERSION}/dengine_config)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine_state/dengine_state.h DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine_state)
 install(DIRECTORY deps/glad/include/glad DESTINATION include/dengine-${DENGINE_VERSION}/deps/glad)
 install(DIRECTORY deps/glad/include/KHR DESTINATION include/dengine-${DENGINE_VERSION}/deps/glad)
 install(DIRECTORY deps/cglm/include/cglm DESTINATION include/dengine-${DENGINE_VERSION}/deps/cglm)
