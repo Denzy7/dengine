@@ -11,7 +11,7 @@ typedef struct
     Vec3Object* rotation;
     Vec3Object* scale;
 }TransformObject;
-PyAPI_DATA(PyTypeObject) TransformObject_Type;
+extern PyTypeObject TransformObject_Type;
 
 typedef struct
 {
@@ -19,7 +19,7 @@ typedef struct
     TransformObject* transform;
     PyObject* name;
 }EntityObject;
-PyAPI_DATA(PyTypeObject) EntityObject_Type;
+extern PyTypeObject EntityObject_Type;
 
 // new Python Object as an entity
 PyAPI_FUNC(PyObject *) denginescript_pymod_scene_entity_new();

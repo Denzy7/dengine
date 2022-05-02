@@ -16,7 +16,7 @@ typedef struct
     double z;
 }Vec3Object;
 
-PyAPI_DATA(PyTypeObject) Vec3Object_Type;
+extern PyTypeObject Vec3Object_Type;
 
 #ifdef __cplusplus
 }
