@@ -19,7 +19,7 @@ set_target_properties(dengine-scene PROPERTIES
                       SOVERSION ${dengine_VERSION_MAJOR}
                       POSITION_INDEPENDENT_CODE ON)
 
-target_link_libraries(dengine-scene dengine-core)
+target_link_libraries(dengine-scene dengine-core dengine-script)
 set_property(TARGET dengine-scene PROPERTY C_STANDARD 99)
 
 #remove lib prefix
