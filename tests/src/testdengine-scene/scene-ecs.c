@@ -20,6 +20,8 @@
 
 #include <dengine-model/model.h>
 
+#include <dengine-script/script.h>
+
 //void prt (Entity* ent)
 //{
 //    dengineutils_logging_log("INFO::prt parent %u. children %zu", ent->entity_id, ent->children_count);
@@ -55,6 +57,8 @@ int main(int argc, char *argv[])
     dengineutils_filesys_init();
 
     dengine_input_init();
+
+    denginescript_init();
 
     Entity* ent1 = denginescene_ecs_new_entity();
     Entity* ent2 = denginescene_ecs_new_entity();
@@ -139,9 +143,18 @@ int main(int argc, char *argv[])
 
     const int prtbf_sz=2048;
     char* prtbf=malloc(prtbf_sz);
+    File2Mem f2m;
 
     snprintf(prtbf,prtbf_sz,"%s/models/duck.obj",dengineutils_filesys_get_assetsdir());
     Primitive* duck = denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ,prtbf,NULL,stdshdr);
+    const char* duckscriptfile = "scripts/moveduck.py";
+    snprintf(prtbf, prtbf_sz, "%s/%s", dengineutils_filesys_get_assetsdir(), duckscriptfile);
+    f2m.file = prtbf;
+    dengineutils_filesys_file2mem_load(&f2m);
+    PyScript* duckscript = denginescript_python_new(f2m.mem, duckscriptfile);
+    ScriptComponent* duckscriptcomp = denginescene_ecs_new_scriptcomponent(duckscript);
+    denginescene_ecs_add_script(ent3, duckscriptcomp);
+    dengineutils_filesys_file2mem_free(&f2m);
 
     //load separated planes
     snprintf(prtbf,prtbf_sz,"%s/models/sperated-planes.obj",dengineutils_filesys_get_assetsdir());
@@ -354,30 +367,6 @@ int main(int argc, char *argv[])
         double delta_s = delta / 1000.0;
         double speed = 4.0;
 
-        if(dengine_input_get_key('A'))
-            ent3->transform.position[0] -= delta_s * speed;
-
-        if(dengine_input_get_key('D'))
-            ent3->transform.position[0] += delta_s * speed;
-
-        if(dengine_input_get_key('E'))
-            ent3->transform.position[1] += delta_s * speed;
-
-        if(dengine_input_get_key('C'))
-            ent3->transform.position[1] -= delta_s * speed;
-
-        if(dengine_input_get_key('W'))
-            ent3->transform.position[2] -= delta_s * speed;
-
-        if(dengine_input_get_key('S'))
-            ent3->transform.position[2] += delta_s * speed;
-
-        if(dengine_input_get_key('Z'))
-            ent3->transform.rotation[1] += delta_s * speed * 30.0;
-
-        if(dengine_input_get_key('X'))
-            ent3->transform.rotation[1] -= delta_s * speed * 30.0;
-
         if(dengine_input_get_key_once('F'))
             poly = !poly;
 
@@ -398,7 +387,6 @@ int main(int argc, char *argv[])
             else
                 glEnable(GL_CULL_FACE);
         }
-
 
         elapsed+=delta;
         if(elapsed>1000.0)
@@ -470,6 +458,7 @@ int main(int argc, char *argv[])
         free(sep_planes);
 
     denginegui_terminate();
+    denginescript_terminate();
     dengineutils_filesys_terminate();
     dengine_window_terminate();
 
