@@ -26,10 +26,10 @@ add_library(dengine-script ${dengine-script-hdr} ${dengine-script-src} ${dengine
 set_target_properties(dengine-script PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
                       SOVERSION ${dengine_VERSION_MAJOR}
-                      POSITION_INDEPENDENT_CODE ON
-                      C_STANDARD 99)
+                      POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(dengine-script dengine-core dengine-utils)
+set_property(TARGET dengine-script PROPERTY C_STANDARD 99)
 
 if(python3_LIBRARIES)
 target_link_libraries(dengine-script ${python3_LIBRARIES})
