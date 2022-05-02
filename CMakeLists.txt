@@ -106,8 +106,8 @@ add_subdirectory(lib/dengine-utils "dengine-utils-build")
 add_subdirectory(lib/dengine-core "dengine-core-build")
 add_subdirectory(lib/dengine-gui "dengine-gui-build")
 add_subdirectory(lib/dengine-model "dengine-model-build")
-add_subdirectory(lib/dengine-scene "dengine-scene-build")
 add_subdirectory(lib/dengine-script "dengine-script-build")
+add_subdirectory(lib/dengine-scene "dengine-scene-build")
 
 set(dengine dengine-utils dengine-core dengine-gui dengine-scene dengine-script)
 
