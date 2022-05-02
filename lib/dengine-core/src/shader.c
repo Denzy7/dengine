@@ -14,8 +14,7 @@
 #include <dengine/android.h>
 #endif
 
-static
-float default_shader_col[3] = {1.0, 0.0, 0.0};
+static const float default_shader_col[3] = {1.0, 0.0, 0.0};
 
 static GLenum binfmt = 0;
 
@@ -302,35 +301,35 @@ void dengine_shader_use(const Shader* shader)
     DENGINE_CHECKGL;
 }
 
-void dengine_shader_set_int(const Shader* shader, const char* name, int value)
+void dengine_shader_set_int(const Shader* shader, const char* name, const int value)
 {
     dengine_shader_use(shader);
     int location = glGetUniformLocation(shader->program_id, name); DENGINE_CHECKGL;
     glUniform1i(location, value); DENGINE_CHECKGL;
 }
 
-void dengine_shader_set_mat4(const Shader* shader, const char* name, float* value)
+void dengine_shader_set_mat4(const Shader* shader, const char* name, const float* value)
 {
     dengine_shader_use(shader);
     int location = glGetUniformLocation(shader->program_id, name); DENGINE_CHECKGL;
     glUniformMatrix4fv(location, 1, GL_FALSE, value); DENGINE_CHECKGL;
 }
 
-void dengine_shader_set_vec3(const Shader* shader, const char* name, float* value)
+void dengine_shader_set_vec3(const Shader* shader, const char* name, const float* value)
 {
     dengine_shader_use(shader);
     int location = glGetUniformLocation(shader->program_id, name); DENGINE_CHECKGL;
     glUniform3fv(location, 1, value); DENGINE_CHECKGL;
 }
 
-void dengine_shader_set_vec4(const Shader* shader, const char* name, float* value)
+void dengine_shader_set_vec4(const Shader* shader, const char* name, const float* value)
 {
     dengine_shader_use(shader);
     int location = glGetUniformLocation(shader->program_id, name); DENGINE_CHECKGL;
     glUniform4fv(location, 1, value); DENGINE_CHECKGL;
 }
 
-void dengine_shader_set_float(const Shader* shader, const char* name, float value)
+void dengine_shader_set_float(const Shader* shader, const char* name, const float value)
 {
     dengine_shader_use(shader);
     int location = glGetUniformLocation(shader->program_id, name); DENGINE_CHECKGL;

@@ -9,9 +9,9 @@
 #include <cglm/cglm.h> //glm_proj
 #include <string.h>    //memcpy
 
-float _target_zero[3] = {0.0f, 0.0f, 0.0f};
-float _default_distance = 7.0f;
-float _default_clearcol[4] = {1.0f, 0.5f, 0.3f, 1.0};
+static float _target_zero[3] = {0.0f, 0.0f, 0.0f};
+static const float _default_distance = 7.0f;
+static const float _default_clearcol[4] = {1.0f, 0.5f, 0.3f, 1.0};
 
 static const char* possible_projmat[]=
 {

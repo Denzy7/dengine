@@ -6,7 +6,7 @@
 
 #include <stdio.h>  //printf
 
-int _gl_max = 0, _gl_min = 0, _gl_core = 0 , _win_msaa = 0;
+static int _gl_max = 0, _gl_min = 0, _gl_core = 0 , _win_msaa = 0;
 #ifdef DENGINE_WIN_EGL
 EGLDisplay _egl_display;
 EGLSurface _egl_surface;

@@ -66,15 +66,15 @@ int dengine_shader_link(Shader* shader);
 
 void dengine_shader_use(const Shader* shader);
 
-void dengine_shader_set_mat4(const Shader* shader, const char* name, float* value);
+void dengine_shader_set_mat4(const Shader* shader, const char* name, const float* value);
 
-void dengine_shader_set_vec3(const Shader* shader, const char* name, float* value);
+void dengine_shader_set_vec3(const Shader* shader, const char* name, const float* value);
 
-void dengine_shader_set_vec4(const Shader* shader, const char* name, float* value);
+void dengine_shader_set_vec4(const Shader* shader, const char* name, const float* value);
 
-void dengine_shader_set_float(const Shader* shader, const char* name, float value);
+void dengine_shader_set_float(const Shader* shader, const char* name, const float value);
 
-void dengine_shader_set_int(const Shader* shader, const char* name, int value);
+void dengine_shader_set_int(const Shader* shader, const char* name, const int value);
 
 Shader* dengine_shader_new_shader_standard(StandardShader stdshader);
 
