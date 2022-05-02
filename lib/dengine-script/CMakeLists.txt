@@ -29,7 +29,7 @@ set_target_properties(dengine-script PROPERTIES
                       POSITION_INDEPENDENT_CODE ON
                       C_STANDARD 99)
 
-target_link_libraries(dengine-script dengine-core dengine-utils dengine-scene)
+target_link_libraries(dengine-script dengine-core dengine-utils)
 
 if(python3_LIBRARIES)
 target_link_libraries(dengine-script ${python3_LIBRARIES})
