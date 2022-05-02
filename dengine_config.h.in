@@ -3,6 +3,9 @@
 
 #cmakedefine DENGINE_VERSION "@DENGINE_VERSION@"
 
+#cmakedefine DENGINE_MT
+#cmakedefine DENGINE_HAVE_PTHREAD_H
+
 /*
  * Uncomment to hide compile dir since it has sensitive info like
  * your username.

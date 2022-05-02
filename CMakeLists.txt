@@ -91,8 +91,13 @@ option(DENGINE_FONT_EMBED_ROBOTO_LIGHT "Embed Roboto Light into dengine-gui" OFF
 
 option(DENGINE_BUILD_TESTS "Build the test suite and examples" ON)
 
+option(DENGINE_MT "Build for multithreading using mutexes" ON)
+
 include(CheckFunctionExists)
+include(CheckIncludeFile)
+
 check_function_exists(clock_gettime DENGINE_HAVE_CLOCK_GETTIME)
+check_include_file(pthread.h DENGINE_HAVE_PTHREAD_H)
 
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
