@@ -80,6 +80,15 @@ static PyModuleDef scenemodule =
 
 PyObject* denginescript_pymod_scene_entity_new()
 {
+    /*
+     * TODO: remove double initialize as its alreadt done in PyInit_scene.
+     * causes SEGV if not Ready here. It seems harmless otherwise since Python
+     * already does this in PyType_Ready 😛
+     */
+
+    if(!(EntityObject_Type.tp_flags & Py_TPFLAGS_READY))
+        PyType_Ready(&EntityObject_Type);
+
     return PyObject_CallObject((PyObject*) &EntityObject_Type, NULL);
 }
 
