@@ -1,6 +1,7 @@
 #include "dengine-script/script.h"
 
 #include "dengine-utils/logging.h"
+#include "dengine-utils/filesys.h"
 
 PyMODINIT_FUNC PyInit_inpt(); //input_mod
 PyMODINIT_FUNC PyInit_timer(); //timer_mod
@@ -42,6 +43,20 @@ static PyObject* py_builtins = NULL,* py_compiler = NULL;
 
 int denginescript_init()
 {
+    Py_DontWriteBytecodeFlag = 1;
+    Py_NoSiteFlag = 1;
+    Py_IgnoreEnvironmentFlag = 1;
+    Py_InteractiveFlag = 0;
+    Py_IsolatedFlag = 1;
+    Py_VerboseFlag = 1;
+
+    char boostrap[1024];
+    snprintf(boostrap, sizeof(boostrap), "%s/%s", dengineutils_filesys_get_assetsdir(), "scripts/bootstrap");
+    dengineutils_logging_log("%s", boostrap);
+    wchar_t* path = Py_DecodeLocale(boostrap, NULL);
+    Py_SetPath(path);
+    PyMem_RawFree(path);
+
     int append_dengine = PyImport_AppendInittab("dengine", &PyInit_dengine);
     PyImport_AppendInittab("dengine.inpt", &PyInit_inpt);
     PyImport_AppendInittab("dengine.timer", &PyInit_timer);
