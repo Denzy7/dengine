@@ -31,6 +31,10 @@ if(WIN32)
     set_target_properties(scene PROPERTIES SUFFIX ".pyd")
 endif()
 
+set(sitedir ${python3_PREFIX}/lib/python${python3_VERSION}/site-packages)
 
+get_directory_property(dir_tgts BUILDSYSTEM_TARGETS)
+set_target_properties(${dir_tgts} PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/to-python3-site-packages/dengine")
 
-
+install(TARGETS ${dir_tgts} DESTINATION ${sitedir}/dengine)
