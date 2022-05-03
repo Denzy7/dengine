@@ -133,13 +133,11 @@ const char* dengineutils_filesys_get_assetsdir()
         return NULL;
     }
 
-    //Check for assets from compile dir, cwd , filedir & envvar
-    if (_dengineutils_filesys_get_assetsdir_resolve(dengineutils_filesys_get_srcdir()))
-        return assetdir;
-
+    //Check for assets from cwd compile
     if (_dengineutils_filesys_get_assetsdir_resolve(dengineutils_os_get_cwd()))
         return assetdir;
 
+    //Check for assets from envvar
     const char* envvar = getenv("DENGINEASSETS");
     if(envvar)
     {
@@ -162,6 +160,7 @@ const char* dengineutils_filesys_get_assetsdir()
             return assets;
     }
 
+    //Check for assets from filesdir
     const size_t denginefilesdir_sz = 4096;
     char* denginefilesdir = malloc(denginefilesdir_sz);
     snprintf(denginefilesdir, denginefilesdir_sz, "%s/%s",dengineutils_filesys_get_filesdir(), "dengine");
@@ -173,6 +172,22 @@ const char* dengineutils_filesys_get_assetsdir()
         denginefilesdir = NULL;
         return assetdir;
     }
+
+    /*
+     * if all fails, use compile dir. this is very very very risky if sources compiled
+     * on one machine try looking this up
+     *
+     * like for eg.
+     * - compiling sources on Linux then running a test in wine
+     * - setting python path with a linux path on a windows build
+     */
+
+    if (_dengineutils_filesys_get_assetsdir_resolve(dengineutils_filesys_get_srcdir()))
+    {
+        dengineutils_logging_log("WARNING::Using srcdir as assets dir");
+        return assetdir;
+    }
+
 
     dengineutils_logging_log("ERROR::Could not find assets directory.\n"
                              "Try:\n\t"
