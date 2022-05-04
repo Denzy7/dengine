@@ -81,13 +81,20 @@ static PyModuleDef scenemodule =
 PyObject* denginescript_pymod_scene_entity_new()
 {
     /*
-     * TODO: remove double initialize as its alreadt done in PyInit_scene.
-     * causes SEGV if not Ready here. It seems harmless otherwise since Python
-     * already does this in PyType_Ready 😛
+     * Compile a dummy script to "Ready" the scene.Entity() type object.
+     *
+     * Causes SEGV if you dont. Despite being readied in PyInit?
      */
 
-    if(!(EntityObject_Type.tp_flags & Py_TPFLAGS_READY))
-        PyType_Ready(&EntityObject_Type);
+    static const char* readyent=
+            "import dengine.common as common\n"
+            "import dengine.scene as scene\n"
+            "obj = scene.Entity()";
+
+    Script* ready = denginescript_python_new(readyent, "_dengine_internal/readyent.py");
+    Py_DECREF(ready->bytecode);
+    Py_DECREF(ready->module);
+    free(ready);
 
     return PyObject_CallObject((PyObject*) &EntityObject_Type, NULL);
 }
