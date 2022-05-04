@@ -13,7 +13,7 @@ void _denginescene_do_check_camera(Entity* root, Scene* scene);
 
 void _denginescene_do_check_light(Entity* root, Scene* scene);
 
-void _denginescene_do_check_script(Entity* root, Scene* scene, PyScriptFunc callfunc);
+void _denginescene_do_check_script(Entity* root, Scene* scene, ScriptFunc callfunc);
 
 Scene* denginescene_new()
 {
@@ -152,7 +152,7 @@ void _denginescene_do_check_light(Entity* root, Scene* scene)
     }
 }
 
-void _denginescene_do_check_script(Entity* root, Scene* scene, PyScriptFunc callfunc)
+void _denginescene_do_check_script(Entity* root, Scene* scene, ScriptFunc callfunc)
 {
     //check scriptcomp and exec callfunc
     if(!root->parent && root->script_components.count)
@@ -371,7 +371,7 @@ void denginescene_ecs_do_skybox_scene(Scene* scene, Camera* camera)
     glCullFace(entrycullface);
 }
 
-void denginescene_ecs_do_script(Entity* entity, PyScriptFunc func, PyObject* dummyentityobj)
+void denginescene_ecs_do_script(Entity* entity, ScriptFunc func, PyObject* dummyentityobj)
 {
     ScriptComponent* sc = entity->script_components.data;
     for(size_t i = 0; i < entity->script_components.count; i++)

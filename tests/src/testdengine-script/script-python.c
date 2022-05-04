@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     f2m.file = prtbf;
     dengineutils_filesys_file2mem_load(&f2m);
 
-    PyScript* script = denginescript_python_new(f2m.mem, script_file);
+    Script* script = denginescript_python_new(f2m.mem, script_file);
     dengineutils_filesys_file2mem_free(&f2m);
 
     Entity* dummy_entitiy = denginescene_ecs_new_entity();

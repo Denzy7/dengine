@@ -43,7 +43,7 @@ typedef struct
 
 typedef struct
 {
-    PyScript* script;
+    Script* script;
 }ScriptComponent;
 
 typedef struct _Entity
@@ -113,7 +113,7 @@ CameraComponent* denginescene_ecs_new_cameracomponent(const Camera* camera);
 
 LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light);
 
-ScriptComponent* denginescene_ecs_new_scriptcomponent(const PyScript* script);
+ScriptComponent* denginescene_ecs_new_scriptcomponent(const Script* script);
 
 void denginescene_ecs_add_script(Entity* entity, const ScriptComponent* script);
 

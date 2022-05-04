@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
     snprintf(prtbf, prtbf_sz, "%s/%s", dengineutils_filesys_get_assetsdir(), duckscriptfile);
     f2m.file = prtbf;
     dengineutils_filesys_file2mem_load(&f2m);
-    PyScript* duckscript = denginescript_python_new(f2m.mem, duckscriptfile);
+    Script* duckscript = denginescript_python_new(f2m.mem, duckscriptfile);
     ScriptComponent* duckscriptcomp = denginescene_ecs_new_scriptcomponent(duckscript);
     denginescene_ecs_add_script(ent3, duckscriptcomp);
     dengineutils_filesys_file2mem_free(&f2m);

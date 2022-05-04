@@ -176,11 +176,11 @@ LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light)
     return comp;
 }
 
-ScriptComponent* denginescene_ecs_new_scriptcomponent(const PyScript* script)
+ScriptComponent* denginescene_ecs_new_scriptcomponent(const Script* script)
 {
     ScriptComponent* comp = calloc(1, sizeof(ScriptComponent));
-    comp->script = calloc(1, sizeof(PyScript));
-    memcpy(comp->script, script, sizeof(PyScript));
+    comp->script = calloc(1, sizeof(Script));
+    memcpy(comp->script, script, sizeof(Script));
     return comp;
 }
 

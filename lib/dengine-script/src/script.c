@@ -96,7 +96,7 @@ int denginescript_init()
     return append_dengine && py_builtins && py_compiler;
 }
 
-PyScript* denginescript_python_new(const char* src, const char* name)
+Script* denginescript_python_new(const char* src, const char* name)
 {
     if(!py_compiler)
         return NULL;
@@ -111,7 +111,7 @@ PyScript* denginescript_python_new(const char* src, const char* name)
     }
 
     PyObject* module = NULL,* fn_start = NULL,* fn_update;
-    PyScript* script = NULL;
+    Script* script = NULL;
     module =  PyImport_ExecCodeModule(name, bytecode);
     if(!module)
     {
@@ -120,7 +120,7 @@ PyScript* denginescript_python_new(const char* src, const char* name)
         return NULL;
     }else
     {
-        script = calloc(1, sizeof(PyScript));
+        script = calloc(1, sizeof(Script));
         script->bytecode = bytecode;
         script->module = module;
 
@@ -138,7 +138,7 @@ PyScript* denginescript_python_new(const char* src, const char* name)
     return script;
 }
 
-void denginescript_python_call(const PyScript* script, PyScriptFunc func, PyObject* args)
+void denginescript_python_call(const Script* script, ScriptFunc func, PyObject* args)
 {
     PyObject* callable = script->fn_start;
     if(func == DENGINE_SCRIPT_FUNC_UPDATE)

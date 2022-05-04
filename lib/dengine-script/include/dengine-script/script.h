@@ -11,13 +11,13 @@ typedef struct
 
     PyObject* fn_start;
     PyObject* fn_update;
-}PyScript;
+}Script;
 
 typedef enum
 {
     DENGINE_SCRIPT_FUNC_START,
     DENGINE_SCRIPT_FUNC_UPDATE,
-}PyScriptFunc;
+}ScriptFunc;
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,9 +27,9 @@ int denginescript_init();
 
 void denginescript_terminate();
 
-PyScript* denginescript_python_new(const char* src, const char* name);
+Script* denginescript_python_new(const char* src, const char* name);
 
-void denginescript_python_call(const PyScript* script, PyScriptFunc func, PyObject* args);
+void denginescript_python_call(const Script* script, ScriptFunc func, PyObject* args);
 
 #ifdef __cplusplus
 }
