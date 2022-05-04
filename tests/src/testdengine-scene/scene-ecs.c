@@ -153,8 +153,12 @@ int main(int argc, char *argv[])
     dengineutils_filesys_file2mem_load(&f2m);
     Script duckscript;
     denginescript_python_compile(f2m.mem, duckscriptfile, &duckscript);
-    ScriptComponent* duckscriptcomp = denginescene_ecs_new_scriptcomponent(&duckscript);
-    denginescene_ecs_add_script(ent3, duckscriptcomp);
+    denginescene_ecs_add_script(ent3, &duckscript);
+
+    //note the same script can be added to other entities for the same effects:
+    //denginescene_ecs_add_script(ent1, &duckscript);
+    //denginescene_ecs_add_script(ent2, &duckscript);
+
     dengineutils_filesys_file2mem_free(&f2m);
 
     //load separated planes
