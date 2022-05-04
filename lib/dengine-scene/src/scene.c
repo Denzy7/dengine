@@ -155,7 +155,7 @@ void _denginescene_do_check_light(Entity* root, Scene* scene)
 void _denginescene_do_check_script(Entity* root, Scene* scene, ScriptFunc callfunc)
 {
     //check scriptcomp and exec callfunc
-    if(!root->parent && root->script_components.count)
+    if(!root->parent && root->scripts.count)
     {
         denginescene_ecs_do_script(root, callfunc, scene->dummyentityobj);
     }
@@ -164,7 +164,7 @@ void _denginescene_do_check_script(Entity* root, Scene* scene, ScriptFunc callfu
     EntityChild* ec = root->children.data;
     for (size_t i = 0; i < children_count; i++) {
         Entity* child = ec[i].child;
-        if(child->script_components.count)
+        if(child->scripts.count)
         {
             denginescene_ecs_do_script(child, callfunc, scene->dummyentityobj);
         }
@@ -373,11 +373,11 @@ void denginescene_ecs_do_skybox_scene(Scene* scene, Camera* camera)
 
 void denginescene_ecs_do_script(Entity* entity, ScriptFunc func, PyObject* dummyentityobj)
 {
-    ScriptComponent* sc = entity->script_components.data;
-    for(size_t i = 0; i < entity->script_components.count; i++)
+    Script* scripts = entity->scripts.data;
+    for(size_t i = 0; i < entity->scripts.count; i++)
     {
         denginescript_pymod_scene_entity_pull(dummyentityobj, entity);
-        denginescript_python_call(sc[i].script, func, dummyentityobj);
+        denginescript_python_call(&scripts[i], func, dummyentityobj);
         denginescript_pymod_scene_entity_push(dummyentityobj, entity);
     }
 

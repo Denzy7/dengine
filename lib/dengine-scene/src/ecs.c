@@ -37,13 +37,7 @@ void _denginescene_ecs_destroy_entity_components(Entity* root)
         free(root->light_component);
     }
 
-    ScriptComponent* sc = root->script_components.data;
-    for(size_t i = 0; i < root->script_components.count; i++)
-    {
-        free(sc[i].script);
-        free(sc[i].this);
-    }
-    vtor_free(&root->script_components);
+    vtor_free(&root->scripts);
 }
 
 void _denginescene_ecs_new_entity_setup(Entity* ent)
@@ -57,7 +51,7 @@ void _denginescene_ecs_new_entity_setup(Entity* ent)
     ent->name =  malloc(DENGINE_ECS_MAXNAME);
     snprintf(ent->name, DENGINE_ECS_MAXNAME, "Entity %u",ent->entity_id);
 
-    vtor_create(&ent->script_components, sizeof(ScriptComponent));
+    vtor_create(&ent->scripts, sizeof(Script));
 }
 
 Entity* denginescene_ecs_new_entity()
@@ -184,18 +178,9 @@ LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light)
     return comp;
 }
 
-ScriptComponent* denginescene_ecs_new_scriptcomponent(const Script* script)
+void denginescene_ecs_add_script(Entity* entity, const Script* script)
 {
-    ScriptComponent* comp = calloc(1, sizeof(ScriptComponent));
-    comp->this = comp;
-    comp->script = calloc(1, sizeof(Script));
-    memcpy(comp->script, script, sizeof(Script));
-    return comp;
-}
-
-void denginescene_ecs_add_script(Entity* entity, const ScriptComponent* script)
-{
-    vtor_pushback(&entity->script_components, script);
+    vtor_pushback(&entity->scripts, script);
 }
 
 void denginescene_ecs_transform_entity(Entity* entity)

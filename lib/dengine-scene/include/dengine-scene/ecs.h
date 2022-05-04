@@ -41,12 +41,6 @@ typedef struct
     int last_cam;
 }CameraComponent;
 
-typedef struct
-{
-    Script* script;
-    void* this;
-}ScriptComponent;
-
 typedef struct _Entity
 {
     uint32_t entity_id;
@@ -59,12 +53,14 @@ typedef struct _Entity
     struct _Entity* parent;
     vtor children;
 
+    /* SCRIPTS */
+    vtor scripts;
+
     /* MORE COMPONENTS HERE */
 
     MeshComponent* mesh_component;
     LightComponent* light_component;
     CameraComponent* camera_component;
-    vtor script_components;
 }Entity;
 
 typedef struct
@@ -114,9 +110,7 @@ CameraComponent* denginescene_ecs_new_cameracomponent(const Camera* camera);
 
 LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light);
 
-ScriptComponent* denginescene_ecs_new_scriptcomponent(const Script* script);
-
-void denginescene_ecs_add_script(Entity* entity, const ScriptComponent* script);
+void denginescene_ecs_add_script(Entity* entity, const Script* script);
 
 #ifdef __cplusplus
 extern "C" {
