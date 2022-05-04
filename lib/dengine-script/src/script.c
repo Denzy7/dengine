@@ -46,11 +46,10 @@ int denginescript_init()
     Py_IgnoreEnvironmentFlag = 1;
     Py_InteractiveFlag = 0;
     Py_IsolatedFlag = 1;
-    Py_VerboseFlag = 1;
+    //Py_VerboseFlag = 1;
 
     char boostrap[1024];
     snprintf(boostrap, sizeof(boostrap), "%s/%s", dengineutils_filesys_get_assetsdir(), "scripts/bootstrap");
-    dengineutils_logging_log("%s", boostrap);
     wchar_t* path = Py_DecodeLocale(boostrap, NULL);
     Py_SetPath(path);
     PyMem_RawFree(path);
