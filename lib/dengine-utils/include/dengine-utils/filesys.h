@@ -42,6 +42,8 @@ void dengineutils_filesys_set_cachedir(const char* dir);
 
 const char* dengineutils_filesys_get_filesdir();
 
+const char* dengineutils_filesys_get_filesdir_dengine();
+
 const char* dengineutils_filesys_get_cachedir();
 
 #ifdef __cplusplus

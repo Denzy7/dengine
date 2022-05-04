@@ -160,16 +160,9 @@ const char* dengineutils_filesys_get_assetsdir()
             return assets;
     }
 
-    //Check for assets from filesdir
-    const size_t denginefilesdir_sz = 4096;
-    char* denginefilesdir = malloc(denginefilesdir_sz);
-    snprintf(denginefilesdir, denginefilesdir_sz, "%s/%s",dengineutils_filesys_get_filesdir(), "dengine");
-
-    if (_dengineutils_filesys_get_assetsdir_resolve(denginefilesdir))
+    //Check for assets from dengine filesdir
+    if (_dengineutils_filesys_get_assetsdir_resolve(dengineutils_filesys_get_filesdir_dengine()))
     {
-        //TODO : note the early free before return;
-        free(denginefilesdir);
-        denginefilesdir = NULL;
         return assetdir;
     }
 
@@ -195,11 +188,7 @@ const char* dengineutils_filesys_get_assetsdir()
                              "-moving it to %s\n\t"
                              "-setting envvar DENGINEASSETS\n\t"
                              "-recompiling sources on this machine",
-                             denginefilesdir);
-
-    //TODO : just a reminder this memory may be early free'd! see above
-    if(denginefilesdir)
-        free(denginefilesdir);
+                             dengineutils_filesys_get_filesdir_dengine());
 
     return NULL;
 }
@@ -214,6 +203,15 @@ const char* dengineutils_filesys_get_filesdir()
 #elif defined(DENGINE_WIN32)
     snprintf(filesdir, dirbuflen, "%s", getenv("APPDATA"));
 #endif
+    dengineutils_os_mkdir(filesdir);
+    return filesdir;
+}
+
+const char* dengineutils_filesys_get_filesdir_dengine()
+{
+    char* files = strdup(dengineutils_filesys_get_filesdir());
+    snprintf(filesdir, dirbuflen, "%s/dengine", files);
+    free(files);
     dengineutils_os_mkdir(filesdir);
     return filesdir;
 }
