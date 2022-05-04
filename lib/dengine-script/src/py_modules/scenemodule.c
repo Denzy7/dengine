@@ -91,10 +91,10 @@ PyObject* denginescript_pymod_scene_entity_new()
             "import dengine.scene as scene\n"
             "obj = scene.Entity()";
 
-    Script* ready = denginescript_python_new(readyent, "_dengine_internal/readyent.py");
-    Py_DECREF(ready->bytecode);
-    Py_DECREF(ready->module);
-    free(ready);
+    Script ready;
+    denginescript_python_compile(readyent, "_dengine_internal/readyent.py", &ready);
+    Py_DECREF(ready.bytecode);
+    Py_DECREF(ready.module);
 
     return PyObject_CallObject((PyObject*) &EntityObject_Type, NULL);
 }

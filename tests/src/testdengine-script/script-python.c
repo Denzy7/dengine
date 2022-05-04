@@ -15,7 +15,8 @@ int main(int argc, char *argv[])
     f2m.file = prtbf;
     dengineutils_filesys_file2mem_load(&f2m);
 
-    Script* script = denginescript_python_new(f2m.mem, script_file);
+    Script printmouse;
+    int compiled = denginescript_python_compile(f2m.mem, script_file, &printmouse);
     dengineutils_filesys_file2mem_free(&f2m);
 
     Entity* dummy_entitiy = denginescene_ecs_new_entity();
@@ -23,15 +24,14 @@ int main(int argc, char *argv[])
     PyObject* dummy_object = denginescript_pymod_scene_entity_new();
     denginescript_pymod_scene_entity_pull(dummy_object, dummy_entitiy);
 
-    if(script)
-        denginescript_python_call(script, DENGINE_SCRIPT_FUNC_START, dummy_object);
+    if(compiled)
+        denginescript_python_call(&printmouse, DENGINE_SCRIPT_FUNC_START, dummy_object);
 
     while (dengine_window_isrunning()) {
-        if(script)
-            denginescript_python_call(script, DENGINE_SCRIPT_FUNC_UPDATE, dummy_object);
+        if(compiled)
+            denginescript_python_call(&printmouse, DENGINE_SCRIPT_FUNC_UPDATE, dummy_object);
         dengine_update();
     }
-    free(script);
     free(prtbf);
 
     dengine_terminate();
