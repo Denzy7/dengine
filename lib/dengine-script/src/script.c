@@ -39,8 +39,6 @@ PyMODINIT_FUNC PyInit_dengine()
     return mod;
 }
 
-static PyObject* py_builtins = NULL,* py_compiler = NULL;
-
 int denginescript_init()
 {
     Py_DontWriteBytecodeFlag = 1;
@@ -86,20 +84,22 @@ int denginescript_init()
         "sys.meta_path.append(Finder())\n" \
     );
 
+    if(append_dengine < 0)
+        dengineutils_logging_log("ERROR::cannot append dengine module to python!");
+
+    return append_dengine;
+}
+
+int denginescript_python_compile(const char* src, const char* name, Script* script)
+{
+    PyObject* py_builtins = NULL,* py_compiler = NULL;
     py_builtins = PyEval_GetBuiltins();
     py_compiler = PyDict_GetItemString(py_builtins, "compile");
     if(!py_compiler)
     {
         dengineutils_logging_log("ERROR::cannot get python compiler!");
-    }
-
-    return append_dengine && py_builtins && py_compiler;
-}
-
-int denginescript_python_compile(const char* src, const char* name, Script* script)
-{
-    if(!py_compiler)
         return 0;
+    }
 
     PyObject* bytecode = PyObject_CallFunction(py_compiler,"sss",
                                                 src, name, "exec");
