@@ -96,10 +96,10 @@ int denginescript_init()
     return append_dengine && py_builtins && py_compiler;
 }
 
-Script* denginescript_python_new(const char* src, const char* name)
+int denginescript_python_compile(const char* src, const char* name, Script* script)
 {
     if(!py_compiler)
-        return NULL;
+        return 0;
 
     PyObject* bytecode = PyObject_CallFunction(py_compiler,"sss",
                                                 src, name, "exec");
@@ -107,20 +107,18 @@ Script* denginescript_python_new(const char* src, const char* name)
     {
         dengineutils_logging_log("ERROR::failed to compile script %s", name);
         PyErr_Print();
-        return NULL;
+        return 0;
     }
 
     PyObject* module = NULL,* fn_start = NULL,* fn_update;
-    Script* script = NULL;
     module =  PyImport_ExecCodeModule(name, bytecode);
     if(!module)
     {
         dengineutils_logging_log("ERROR::failed to import script %s", name);
         PyErr_Print();
-        return NULL;
+        return 0;
     }else
     {
-        script = calloc(1, sizeof(Script));
         script->bytecode = bytecode;
         script->module = module;
 
@@ -135,7 +133,7 @@ Script* denginescript_python_new(const char* src, const char* name)
             script->fn_update = fn_update;
     }
 
-    return script;
+    return 1;
 }
 
 void denginescript_python_call(const Script* script, ScriptFunc func, PyObject* args)

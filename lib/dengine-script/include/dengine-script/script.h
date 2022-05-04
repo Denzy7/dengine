@@ -27,7 +27,7 @@ int denginescript_init();
 
 void denginescript_terminate();
 
-Script* denginescript_python_new(const char* src, const char* name);
+int denginescript_python_compile(const char* src, const char* name, Script* script);
 
 void denginescript_python_call(const Script* script, ScriptFunc func, PyObject* args);
 
