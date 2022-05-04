@@ -44,6 +44,7 @@ typedef struct
 typedef struct
 {
     Script* script;
+    void* this;
 }ScriptComponent;
 
 typedef struct _Entity

@@ -36,6 +36,14 @@ void _denginescene_ecs_destroy_entity_components(Entity* root)
         free(root->light_component->light);
         free(root->light_component);
     }
+
+    ScriptComponent* sc = root->script_components.data;
+    for(size_t i = 0; i < root->script_components.count; i++)
+    {
+        free(sc[i].script);
+        free(sc[i].this);
+    }
+    vtor_free(&root->script_components);
 }
 
 void _denginescene_ecs_new_entity_setup(Entity* ent)
@@ -179,6 +187,7 @@ LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light)
 ScriptComponent* denginescene_ecs_new_scriptcomponent(const Script* script)
 {
     ScriptComponent* comp = calloc(1, sizeof(ScriptComponent));
+    comp->this = comp;
     comp->script = calloc(1, sizeof(Script));
     memcpy(comp->script, script, sizeof(Script));
     return comp;
