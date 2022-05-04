@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
             denginescript_python_call(&printmouse, DENGINE_SCRIPT_FUNC_UPDATE, dummy_object);
         dengine_update();
     }
+    denginescene_ecs_destroy_entity(dummy_entitiy);
     free(prtbf);
 
     dengine_terminate();
