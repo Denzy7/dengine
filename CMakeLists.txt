@@ -84,6 +84,7 @@ if(NOT python3_LIBRARIES)
         ${CMAKE_CURRENT_BINARY_DIR}/deps/cpython-portable/config
     )
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython-portable)
+    set(python3_LIBRARIES cpython-portable)
 endif()
 
 
