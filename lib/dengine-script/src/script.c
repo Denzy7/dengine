@@ -2,6 +2,7 @@
 
 #include "dengine-utils/logging.h"
 #include "dengine-utils/filesys.h"
+#include "dengine-utils/os.h"
 
 PyMODINIT_FUNC PyInit_inpt(); //input_mod
 PyMODINIT_FUNC PyInit_timer(); //timer_mod
@@ -10,6 +11,10 @@ PyMODINIT_FUNC PyInit_filesys(); //filesys_mod
 
 PyMODINIT_FUNC PyInit_common(); //common_mod
 PyMODINIT_FUNC PyInit_scene(); //scene_mod
+
+#ifdef DENGINE_ANDROID
+#include "dengine/android.h"
+#endif
 
 static PyObject* dengineinit(PyObject* self, PyObject* args)
 {
@@ -50,11 +55,34 @@ int denginescript_init()
 
 #ifndef DENGINE_HAS_PYTHON3
     //bootstrap cpython-portable
-    char boostrap[1024];
-    snprintf(boostrap, sizeof(boostrap), "%s/%s", dengineutils_filesys_get_assetsdir(), "scripts/bootstrap.zip");
+    char* bootstrapzip = "scripts/bootstrap.zip";
+    char boostrap[2048];
+#ifdef DENGINE_ANDROID
+    //dump bootstrap.zip to filesdir
+    snprintf(boostrap, sizeof(boostrap), "%s/%s", dengineutils_filesys_get_filesdir(), "scripts");
+    if(!dengineutils_os_direxist(boostrap))
+        dengineutils_os_mkdir(boostrap);
+    snprintf(boostrap, sizeof(boostrap), "%s/%s", dengineutils_filesys_get_filesdir(), bootstrapzip);
+    if(!fopen(boostrap, "rb"))
+    {
+        File2Mem  f2m;
+        f2m.file = bootstrapzip;
+        dengine_android_asset2file2mem(&f2m);
+        FILE* f = fopen(boostrap, "wb");
+        if(f)
+        {
+            fwrite(f2m.mem, f2m.size,1, f);
+            dengineutils_logging_log("INFO::dumped %s successfully", bootstrapzip);
+            fclose(f);
+        }
+        dengineutils_filesys_file2mem_free(&f2m);
+    }
+#else
+    snprintf(boostrap, sizeof(boostrap), "%s/%s", dengineutils_filesys_get_assetsdir(), bootstrapzip);
+#endif
     wchar_t* path = Py_DecodeLocale(boostrap, NULL);
-    Py_SetPath(path);
     Py_SetPythonHome(path);
+    Py_SetPath(path);
     PyMem_RawFree(path);
 #endif
 
