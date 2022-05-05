@@ -11,3 +11,6 @@
 	path = deps/cpython
 	url = https://github.com/python/cpython.git
 	branch = 3.9
+[submodule "deps/cpython-portable"]
+	path = deps/cpython-portable
+	url = https://github.com/Denzy7/cpython-portable
