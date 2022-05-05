@@ -40,6 +40,9 @@
 // does time.h have clock_gettime?
 #cmakedefine DENGINE_HAVE_CLOCK_GETTIME
 
+// is python3 installed?
+#cmakedefine DENGINE_HAS_PYTHON3
+
 //Size of log buffer for snprintf
 #define DENGINE_LOG_BUF_SIZE 2048
 

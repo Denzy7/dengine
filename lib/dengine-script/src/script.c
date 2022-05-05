@@ -48,11 +48,15 @@ int denginescript_init()
     Py_IsolatedFlag = 1;
     //Py_VerboseFlag = 1;
 
+#ifndef DENGINE_HAS_PYTHON3
+    //bootstrap cpython-portable
     char boostrap[1024];
-    snprintf(boostrap, sizeof(boostrap), "%s/%s", dengineutils_filesys_get_assetsdir(), "scripts/bootstrap");
+    snprintf(boostrap, sizeof(boostrap), "%s/%s", dengineutils_filesys_get_assetsdir(), "scripts/bootstrap.zip");
     wchar_t* path = Py_DecodeLocale(boostrap, NULL);
     Py_SetPath(path);
+    Py_SetPythonHome(path);
     PyMem_RawFree(path);
+#endif
 
     int append_dengine = PyImport_AppendInittab("dengine", &PyInit_dengine);
     PyImport_AppendInittab("dengine.inpt", &PyInit_inpt);
