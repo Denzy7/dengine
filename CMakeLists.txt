@@ -76,6 +76,17 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-script/include
         )
 
+if(NOT python3_LIBRARIES)
+    set(PYSRC ${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython)
+    set(PYVER "3.9")
+    include_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython/Include
+        ${CMAKE_CURRENT_BINARY_DIR}/deps/cpython-portable/config
+    )
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython-portable)
+endif()
+
+
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 
 option(DENGINE_FONT_EMBED_OPENSANS_REGULAR "Embed OpenSans Regular into dengine-gui" OFF)
