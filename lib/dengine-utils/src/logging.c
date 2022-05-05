@@ -13,13 +13,17 @@
 
 #if defined(DENGINE_ANDROID)
 #include <android/log.h>
+#include <pthread.h>
+#include <unistd.h>
 #define ANDROID_LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, DENGINE_ANDROID_LOG_TAG, __VA_ARGS__))
 #define ANDROID_LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, DENGINE_ANDROID_LOG_TAG, __VA_ARGS__))
 #define ANDROID_LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, DENGINE_ANDROID_LOG_TAG, __VA_ARGS__))
+int logthr = 0;
+void* _android_logthr(void* arg);
+int pfd[2];
 #elif defined (DENGINE_WIN32)
 #include <windows.h>
 #endif // defined
-
 
 char LOG_BUFFER[DENGINE_LOG_BUF_SIZE];
 
@@ -69,6 +73,21 @@ static const char logcolorpairsWIN32[][2]=
     {'W', WIN32_Yellow},
     {'T', WIN32_Cyan},
 };
+#endif
+
+#ifdef DENGINE_ANDROID
+void* _android_logthr(void* arg) {
+    ssize_t sz;
+    ANDROID_LOGI("INFO::START ANDROID LOG THREAD");
+    while((sz = read(pfd[0], LOG_BUFFER, sizeof LOG_BUFFER - 1)) > 0) {
+        if(LOG_BUFFER[sz - 1] == '\n') {
+            --sz;
+        }
+        LOG_BUFFER[sz] = 0;  // add null-terminator
+        ANDROID_LOGI("stdout: %s", LOG_BUFFER);
+    }
+    return 0;
+}
 #endif
 
 void dengineutils_logging_set_filelogging(int value)
@@ -144,14 +163,30 @@ void dengineutils_logging_log(const char* message, ...)
             delim =  offsetneedles[i];
     }
 
+    #ifdef DENGINE_ANDROID
+    ANDROID_LOGI("%s",LOG_BUFFER + strlen(delim));
+    if(!logthr)
+    {
+        setvbuf(stdout, 0, _IOLBF, 0); // make stdout line-buffered
+        setvbuf(stderr, 0, _IONBF, 0); // make stderr unbuffered
+
+        /* create the pipe and redirect stdout and stderr */
+        pipe(pfd);
+        dup2(pfd[1], 1);
+        dup2(pfd[1], 2);
+
+        /* spawn the logging thread */
+        pthread_t thr;
+        pthread_create(&thr, 0, &_android_logthr, 0);
+        pthread_detach(thr);
+        logthr = 1;
+    }
+    #else
     printf("\n");
     dengineutils_logging_set_consolecolor(LOG_BUFFER[0]);
     printf("%s", LOG_BUFFER + strlen(delim));
     dengineutils_logging_set_consolecolor(0);
     printf("\n");
-
-    #ifdef DENGINE_ANDROID
-        ANDROID_LOGI("%s",LOG_BUFFER + strlen(delim));
     #endif // DENGINE_ANDROID
 
     if(LOG_BUFFER[0] == 'E' && msgboxerr)
