@@ -1,5 +1,6 @@
 #utils
 add_subdirectory(src/testdengine-utils "utils-build")
+add_subdirectory(src/testdengine-nogui "nogui-build")
 
 #executables for desktop
 if(NOT ANDROID)    

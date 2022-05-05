@@ -1,0 +1,3 @@
+add_executable(testdengine-nogui-python nogui-python.c)
+target_link_libraries(testdengine-nogui-python ${dengine})
+set_property(TARGET testdengine-nogui-python PROPERTY C_STANDARD 99)
