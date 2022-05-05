@@ -94,6 +94,8 @@ int denginescript_init()
     PyImport_AppendInittab("dengine.common", &PyInit_common);
     PyImport_AppendInittab("dengine.scene", &PyInit_scene);
 
+    dengineutils_logging_log("INFO::initialziing python...");
+
     Py_Initialize();
 
     //Import hook
@@ -117,6 +119,8 @@ int denginescript_init()
 
     if(append_dengine < 0)
         dengineutils_logging_log("ERROR::cannot append dengine module to python!");
+    else
+        dengineutils_logging_log("INFO::done!");
 
     return append_dengine;
 }
