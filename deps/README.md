@@ -3,6 +3,7 @@ Its a good idea to check if you have cloned the following deps before to save so
 - [glfw](https://github.com/glfw/glfw.git)
 - [stb](https://github.com/nothings/stb.git)
 - [cglm](https://github.com/recp/cglm.git)
+- [cpython v3.9](https://github.com/python/cpython)
 
 If so, make symlinks to this directory.
 On Linux : `ln -sf <dir> deps/`
@@ -21,14 +22,17 @@ Get default deps
 
 # optional deps
 **Windows users need to get all optional deps then proceed to build**
-`git submodule update deps/glfw`
+`git submodule update deps/glfw deps/cpython`
+
+# python
+Depends if python is found on your system. And is compatible with the build system. If not this will result in a lenghty compile process. It might also result in an incompatible module set
 
 # debian & ubuntu
-`# apt install libglfw3-dev libgtk-3-dev `
+`# apt install libglfw3-dev libgtk-3-dev libpython3.9-dev `
 **Substitute libglfw3 for libglfw3-wayland if on wayland**
 
 # arch
-`# pacman -S glfw-x11 gtk3`
+`# pacman -S glfw-x11 gtk3 python`
 **Substitute glfw-x11 for glfw3-wayland if on wayland**
 
 # dengitor and gtk3
