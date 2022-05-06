@@ -22,7 +22,6 @@ Primitive* denginemodel_load_file(DengineModelFormat format, const char* file, s
         return NULL;
     }
 
-
     fseek(f_model, 0, SEEK_END);
     size_t sz = ftell(f_model);
 
@@ -42,6 +41,14 @@ Primitive* denginemodel_load_file(DengineModelFormat format, const char* file, s
     free(mem);
 
     return load;
+}
+
+Primitive* denginemodel_load_mem(DengineModelFormat format, const void* mem, const size_t sz, size_t* meshes, Shader* shader)
+{
+    if(format == DENGINE_MODEL_FORMAT_OBJ)
+        return _denginemodel_load_obj(mem, sz, meshes, shader);
+    else
+        return NULL;
 }
 
 Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* meshes, Shader* shader)

@@ -15,6 +15,8 @@ extern "C" {
 
 Primitive* denginemodel_load_file(DengineModelFormat format, const char* file, size_t* meshes , Shader* shader);
 
+Primitive* denginemodel_load_mem(DengineModelFormat format, const void* mem, const size_t sz, size_t* meshes, Shader* shader);
+
 #ifdef __cplusplus
 }
 #endif
