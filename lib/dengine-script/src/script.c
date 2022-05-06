@@ -51,9 +51,12 @@ int denginescript_init()
     Py_IgnoreEnvironmentFlag = 1;
     Py_InteractiveFlag = 0;
     Py_IsolatedFlag = 1;
-    //Py_VerboseFlag = 1;
+
+    int usingbootstrap = 0;
 
 #ifndef DENGINE_HAS_PYTHON3
+    usingbootstrap = 1;
+
     //bootstrap cpython-portable
     char* bootstrapzip = "scripts/bootstrap.zip";
     char boostrap[2048];
@@ -86,6 +89,12 @@ int denginescript_init()
     PyMem_RawFree(path);
 #endif
 
+    if(usingbootstrap)
+    {
+        Py_VerboseFlag = 1;
+        dengineutils_logging_log("INFO::initialzing python from bootstrap.zip. This might take some seconds...");
+    }
+
     int append_dengine = PyImport_AppendInittab("dengine", &PyInit_dengine);
     PyImport_AppendInittab("dengine.inpt", &PyInit_inpt);
     PyImport_AppendInittab("dengine.timer", &PyInit_timer);
@@ -94,9 +103,13 @@ int denginescript_init()
     PyImport_AppendInittab("dengine.common", &PyInit_common);
     PyImport_AppendInittab("dengine.scene", &PyInit_scene);
 
-    dengineutils_logging_log("INFO::initialziing python...");
-
     Py_Initialize();
+
+    if(usingbootstrap)
+    {
+        dengineutils_logging_log("INFO::done!");
+        Py_VerboseFlag = 0;
+    }
 
     //Import hook
     PyRun_SimpleString(
@@ -119,8 +132,6 @@ int denginescript_init()
 
     if(append_dengine < 0)
         dengineutils_logging_log("ERROR::cannot append dengine module to python!");
-    else
-        dengineutils_logging_log("INFO::done!");
 
     return append_dengine;
 }
