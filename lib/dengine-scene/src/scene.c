@@ -5,6 +5,7 @@
 #include "dengine-utils/logging.h"
 #include "dengine/draw.h"
 #include "dengine/loadgl.h" //getFBO
+#include "dengine/entrygl.h"
 #include "dengine_config.h"// DENGINE_ECS_MAXCHILDREN
 
 #include "dengine/viewport.h" //get_view
@@ -188,8 +189,8 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     denginescene_ecs_get_front(camera, front);
 
     //we might not have entered with fb 0, save binding for later
-    int bind;
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &bind); DENGINE_CHECKGL;
+    Framebuffer entryfb;
+    dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entryfb);
 
     //store entry viewport
     int x, y, w, h;
@@ -219,7 +220,7 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     denginescene_ecs_do_skybox_scene(scene, camera->camera_component->camera);
 
     //now bind what we entered with
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, bind); DENGINE_CHECKGL;
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, &entryfb);
 
     dengine_viewport_set(x, y, w, h);
 }
@@ -350,7 +351,6 @@ void denginescene_ecs_do_skybox_scene(Scene* scene, Camera* camera)
         return;
 
     // draw as the last entity
-
     int entrydfunc;
     glGetIntegerv(GL_DEPTH_FUNC, &entrydfunc);
 
