@@ -232,8 +232,8 @@ int _dengineutils_logging_logthr_start()
 #ifdef DENGINE_LINUX
     //pipe and dup2 stdout and stderr
     pipe(logfd);
-    dup2(logfd[1], 1);
-    dup2(logfd[1], 2);
+    dup2(logfd[1], STDOUT_FILENO);
+    dup2(logfd[1], STDERR_FILENO);
 #endif
 
 #ifdef DENGINE_WIN32
