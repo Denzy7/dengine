@@ -33,6 +33,13 @@ int main(int argc, char *argv[])
     return run;
 }
 
+void _dengitor_logcallback(const char* logbuf, const char* tripbuf)
+{
+    GtkWidget* logmsg = gtk_label_new(logbuf);
+    gtk_widget_show(logmsg);
+    gtk_container_add(dengitor->log, logmsg);
+}
+
 gboolean dengitor_main_ontick(GtkWidget* widget, GdkFrameClock* clock, gpointer data)
 {
     // this runs every frame cycle for the main GtkApplicationWindow
@@ -111,6 +118,9 @@ void dengitor_onactivate(GtkApplication* app)
 
     // setup viewportopts
     dengitor_viewport_opts_setup(dengitor->builder);
+
+    //logging box
+    dengitor->log = GTK_CONTAINER( gtk_builder_get_object(dengitor->builder, "log") );
 
     // app setup complete..., show window and apply settings
 
@@ -389,6 +399,9 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
              (char*)glGetString(GL_VERSION),
              (char*)glGetString(GL_RENDERER));;
     gtk_window_set_title( GTK_WINDOW(dengitor->main), prtbf);
+
+    //logcallback to logging widget
+    dengineutils_logging_addcallback(_dengitor_logcallback);
 }
 
 void dengitor_glarea_onunrealize(GtkGLArea* area)
