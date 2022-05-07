@@ -185,6 +185,7 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     DengineInitOpts* opts = dengine_init_get_opts();
     opts->gl_loaddefault = 1;
     opts->window_createnative = 0;
+    opts->enable_logthread = 1;
 
     // preload glad to set viewport
     gladLoadGL();

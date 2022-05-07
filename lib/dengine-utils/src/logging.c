@@ -294,7 +294,7 @@ void dengineutils_logging_addcallback(LoggingCallback callback)
     if(logthrstarted)
         vtor_pushback(&logcallbacks, &var);
     else
-        dengineutils_logging_log("WARNING::Cannot use callbacks when log thread is not running. call dengineutils_logging_init()");
+        dengineutils_logging_log("WARNING::Cannot use callbacks when log thread is not running. call dengineutils_logging_init() or set INIT_OPT enable_logthread=1");
 }
 
 const char* dengineutils_logging_get_logfile()

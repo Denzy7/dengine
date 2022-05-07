@@ -28,6 +28,8 @@ typedef struct
 
     int cache_textures;
     int cache_shaders;
+
+    int enable_logthread;
 }DengineInitOpts;
 
 #include <dengine/window.h>
@@ -92,6 +94,15 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
     DENGINE_INIT_OPTS.enable_depth = 1;
 
     DENGINE_INIT_OPTS.cache_shaders = 1;
+
+#ifdef DENGINE_ANDROID
+    /*
+     * in most cases don't need logthr.
+     * just android (to redirect stdout to logcat)
+     * and dengitor (to redirect stdout to logging widget)
+     */
+    DENGINE_INIT_OPTS.enable_logthread = 1;
+#endif
 
     const size_t prtbf_sz = 2048;
     char* prtbf = (char*) malloc(prtbf_sz);
@@ -274,7 +285,8 @@ DENGINE_INLINE int dengine_init()
     dengineutils_rng_set_seedwithtime();
 
     //init logthread
-    dengineutils_logging_init();
+    if(DENGINE_INIT_OPTS.enable_logthread)
+        dengineutils_logging_init();
 
     //INIT SCRIPTING
     denginescript_init();
@@ -298,7 +310,8 @@ DENGINE_INLINE void dengine_terminate()
     dengineutils_debug_terminate();
 
     denginescript_terminate();
-    dengineutils_logging_terminate();
+    if(DENGINE_INIT_OPTS.enable_logthread)
+        dengineutils_logging_terminate();
 
     dengine_window_terminate();
 }
