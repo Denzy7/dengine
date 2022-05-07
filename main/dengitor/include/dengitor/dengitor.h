@@ -26,7 +26,7 @@ typedef struct
     GtkGLArea* glarea;
     GtkAllocation* glarea_alloc;
 
-    GtkContainer* log;
+    GtkTreeView* log;
 
     GtkEventBox* glarea_evbox;
     int glarea_evbox_first;

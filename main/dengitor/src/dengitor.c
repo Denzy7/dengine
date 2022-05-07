@@ -35,9 +35,14 @@ int main(int argc, char *argv[])
 
 void _dengitor_logcallback(const char* logbuf, const char* tripbuf)
 {
-    GtkWidget* logmsg = gtk_label_new(logbuf);
-    gtk_widget_show(logmsg);
-    gtk_container_add(dengitor->log, logmsg);
+    if(!dengitor->log)
+        return;
+    GtkListStore* store = GTK_LIST_STORE(gtk_tree_view_get_model(dengitor->log));
+    GtkTreeIter iter;
+    gtk_list_store_append(store,&iter);
+    gtk_list_store_set(store, &iter,
+                       0, logbuf,
+                       -1);
 }
 
 gboolean dengitor_main_ontick(GtkWidget* widget, GdkFrameClock* clock, gpointer data)
@@ -120,7 +125,16 @@ void dengitor_onactivate(GtkApplication* app)
     dengitor_viewport_opts_setup(dengitor->builder);
 
     //logging box
-    dengitor->log = GTK_CONTAINER( gtk_builder_get_object(dengitor->builder, "log") );
+    dengitor->log = GTK_TREE_VIEW( gtk_builder_get_object(dengitor->builder, "log") );
+    GtkListStore* store = gtk_list_store_new(1, G_TYPE_STRING);
+    gtk_tree_view_set_model(dengitor->log, GTK_TREE_MODEL(store));
+    g_object_unref(store);
+    GtkCellRenderer* renderer;
+    renderer = gtk_cell_renderer_text_new();
+    gtk_tree_view_insert_column_with_attributes(dengitor->log,
+                                                -1, "Log",
+                                                renderer, "text",
+                                                0, NULL);
 
     // app setup complete..., show window and apply settings
 
