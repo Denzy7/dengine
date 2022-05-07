@@ -273,11 +273,11 @@ DENGINE_INLINE int dengine_init()
     //SEED RNG. NOT MT-SAFE!(AFAIK)
     dengineutils_rng_set_seedwithtime();
 
-    //INIT SCRIPTING
-    denginescript_init();
-
     //init logthread
     dengineutils_logging_init();
+
+    //INIT SCRIPTING
+    denginescript_init();
 
     //depth testing ✅
     if(DENGINE_INIT_OPTS.enable_depth)
