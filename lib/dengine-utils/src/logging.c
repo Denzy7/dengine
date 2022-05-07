@@ -40,6 +40,7 @@
 #define ANDROID_LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, DENGINE_ANDROID_LOG_TAG, __VA_ARGS__))
 #define ANDROID_LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, DENGINE_ANDROID_LOG_TAG, __VA_ARGS__))
 #define ANDROID_LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, DENGINE_ANDROID_LOG_TAG, __VA_ARGS__))
+void _dengineutils_logging_androidcb(const char* log, const char* trip);
 #endif
 
 //PTHREAD
@@ -99,6 +100,14 @@ static const char* offsetneedles[]=
     "WARNING::",
     "TODO::",
 };
+
+#ifdef DENGINE_ANDROID
+void _dengineutils_logging_androidcb(const char* log, const char* trip)
+{
+    //write stdout and stderr to logcat
+    ANDROID_LOGI("std: %s", trip);
+}
+#endif
 
 int dengineutils_logging_init()
 {
@@ -191,7 +200,7 @@ void dengineutils_logging_log(const char* message, ...)
             delim =  offsetneedles[i];
     }
 #ifdef DENGINE_ANDROID
-    //use logcat. any stdout writes will be sent to callbacks
+    //use logcat. any stdout writes will be sent to callback
     if(iserr)
         ANDROID_LOGE("%s",LOG_BUFFER + strlen(delim));
     else
@@ -229,8 +238,8 @@ int _dengineutils_logging_logthr_start()
     logthrstarted = 1;
 #endif
 
-    setvbuf(stdout, 0, _IOLBF, 0); // make stdout line-buffered
-    setvbuf(stderr, 0, _IONBF, 0); // make stderr unbuffered
+    setvbuf(stdout, NULL, _IOLBF, 0); // make stdout line-buffered
+    setvbuf(stderr, NULL, _IONBF, 0); // make stderr unbuffered
 
 #ifdef DENGINE_LINUX
     //pipe and dup2 stdout and stderr
@@ -244,6 +253,12 @@ int _dengineutils_logging_logthr_start()
 #endif
 
     vtor_create(&logcallbacks, sizeof(LoggingCallbackVtor));
+
+    // android stdout stderr callback
+#ifdef DENGINE_ANDROID
+    dengineutils_logging_addcallback(_dengineutils_logging_androidcb);
+#endif
+
     return 1;
 }
 
