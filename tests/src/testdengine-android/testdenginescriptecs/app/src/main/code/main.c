@@ -304,6 +304,8 @@ static void init(struct android_app* app)
 
         vec3 gridcolor = {0.0f, 1.0f, 0.0f};
         dengine_shader_set_vec3(ds.dftshdr, "color", gridcolor);
+
+        printf("test stdout to logcat!");
     }
 }
 
