@@ -45,6 +45,12 @@ void _dengitor_logcallback(const char* logbuf, const char* tripbuf)
                        -1);
 }
 
+void _dengitor_log_clear()
+{
+    GtkListStore* store = GTK_LIST_STORE(gtk_tree_view_get_model(dengitor->log));
+    gtk_list_store_clear(store);
+}
+
 gboolean dengitor_main_ontick(GtkWidget* widget, GdkFrameClock* clock, gpointer data)
 {
     // this runs every frame cycle for the main GtkApplicationWindow
