@@ -238,16 +238,6 @@ int _dengineutils_logging_logthr_start()
     logthrstarted = 1;
 #endif
 
-    setvbuf(stdout, NULL, _IOLBF, 0); // make stdout line-buffered
-    setvbuf(stderr, NULL, _IONBF, 0); // make stderr unbuffered
-
-#ifdef DENGINE_LINUX
-    //pipe and dup2 stdout and stderr
-    pipe(logfd);
-    dup2(logfd[1], STDOUT_FILENO);
-    dup2(logfd[1], STDERR_FILENO);
-#endif
-
 #ifdef DENGINE_WIN32
    //TODO: Win32 impl.
 #endif
@@ -268,6 +258,17 @@ void* _dengineutils_logging_logthr_pthread(void* arg)
     ssize_t sz;
     //read pipe here with a trip buffer
     char trip[BUFSIZ];
+
+    dengineutils_logging_log("WARNING::Log thread about to start. stdout and stderr will be redirected to callbacks");
+
+    setvbuf(stdout, NULL, _IOLBF, 0); // make stdout line-buffered
+    setvbuf(stderr, NULL, _IONBF, 0); // make stderr unbuffered
+
+    //pipe and dup2 stdout and stderr
+    pipe(logfd);
+    dup2(logfd[1], STDOUT_FILENO);
+    dup2(logfd[1], STDERR_FILENO);
+
     while((sz = read(logfd[0], trip, sizeof trip - 1)) > 0)
     {
         if(trip[sz - 1] == '\n') {
