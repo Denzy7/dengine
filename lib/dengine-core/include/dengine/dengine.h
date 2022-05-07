@@ -276,6 +276,9 @@ DENGINE_INLINE int dengine_init()
     //INIT SCRIPTING
     denginescript_init();
 
+    //init logthread
+    dengineutils_logging_init();
+
     //depth testing ✅
     if(DENGINE_INIT_OPTS.enable_depth)
         glEnable(GL_DEPTH_TEST);
@@ -295,6 +298,8 @@ DENGINE_INLINE void dengine_terminate()
     dengineutils_debug_terminate();
 
     denginescript_terminate();
+    dengineutils_logging_terminate();
+
     dengine_window_terminate();
 }
 
