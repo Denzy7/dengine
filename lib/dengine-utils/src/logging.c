@@ -229,6 +229,9 @@ int _dengineutils_logging_logthr_start()
     logthrstarted = 1;
 #endif
 
+    setvbuf(stdout, 0, _IOLBF, 0); // make stdout line-buffered
+    setvbuf(stderr, 0, _IONBF, 0); // make stderr unbuffered
+
 #ifdef DENGINE_LINUX
     //pipe and dup2 stdout and stderr
     pipe(logfd);
@@ -248,19 +251,20 @@ void* _dengineutils_logging_logthr_pthread(void* arg)
 {
 #ifdef DENGINE_LINUX
     ssize_t sz;
-    //read pipe here
-    while((sz = read(logfd[0], LOG_BUFFER, sizeof LOG_BUFFER - 1)) > 0)
+    //read pipe here with a trip buffer
+    char trip[BUFSIZ];
+    while((sz = read(logfd[0], trip, sizeof trip - 1)) > 0)
     {
-        if(LOG_BUFFER[sz - 1] == '\n') {
+        if(trip[sz - 1] == '\n') {
             --sz;
         }
-        LOG_BUFFER[sz] = 0;  // add null-terminator
+        trip[sz] = 0;  // add null-terminator
         //call callbacks
         LoggingCallbackVtor* cbs = logcallbacks.data;
         for(size_t i = 0; i < logcallbacks.count; i++)
         {
             LoggingCallback cb = cbs[i].cb;
-            cb(LOG_BUFFER);
+            cb(LOG_BUFFER, trip);
         }
     }
 #endif

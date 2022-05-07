@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-typedef void (*LoggingCallback)(const char*);
+typedef void (*LoggingCallback)(const char* logbuf,const char* tripbuf);
 
 int dengineutils_logging_init();
 
