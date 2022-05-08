@@ -49,8 +49,8 @@ int denginescript_init()
     Py_DontWriteBytecodeFlag = 1;
     Py_NoSiteFlag = 1;
     //Py_IgnoreEnvironmentFlag = 1;
-    Py_InteractiveFlag = 0;
-    Py_IsolatedFlag = 1;
+    //Py_InteractiveFlag = 0;
+    //Py_IsolatedFlag = 1;
 
     int usingbootstrap = 0;
 
