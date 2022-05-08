@@ -133,6 +133,9 @@ if(DENGINE_BUILD_TESTS_PRIV)
 endif()
 
 add_subdirectory(main/dengitor)
+if(WIN32)
+    add_subdirectory(main/python-dengine-script)
+endif()
 
 foreach(i ${dengine})
     string(APPEND DENGINE_PKG_LIBS "-l${i} ")
