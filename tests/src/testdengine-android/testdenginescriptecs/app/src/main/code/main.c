@@ -306,6 +306,8 @@ static void init(struct android_app* app)
         dengine_shader_set_vec3(ds.dftshdr, "color", gridcolor);
 
         printf("test stdout to logcat!");
+
+        denginescene_ecs_do_script_scene(ds.scene, DENGINE_SCRIPT_FUNC_START);
     }
 }
 

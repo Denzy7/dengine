@@ -359,6 +359,8 @@ int main(int argc, char *argv[])
     vec3 gridcolor = {0.0f, 1.0f, 0.0f};
     dengine_shader_set_vec3(dftshdr, "color", gridcolor);
 
+    denginescene_ecs_do_script_scene(scene, DENGINE_SCRIPT_FUNC_START);
+
     while (dengine_window_isrunning()) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE + poly);
 
