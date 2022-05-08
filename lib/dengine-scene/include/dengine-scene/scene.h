@@ -49,6 +49,8 @@ void denginescene_ecs_do_light_scene(Entity* light, Scene* scene);
 
 void denginescene_ecs_do_skybox_scene(Scene* scene, Camera* camera);
 
-void denginescene_ecs_do_script(Entity* entity, ScriptFunc func, PyObject* dummyentityobj);
+void denginescene_ecs_do_script_entity(Entity* entity, ScriptFunc func, PyObject* dummyentityobj);
+
+void denginescene_ecs_do_script_scene(Scene* scene, ScriptFunc func);
 
 #endif // SCENE_H

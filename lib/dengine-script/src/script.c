@@ -133,6 +133,7 @@ int denginescript_init()
 
 int denginescript_python_compile(const char* src, const char* name, Script* script)
 {
+    memset(script, 0, sizeof(Script));
     PyObject* py_builtins = NULL,* py_compiler = NULL;
     py_builtins = PyEval_GetBuiltins();
     py_compiler = PyDict_GetItemString(py_builtins, "compile");
