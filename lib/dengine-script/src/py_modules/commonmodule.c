@@ -20,7 +20,7 @@ PyTypeObject Vec3Object_Type=
 {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "common.Vec3",
-    .tp_doc = "Vector with 3 components (X, Y and Z)",
+    .tp_doc = "Vector with 3 components (X, Y, Z)",
     .tp_basicsize = sizeof(Vec3Object),
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
