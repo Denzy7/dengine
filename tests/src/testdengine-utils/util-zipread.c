@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
         dengineutils_logging_log("TODO::"
                                  "%hu\n"
                                  "file:%s\n"
-                                 "compr:%hu, uncompr:%hu\n"
+                                 "compr:%u, uncompr:%u\n"
                                  "time:%hu, data:%hu\n"
                                  "compr_meth:%s\n"
                                  "encr:%s, crc:%s, utf-8:%s",
