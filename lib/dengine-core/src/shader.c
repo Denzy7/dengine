@@ -11,7 +11,7 @@
 #include "dengine-utils/os.h" //mkdir
 #include "dengine_config.h" //cache_dir, ext, version
 #ifdef DENGINE_ANDROID
-#include <dengine/android.h>
+#include <dengine-utils/platform/android.h>
 #endif
 
 static const float default_shader_col[3] = {1.0, 0.0, 0.0};
@@ -390,7 +390,7 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
 #ifdef DENGINE_ANDROID
             char* assetsshaders = strstr(prtbuf + 1, "shaders");
             f2m.file = assetsshaders;
-            dengine_android_asset2file2mem(&f2m);
+            dengineutils_android_asset2file2mem(&f2m);
 #else
             f2m.file = prtbuf;
             dengineutils_filesys_file2mem_load(&f2m);

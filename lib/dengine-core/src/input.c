@@ -6,7 +6,7 @@
 #include <stdio.h> // snprintf
 
 #ifdef DENGINE_ANDROID
-#include "dengine/android.h"
+#include "dengine-utils/platform/android.h"
 #endif
 
 #ifdef DENGINE_WIN32
@@ -476,23 +476,13 @@ void dengine_input_pollevents()
     #if defined(DENGINE_WIN_GLFW)
     dengine_window_glfw_pollevents();
     #elif defined(DENGINE_ANDROID)
-    dengine_android_pollevents();
+    dengineutils_android_pollevents();
+    //TODO: get pointer positions...
     #endif
 
 #ifdef DENGINE_HAS_GTK3
     //do gtk main non-blocking loop to unfreeze dialogs
     gtk_main_iteration_do(0);
 #endif
-}
-
-void dengine_input_set_mousepos(double x, double y)
-{
-    mouseposx = x;
-    mouseposy = y;
-}
-
-void dengine_input_set_mousebtn(int btn, int val)
-{
-    mousebtns[btn] = val;
 }
 

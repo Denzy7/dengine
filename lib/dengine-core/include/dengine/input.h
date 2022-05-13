@@ -63,11 +63,6 @@ void dengine_input_glfw_callback_joystick(int jid, int event);
 
 #endif
 
-//These are for stubborn platforms without input callbacks I know of (e.g. Android?)
-void dengine_input_set_mousepos(double x, double y);
-
-void dengine_input_set_mousebtn(int btn, int val);
-
 #ifdef __cplusplus
 }
 #endif

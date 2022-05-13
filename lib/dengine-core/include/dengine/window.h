@@ -20,7 +20,7 @@
 #endif // defined
 
 #ifdef DENGINE_ANDROID
-#include <android/window.h>
+#include <dengine-utils/platform/android.h>
 #endif
 
 /*!
@@ -103,7 +103,6 @@ int dengine_window_glfw_context_gladloadgl();
 #endif // DENGINE_WIN_GLFW
 
 #ifdef DENGINE_ANDROID
-void dengine_window_android_set_nativewindow(struct ANativeWindow* window);
 
 int dengine_window_android_egl_context_gladloadgl();
 #endif

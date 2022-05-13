@@ -13,11 +13,6 @@ EGLSurface _egl_surface;
 EGLContext _egl_context;
 #endif
 
-#ifdef DENGINE_ANDROID
-#include "dengine/android.h"
-struct ANativeWindow* _android_current;
-#endif
-
 int isrunning = 0;
 int glinit = 0;
 #if defined (DENGINE_WIN_GLFW)
@@ -84,7 +79,8 @@ int dengine_window_init()
     EGLConfig configs[supported_count];
     eglChooseConfig(_egl_display, egl_spec_desired, configs, supported_count, &supported_count);
 
-    _egl_surface = eglCreateWindowSurface(_egl_display, configs[0], _android_current , NULL);
+    ANativeWindow* android_native_window = dengineutils_android_get_window();
+    _egl_surface = eglCreateWindowSurface(_egl_display, configs[0], android_native_window , NULL);
     if(_egl_surface == EGL_NO_SURFACE)
     {
         dengineutils_logging_log("ERROR::WINDOW::NO_EGL_SURFACE!");
@@ -346,11 +342,6 @@ int dengine_window_glfw_context_gladloadgl()
 #endif // DENGINE_WIN_GLFW
 
 #ifdef DENGINE_ANDROID
-void dengine_window_android_set_nativewindow(struct ANativeWindow* window)
-{
-    _android_current = window;
-}
-
 int dengine_window_android_egl_context_gladloadgl()
 {
     return gladLoadGLES2Loader((GLADloadproc)eglGetProcAddress);

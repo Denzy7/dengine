@@ -9,6 +9,26 @@ include(GNUInstallDirs)
 set(DENGINE_PKG_LIBS)
 set(DENGINE_PKG_DEPS)
 
+option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
+
+option(DENGINE_FONT_EMBED_OPENSANS_REGULAR "Embed OpenSans Regular into dengine-gui" OFF)
+option(DENGINE_FONT_EMBED_OPENSANS_ITALIC "Embed OpenSans Italic into dengine-gui" OFF)
+option(DENGINE_FONT_EMBED_OPENSANS_LIGHT "Embed OpenSans Light into dengine-gui" ON)
+
+option(DENGINE_FONT_EMBED_SOURCESANSPRO_REGULAR "Embed Source Sans Pro Regular into dengine-gui" OFF)
+option(DENGINE_FONT_EMBED_SOURCESANSPRO_ITALIC "Embed Source Sans Pro Italic into dengine-gui" OFF)
+option(DENGINE_FONT_EMBED_SOURCESANSPRO_LIGHT "Embed Source Sans Pro Light into dengine-gui" OFF)
+
+option(DENGINE_FONT_EMBED_ROBOTO_REGULAR "Embed Roboto Regular into dengine-gui" OFF)
+option(DENGINE_FONT_EMBED_ROBOTO_ITALIC "Embed Roboto Italic into dengine-gui" OFF)
+option(DENGINE_FONT_EMBED_ROBOTO_LIGHT "Embed Roboto Light into dengine-gui" OFF)
+
+option(DENGINE_BUILD_TESTS "Build the test suite and examples" ON)
+
+option(DENGINE_MT "Build for multithreading using mutexes" ON)
+
+option(DENGINE_SCRIPTING_PYTHON "Enable support for Python scripts" ON)
+
 if(NOT ANDROID)
     find_package(PkgConfig QUIET)
     if(PkgConfig_FOUND)
@@ -36,16 +56,18 @@ if(NOT ANDROID)
             message(WARNING ">>> Could not find fontconfig. Default font support will not work! Consider installing it")
         endif()
 
-        pkg_check_modules(python3 python3-embed)
-        if(python3_LIBRARIES)
-            message(">>> Found python3 libraries")
-            include_directories(${python3_INCLUDE_DIRS})
-            link_directories(${python3_LIBRARY_DIRS})
-            set(DENGINE_HAS_PYTHON3 1)
-            string(APPEND DENGINE_PKG_DEPS "python3-embed ")
-        else()
-            #most if not all distros have python3
-            message(WARNING ">>> Could not find python3. Python scripting will not work! Consider installing it")
+        if(DENGINE_SCRIPTING_PYTHON)
+            pkg_check_modules(python3 python3-embed)
+            if(python3_LIBRARIES)
+                message(">>> Found python3 libraries")
+                include_directories(${python3_INCLUDE_DIRS})
+                link_directories(${python3_LIBRARY_DIRS})
+                set(DENGINE_HAS_PYTHON3 1)
+                string(APPEND DENGINE_PKG_DEPS "python3-embed ")
+            else()
+                #most if not all distros have python3
+                message(WARNING ">>> Could not find python3. Python scripting will not work! Consider installing it")
+            endif()
         endif()
     else()
         message(WARNING ">>> Could not find pkg-config. Will compile From sources")
@@ -76,35 +98,18 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-script/include
         )
 
-if(NOT python3_LIBRARIES)
-    set(PYSRC ${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython)
-    set(PYVER "3.9")
-    include_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython/Include
-        ${CMAKE_CURRENT_BINARY_DIR}/deps/cpython-portable/config
-    )
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython-portable)
-    set(python3_LIBRARIES cpython-portable)
+if(DENGINE_SCRIPTING_PYTHON)
+    if(NOT python3_LIBRARIES)
+        set(PYSRC ${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython)
+        set(PYVER "3.9")
+        include_directories(
+            ${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython/Include
+            ${CMAKE_CURRENT_BINARY_DIR}/deps/cpython-portable/config
+        )
+        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython-portable)
+        set(python3_LIBRARIES cpython-portable)
+    endif()
 endif()
-
-
-option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
-
-option(DENGINE_FONT_EMBED_OPENSANS_REGULAR "Embed OpenSans Regular into dengine-gui" OFF)
-option(DENGINE_FONT_EMBED_OPENSANS_ITALIC "Embed OpenSans Italic into dengine-gui" OFF)
-option(DENGINE_FONT_EMBED_OPENSANS_LIGHT "Embed OpenSans Light into dengine-gui" ON)
-
-option(DENGINE_FONT_EMBED_SOURCESANSPRO_REGULAR "Embed Source Sans Pro Regular into dengine-gui" OFF)
-option(DENGINE_FONT_EMBED_SOURCESANSPRO_ITALIC "Embed Source Sans Pro Italic into dengine-gui" OFF)
-option(DENGINE_FONT_EMBED_SOURCESANSPRO_LIGHT "Embed Source Sans Pro Light into dengine-gui" OFF)
-
-option(DENGINE_FONT_EMBED_ROBOTO_REGULAR "Embed Roboto Regular into dengine-gui" OFF)
-option(DENGINE_FONT_EMBED_ROBOTO_ITALIC "Embed Roboto Italic into dengine-gui" OFF)
-option(DENGINE_FONT_EMBED_ROBOTO_LIGHT "Embed Roboto Light into dengine-gui" OFF)
-
-option(DENGINE_BUILD_TESTS "Build the test suite and examples" ON)
-
-option(DENGINE_MT "Build for multithreading using mutexes" ON)
 
 include(CheckFunctionExists)
 include(CheckIncludeFile)

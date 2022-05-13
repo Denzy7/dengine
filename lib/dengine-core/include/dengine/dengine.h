@@ -42,9 +42,6 @@ typedef struct
 #include <dengine/macros.h>
 #include <dengine/viewport.h>
 #include <dengine/entrygl.h>
-#ifdef DENGINE_ANDROID
-#include <dengine/android.h>
-#endif
 
 #include <dengine-utils/logging.h>
 #include <dengine-utils/filesys.h>
@@ -53,6 +50,9 @@ typedef struct
 #include <dengine-utils/rng.h>
 #include <dengine-utils/timer.h>
 #include <dengine-utils/confserialize.h>
+#ifdef DENGINE_ANDROID
+#include <dengine-utils/platform/android.h>
+#endif
 
 #include <dengine-gui/gui.h>
 
@@ -77,8 +77,8 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
 
 #ifdef DENGINE_ANDROID
     //Can safely set files and cachedirs
-    dengine_android_set_filesdir();
-    dengine_android_set_cachedir();
+    dengineutils_android_set_filesdir();
+    dengineutils_android_set_cachedir();
 #endif
 
     DENGINE_INIT_OPTS.window_height = 720;

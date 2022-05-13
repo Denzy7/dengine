@@ -27,6 +27,13 @@ include/dengine-utils/str.h
 include/dengine-utils/debug.h
 )
 
+if(ANDROID)
+    list(APPEND dengine-utils-hdr include/dengine-utils/platform/android.h)
+    list(APPEND dengine-utils-src src/platform/android.c )
+    #glue
+    list(APPEND dengine-utils-src "${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c")
+endif()
+
 add_library(dengine-utils ${dengine-utils-hdr} ${dengine-utils-src})
 set_target_properties(dengine-utils PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
@@ -38,7 +45,17 @@ if(GTK3_LIBRARIES AND UNIX)
 endif()
 
 if(ANDROID)
-    target_link_libraries(dengine-utils log)
+    target_include_directories(dengine-utils PUBLIC
+            #FOR debugging without Android studio
+            #"/home/denzy/Android/Sdk/ndk/23.1.7779620/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include"
+            #"/home/denzy/Android/Sdk/ndk/23.1.7779620/sources"
+
+            ${ANDROID_NDK}/sources
+            )
+endif()
+
+if(ANDROID)
+    target_link_libraries(dengine-utils android log)
 endif()
 
 set_property(TARGET dengine-utils PROPERTY C_STANDARD 99)

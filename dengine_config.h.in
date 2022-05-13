@@ -19,6 +19,13 @@
     #define DENGINE_WIN32
     #define DENGINE_WIN_GLFW
     #define DENGINE_FONT_DEFAULT "C:/Windows/fonts/arial.ttf"
+#if defined(__MINGW32__)
+    #define DENGINE_MINGW_ARCH "i686"
+#elif defined(__MINGW64__)
+    #define DENGINE_MINGW_ARCH "x86_64"
+#endif
+    // for mingw32 only
+    #define DENGINE_PYTHON_DENGINE_SCRIPT_VER 1U
 #elif defined(__ANDROID__)
     #define DENGINE_ANDROID
     #define DENGINE_WIN_EGL
@@ -42,6 +49,9 @@
 
 // is python3 installed?
 #cmakedefine DENGINE_HAS_PYTHON3
+
+// use python scripting
+#cmakedefine DENGINE_SCRIPTING_PYTHON
 
 //Size of log buffer for snprintf
 #define DENGINE_LOG_BUF_SIZE 2048
