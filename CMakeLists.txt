@@ -29,6 +29,8 @@ option(DENGINE_MT "Build for multithreading using mutexes" ON)
 
 option(DENGINE_SCRIPTING_PYTHON "Enable support for Python scripts" ON)
 
+find_library(DENGINE_HAS_LIBZ z)
+
 if(NOT ANDROID)
     find_package(PkgConfig QUIET)
     if(PkgConfig_FOUND)

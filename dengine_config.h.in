@@ -53,6 +53,9 @@
 // use python scripting
 #cmakedefine DENGINE_SCRIPTING_PYTHON
 
+// do we have libz (zlib)?
+#cmakedefine DENGINE_HAS_LIBZ
+
 //Size of log buffer for snprintf
 #define DENGINE_LOG_BUF_SIZE 2048
 

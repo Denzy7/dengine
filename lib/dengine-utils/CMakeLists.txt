@@ -14,6 +14,7 @@ src/str.c
 src/debug.c
 ${CMAKE_CURRENT_BINARY_DIR}/src/dengine-utils.rc
 src/stream.c
+src/zipread.c
 )
 
 set(dengine-utils-hdr
@@ -27,6 +28,7 @@ include/dengine-utils/timer.h
 include/dengine-utils/str.h
 include/dengine-utils/debug.h
 include/dengine-utils/stream.h
+include/dengine-utils/zipread.h
 )
 
 if(ANDROID)
