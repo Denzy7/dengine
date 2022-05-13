@@ -3,6 +3,7 @@
 #include "dengine-utils/logging.h"
 #include "dengine-utils/filesys.h"
 #include "dengine-utils/os.h"
+#include "dengine-utils/zipread.h"
 
 #ifdef DENGINE_ANDROID
 #include "dengine-utils/platform/android.h"
@@ -50,48 +51,56 @@ PyMODINIT_FUNC PyInit_dengine()
 int denginescript_init()
 {
 #ifdef DENGINE_SCRIPTING_PYTHON
-    Py_DontWriteBytecodeFlag = 1;
+    //Py_DontWriteBytecodeFlag = 1;
     Py_NoSiteFlag = 1;
     //Py_IgnoreEnvironmentFlag = 1;
     //Py_InteractiveFlag = 0;
     //Py_IsolatedFlag = 1;
 
     int usingbootstrap = 0;
-    // don't take chances with win32 and android
-#if defined(DENGINE_WIN32) || defined(DENGINE_ANDROID)
-    usingbootstrap = 1;
-    //bootstrap cpython-portable
-    char* bootstrapzip = "scripts/bootstrap.zip";
     char boostrap[8192];
-#ifdef DENGINE_ANDROID
-    //dump bootstrap.zip to filesdir
-    snprintf(boostrap, sizeof(boostrap), "%s/%s", dengineutils_filesys_get_filesdir(), "scripts");
-    if(!dengineutils_os_direxist(boostrap))
-        dengineutils_os_mkdir(boostrap);
-    snprintf(boostrap, sizeof(boostrap), "%s/%s", dengineutils_filesys_get_filesdir(), bootstrapzip);
-    if(!fopen(boostrap, "rb"))
-    {
-        File2Mem  f2m;
-        f2m.file = bootstrapzip;
-        dengineutils_android_asset2file2mem(&f2m);
-        FILE* f = fopen(boostrap, "wb");
-        if(f)
-        {
-            fwrite(f2m.mem, f2m.size,1, f);
-            dengineutils_logging_log("INFO::dumped %s successfully", bootstrapzip);
-            fclose(f);
-        }
-        dengineutils_filesys_file2mem_free(&f2m);
-    }
+    static const char* bootstrap_zip_file = "scripts/bootstrap.zip";
+    Stream* bootstrap_zip_stream = NULL;
+#if defined(DENGINE_ANDROID)
+    bootstrap_zip_stream = dengineutils_stream_new(bootstrap_zip_file,
+                                                   DENGINEUTILS_STREAM_TYPE_ANDROIDASSET, DENGINEUTILS_STREAM_MODE_READ);
 #else
-    // locate zlib.dll from "."
-    snprintf(boostrap, sizeof(boostrap), "%s/%s;./", dengineutils_filesys_get_assetsdir(), bootstrapzip);
+    snprintf(boostrap, sizeof(boostrap), "%s/%s", dengineutils_filesys_get_assetsdir(), bootstrap_zip_file);
+    bootstrap_zip_stream = dengineutils_stream_new(boostrap,
+                                                   DENGINEUTILS_STREAM_TYPE_FILE, DENGINEUTILS_STREAM_MODE_READ);
 #endif
+    if(!bootstrap_zip_stream)
+    {
+        dengineutils_logging_log("ERROR::Cannot open stream to %s", bootstrap_zip_file);
+        return 0;
+    }
+
+    ZipRead bootstrap_zip_zipread;
+    int stat = dengineutils_zipread_load(bootstrap_zip_stream, &bootstrap_zip_zipread);
+    if(!stat)
+    {
+        dengineutils_logging_log("ERROR::Cannot ZipRead %s", bootstrap_zip_file);
+        return 0;
+    }
+
+    snprintf(boostrap, sizeof(boostrap),
+             "%s/python_bootstrap/%s",
+             dengineutils_filesys_get_filesdir_dengine(),DENGINE_VERSION);
+
+    stat = dengineutils_zipread_decompress_zip(bootstrap_zip_stream, &bootstrap_zip_zipread, boostrap);
+    if(!stat)
+    {
+        dengineutils_logging_log("ERROR::Cannot extract %s to %s", bootstrap_zip_file, boostrap);
+        return 0;
+    }
+
+    dengineutils_stream_destroy(bootstrap_zip_stream);
+    dengineutils_zipread_free(&bootstrap_zip_zipread);
+
     wchar_t* path = Py_DecodeLocale(boostrap, NULL);
     Py_SetPythonHome(path);
     Py_SetPath(path);
     PyMem_RawFree(path);
-#endif
 
     if(usingbootstrap)
         dengineutils_logging_log("INFO::initialzing python from bootstrap.zip. This might take some seconds...");
