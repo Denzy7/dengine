@@ -72,9 +72,6 @@ typedef struct
     uint8_t* name; /*!< Name of file */
     uint8_t* extra; /*!< Extra options */
     uint8_t* comment; /*!< File comment */
-
-    /* CUSTOM FIELDS NOT IN PKWARE SPEC */
-    uint8_t* decomp; /*!< Decompressed data */
 }CDFHR;
 #define OFF_CDFHR 46
 #define OFF_LFHR 30

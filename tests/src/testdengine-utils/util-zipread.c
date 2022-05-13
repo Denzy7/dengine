@@ -2,7 +2,6 @@
 #include <dengine-utils/logging.h>
 int main(int argc, char *argv[])
 {
-
     const char* zip = argv[1];
     if(!zip)
     {
@@ -18,7 +17,7 @@ int main(int argc, char *argv[])
     }
 
     ZipRead zipread;
-    int read = dengineutils_zipread_read(zipstream, &zipread);
+    int read = dengineutils_zipread_load(zipstream, &zipread);
     if(!read)
     {
         dengineutils_logging_log("ERROR::Failed to read zip");
@@ -55,6 +54,13 @@ int main(int argc, char *argv[])
     }
 
     dengineutils_logging_log("INFO::%u Central Directory Records Done!", zipread.eocdr->cd_records);
+
+    const char* zipout = "zipout";
+    if(dengineutils_zipread_decompress_zip(zipstream, &zipread, zipout))
+    {
+        dengineutils_logging_log("INFO::extracted to %s", zipout);
+        dengineutils_zipread_free(&zipread);
+    }
 
     dengineutils_stream_destroy(zipstream);
     return 0;
