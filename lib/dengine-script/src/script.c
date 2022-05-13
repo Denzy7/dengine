@@ -65,6 +65,8 @@ int denginescript_init()
 
     if(!dengineutils_os_direxist(boostrap))
     {
+        char* bootstrapfix = strdup(boostrap);
+
         static const char* bootstrap_zip_file = "scripts/bootstrap.zip";
         Stream* bootstrap_zip_stream = NULL;
     #if defined(DENGINE_ANDROID)
@@ -78,6 +80,7 @@ int denginescript_init()
         if(!bootstrap_zip_stream)
         {
             dengineutils_logging_log("ERROR::Cannot open stream to %s", bootstrap_zip_file);
+            free(bootstrapfix);
             return 0;
         }
 
@@ -86,24 +89,26 @@ int denginescript_init()
         if(!stat)
         {
             dengineutils_logging_log("ERROR::Cannot ZipRead %s", bootstrap_zip_file);
+            free(bootstrapfix);
             return 0;
         }
 
-        snprintf(boostrap, sizeof(boostrap),
-                 "%s/python_bootstrap/%s",
-                 dengineutils_filesys_get_filesdir_dengine(),DENGINE_VERSION);
-
-        stat = dengineutils_zipread_decompress_zip(bootstrap_zip_stream, &bootstrap_zip_zipread, boostrap);
+        stat = dengineutils_zipread_decompress_zip(bootstrap_zip_stream, &bootstrap_zip_zipread, bootstrapfix);
         if(!stat)
         {
-            dengineutils_logging_log("ERROR::Cannot extract %s to %s", bootstrap_zip_file, boostrap);
+            dengineutils_logging_log("ERROR::Cannot extract %s to %s", bootstrap_zip_file, bootstrapfix);
+            free(bootstrapfix);
             return 0;
         }
 
-        dengineutils_logging_log("TODO::Extracted bootsrap.zip to %s. %hu records processed", boostrap, bootstrap_zip_zipread.eocdr->cd_records);
+        dengineutils_logging_log("TODO::Extracted bootstrap.zip to %s. %hu records processed", bootstrapfix, bootstrap_zip_zipread.eocdr->cd_records);
 
         dengineutils_stream_destroy(bootstrap_zip_stream);
         dengineutils_zipread_free(&bootstrap_zip_zipread);
+
+        snprintf(boostrap, sizeof(boostrap), "%s", bootstrapfix);
+
+        free(bootstrapfix);
     }
 
     wchar_t* path = Py_DecodeLocale(boostrap, NULL);
