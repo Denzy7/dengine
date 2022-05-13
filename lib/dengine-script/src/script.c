@@ -59,43 +59,52 @@ int denginescript_init()
 
     int usingbootstrap = 0;
     char boostrap[8192];
-    static const char* bootstrap_zip_file = "scripts/bootstrap.zip";
-    Stream* bootstrap_zip_stream = NULL;
-#if defined(DENGINE_ANDROID)
-    bootstrap_zip_stream = dengineutils_stream_new(bootstrap_zip_file,
-                                                   DENGINEUTILS_STREAM_TYPE_ANDROIDASSET, DENGINEUTILS_STREAM_MODE_READ);
-#else
-    snprintf(boostrap, sizeof(boostrap), "%s/%s", dengineutils_filesys_get_assetsdir(), bootstrap_zip_file);
-    bootstrap_zip_stream = dengineutils_stream_new(boostrap,
-                                                   DENGINEUTILS_STREAM_TYPE_FILE, DENGINEUTILS_STREAM_MODE_READ);
-#endif
-    if(!bootstrap_zip_stream)
-    {
-        dengineutils_logging_log("ERROR::Cannot open stream to %s", bootstrap_zip_file);
-        return 0;
-    }
-
-    ZipRead bootstrap_zip_zipread;
-    int stat = dengineutils_zipread_load(bootstrap_zip_stream, &bootstrap_zip_zipread);
-    if(!stat)
-    {
-        dengineutils_logging_log("ERROR::Cannot ZipRead %s", bootstrap_zip_file);
-        return 0;
-    }
-
     snprintf(boostrap, sizeof(boostrap),
              "%s/python_bootstrap/%s",
              dengineutils_filesys_get_filesdir_dengine(),DENGINE_VERSION);
 
-    stat = dengineutils_zipread_decompress_zip(bootstrap_zip_stream, &bootstrap_zip_zipread, boostrap);
-    if(!stat)
+    if(!dengineutils_os_direxist(boostrap))
     {
-        dengineutils_logging_log("ERROR::Cannot extract %s to %s", bootstrap_zip_file, boostrap);
-        return 0;
-    }
+        static const char* bootstrap_zip_file = "scripts/bootstrap.zip";
+        Stream* bootstrap_zip_stream = NULL;
+    #if defined(DENGINE_ANDROID)
+        bootstrap_zip_stream = dengineutils_stream_new(bootstrap_zip_file,
+                                                       DENGINEUTILS_STREAM_TYPE_ANDROIDASSET, DENGINEUTILS_STREAM_MODE_READ);
+    #else
+        snprintf(boostrap, sizeof(boostrap), "%s/%s", dengineutils_filesys_get_assetsdir(), bootstrap_zip_file);
+        bootstrap_zip_stream = dengineutils_stream_new(boostrap,
+                                                       DENGINEUTILS_STREAM_TYPE_FILE, DENGINEUTILS_STREAM_MODE_READ);
+    #endif
+        if(!bootstrap_zip_stream)
+        {
+            dengineutils_logging_log("ERROR::Cannot open stream to %s", bootstrap_zip_file);
+            return 0;
+        }
 
-    dengineutils_stream_destroy(bootstrap_zip_stream);
-    dengineutils_zipread_free(&bootstrap_zip_zipread);
+        ZipRead bootstrap_zip_zipread;
+        int stat = dengineutils_zipread_load(bootstrap_zip_stream, &bootstrap_zip_zipread);
+        if(!stat)
+        {
+            dengineutils_logging_log("ERROR::Cannot ZipRead %s", bootstrap_zip_file);
+            return 0;
+        }
+
+        snprintf(boostrap, sizeof(boostrap),
+                 "%s/python_bootstrap/%s",
+                 dengineutils_filesys_get_filesdir_dengine(),DENGINE_VERSION);
+
+        stat = dengineutils_zipread_decompress_zip(bootstrap_zip_stream, &bootstrap_zip_zipread, boostrap);
+        if(!stat)
+        {
+            dengineutils_logging_log("ERROR::Cannot extract %s to %s", bootstrap_zip_file, boostrap);
+            return 0;
+        }
+
+        dengineutils_logging_log("TODO::Extracted bootsrap.zip to %s. %hu records processed", boostrap, bootstrap_zip_zipread.eocdr->cd_records);
+
+        dengineutils_stream_destroy(bootstrap_zip_stream);
+        dengineutils_zipread_free(&bootstrap_zip_zipread);
+    }
 
     wchar_t* path = Py_DecodeLocale(boostrap, NULL);
     Py_SetPythonHome(path);
