@@ -45,12 +45,14 @@ void _dengineutils_zipread_writeout(const void* mem, const CDFHR* cdfhr, const c
 int dengineutils_zipread_load(const Stream* stream, ZipRead* zipread)
 {
     char find_eocdr = 0;
-    uint8_t eocdr_mem[OFF_EOCDR];
+    uint8_t eocdr_mgc_test[4];
 
-    dengineutils_stream_seek(stream, -OFF_EOCDR, SEEK_END);
-    dengineutils_stream_read(eocdr_mem, 1, OFF_EOCDR, stream);
+    off_t eocdr_off = -OFF_EOCDR;
 
-    if(!memcmp(eocdr_mem, EOCD_MGC, 4))
+    dengineutils_stream_seek(stream, eocdr_off, SEEK_END);
+    dengineutils_stream_read(eocdr_mgc_test, 1, 4, stream);
+
+    if(!memcmp(eocdr_mgc_test, EOCD_MGC, 4))
     {
         find_eocdr = 1;
     }else
@@ -60,12 +62,11 @@ int dengineutils_zipread_load(const Stream* stream, ZipRead* zipread)
         while(sz > 0)
         {
             dengineutils_stream_seek(stream, sz - 1, SEEK_SET);
-            dengineutils_stream_read(eocdr_mem, 1, 4, stream);
-            if(!memcmp(eocdr_mem, EOCD_MGC, 4))
+            dengineutils_stream_read(eocdr_mgc_test, 1, 4, stream);
+            if(!memcmp(eocdr_mgc_test, EOCD_MGC, 4))
             {
                 find_eocdr = 1;
-                //read remaining bytes
-                dengineutils_stream_read(eocdr_mem + 4, 1, OFF_EOCDR - 4, stream);
+                eocdr_off = sz;
                 break;
             }
             sz--;
@@ -77,16 +78,30 @@ int dengineutils_zipread_load(const Stream* stream, ZipRead* zipread)
         dengineutils_logging_log("ERROR::EOCDR not found. This is probably not a zip file");
         return 0;
     }
-    EOCDR* eocdr = NULL;
-    eocdr = (EOCDR*)eocdr_mem;
+
+    EOCDR* eocdr = calloc(1, sizeof(EOCDR));
+
+    dengineutils_stream_seek(stream, eocdr_off, SEEK_END);
+
+    dengineutils_stream_read(&eocdr->eoc, 4, 1, stream);
+
+    dengineutils_stream_read(&eocdr->disk_no, 2, 1, stream);
+    dengineutils_stream_read(&eocdr->disk_cd_start, 2, 1, stream);
+    dengineutils_stream_read(&eocdr->disk_cd_records, 2, 1, stream);
+
+    dengineutils_stream_read(&eocdr->cd_records, 2, 1, stream);
+    dengineutils_stream_read(&eocdr->cd_size, 4, 1, stream);
+
+    dengineutils_stream_read(&eocdr->off_cd, 4, 1, stream);
+
+    dengineutils_stream_read(&eocdr->comment_sz, 2, 1, stream);
+
     if(eocdr->off_cd == UINT32_MAX)
     {
         dengineutils_logging_log("Incompatible with Zip64");
+        free(eocdr);
         return 0;
     }
-
-    eocdr = calloc(1, sizeof(EOCDR));
-    memcpy(eocdr, eocdr_mem, OFF_EOCDR);
 
     //read eocdr comment
     if(eocdr->comment_sz)
