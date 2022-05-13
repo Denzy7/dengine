@@ -24,8 +24,7 @@
 #elif defined(__MINGW64__)
     #define DENGINE_MINGW_ARCH "x86_64"
 #endif
-    // for mingw32 only
-    #define DENGINE_PYTHON_DENGINE_SCRIPT_VER 1U
+    #cmakedefine DENGINE_PYTHON_DENGINE_SCRIPT_VER @DENGINE_PYTHON_DENGINE_SCRIPT_VER@
 #elif defined(__ANDROID__)
     #define DENGINE_ANDROID
     #define DENGINE_WIN_EGL

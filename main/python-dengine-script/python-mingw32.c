@@ -2,11 +2,7 @@
 
 #define APPVER 1U
 
-#if defined(__MINGW32__)
-#define ARCH "i686"
-#elif defined(__MINGW64__)
-#define ARCH "x86_64"
-#else
+#ifndef DENGINE_MINGW_ARCH
 #error "This is only meant for mingw32!"
 #endif
 
@@ -19,7 +15,7 @@ int main(int argc, char* argv[])
 
     snprintf(stdlib, sizeof(stdlib),
              "%s/python-dengine-script-%u-%s-%s/python-stdlib",
-             denginescriptdir, APPVER, PY_VERSION, ARCH);
+             denginescriptdir, DENGINE_PYTHON_DENGINE_SCRIPT_VER, PY_VERSION, DENGINE_MINGW_ARCH);
     wchar_t* home = Py_DecodeLocale(stdlib, NULL);
     Py_SetPythonHome(home);
 
@@ -29,10 +25,10 @@ int main(int argc, char* argv[])
              "%s/python-dengine-script-%u-%s-%s/python-modules;"
              "%s/python-dengine-script-%u-%s-%s/python-stdlib/lib-dynload;"
              "%s/",
-             denginescriptdir, APPVER, PY_VERSION, ARCH,
-             denginescriptdir, APPVER, PY_VERSION, ARCH,
-             denginescriptdir, APPVER, PY_VERSION, ARCH,
-             denginescriptdir, APPVER, PY_VERSION, ARCH,
+             denginescriptdir, DENGINE_PYTHON_DENGINE_SCRIPT_VER, PY_VERSION, DENGINE_MINGW_ARCH,
+             denginescriptdir, DENGINE_PYTHON_DENGINE_SCRIPT_VER, PY_VERSION, DENGINE_MINGW_ARCH,
+             denginescriptdir, DENGINE_PYTHON_DENGINE_SCRIPT_VER, PY_VERSION, DENGINE_MINGW_ARCH,
+             denginescriptdir, DENGINE_PYTHON_DENGINE_SCRIPT_VER, PY_VERSION, DENGINE_MINGW_ARCH,
              denginescriptdir);
     wchar_t* path = Py_DecodeLocale(stdlib, NULL);
     Py_SetPath(path);

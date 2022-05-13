@@ -119,6 +119,7 @@ include(CheckIncludeFile)
 check_function_exists(clock_gettime DENGINE_HAS_CLOCK_GETTIME)
 check_include_file(pthread.h DENGINE_HAS_PTHREAD_H)
 
+set(DENGINE_PYTHON_DENGINE_SCRIPT_VER 1)
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
 add_subdirectory(lib/dengine-utils "dengine-utils-build")
@@ -140,7 +141,8 @@ if(DENGINE_BUILD_TESTS_PRIV)
 endif()
 
 add_subdirectory(main/dengitor)
-if(WIN32)
+if(MINGW)
+    # for mingw32 only
     add_subdirectory(main/python-dengine-script)
 endif()
 
