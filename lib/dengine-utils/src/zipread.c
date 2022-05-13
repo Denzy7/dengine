@@ -9,7 +9,7 @@
 static const uint8_t LFH_MGC[] = {0x50, 0x4b, 0x03, 0x04};
 static const uint8_t EOCD_MGC[] = {0x50, 0x4b, 0x05, 0x06};
 
-ZipRead* dengineutils_zipread_read(const Stream* stream)
+int dengineutils_zipread_read(const Stream* stream, ZipRead* zipread)
 {
     char find_eocdr = 0;
     uint8_t eocdr_mem[OFF_EOCDR];
@@ -42,14 +42,14 @@ ZipRead* dengineutils_zipread_read(const Stream* stream)
     if(!find_eocdr)
     {
         dengineutils_logging_log("ERROR::EOCDR not found. This is probably not a zip file");
-        return NULL;
+        return 0;
     }
     EOCDR* eocdr = NULL;
     eocdr = (EOCDR*)eocdr_mem;
     if(eocdr->off_cd == UINT32_MAX)
     {
         dengineutils_logging_log("Incompatible with Zip64");
-        return NULL;
+        return 0;
     }
 
     eocdr = calloc(1, sizeof(EOCDR));
@@ -107,10 +107,8 @@ ZipRead* dengineutils_zipread_read(const Stream* stream)
             dengineutils_stream_read(cdfhrs[i].comment, 1, cdfhrs[i].sz_comment, stream);
         }
     }
-    ZipRead* zip = calloc(1, sizeof(ZipRead));
-    zip->eocdr = eocdr;
-    zip->cdfhrs = cdfhrs;
+    zipread->eocdr = eocdr;
+    zipread->cdfhrs = cdfhrs;
 
-    return zip;
-
+    return 1;
 }
