@@ -20,4 +20,6 @@
 #  define DENGINE_INLINE static inline __attribute((always_inline))
 #endif
 
+#define DENGINE_ISBITSET(var, bit) (var & (1<<bit))
+
 #endif // MACROS_H
