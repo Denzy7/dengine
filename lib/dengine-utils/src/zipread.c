@@ -240,3 +240,21 @@ int dengineutils_zipread_decompress_cdfhr(const Stream* stream, const CDFHR* cdf
     }
     return ret;
 }
+
+void dengineutils_zipread_free(const ZipRead* zipread)
+{
+    if(zipread->eocdr->comment_sz)
+        free(zipread->eocdr->comment);
+
+    for(uint16_t i = 0; i < zipread->eocdr->cd_records; i++)
+    {
+        CDFHR* cdfhr = &zipread->cdfhrs[i];
+        free(cdfhr->name);
+        free(cdfhr->extra);
+        if(cdfhr->sz_comment)
+            free(cdfhr->comment);
+    }
+
+    free(zipread->cdfhrs);
+    free(zipread->eocdr);
+}
