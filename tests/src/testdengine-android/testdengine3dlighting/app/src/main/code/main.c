@@ -4,7 +4,6 @@
 
 #include <cglm/cglm.h>
 
-#include <dengine/android.h>
 #include <dengine/window.h>
 #include <dengine/input.h>
 #include <dengine/loadgl.h>
@@ -19,6 +18,7 @@
 #include <dengine-utils/filesys.h>
 #include <dengine-utils/timer.h>
 #include <dengine-utils/debug.h>
+#include <dengine-utils/platform/android.h>
 
 #include <dengine-gui/gui.h>
 
@@ -72,8 +72,6 @@ static void init(struct android_app* app)
 {
     //Acquire win
     ANativeWindow_acquire(app->window);
-    dengine_window_android_set_nativewindow(app->window);
-
     dengine_window_request_GL(2, 0, 0);
     dengineutils_debug_init();
 
@@ -107,7 +105,7 @@ static void init(struct android_app* app)
 
         for (int i = 0; i < 2; i++) {
             f2m.file = stdshadersrcfile[i];
-            dengine_android_asset2file2mem(&f2m);
+            dengineutils_android_asset2file2mem(&f2m);
             stdshadersrc[i] = strdup(f2m.mem);
             dengineutils_filesys_file2mem_free(&f2m);
         }
@@ -131,7 +129,7 @@ static void init(struct android_app* app)
         char *shadow2dsrc[2];
         for (int i = 0; i < 2; i++) {
             f2m.file = shadow2dsrcfile[i];
-            dengine_android_asset2file2mem(&f2m);
+            dengineutils_android_asset2file2mem(&f2m);
             shadow2dsrc[i] = strdup(f2m.mem);
             dengineutils_filesys_file2mem_free(&f2m);
         }
@@ -157,7 +155,7 @@ static void init(struct android_app* app)
         char *shadow3dsrc[3];
         for (int i = 0; i < 3; i++) {
             f2m.file = shadow3dsrcfile[i];
-            dengine_android_asset2file2mem(&f2m);
+            dengineutils_android_asset2file2mem(&f2m);
             shadow3dsrc[i] = strdup(f2m.mem);
             dengineutils_filesys_file2mem_free(&f2m);
         }
@@ -185,7 +183,7 @@ static void init(struct android_app* app)
         char *dftsrc[2];
         for (int i = 0; i < 2; i++) {
             f2m.file = dftsrcfile[i];
-            dengine_android_asset2file2mem(&f2m);
+            dengineutils_android_asset2file2mem(&f2m);
             dftsrc[i] = strdup(f2m.mem);
             dengineutils_filesys_file2mem_free(&f2m);
         }
@@ -245,7 +243,7 @@ static void init(struct android_app* app)
             dengine_texture_bind(GL_TEXTURE_2D, tex_plane);
             tex_plane->interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
             f2m.file = planeTextureFile[i];
-            dengine_android_asset2file2mem(&f2m);
+            dengineutils_android_asset2file2mem(&f2m);
             dengine_texture_load_mem(f2m.mem, f2m.size, 1, tex_plane);
             dengineutils_filesys_file2mem_free(&f2m);
             tex_plane->filter_min = GL_LINEAR;
@@ -267,7 +265,7 @@ static void init(struct android_app* app)
             dengine_texture_bind(GL_TEXTURE_2D, tex_cube);
             tex_cube->interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
             f2m.file = cubeTextureFile[i];
-            dengine_android_asset2file2mem(&f2m);
+            dengineutils_android_asset2file2mem(&f2m);
             dengine_texture_load_mem(f2m.mem, f2m.size, 1, tex_cube);
             dengineutils_filesys_file2mem_free(&f2m);
             tex_cube->filter_min = GL_LINEAR;
@@ -518,9 +516,9 @@ static void draw()
 
 void android_main(struct android_app* state)
 {
-    dengine_android_set_app(state);
-    dengine_android_set_initfunc(init);
-    dengine_android_set_terminatefunc(term);
+    dengineutils_android_set_app(state);
+    dengineutils_android_set_initfunc(init);
+    dengineutils_android_set_terminatefunc(term);
 
     if(state->savedState)
     {
@@ -529,7 +527,7 @@ void android_main(struct android_app* state)
 
     while(1)
     {
-        dengine_android_pollevents();
+        dengineutils_android_pollevents();
 		
         //Quit and detach
         if(state->destroyRequested != 0)

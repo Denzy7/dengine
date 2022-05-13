@@ -1,4 +1,3 @@
-#include <dengine/android.h>
 #include <dengine/window.h>
 #include <dengine/loadgl.h>
 
@@ -7,7 +6,7 @@
 
 #include <dengine-utils/logging.h>
 #include <dengine-utils/timer.h>
-
+#include <dengine-utils/platform/android.h>
 double elapsed;
 int window_init = 0;
 
@@ -18,8 +17,6 @@ static void init(struct android_app* app)
 {
     //Acquire win
     ANativeWindow_acquire(app->window);
-    dengine_window_android_set_nativewindow(app->window);
-
     dengine_window_request_GL(2, 0, 0);
 
     if(dengine_window_init())
@@ -73,9 +70,9 @@ static void draw()
 void android_main(struct android_app* state)
 {
     //Set app callbacks
-    dengine_android_set_app(state);
-    dengine_android_set_initfunc(init);
-    dengine_android_set_terminatefunc(term);
+    dengineutils_android_set_app(state);
+    dengineutils_android_set_initfunc(init);
+    dengineutils_android_set_terminatefunc(term);
 
     if(state->savedState)
     {
@@ -84,7 +81,7 @@ void android_main(struct android_app* state)
 
     while(1)
     {
-        dengine_android_pollevents();
+        dengineutils_android_pollevents();
 
         //Quit and detach
         if(state->destroyRequested != 0)

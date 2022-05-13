@@ -24,8 +24,6 @@ static void init(struct android_app* app)
     memset(&ds,0,sizeof(dt_script));
     //Acquire win
     ANativeWindow_acquire(app->window);
-    dengine_window_android_set_nativewindow(app->window);
-
     dengine_window_request_GL(2, 0, 0);
     if(dengine_init())
     {
@@ -98,7 +96,7 @@ static void init(struct android_app* app)
 
         File2Mem f2m;
         f2m.file = "models/duck.obj";
-        dengine_android_asset2file2mem(&f2m);
+        dengineutils_android_asset2file2mem(&f2m);
         ds.duck = denginemodel_load_mem(DENGINE_MODEL_FORMAT_OBJ, f2m.mem, f2m.size, NULL, ds.stdshdr);
         dengineutils_filesys_file2mem_free(&f2m);
 
@@ -106,25 +104,24 @@ static void init(struct android_app* app)
 //        char* duckscriptfile = "scripts/moveduck.py";
 //        Script duckscript;
 //        f2m.file = duckscriptfile;
-//        dengine_android_asset2file2mem(&f2m);
+//        dengineutils_android_asset2file2mem(&f2m);
 //        denginescript_python_compile(f2m.mem, duckscriptfile, &duckscript);
 //        denginescene_ecs_add_script(ent3, &duckscript);
 //        //note the same script can be added to other entities for the same effects:
 //        //denginescene_ecs_add_script(ent1, &duckscript);
 //        //denginescene_ecs_add_script(ent2, &duckscript);
 //        dengineutils_filesys_file2mem_free(&f2m);
-
+#ifdef DENGINE_SCRIPTING_PYTHON
         char* pingpongscalefile = "scripts/pingpongscale.py";
         Script pingpongscale;
         f2m.file = pingpongscalefile;
-        dengine_android_asset2file2mem(&f2m);
+        dengineutils_android_asset2file2mem(&f2m);
         denginescript_python_compile(f2m.mem, pingpongscalefile, &pingpongscale);
         dengineutils_filesys_file2mem_free(&f2m);
-
         denginescene_ecs_add_script(ent7, &pingpongscale);
-
+#endif
         f2m.file = "models/sperated-planes.obj";
-        dengine_android_asset2file2mem(&f2m);
+        dengineutils_android_asset2file2mem(&f2m);
         size_t n_planes = 0;
         ds.sep_planes = denginemodel_load_mem(DENGINE_MODEL_FORMAT_OBJ, f2m.mem, f2m.size, &n_planes, ds.stdshdr);
         dengineutils_filesys_file2mem_free(&f2m);
@@ -140,7 +137,7 @@ static void init(struct android_app* app)
         sep_plane_tex.auto_dataonload=1;
         sep_plane_tex.interface=DENGINE_TEXTURE_INTERFACE_8_BIT;
         f2m.file = "textures/2d/cube_diff.png";
-        dengine_android_asset2file2mem(&f2m);
+        dengineutils_android_asset2file2mem(&f2m);
         dengine_texture_load_mem(f2m.mem, f2m.size, 1, &sep_plane_tex);
 
         dengine_material_set_texture(&sep_plane_tex,"diffuseTex",&ds.sep_planes_mat);
@@ -161,14 +158,15 @@ static void init(struct android_app* app)
                 }
             }
         }
+#ifdef DENGINE_SCRIPTING_PYTHON
         char* contantrotationfile = "scripts/constantrotation.py";
         Script constantrotation;
         f2m.file = contantrotationfile;
-        dengine_android_asset2file2mem(&f2m);
+        dengineutils_android_asset2file2mem(&f2m);
         denginescript_python_compile(f2m.mem, contantrotationfile, &constantrotation);
         dengineutils_filesys_file2mem_free(&f2m);
         denginescene_ecs_add_script(ent15, &constantrotation);
-
+#endif
         DirLight dLight;
         memset(&dLight,0,sizeof (DirLight));
         //uncomment to slow everything down with shadows
@@ -200,14 +198,15 @@ static void init(struct android_app* app)
         ent_dlight->transform.position[1] = 7.1f;
         ent_dlight->transform.position[2] = 3.1f;
 
+#ifdef DENGINE_SCRIPTING_PYTHON
         char* pingpongpositionfile = "scripts/pingpongposition.py";
         Script pingpongposition;
         f2m.file = pingpongpositionfile;
-        dengine_android_asset2file2mem(&f2m);
+        dengineutils_android_asset2file2mem(&f2m);
         denginescript_python_compile(f2m.mem, pingpongpositionfile, &pingpongposition);
         dengineutils_filesys_file2mem_free(&f2m);
         denginescene_ecs_add_script(ent_plight, &pingpongposition);
-
+#endif
         MeshComponent* cube_mesh, * cube_mesh2,* plane_mesh,* duck_mesh,* grid_mesh;
         cube_mesh = denginescene_ecs_new_meshcomponent(&cube, &ds.cube_mat);
         plane_mesh = denginescene_ecs_new_meshcomponent(&plane, &ds.cube_mat);
@@ -226,7 +225,7 @@ static void init(struct android_app* app)
         duck_tex.auto_dataonload=1;
         duck_tex.interface=DENGINE_TEXTURE_INTERFACE_8_BIT;
         f2m.file = "textures/2d/duck.png";
-        dengine_android_asset2file2mem(&f2m);
+        dengineutils_android_asset2file2mem(&f2m);
         dengine_texture_load_mem(f2m.mem, f2m.size,1,&duck_tex);
 
         dengine_material_set_texture(&duck_tex,"diffuseTex",&ds.duck_mat);
@@ -286,7 +285,7 @@ static void init(struct android_app* app)
             snprintf(prtbf, sizeof(prtbf), "textures/cubemaps/sea/sea%d.jpg",
                      i + 1);
             f2m.file = prtbf;
-            dengine_android_asset2file2mem(&f2m);
+            dengineutils_android_asset2file2mem(&f2m);
             dengine_texture_load_mem(f2m.mem, f2m.size, 0, &cubemap);
             cubemap.format = cubemap.channels == 3 ? GL_RGB : GL_RGBA;
             cubemap.internal_format = cubemap.format;
@@ -366,9 +365,9 @@ static void draw()
 
 void android_main(struct android_app* state)
 {
-    dengine_android_set_app(state);
-    dengine_android_set_initfunc(init);
-    dengine_android_set_terminatefunc(term);
+    dengineutils_android_set_app(state);
+    dengineutils_android_set_initfunc(init);
+    dengineutils_android_set_terminatefunc(term);
 
     if(state->savedState)
     {
@@ -377,7 +376,7 @@ void android_main(struct android_app* state)
 
     while(1)
     {
-        dengine_android_pollevents();
+        dengineutils_android_pollevents();
 
         //Quit and detach
         if(state->destroyRequested != 0)

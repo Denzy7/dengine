@@ -1,10 +1,10 @@
-#include <dengine/android.h>
 #include <dengine/window.h>
 #include <dengine/loadgl.h>
 
 #include <dengine-utils/timer.h>
 #include <dengine-utils/logging.h>
 #include <dengine-utils/filesys.h>
+#include <dengine-utils/platform/android.h>
 
 #include <dengine-gui/gui.h>
 
@@ -60,13 +60,13 @@ static void draw()
 
 void android_main(struct android_app* app)
 {
-    dengine_android_set_app(app);
-    dengine_android_set_initfunc(init);
-    dengine_android_set_terminatefunc(term);
+    dengineutils_android_set_app(app);
+    dengineutils_android_set_initfunc(init);
+    dengineutils_android_set_terminatefunc(term);
 
     while(1)
     {
-        dengine_android_pollevents();
+        dengineutils_android_pollevents();
 
         //Quit and detach
         if(app->destroyRequested != 0)
