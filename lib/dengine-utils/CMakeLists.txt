@@ -13,6 +13,7 @@ src/vtor.c
 src/str.c
 src/debug.c
 ${CMAKE_CURRENT_BINARY_DIR}/src/dengine-utils.rc
+src/stream.c
 )
 
 set(dengine-utils-hdr
@@ -25,6 +26,7 @@ include/dengine-utils/rng.h
 include/dengine-utils/timer.h
 include/dengine-utils/str.h
 include/dengine-utils/debug.h
+include/dengine-utils/stream.h
 )
 
 if(ANDROID)
