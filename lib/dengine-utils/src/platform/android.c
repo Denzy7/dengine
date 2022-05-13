@@ -197,3 +197,8 @@ ANativeWindow* dengineutils_android_get_window()
 {
     return _app->window;
 }
+
+AAssetManager* dengineutils_android_get_assetmgr()
+{
+    return _app->activity->assetManager;
+}

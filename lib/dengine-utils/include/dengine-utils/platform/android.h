@@ -27,6 +27,8 @@ int dengineutils_android_asset2file2mem(File2Mem* f2m);
 
 ANativeWindow* dengineutils_android_get_window();
 
+AAssetManager* dengineutils_android_get_assetmgr();
+
 #ifdef __cplusplus
 }
 #endif
