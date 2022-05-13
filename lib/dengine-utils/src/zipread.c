@@ -42,7 +42,7 @@ void _dengineutils_zipread_writeout(const void* mem, const CDFHR* cdfhr, const c
     }
 }
 
-int dengineutils_zipread_read(const Stream* stream, ZipRead* zipread)
+int dengineutils_zipread_load(const Stream* stream, ZipRead* zipread)
 {
     char find_eocdr = 0;
     uint8_t eocdr_mem[OFF_EOCDR];

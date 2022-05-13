@@ -85,7 +85,7 @@ typedef struct
     CDFHR* cdfhrs;
 }ZipRead;
 
-int dengineutils_zipread_read(const Stream* stream, ZipRead* zipread);
+int dengineutils_zipread_load(const Stream* stream, ZipRead* zipread);
 
 int dengineutils_zipread_decompress_cdfhr(const Stream* stream, const CDFHR* cdfhr, const char* dest);
 
