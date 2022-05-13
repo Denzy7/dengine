@@ -147,6 +147,8 @@ int main(int argc, char *argv[])
 
     snprintf(prtbf,prtbf_sz,"%s/models/duck.obj",dengineutils_filesys_get_assetsdir());
     Primitive* duck = denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ,prtbf,NULL,stdshdr);
+
+#ifdef DENGINE_SCRIPTING_PYTHON
     const char* duckscriptfile = "scripts/moveduck.py";
     snprintf(prtbf, prtbf_sz, "%s/%s", dengineutils_filesys_get_assetsdir(), duckscriptfile);
     f2m.file = prtbf;
@@ -160,7 +162,7 @@ int main(int argc, char *argv[])
     //denginescene_ecs_add_script(ent2, &duckscript);
 
     dengineutils_filesys_file2mem_free(&f2m);
-
+#endif
     //load separated planes
     snprintf(prtbf,prtbf_sz,"%s/models/sperated-planes.obj",dengineutils_filesys_get_assetsdir());
     size_t n_planes = 0;

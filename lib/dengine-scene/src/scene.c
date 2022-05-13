@@ -9,7 +9,10 @@
 #include "dengine_config.h"// DENGINE_ECS_MAXCHILDREN
 
 #include "dengine/viewport.h" //get_view
-#include "dengine-script/py_modules/scenemodule.h" //create dummy scene entity for push/pull
+
+#ifdef DENGINE_SCRIPTING_PYTHON
+#include "dengine-script/py_modules/scenemodule.h" //create dummy scene entity PyObject* for push/pull
+#endif
 void _denginescene_do_check_camera(Entity* root, Scene* scene);
 
 void _denginescene_do_check_light(Entity* root, Scene* scene);
@@ -23,7 +26,9 @@ Scene* denginescene_new()
 
     vtor_create(&newscn->entities, sizeof(EntityChild));
 
+#ifdef DENGINE_SCRIPTING_PYTHON
     newscn->dummyentityobj = denginescript_pymod_scene_entity_new();
+#endif
 
     return newscn;
 }
@@ -158,7 +163,9 @@ void _denginescene_do_check_script(Entity* root, Scene* scene, ScriptFunc callfu
     //check scriptcomp and exec callfunc
     if(!root->parent && root->scripts.count)
     {
+#ifdef DENGINE_SCRIPTING_PYTHON
         denginescene_ecs_do_script_entity(root, callfunc, scene->dummyentityobj);
+#endif
     }
 
     size_t children_count = root->children.count;
@@ -167,7 +174,9 @@ void _denginescene_do_check_script(Entity* root, Scene* scene, ScriptFunc callfu
         Entity* child = ec[i].child;
         if(child->scripts.count)
         {
+            #ifdef DENGINE_SCRIPTING_PYTHON
             denginescene_ecs_do_script_entity(child, callfunc, scene->dummyentityobj);
+            #endif
         }
         _denginescene_do_check_script(child, scene, callfunc);
     }
@@ -371,14 +380,17 @@ void denginescene_ecs_do_skybox_scene(Scene* scene, Camera* camera)
     glCullFace(entrycullface);
 }
 
-void denginescene_ecs_do_script_entity(Entity* entity, ScriptFunc func, PyObject* dummyentityobj)
+void denginescene_ecs_do_script_entity(Entity* entity, ScriptFunc func, const void* args)
 {
     Script* scripts = entity->scripts.data;
     for(size_t i = 0; i < entity->scripts.count; i++)
     {
+        #ifdef DENGINE_SCRIPTING_PYTHON
+        PyObject* dummyentityobj = (PyObject*) args;
         denginescript_pymod_scene_entity_pull(dummyentityobj, entity);
         denginescript_python_call(&scripts[i], func, dummyentityobj);
         denginescript_pymod_scene_entity_push(dummyentityobj, entity);
+        #endif
     }
 }
 

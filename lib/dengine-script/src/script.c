@@ -4,6 +4,12 @@
 #include "dengine-utils/filesys.h"
 #include "dengine-utils/os.h"
 
+#ifdef DENGINE_ANDROID
+#include "dengine-utils/platform/android.h"
+#endif
+
+#ifdef DENGINE_SCRIPTING_PYTHON //init table for main python module
+
 PyMODINIT_FUNC PyInit_inpt(); //input_mod
 PyMODINIT_FUNC PyInit_timer(); //timer_mod
 PyMODINIT_FUNC PyInit_logging(); //logging_mod
@@ -11,10 +17,6 @@ PyMODINIT_FUNC PyInit_filesys(); //filesys_mod
 
 PyMODINIT_FUNC PyInit_common(); //common_mod
 PyMODINIT_FUNC PyInit_scene(); //scene_mod
-
-#ifdef DENGINE_ANDROID
-#include "dengine/android.h"
-#endif
 
 static PyObject* dengineinit(PyObject* self, PyObject* args)
 {
@@ -43,9 +45,11 @@ PyMODINIT_FUNC PyInit_dengine()
     PyModule_AddObject(mod, "__path__", Py_BuildValue("()"));
     return mod;
 }
+#endif
 
 int denginescript_init()
 {
+#ifdef DENGINE_SCRIPTING_PYTHON
     Py_DontWriteBytecodeFlag = 1;
     Py_NoSiteFlag = 1;
     //Py_IgnoreEnvironmentFlag = 1;
@@ -53,13 +57,12 @@ int denginescript_init()
     //Py_IsolatedFlag = 1;
 
     int usingbootstrap = 0;
-
-#ifndef DENGINE_HAS_PYTHON3
+    // don't take chances with win32 and android
+#if defined(DENGINE_WIN32) || defined(DENGINE_ANDROID)
     usingbootstrap = 1;
-
     //bootstrap cpython-portable
     char* bootstrapzip = "scripts/bootstrap.zip";
-    char boostrap[2048];
+    char boostrap[8192];
 #ifdef DENGINE_ANDROID
     //dump bootstrap.zip to filesdir
     snprintf(boostrap, sizeof(boostrap), "%s/%s", dengineutils_filesys_get_filesdir(), "scripts");
@@ -70,7 +73,7 @@ int denginescript_init()
     {
         File2Mem  f2m;
         f2m.file = bootstrapzip;
-        dengine_android_asset2file2mem(&f2m);
+        dengineutils_android_asset2file2mem(&f2m);
         FILE* f = fopen(boostrap, "wb");
         if(f)
         {
@@ -81,7 +84,8 @@ int denginescript_init()
         dengineutils_filesys_file2mem_free(&f2m);
     }
 #else
-    snprintf(boostrap, sizeof(boostrap), "%s/%s", dengineutils_filesys_get_assetsdir(), bootstrapzip);
+    // locate zlib.dll from "."
+    snprintf(boostrap, sizeof(boostrap), "%s/%s;./", dengineutils_filesys_get_assetsdir(), bootstrapzip);
 #endif
     wchar_t* path = Py_DecodeLocale(boostrap, NULL);
     Py_SetPythonHome(path);
@@ -129,8 +133,14 @@ int denginescript_init()
     }
 
     return append_dengine;
+#endif
+
+    //no scripting lang found;
+    dengineutils_logging_log("WARNING::Could not find a valid scripting library. Scripting not initialized");
+    return 0;
 }
 
+#ifdef DENGINE_SCRIPTING_PYTHON
 int denginescript_python_compile(const char* src, const char* name, Script* script)
 {
     memset(script, 0, sizeof(Script));
@@ -178,20 +188,78 @@ int denginescript_python_compile(const char* src, const char* name, Script* scri
     return 1;
 }
 
-void denginescript_python_call(const Script* script, ScriptFunc func, PyObject* args)
+int denginescript_python_call(const Script* script, ScriptFunc func, const PyObject* args)
 {
     PyObject* callable = script->fn_start;
+    PyObject* ret = NULL;
     if(func == DENGINE_SCRIPT_FUNC_UPDATE)
         callable = script->fn_update;
 
     if(callable)
     {
-        PyObject_CallFunctionObjArgs(callable, args, NULL);
+        ret = PyObject_CallFunctionObjArgs(callable, args, NULL);
         PyErr_Print();
     }
+    if(ret)
+        return 1;
+    else
+        return 0;
 }
+#endif
 
 void denginescript_terminate()
 {
+#ifdef DENGINE_SCRIPTING_PYTHON
     Py_Finalize();
+#endif
+}
+
+int denginescript_compile(const char* src, const char* name, ScriptType type, Script* script)
+{
+    if(type == DENGINE_SCRIPT_TYPE_PYTHON)
+    {
+        #ifdef DENGINE_SCRIPTING_PYTHON
+        return denginescript_python_compile(src, name, script);
+        #else
+        dengineutils_logging_log("ERROR::Script %s not compiled. Python was not linked at build", name);
+        return 0;
+        #endif
+    }else
+    {
+        dengineutils_logging_log("ERROR::Unknown script type");
+        return 0;
+    }
+}
+
+int denginescript_call(ScriptType type, const Script* script, ScriptFunc func, const void* args)
+{
+    if(type == DENGINE_SCRIPT_TYPE_PYTHON)
+    {
+        #ifdef DENGINE_SCRIPTING_PYTHON
+        return denginescript_python_call(script, func, args);
+        #else
+        dengineutils_logging_log("ERROR::Script not callable. Python was not linked at build");
+        return 0;
+        #endif
+    }else
+    {
+        dengineutils_logging_log("ERROR::Unknown script type");
+        return 0;
+    }
+}
+
+int denginescript_isavailable(ScriptType type)
+{
+    if(type == DENGINE_SCRIPT_TYPE_PYTHON)
+    {
+        #ifdef DENGINE_SCRIPTING_PYTHON
+        return 1;
+        #else
+        return 0;
+        #endif
+    }else
+    {
+        dengineutils_logging_log("ERROR::Unknown script type");
+        return 0;
+    }
 }

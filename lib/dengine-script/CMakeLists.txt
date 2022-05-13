@@ -21,8 +21,11 @@ set(dengine-script-py_modules
     src/py_modules/commonmodule.c
     src/py_modules/scenemodule.c
 )
+if(DENGINE_SCRIPTING_PYTHON)
+    list(APPEND dengine-script-src ${dengine-script-py_modules})
+endif()
 
-add_library(dengine-script ${dengine-script-hdr} ${dengine-script-src} ${dengine-script-py_modules})
+add_library(dengine-script ${dengine-script-hdr} ${dengine-script-src})
 set_target_properties(dengine-script PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
                       SOVERSION ${dengine_VERSION_MAJOR}
@@ -31,7 +34,7 @@ set_target_properties(dengine-script PROPERTIES
 target_link_libraries(dengine-script dengine-core dengine-utils)
 set_property(TARGET dengine-script PROPERTY C_STANDARD 99)
 
-if(python3_LIBRARIES)
+if(DENGINE_SCRIPTING_PYTHON)
 target_link_libraries(dengine-script ${python3_LIBRARIES})
     if(NOT ANDROID)
         #add python modules (shared libraries)

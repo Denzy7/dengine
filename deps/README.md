@@ -21,7 +21,10 @@ Get default deps
 `git submodule update deps/cglm deps/stb`
 
 # optional deps
-**Windows users need to get all optional deps then proceed to build**
+**If you will be compiling for Windows or Android you might want to get all optional deps to avoid missing libraries and header files**  
+**GLFW is only needed for Windows**  
+**If you want Python scripting, update deps/cpython (will take some time!)**  
+
 `git submodule update deps/glfw deps/cpython`
 
 # python
