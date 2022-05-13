@@ -96,7 +96,7 @@ size_t dengineutils_stream_read(void* dest, const size_t size, const size_t coun
     }else if(stream->type == DENGINEUTILS_STREAM_TYPE_ANDROIDASSET)
     {
 #ifdef DENGINE_ANDROID
-        return AAsset_read(stream->asset, dest, count);
+        return AAsset_read(stream->asset, dest, size * count);
 #else
         dengineutils_logging_log(DENGINEUTILS_STREAM_MSG_TYPE4ANDROID);
         return 0;
