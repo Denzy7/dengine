@@ -56,7 +56,7 @@ size_t dengineutils_stream_read(void* dest, const size_t size, const size_t coun
 
 size_t dengineutils_stream_write(const void* src, const size_t size, const size_t count, const Stream* stream);
 
-off_t dengineutils_stream_seek(const off_t offset, const int whence, const Stream* stream);
+off_t dengineutils_stream_seek(const Stream* stream, const off_t offset, const int whence);
 
 void dengineutils_stream_destroy(Stream* stream);
 
