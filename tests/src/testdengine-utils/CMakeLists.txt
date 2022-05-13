@@ -55,3 +55,8 @@ add_executable(testdengine-util-vtor
 target_link_libraries(testdengine-util-vtor
         dengine-utils)
 set_property(TARGET testdengine-util-vtor PROPERTY C_STANDARD 99)
+
+#read zip files
+add_executable(testdengine-util-zipread util-zipread.c)
+target_link_libraries(testdengine-util-zipread dengine-utils)
+set_property(TARGET testdengine-util-zipread PROPERTY C_STANDARD 99)

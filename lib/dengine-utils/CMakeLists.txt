@@ -62,6 +62,10 @@ if(ANDROID)
     target_link_libraries(dengine-utils android log)
 endif()
 
+if(DENGINE_HAS_LIBZ)
+    target_link_libraries(dengine-utils ${DENGINE_HAS_LIBZ})
+endif()
+
 set_property(TARGET dengine-utils PROPERTY C_STANDARD 99)
 
 #remove lib prefix
