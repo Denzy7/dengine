@@ -1,6 +1,7 @@
 #include "dengine-script/script.h"
 
 #include <stdlib.h> //free
+#include <string.h> //strdup, memset
 
 #include "dengine-utils/logging.h"
 #include "dengine-utils/filesys.h"
@@ -164,7 +165,7 @@ int denginescript_init()
             dengineutils_logging_log("INFO::done!");
     }
 
-    return append_dengine;
+    return 1;
 #endif
 
     //no scripting lang found;

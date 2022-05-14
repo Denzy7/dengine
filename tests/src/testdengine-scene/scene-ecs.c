@@ -37,6 +37,7 @@
 int main(int argc, char *argv[])
 {
     int camscl = 0;
+    int usensl = 0;
 
     for(int i = 0; i < argc; i++)
     {
@@ -45,6 +46,11 @@ int main(int argc, char *argv[])
         if(arg && v && strstr("-camscl", arg))
         {
             camscl = strtod(v, NULL);
+        }
+
+        if(arg && v && strstr("-usensl", arg))
+        {
+            //usensl = 1;
         }
     }
 
@@ -57,8 +63,30 @@ int main(int argc, char *argv[])
     dengineutils_filesys_init();
 
     dengine_input_init();
+    NSL nsl = NULL;
 
-    denginescript_init();
+    if(!usensl)
+    {
+        if(!denginescript_init())
+        {
+            usensl = 1;
+        }else
+        {
+            dengineutils_logging_log("you can pass -usensl to use native scripting library alternative");
+        }
+    }
+
+
+    if(usensl)
+    {
+        nsl = denginescript_nsl_load("nsl-test.nsl");
+        if(!nsl)
+        {
+            dengineutils_logging_log("ERROR::nsl-test.nsl not found. place it next to executable");
+            return -1;
+        }
+        dengineutils_logging_log("INFO::NSL loaded!");
+    }
 
     Entity* ent1 = denginescene_ecs_new_entity();
     Entity* ent2 = denginescene_ecs_new_entity();
@@ -148,21 +176,43 @@ int main(int argc, char *argv[])
     snprintf(prtbf,prtbf_sz,"%s/models/duck.obj",dengineutils_filesys_get_assetsdir());
     Primitive* duck = denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ,prtbf,NULL,stdshdr);
 
+    Script duckscript;
+    if(usensl)
+    {
+        denginescript_nsl_get_script("moveduck", &duckscript, nsl);
+    }else
+    {
 #ifdef DENGINE_SCRIPTING_PYTHON
     const char* duckscriptfile = "scripts/moveduck.py";
     snprintf(prtbf, prtbf_sz, "%s/%s", dengineutils_filesys_get_assetsdir(), duckscriptfile);
     f2m.file = prtbf;
     dengineutils_filesys_file2mem_load(&f2m);
-    Script duckscript;
     denginescript_python_compile(f2m.mem, duckscriptfile, &duckscript);
+    dengineutils_filesys_file2mem_free(&f2m);
+#endif
+    }
     denginescene_ecs_add_script(ent3, &duckscript);
-
     //note the same script can be added to other entities for the same effects:
     //denginescene_ecs_add_script(ent1, &duckscript);
     //denginescene_ecs_add_script(ent2, &duckscript);
 
-    dengineutils_filesys_file2mem_free(&f2m);
-#endif
+    Script pingpongscale;
+    if(usensl)
+    {
+        denginescript_nsl_get_script("pingpongscale", &pingpongscale, nsl);
+    }else
+    {
+    #ifdef DENGINE_SCRIPTING_PYTHON
+        char* pingpongscalefile = "scripts/pingpongscale.py";
+        snprintf(prtbf, prtbf_sz, "%s/%s", dengineutils_filesys_get_assetsdir(), pingpongscalefile);
+        f2m.file = prtbf;
+        dengineutils_filesys_file2mem_load(&f2m);
+        denginescript_python_compile(f2m.mem, pingpongscalefile, &pingpongscale);
+        dengineutils_filesys_file2mem_free(&f2m);
+    #endif
+    }
+    denginescene_ecs_add_script(ent7, &pingpongscale);
+
     //load separated planes
     snprintf(prtbf,prtbf_sz,"%s/models/sperated-planes.obj",dengineutils_filesys_get_assetsdir());
     size_t n_planes = 0;
@@ -204,6 +254,22 @@ int main(int argc, char *argv[])
             }
         }
     }
+    Script constantrotation;
+    if(usensl)
+    {
+        denginescript_nsl_get_script("constantrotation", &constantrotation, nsl);
+    }else
+    {
+#ifdef DENGINE_SCRIPTING_PYTHON
+        char* contantrotationfile = "scripts/constantrotation.py";
+        snprintf(prtbf, prtbf_sz, "%s/%s", dengineutils_filesys_get_assetsdir(), contantrotationfile);
+        f2m.file = prtbf;
+        dengineutils_filesys_file2mem_load(&f2m);
+        denginescript_python_compile(f2m.mem, contantrotationfile, &constantrotation);
+        dengineutils_filesys_file2mem_free(&f2m);
+#endif
+    }
+    denginescene_ecs_add_script(ent15, &constantrotation);
 
     DirLight dLight;
     memset(&dLight,0,sizeof (DirLight));
@@ -238,6 +304,22 @@ int main(int argc, char *argv[])
     ent_dlight->transform.position[1] = 7.1f;
     ent_dlight->transform.position[2] = 3.1f;
 
+    Script pingpongposition;
+    if(usensl)
+    {
+        denginescript_nsl_get_script("pingpongposition", &pingpongposition, nsl);
+    }else
+    {
+#ifdef DENGINE_SCRIPTING_PYTHON
+         char* pingpongpositionfile = "scripts/pingpongposition.py";
+        snprintf(prtbf, prtbf_sz, "%s/%s", dengineutils_filesys_get_assetsdir(), pingpongpositionfile);
+        f2m.file = prtbf;
+        dengineutils_filesys_file2mem_load(&f2m);
+        denginescript_python_compile(f2m.mem, pingpongpositionfile, &pingpongposition);
+        dengineutils_filesys_file2mem_free(&f2m);
+#endif
+    }
+    denginescene_ecs_add_script(ent_plight, &pingpongposition);
 
     MeshComponent* cube_mesh, * cube_mesh2,* plane_mesh,* duck_mesh,* grid_mesh;
     cube_mesh = denginescene_ecs_new_meshcomponent(&cube, &cube_mat);
@@ -369,12 +451,9 @@ int main(int argc, char *argv[])
         dengine_input_pollevents();
 
         static double elapsed=9999.0;
-        double current = dengineutils_timer_get_current();
 
         dengineutils_timer_update();
         double delta = dengineutils_timer_get_delta();
-        double delta_s = delta / 1000.0;
-        double speed = 4.0;
 
         if(dengine_input_get_key_once('F'))
             poly = !poly;
@@ -403,16 +482,6 @@ int main(int argc, char *argv[])
             snprintf(fpsstr,sizeof (fpsstr),"FPS : %.1f (%.2fms)",1/delta*1000,delta);
             elapsed=0.0;
         }
-
-        ent15->transform.rotation[1] += delta_s * speed;
-
-        static double pingpong = 0.0;
-        pingpong = sin(current / 1000.0);
-
-        ent_plight->transform.position[0] = pingpong * 5.0;
-
-        ent7->transform.scale[2] = fabs(pingpong) * 1.3;
-        ent7->transform.scale[1] = fabs(pingpong) * 0.3;
 
         denginescene_update(scene);
 
@@ -465,6 +534,9 @@ int main(int argc, char *argv[])
 
     if(sep_planes)
         free(sep_planes);
+
+    if(nsl)
+        denginescript_nsl_free(nsl);
 
     denginegui_terminate();
     denginescript_terminate();
