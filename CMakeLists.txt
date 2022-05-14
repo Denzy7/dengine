@@ -141,7 +141,7 @@ if(DENGINE_BUILD_TESTS_PRIV)
 endif()
 
 add_subdirectory(main/dengitor)
-if(MINGW)
+if(MINGW AND DENGINE_SCRIPTING_PYTHON)
     # for mingw32 only
     add_subdirectory(main/python-dengine-script)
 endif()
