@@ -4,22 +4,47 @@
 #include "dengine_config.h" //DENGINE_SCRIPTING_PYTHON
 
 #ifdef DENGINE_SCRIPTING_PYTHON
-
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
+#endif
 
+typedef enum
+{
+    DENGINE_SCRIPT_TYPE_PYTHON,
+    DENGINE_SCRIPT_TYPE_NSL
+}ScriptType;
+
+#ifdef DENGINE_LINUX
+#include <dlfcn.h> //dlopen
+#elif defined(DENGINE_WIN32)
+#include <libloaderapi.h> //LoadLibrary
+#include <errhandlingapi.h> //GetLastError
+#endif
+//NATIVE SCRIPT LIBRARY types
+typedef void (*nslfunc_arg)(void*);
+typedef void (*nslfunc_noarg)();
+#ifdef DENGINE_LINUX
+typedef void* NSL;
+#elif defined(DENGINE_WIN32)
+typedef HMODULE NSL;
 #endif
 
 typedef struct
 {
-#ifdef DENGINE_SCRIPTING_PYTHON
+    ScriptType type;
 
+    nslfunc_arg nsl_start;
+    nslfunc_noarg nsl_start_noarg;
+
+    nslfunc_arg nsl_update;
+    nslfunc_noarg nsl_update_noarg;
+
+#ifdef DENGINE_SCRIPTING_PYTHON
     PyObject* bytecode;
     PyObject* module;
 
     PyObject* fn_start;
     PyObject* fn_update;
-
 #endif
 }Script;
 
@@ -29,10 +54,6 @@ typedef enum
     DENGINE_SCRIPT_FUNC_UPDATE,
 }ScriptFunc;
 
-typedef enum
-{
-    DENGINE_SCRIPT_TYPE_PYTHON,
-}ScriptType;
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,6 +74,12 @@ int denginescript_python_compile(const char* src, const char* name, Script* scri
 
 int denginescript_python_call(const Script* script, ScriptFunc func, const PyObject* args);
 #endif
+
+NSL denginescript_nsl_load(const char* file);
+
+void denginescript_nsl_free(NSL nsl);
+
+void denginescript_nsl_get_script(const char* name, Script* script, const NSL nsl);
 
 #ifdef __cplusplus
 }

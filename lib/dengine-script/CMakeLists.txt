@@ -47,5 +47,9 @@ if(WIN32)
     set_target_properties(dengine-script PROPERTIES PREFIX "")
 endif()
 
+if(NOT WIN32)
+    target_link_libraries(dengine-script dl)
+endif()
+
 install(TARGETS dengine-script DESTINATION lib)
 install(FILES ${dengine-script-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-script)

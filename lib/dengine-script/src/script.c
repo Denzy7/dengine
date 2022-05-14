@@ -286,3 +286,86 @@ int denginescript_isavailable(ScriptType type)
         return 0;
     }
 }
+
+NSL denginescript_nsl_load(const char* file)
+{
+    NSL load = NULL;
+    char* errmsg = NULL;
+#ifdef DENGINE_LINUX
+    load = dlopen(file, RTLD_LAZY);
+    if(!load)
+        errmsg = strdup(dlerror());
+#elif defined(DENGINE_WIN32)
+    char* dlpath = strdup(file);
+    for(size_t i = 0; i < strlen(dlpath); i++)
+    {
+        if(dlpath[i] == '/')
+            dlpath[i] = '\\';
+    }
+    load = LoadLibrary(dlpath);
+    if(!load)
+    {
+          DWORD dw = GetLastError();
+//        LPVOID lpMsgBuf;
+
+
+//        FormatMessage(
+//            FORMAT_MESSAGE_ALLOCATE_BUFFER |
+//            FORMAT_MESSAGE_FROM_SYSTEM |
+//            FORMAT_MESSAGE_IGNORE_INSERTS,
+//            NULL,
+//            dw,
+//            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+//            (LPTSTR) &lpMsgBuf,
+//            0, NULL );
+//        int len = lstrlen((LPCTSTR)lpMsgBuf);
+        errmsg = malloc(256);
+        snprintf(errmsg, 256, "Failed to load DLL : %ld", dw);
+//        LocalFree(lpMsgBuf);
+    }
+    free(dlpath);
+#else
+    dengineutils_logging_log("ERROR::NSL not supported on this platform!");
+    return NULL;;
+#endif
+    if(errmsg)
+    {
+        dengineutils_logging_log("ERROR::Cannot load NSL. Reason : %s\n", file, errmsg);
+        free(errmsg);
+    }else
+    {
+        dengineutils_logging_log("ERROR::Cannot load NSL");
+    }
+    return load;
+}
+
+void denginescript_nsl_free(NSL nsl)
+{
+#ifdef DENGINE_LINUX
+    dlclose(nsl);
+#elif defined(DENGINE_WIN32)
+    FreeLibrary(nsl);
+#endif
+}
+
+void* _denginescript_nsl_getsym(const NSL nsl, const char* name)
+{
+#ifdef DENGINE_LINUX
+    return dlsym(nsl, name);
+#elif defined(DENGINE_WIN32)
+    return GetProcAddress(nsl, name);
+#endif
+}
+
+void denginescript_nsl_get_script(const char* name, Script* script, const NSL nsl)
+{
+    char buf[256];
+    snprintf(buf, sizeof(buf), "%s_start",name);
+    script->nsl_start = _denginescript_nsl_getsym(nsl, buf);
+    snprintf(buf, sizeof(buf), "%s_update",name);
+    script->nsl_update = _denginescript_nsl_getsym(nsl, buf);
+    snprintf(buf, sizeof(buf), "%s_start_noarg",name);
+    script->nsl_update_noarg = _denginescript_nsl_getsym(nsl, buf);
+    snprintf(buf, sizeof(buf), "%s_update_noarg",name);
+    script->nsl_update_noarg = _denginescript_nsl_getsym(nsl, buf);
+}
