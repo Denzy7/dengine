@@ -51,7 +51,13 @@ if(NOT WIN32)
     target_link_libraries(dengine-script dl)
 endif()
 
-add_library(nsl-test SHARED src/nsl-test/printmouse.c)
+add_library(nsl-test SHARED
+    src/nsl-test/printmouse.c
+    src/nsl-test/constantrotation.c
+    src/nsl-test/moveduck.c
+    src/nsl-test/pingpongscale.c
+    src/nsl-test/pingpongposition.c
+)
 set_target_properties(nsl-test PROPERTIES PREFIX "")
 set_target_properties(nsl-test PROPERTIES SUFFIX ".nsl")
 target_link_libraries(nsl-test ${dengine})
