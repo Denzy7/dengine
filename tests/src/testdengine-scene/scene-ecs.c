@@ -48,9 +48,9 @@ int main(int argc, char *argv[])
             camscl = strtod(v, NULL);
         }
 
-        if(arg && v && strstr("-usensl", arg))
+        if(arg && strstr("-usensl", arg))
         {
-            //usensl = 1;
+            usensl = 1;
         }
     }
 
