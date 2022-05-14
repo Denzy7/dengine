@@ -282,8 +282,10 @@ int denginescript_isavailable(ScriptType type)
         #else
         return 0;
         #endif
-    }else
+    }else if(type == DENGINE_SCRIPT_TYPE_NSL)
     {
+        return 1;
+    }else{
         dengineutils_logging_log("ERROR::Unknown script type");
         return 0;
     }
