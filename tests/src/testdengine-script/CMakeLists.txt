@@ -3,3 +3,7 @@ if(DENGINE_SCRIPTING_PYTHON)
     target_link_libraries(testdengine-script-python ${dengine})
     set_property(TARGET testdengine-script-python PROPERTY C_STANDARD 99)
 endif()
+
+add_executable(testdengine-script-nsl script-nsl.c)
+target_link_libraries(testdengine-script-nsl ${dengine})
+set_property(TARGET testdengine-script-nsl PROPERTY C_STANDARD 99)

@@ -51,5 +51,12 @@ if(NOT WIN32)
     target_link_libraries(dengine-script dl)
 endif()
 
+add_library(nsl-test SHARED src/nsl-test/printmouse.c)
+set_target_properties(nsl-test PROPERTIES PREFIX "")
+set_target_properties(nsl-test PROPERTIES SUFFIX ".nsl")
+target_link_libraries(nsl-test ${dengine})
+set_target_properties(nsl-test PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests-build/bin")
+
 install(TARGETS dengine-script DESTINATION lib)
 install(FILES ${dengine-script-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-script)
