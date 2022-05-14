@@ -28,6 +28,11 @@ int printmouse_update(void* args)
 {
     static double elapsed;
     elapsed += dengineutils_timer_get_delta();
+    //NSL can directly interface with rendering.
+    double current = dengineutils_timer_get_current();
+    double pingpong = sin(current / 1000.0);
+    pingpong = fabs(pingpong);
+    glClearColor(1.0, pingpong, 0.0, 1.0);
     if(elapsed > 3000.0)
     {
         char msg[40];
