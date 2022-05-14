@@ -166,6 +166,7 @@ void _denginescene_do_check_script(Entity* root, Scene* scene, ScriptFunc callfu
 #ifdef DENGINE_SCRIPTING_PYTHON
         denginescene_ecs_do_script_entity(root, callfunc, scene->dummyentityobj);
 #endif
+        denginescene_ecs_do_script_entity(root, callfunc, root);
     }
 
     size_t children_count = root->children.count;
@@ -177,6 +178,7 @@ void _denginescene_do_check_script(Entity* root, Scene* scene, ScriptFunc callfu
             #ifdef DENGINE_SCRIPTING_PYTHON
             denginescene_ecs_do_script_entity(child, callfunc, scene->dummyentityobj);
             #endif
+            denginescene_ecs_do_script_entity(root, callfunc, root);
         }
         _denginescene_do_check_script(child, scene, callfunc);
     }
@@ -380,17 +382,23 @@ void denginescene_ecs_do_skybox_scene(Scene* scene, Camera* camera)
     glCullFace(entrycullface);
 }
 
-void denginescene_ecs_do_script_entity(Entity* entity, ScriptFunc func, const void* args)
+void denginescene_ecs_do_script_entity(Entity* entity, ScriptFunc func, void* args)
 {
     Script* scripts = entity->scripts.data;
     for(size_t i = 0; i < entity->scripts.count; i++)
     {
-        #ifdef DENGINE_SCRIPTING_PYTHON
-        PyObject* dummyentityobj = (PyObject*) args;
-        denginescript_pymod_scene_entity_pull(dummyentityobj, entity);
-        denginescript_python_call(&scripts[i], func, dummyentityobj);
-        denginescript_pymod_scene_entity_push(dummyentityobj, entity);
-        #endif
+        if(scripts[i].type == DENGINE_SCRIPT_TYPE_PYTHON)
+        {
+            #ifdef DENGINE_SCRIPTING_PYTHON
+            PyObject* dummyentityobj = (PyObject*) args;
+            denginescript_pymod_scene_entity_pull(dummyentityobj, entity);
+            denginescript_python_call(&scripts[i], func, dummyentityobj);
+            denginescript_pymod_scene_entity_push(dummyentityobj, entity);
+            #endif
+        }else if(scripts[i].type == DENGINE_SCRIPT_TYPE_NSL)
+        {
+            denginescript_call(&scripts[i], func, args);
+        }
     }
 }
 
