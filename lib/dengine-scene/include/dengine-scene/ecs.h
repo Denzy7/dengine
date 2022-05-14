@@ -68,6 +68,10 @@ typedef struct
     Entity* child;
 }EntityChild;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*!
  * \brief Create a new empty entity
  * \return An empty active entity with no components
@@ -111,11 +115,6 @@ CameraComponent* denginescene_ecs_new_cameracomponent(const Camera* camera);
 LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light);
 
 void denginescene_ecs_add_script(Entity* entity, const Script* script);
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 
 #ifdef __cplusplus
 }

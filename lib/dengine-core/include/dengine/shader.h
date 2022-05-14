@@ -6,12 +6,6 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
-
 #include <stdint.h> //uint32
 
 /*! \struct Shader
@@ -51,6 +45,10 @@ typedef enum
     DENGINE_SHADER_SKYBOXCUBE, /*!< 3D shader when using a cubemap skybox */
     DENGINE_SHADER_SKYBOX2D, /*!< 3D shader when using a 2D skybox (hdri map) */
 }StandardShader;
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
 
 void dengine_shader_create(Shader* shader);
 

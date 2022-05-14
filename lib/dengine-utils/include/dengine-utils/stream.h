@@ -50,6 +50,10 @@ typedef struct _Stream
     off_t size;
 }Stream;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 Stream* dengineutils_stream_new(const char* path, StreamType type, StreamMode mode);
 
 size_t dengineutils_stream_read(void* dest, const size_t size, const size_t count, const Stream* stream);
@@ -60,4 +64,7 @@ off_t dengineutils_stream_seek(const Stream* stream, const off_t offset, const i
 
 void dengineutils_stream_destroy(Stream* stream);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // DENGINEUTILS_STREAM_H

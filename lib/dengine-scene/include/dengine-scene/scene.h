@@ -22,6 +22,10 @@ typedef struct _Scene
 #endif
 }Scene;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*!
  * \brief Create an empty scene
  * \return An empty scene
@@ -55,5 +59,9 @@ void denginescene_ecs_do_skybox_scene(Scene* scene, Camera* camera);
 void denginescene_ecs_do_script_entity(Entity* entity, ScriptFunc func, void* args);
 
 void denginescene_ecs_do_script_scene(Scene* scene, ScriptFunc func);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #endif // SCENE_H

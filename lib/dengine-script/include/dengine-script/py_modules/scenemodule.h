@@ -21,6 +21,10 @@ typedef struct
 }EntityObject;
 extern PyTypeObject EntityObject_Type;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // new Python Object as an entity
 PyObject* denginescript_pymod_scene_entity_new();
 
@@ -29,5 +33,9 @@ void denginescript_pymod_scene_entity_pull(PyObject* object, Entity* entity);
 
 //push/commit changes to PyObject to ecs
 void denginescript_pymod_scene_entity_push(PyObject* object, Entity* entity);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SCENEMODULE_H
