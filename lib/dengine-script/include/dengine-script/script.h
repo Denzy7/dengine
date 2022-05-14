@@ -47,6 +47,8 @@ extern "C" {
 
 int denginescript_init();
 
+int denginescript_isinit();
+
 void denginescript_terminate();
 
 int denginescript_compile(const char* src, const char* name, ScriptType type, Script* script);

@@ -176,6 +176,15 @@ int denginescript_init()
     return 0;
 }
 
+int denginescript_isinit()
+{
+#ifdef DENGINE_SCRIPTING_PYTHON
+    return Py_IsInitialized();
+#else
+    return 0;
+#endif
+}
+
 #ifdef DENGINE_SCRIPTING_PYTHON
 int denginescript_python_compile(const char* src, const char* name, Script* script)
 {
