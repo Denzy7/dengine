@@ -28,7 +28,7 @@ option(DENGINE_BUILD_TESTS "Build the test suite and examples" ON)
 option(DENGINE_MT "Build for multithreading using mutexes" ON)
 
 option(DENGINE_SCRIPTING_PYTHON "Enable support for Python scripts" ON)
-
+option(DENGINE_USE_SYSTEM_PYTHON "Use system python or build custom. Might cause some serious path issues if using system Python" OFF)
 find_library(DENGINE_HAS_LIBZ z)
 
 if(NOT ANDROID)
@@ -58,7 +58,7 @@ if(NOT ANDROID)
             message(WARNING ">>> Could not find fontconfig. Default font support will not work! Consider installing it")
         endif()
 
-        if(DENGINE_SCRIPTING_PYTHON)
+        if(DENGINE_SCRIPTING_PYTHON AND DENGINE_USE_SYSTEM_PYTHON)
             pkg_check_modules(python3 python3-embed)
             if(python3_LIBRARIES)
                 message(">>> Found python3 libraries")

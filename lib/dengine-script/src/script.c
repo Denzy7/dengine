@@ -61,6 +61,8 @@ PyMODINIT_FUNC PyInit_dengine()
 int denginescript_init()
 {
 #ifdef DENGINE_SCRIPTING_PYTHON
+
+#ifndef DENGINE_USE_SYSTEM_PYTHON
     //Py_DontWriteBytecodeFlag = 1;
     Py_NoSiteFlag = 1;
     //Py_IgnoreEnvironmentFlag = 1;
@@ -128,6 +130,7 @@ int denginescript_init()
 
     if(usingbootstrap)
         dengineutils_logging_log("INFO::initialzing python from bootstrap.zip. This might take some seconds...");
+#endif
 
     int append_dengine = PyImport_AppendInittab("dengine", &PyInit_dengine);
     PyImport_AppendInittab("dengine.inpt", &PyInit_inpt);

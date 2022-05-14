@@ -49,6 +49,9 @@
 // is python3 installed?
 #cmakedefine DENGINE_HAS_PYTHON3
 
+// use system python. MIGHT CAUSE SOME SERIOUS PATH ISSUES
+#cmakedefine DENGINE_USE_SYSTEM_PYTHON
+
 // use python scripting
 #cmakedefine DENGINE_SCRIPTING_PYTHON
 
