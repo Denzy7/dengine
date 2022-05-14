@@ -254,7 +254,7 @@ int denginescript_compile(const char* src, const char* name, ScriptType type, Sc
     }
 }
 
-int denginescript_call(ScriptType type, const Script* script, ScriptFunc func, const void* args)
+int denginescript_call(ScriptType type, const Script* script, ScriptFunc func, void* args)
 {
     if(type == DENGINE_SCRIPT_TYPE_PYTHON)
     {
@@ -264,8 +264,10 @@ int denginescript_call(ScriptType type, const Script* script, ScriptFunc func, c
         dengineutils_logging_log("ERROR::Script not callable. Python was not linked at build");
         return 0;
         #endif
-    }else
+    }else if(type == DENGINE_SCRIPT_TYPE_NSL)
     {
+        return denginescript_nsl_call(script, func, args);
+    }else{
         dengineutils_logging_log("ERROR::Unknown script type");
         return 0;
     }
@@ -364,8 +366,19 @@ void denginescript_nsl_get_script(const char* name, Script* script, const NSL ns
     script->nsl_start = _denginescript_nsl_getsym(nsl, buf);
     snprintf(buf, sizeof(buf), "%s_update",name);
     script->nsl_update = _denginescript_nsl_getsym(nsl, buf);
-    snprintf(buf, sizeof(buf), "%s_start_noarg",name);
-    script->nsl_update_noarg = _denginescript_nsl_getsym(nsl, buf);
-    snprintf(buf, sizeof(buf), "%s_update_noarg",name);
-    script->nsl_update_noarg = _denginescript_nsl_getsym(nsl, buf);
+}
+
+int denginescript_nsl_call(const Script* script, ScriptFunc func, void* args)
+{
+    int nsl_call = 0;
+    if(func == DENGINE_SCRIPT_FUNC_START)
+    {
+        if(script->nsl_start)
+            nsl_call = script->nsl_start(args);
+    }else if(func == DENGINE_SCRIPT_FUNC_UPDATE)
+    {
+        if(script->nsl_update)
+            nsl_call = script->nsl_update(args);
+    }
+    return nsl_call;
 }

@@ -21,8 +21,7 @@ typedef enum
 #include <errhandlingapi.h> //GetLastError
 #endif
 //NATIVE SCRIPT LIBRARY types
-typedef void (*nslfunc_arg)(void*);
-typedef void (*nslfunc_noarg)();
+typedef int (*nslfunc)(void*);
 #ifdef DENGINE_LINUX
 typedef void* NSL;
 #elif defined(DENGINE_WIN32)
@@ -33,11 +32,8 @@ typedef struct
 {
     ScriptType type;
 
-    nslfunc_arg nsl_start;
-    nslfunc_noarg nsl_start_noarg;
-
-    nslfunc_arg nsl_update;
-    nslfunc_noarg nsl_update_noarg;
+    nslfunc nsl_start;
+    nslfunc nsl_update;
 
 #ifdef DENGINE_SCRIPTING_PYTHON
     PyObject* bytecode;
@@ -65,7 +61,7 @@ void denginescript_terminate();
 
 int denginescript_compile(const char* src, const char* name, ScriptType type, Script* script);
 
-int denginescript_call(ScriptType type, const Script* script, ScriptFunc func, const void* args);
+int denginescript_call(ScriptType type, const Script* script, ScriptFunc func, void* args);
 
 int denginescript_isavailable(ScriptType type);
 
@@ -81,6 +77,7 @@ void denginescript_nsl_free(NSL nsl);
 
 void denginescript_nsl_get_script(const char* name, Script* script, const NSL nsl);
 
+int denginescript_nsl_call(const Script* script, ScriptFunc func, void* args);
 #ifdef __cplusplus
 }
 #endif
