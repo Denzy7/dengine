@@ -3,10 +3,10 @@
 #include "dengine/loadgl.h" //gl
 #include "dengine/draw.h" //draw
 //#include "dengine/window.h" //get w,h
-#include "dengine/macros.h" //arr_sz
 #include "dengine/entrygl.h" //entryfb
 
 #include "dengine-utils/logging.h"
+#include "dengine-utils/macros.h" //arr_sz
 
 #include <string.h> //memset
 Lighting lighting;

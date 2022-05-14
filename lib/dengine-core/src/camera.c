@@ -1,10 +1,10 @@
 #include "dengine/camera.h"
 
-#include "dengine/macros.h"
 #include "dengine/loadgl.h"
 #include "dengine/entrygl.h"
 
 #include "dengine-utils/debug.h"
+#include "dengine-utils/macros.h"
 
 #include <cglm/cglm.h> //glm_proj
 #include <string.h>    //memcpy

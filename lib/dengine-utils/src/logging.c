@@ -11,7 +11,7 @@
 
 #include "dengine_config.h" //MAX_LOG_STR_SIZE
 
-#include "dengine/macros.h"
+#include "dengine-utils/macros.h"
 
 #ifdef DENGINE_LINUX
 #include <unistd.h>

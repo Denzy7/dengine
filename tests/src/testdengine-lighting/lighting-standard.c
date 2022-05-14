@@ -12,13 +12,13 @@
 #include <dengine/draw.h>
 #include <dengine/lighting.h>
 #include <dengine/material.h>
-#include <dengine/macros.h>
 
 #include <dengine-utils/logging.h>
 #include <dengine-utils/filesys.h>
 #include <dengine-utils/timer.h>
 #include <dengine-utils/os.h>
 #include <dengine-utils/debug.h>
+#include <dengine-utils/macros.h>
 
 #include <dengine-gui/gui.h>
 

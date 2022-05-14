@@ -39,10 +39,10 @@ typedef struct
 #include <dengine/lighting.h>
 #include <dengine/draw.h>
 #include <dengine/loadgl.h>
-#include <dengine/macros.h>
 #include <dengine/viewport.h>
 #include <dengine/entrygl.h>
 
+#include <dengine-utils/macros.h>
 #include <dengine-utils/logging.h>
 #include <dengine-utils/filesys.h>
 #include <dengine-utils/debug.h>
