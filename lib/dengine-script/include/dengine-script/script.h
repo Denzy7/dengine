@@ -14,19 +14,9 @@ typedef enum
     DENGINE_SCRIPT_TYPE_NSL
 }ScriptType;
 
-#ifdef DENGINE_LINUX
-#include <dlfcn.h> //dlopen
-#elif defined(DENGINE_WIN32)
-#include <libloaderapi.h> //LoadLibrary
-#include <errhandlingapi.h> //GetLastError
-#endif
 //NATIVE SCRIPT LIBRARY types
-typedef int (*nslfunc)(void*);
-#ifdef DENGINE_LINUX
 typedef void* NSL;
-#elif defined(DENGINE_WIN32)
-typedef HMODULE NSL;
-#endif
+typedef int (*nslfunc)(void*);
 
 typedef struct
 {

@@ -1,5 +1,7 @@
 #include "dengine-script/script.h"
 
+#include <stdlib.h> //free
+
 #include "dengine-utils/logging.h"
 #include "dengine-utils/filesys.h"
 #include "dengine-utils/os.h"
@@ -7,6 +9,13 @@
 
 #ifdef DENGINE_ANDROID
 #include "dengine-utils/platform/android.h"
+#endif
+
+#ifdef DENGINE_LINUX
+#include <dlfcn.h> //dlopen
+#elif defined(DENGINE_WIN32)
+#include <libloaderapi.h> //LoadLibrary
+#include <errhandlingapi.h> //GetLastError
 #endif
 
 #ifdef DENGINE_SCRIPTING_PYTHON //init table for main python module
