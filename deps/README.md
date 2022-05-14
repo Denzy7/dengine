@@ -28,7 +28,9 @@ Get default deps
 `git submodule update deps/glfw deps/cpython`
 
 # python
-Depends if python is found on your system. And is compatible with the build system. If not this will result in a lenghty compile process. It might also result in an incompatible module set
+Depends if python is found on your system. And is compatible with the build system. If not this will result in a lenghty compile process. It might also result in an incompatible module set.
+
+A general rule of thumb if you are using Linux, no need to build python. Just set CMake option DENGINE_USE_SYSTEM_PYTHON to ON. Otherwise if you are going to build on another system, definitely set it to OFF
 
 # debian & ubuntu
 `# apt install libglfw3-dev libgtk-3-dev libpython3.9-dev `
