@@ -247,16 +247,20 @@ int denginescript_compile(const char* src, const char* name, ScriptType type, Sc
         dengineutils_logging_log("ERROR::Script %s not compiled. Python was not linked at build", name);
         return 0;
         #endif
-    }else
+    }else if(type == DENGINE_SCRIPT_TYPE_NSL)
+    {
+        dengineutils_logging_log("WARNING::Why are you compiling an NSL library?");
+        return 0;
+    }
     {
         dengineutils_logging_log("ERROR::Unknown script type");
         return 0;
     }
 }
 
-int denginescript_call(ScriptType type, const Script* script, ScriptFunc func, void* args)
+int denginescript_call(const Script* script, ScriptFunc func, void* args)
 {
-    if(type == DENGINE_SCRIPT_TYPE_PYTHON)
+    if(script->type == DENGINE_SCRIPT_TYPE_PYTHON)
     {
         #ifdef DENGINE_SCRIPTING_PYTHON
         return denginescript_python_call(script, func, args);
@@ -264,7 +268,7 @@ int denginescript_call(ScriptType type, const Script* script, ScriptFunc func, v
         dengineutils_logging_log("ERROR::Script not callable. Python was not linked at build");
         return 0;
         #endif
-    }else if(type == DENGINE_SCRIPT_TYPE_NSL)
+    }else if(script->type == DENGINE_SCRIPT_TYPE_NSL)
     {
         return denginescript_nsl_call(script, func, args);
     }else{

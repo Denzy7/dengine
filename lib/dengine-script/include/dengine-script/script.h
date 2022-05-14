@@ -61,7 +61,7 @@ void denginescript_terminate();
 
 int denginescript_compile(const char* src, const char* name, ScriptType type, Script* script);
 
-int denginescript_call(ScriptType type, const Script* script, ScriptFunc func, void* args);
+int denginescript_call(const Script* script, ScriptFunc func, void* args);
 
 int denginescript_isavailable(ScriptType type);
 
