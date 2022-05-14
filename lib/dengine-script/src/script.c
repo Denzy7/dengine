@@ -62,6 +62,7 @@ int denginescript_init()
 {
 #ifdef DENGINE_SCRIPTING_PYTHON
 
+    int usingbootstrap = 0;
 #ifndef DENGINE_USE_SYSTEM_PYTHON
     //Py_DontWriteBytecodeFlag = 1;
     Py_NoSiteFlag = 1;
@@ -69,7 +70,6 @@ int denginescript_init()
     //Py_InteractiveFlag = 0;
     //Py_IsolatedFlag = 1;
 
-    int usingbootstrap = 0;
     char boostrap[8192];
     snprintf(boostrap, sizeof(boostrap),
              "%s/python_bootstrap/%s",

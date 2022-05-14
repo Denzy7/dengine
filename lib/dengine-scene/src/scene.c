@@ -163,10 +163,19 @@ void _denginescene_do_check_script(Entity* root, Scene* scene, ScriptFunc callfu
     //check scriptcomp and exec callfunc
     if(!root->parent && root->scripts.count)
     {
-#ifdef DENGINE_SCRIPTING_PYTHON
-        denginescene_ecs_do_script_entity(root, callfunc, scene->dummyentityobj);
-#endif
-        denginescene_ecs_do_script_entity(root, callfunc, root);
+        Script* scripts = root->scripts.data;
+        for(size_t i = 0; i < root->scripts.count; i++)
+        {
+            if(scripts[i].type == DENGINE_SCRIPT_TYPE_PYTHON)
+            {
+                #ifdef DENGINE_SCRIPTING_PYTHON
+                denginescene_ecs_do_script_entity(root, &scripts[i], callfunc , scene->dummyentityobj);
+                #endif
+            }else if(scripts[i].type == DENGINE_SCRIPT_TYPE_NSL)
+            {
+                 denginescene_ecs_do_script_entity(root, &scripts[i], callfunc, root);
+            }
+        }
     }
 
     size_t children_count = root->children.count;
@@ -175,10 +184,19 @@ void _denginescene_do_check_script(Entity* root, Scene* scene, ScriptFunc callfu
         Entity* child = ec[i].child;
         if(child->scripts.count)
         {
-            #ifdef DENGINE_SCRIPTING_PYTHON
-            denginescene_ecs_do_script_entity(child, callfunc, scene->dummyentityobj);
-            #endif
-            denginescene_ecs_do_script_entity(child, callfunc, child);
+            Script* scripts = child->scripts.data;
+            for(size_t i = 0; i < child->scripts.count; i++)
+            {
+                if(scripts[i].type == DENGINE_SCRIPT_TYPE_PYTHON)
+                {
+                    #ifdef DENGINE_SCRIPTING_PYTHON
+                    denginescene_ecs_do_script_entity(child, &scripts[i], callfunc , scene->dummyentityobj);
+                    #endif
+                }else if(scripts[i].type == DENGINE_SCRIPT_TYPE_NSL)
+                {
+                     denginescene_ecs_do_script_entity(child, &scripts[i], callfunc, child);
+                }
+            }
         }
         _denginescene_do_check_script(child, scene, callfunc);
     }
@@ -382,23 +400,28 @@ void denginescene_ecs_do_skybox_scene(Scene* scene, Camera* camera)
     glCullFace(entrycullface);
 }
 
-void denginescene_ecs_do_script_entity(Entity* entity, ScriptFunc func, void* args)
+void denginescene_ecs_do_scripts_entity(Entity* entity, ScriptFunc func, void* args)
 {
     Script* scripts = entity->scripts.data;
     for(size_t i = 0; i < entity->scripts.count; i++)
     {
-        if(scripts[i].type == DENGINE_SCRIPT_TYPE_PYTHON)
-        {
-            #ifdef DENGINE_SCRIPTING_PYTHON
-            PyObject* dummyentityobj = (PyObject*) args;
-            denginescript_pymod_scene_entity_pull(dummyentityobj, entity);
-            denginescript_python_call(&scripts[i], func, dummyentityobj);
-            denginescript_pymod_scene_entity_push(dummyentityobj, entity);
-            #endif
-        }else if(scripts[i].type == DENGINE_SCRIPT_TYPE_NSL)
-        {
-            denginescript_call(&scripts[i], func, args);
-        }
+        denginescene_ecs_do_script_entity(entity, &scripts[i], func, args);
+    }
+}
+
+void denginescene_ecs_do_script_entity(Entity* entity, const Script* script, ScriptFunc func, void* args)
+{
+    if(script->type == DENGINE_SCRIPT_TYPE_PYTHON)
+    {
+        #ifdef DENGINE_SCRIPTING_PYTHON
+        PyObject* dummyentityobj = (PyObject*) args;
+        denginescript_pymod_scene_entity_pull(dummyentityobj, entity);
+        denginescript_python_call(script, func, dummyentityobj);
+        denginescript_pymod_scene_entity_push(dummyentityobj, entity);
+        #endif
+    }else if(script->type == DENGINE_SCRIPT_TYPE_NSL)
+    {
+        denginescript_call(script, func, args);
     }
 }
 
