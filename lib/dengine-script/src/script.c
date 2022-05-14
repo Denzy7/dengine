@@ -340,11 +340,8 @@ NSL denginescript_nsl_load(const char* file)
 #endif
     if(errmsg)
     {
-        dengineutils_logging_log("ERROR::Cannot load NSL. Reason : %s\n", file, errmsg);
+        dengineutils_logging_log("ERROR::Cannot load NSL [%s]\nReason : %s\n", file, errmsg);
         free(errmsg);
-    }else
-    {
-        dengineutils_logging_log("ERROR::Cannot load NSL");
     }
     return load;
 }
