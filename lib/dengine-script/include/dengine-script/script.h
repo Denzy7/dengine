@@ -10,7 +10,7 @@
 
 typedef enum
 {
-    DENGINE_SCRIPT_TYPE_PYTHON,
+    DENGINE_SCRIPT_TYPE_PYTHON = 1,
     DENGINE_SCRIPT_TYPE_NSL
 }ScriptType;
 
@@ -75,7 +75,7 @@ NSL denginescript_nsl_load(const char* file);
 
 void denginescript_nsl_free(NSL nsl);
 
-void denginescript_nsl_get_script(const char* name, Script* script, const NSL nsl);
+int denginescript_nsl_get_script(const char* name, Script* script, const NSL nsl);
 
 int denginescript_nsl_call(const Script* script, ScriptFunc func, void* args);
 #ifdef __cplusplus

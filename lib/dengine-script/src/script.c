@@ -208,6 +208,8 @@ int denginescript_python_compile(const char* src, const char* name, Script* scri
             script->fn_update = fn_update;
     }
 
+    script->type = DENGINE_SCRIPT_TYPE_PYTHON;
+
     return 1;
 }
 
@@ -365,13 +367,23 @@ void* _denginescript_nsl_getsym(const NSL nsl, const char* name)
 #endif
 }
 
-void denginescript_nsl_get_script(const char* name, Script* script, const NSL nsl)
+int denginescript_nsl_get_script(const char* name, Script* script, const NSL nsl)
 {
+    memset(script, 0, sizeof(Script));
     char buf[256];
     snprintf(buf, sizeof(buf), "%s_start",name);
     script->nsl_start = _denginescript_nsl_getsym(nsl, buf);
     snprintf(buf, sizeof(buf), "%s_update",name);
     script->nsl_update = _denginescript_nsl_getsym(nsl, buf);
+    if(script->nsl_start || script->nsl_update)
+    {
+        script->type = DENGINE_SCRIPT_TYPE_NSL;
+        return 1;
+    }else
+    {
+        dengineutils_logging_log("WARNING::NSL has no script [%s] with start or update", name);
+        return 0;
+    }
 }
 
 int denginescript_nsl_call(const Script* script, ScriptFunc func, void* args)
