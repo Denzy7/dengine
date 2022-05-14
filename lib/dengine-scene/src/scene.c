@@ -178,7 +178,7 @@ void _denginescene_do_check_script(Entity* root, Scene* scene, ScriptFunc callfu
             #ifdef DENGINE_SCRIPTING_PYTHON
             denginescene_ecs_do_script_entity(child, callfunc, scene->dummyentityobj);
             #endif
-            denginescene_ecs_do_script_entity(root, callfunc, root);
+            denginescene_ecs_do_script_entity(child, callfunc, child);
         }
         _denginescene_do_check_script(child, scene, callfunc);
     }
