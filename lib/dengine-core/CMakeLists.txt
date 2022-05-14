@@ -44,7 +44,6 @@ include/dengine/framebuffer.h
 include/dengine/material.h
 include/dengine/lighting.h
 include/dengine/vao.h
-include/dengine/macros.h
 include/dengine/renderbuffer.h
 include/dengine/dengine.h
 include/dengine/viewport.h

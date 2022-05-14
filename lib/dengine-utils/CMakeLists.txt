@@ -29,6 +29,7 @@ include/dengine-utils/str.h
 include/dengine-utils/debug.h
 include/dengine-utils/stream.h
 include/dengine-utils/zipread.h
+include/dengine-utils/macros.h
 )
 
 if(ANDROID)
