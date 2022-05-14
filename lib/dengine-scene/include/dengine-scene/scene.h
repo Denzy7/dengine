@@ -61,7 +61,7 @@ void denginescene_ecs_do_script_entity(Entity* entity, ScriptFunc func, void* ar
 void denginescene_ecs_do_script_scene(Scene* scene, ScriptFunc func);
 
 #ifdef __cplusplus
-extern "C" {
+}
 #endif
 
 #endif // SCENE_H
