@@ -27,7 +27,8 @@ Scene* denginescene_new()
     vtor_create(&newscn->entities, sizeof(EntityChild));
 
 #ifdef DENGINE_SCRIPTING_PYTHON
-    newscn->dummyentityobj = denginescript_pymod_scene_entity_new();
+    if(denginescript_isinit())
+        newscn->dummyentityobj = denginescript_pymod_scene_entity_new();
 #endif
 
     return newscn;
