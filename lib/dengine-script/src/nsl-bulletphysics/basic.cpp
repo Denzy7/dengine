@@ -10,6 +10,16 @@ btBroadphaseInterface* broadphase = NULL;
 btSequentialImpulseConstraintSolver* solver = NULL;
 btAlignedObjectArray<btCollisionShape*> shapes;
 
+void applyForce(btRigidBody* body, const btVector3& force)
+{
+    body->applyForce(force, btVector3(0, 0, 0));
+}
+
+void applyTorque(btRigidBody* body, const btVector3& force)
+{
+    body->applyTorque(force);
+}
+
 void addBox(const btVector3& box_size, const btVector3& origin, const btVector3& rotation, const float& mass)
 {
     btCollisionShape* box = new btBoxShape(box_size);
@@ -54,7 +64,7 @@ extern "C" int basic_start(Entity* entity)
         world->setGravity(btVector3(0, -10, 0));
     }
 
-    addBox(btVector3(5.0, 0.25, 5.0), btVector3(0, 0, 0),btVector3(0, 0, 0), 0.0);
+    addBox(btVector3(15.0, 0.25, 15.0), btVector3(0, 0, 0),btVector3(0, 0, 0), 0.0);
     addBox(btVector3(1.0, 1.0, 1.0), btVector3(
                 entity->transform.position[0],
                 entity->transform.position[1],
@@ -68,8 +78,35 @@ extern "C" int basic_start(Entity* entity)
 
 extern "C" int basic_update(Entity* entity)
 {
-    world->stepSimulation(1.f / 60.f, 10);
     btCollisionObject* obj = world->getCollisionObjectArray()[1];
+    btRigidBody* body = btRigidBody::upcast(obj);
+
+    static const float force = 15.0f;
+    if(dengine_input_get_key('F'))
+        applyForce(body, btVector3(0, force, 0));
+    if(dengine_input_get_key('G'))
+        applyForce(body, btVector3(0, -force, 0));
+
+    if(dengine_input_get_key('W'))
+        applyForce(body, btVector3(0, 0, -force));
+    if(dengine_input_get_key('S'))
+        applyForce(body, btVector3(0, 0, force));
+    if(dengine_input_get_key('A'))
+        applyForce(body, btVector3(-force, 0, 0));
+    if(dengine_input_get_key('D'))
+        applyForce(body, btVector3(force, 0, 0));
+
+    if(dengine_input_get_key('Z'))
+        applyTorque(body, btVector3(0, force, 0));
+    if(dengine_input_get_key('X'))
+        applyTorque(body, btVector3(0, -force, 0));
+
+    if(dengine_input_get_key('E'))
+        applyTorque(body, btVector3(0, 0,force));
+    if(dengine_input_get_key('Q'))
+        applyTorque(body, btVector3(0, 0, -force));
+
+    world->stepSimulation(1.f / 60.f, 10);
     float model_mtx[16];
     obj->getWorldTransform().getOpenGLMatrix(model_mtx);
     // physics always in world space

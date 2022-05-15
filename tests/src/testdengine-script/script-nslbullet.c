@@ -31,6 +31,10 @@ int main(int argc, char *argv[])
     Camera cam;
     dengine_camera_setup(&cam);
     dengine_camera_set_rendermode(DENGINE_CAMERA_RENDER_FOWARD, &cam);
+    cam.clearcolor[0] = 0.1f;
+    cam.clearcolor[1] = 0.1f;
+    cam.clearcolor[2] = 0.1f;
+    cam.clearcolor[3] = 0.1f;
 
     CameraComponent* cam_c = denginescene_ecs_new_cameracomponent(&cam);
     Entity* cam_ent = denginescene_ecs_new_entity();
@@ -57,9 +61,9 @@ int main(int argc, char *argv[])
     plane_ent->transform.position[0] = 0.0;
     plane_ent->transform.position[1] = 0.0;
     plane_ent->transform.position[2] = 0.0;
-    plane_ent->transform.scale[0] = 5.0;
+    plane_ent->transform.scale[0] = 15.0;
     plane_ent->transform.scale[1] = 0.25;
-    plane_ent->transform.scale[2] = 5.0;
+    plane_ent->transform.scale[2] = 15.0;
     plane_ent->mesh_component = plane_mesh;
     denginescene_add_entity(scene, plane_ent);
 
@@ -85,6 +89,23 @@ int main(int argc, char *argv[])
         dengine_viewport_get(NULL, NULL, &w, &h);
 
         denginegui_panel(0, 0, w, h, cam_ent->camera_component->camera->framebuffer.color, NULL, black);
+        float fontsz = denginegui_get_fontsz();
+        static const char* staticmessageslist[] =
+        {
+            "Press WASD to apply movement force",
+            "F to apply upthrust",
+            "G to apply downthrust",
+            "Z to apply -ve upward torque",
+            "X to apply +ve upward torque",
+            "Q to apply +ve forward torque",
+            "E to apply -ve forward torque"
+        };
+
+        for(int i = 0; i < DENGINE_ARY_SZ(staticmessageslist); i++)
+        {
+            denginegui_text(0, h - fontsz - i * fontsz, staticmessageslist[i], NULL);
+        }
+
         denginegui_text(0, 0, (char*)glGetString(GL_VERSION), NULL);
 
         dengine_update();
