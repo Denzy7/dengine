@@ -24,6 +24,7 @@ typedef struct
 
     nslfunc nsl_start;
     nslfunc nsl_update;
+    nslfunc nsl_terminate;
 
 #ifdef DENGINE_SCRIPTING_PYTHON
     PyObject* bytecode;
@@ -38,6 +39,7 @@ typedef enum
 {
     DENGINE_SCRIPT_FUNC_START,
     DENGINE_SCRIPT_FUNC_UPDATE,
+    DENGINE_SCRIPT_FUNC_TERMINATE,
 }ScriptFunc;
 
 

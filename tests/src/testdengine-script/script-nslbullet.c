@@ -89,6 +89,8 @@ int main(int argc, char *argv[])
 
         dengine_update();
     }
+    denginescene_ecs_do_script_scene(scene, DENGINE_SCRIPT_FUNC_TERMINATE);
+
     denginescene_destroy(scene);
     free(prtbf);
     free(stdshdr);

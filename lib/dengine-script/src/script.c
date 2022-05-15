@@ -394,6 +394,8 @@ int denginescript_nsl_get_script(const char* name, Script* script, const NSL nsl
     script->nsl_start = _denginescript_nsl_getsym(nsl, buf);
     snprintf(buf, sizeof(buf), "%s_update",name);
     script->nsl_update = _denginescript_nsl_getsym(nsl, buf);
+    snprintf(buf, sizeof(buf), "%s_terminate",name);
+    script->nsl_terminate = _denginescript_nsl_getsym(nsl, buf);
     if(script->nsl_start || script->nsl_update)
     {
         script->type = DENGINE_SCRIPT_TYPE_NSL;
@@ -416,6 +418,10 @@ int denginescript_nsl_call(const Script* script, ScriptFunc func, void* args)
     {
         if(script->nsl_update)
             nsl_call = script->nsl_update(args);
+    }else if(func == DENGINE_SCRIPT_FUNC_TERMINATE)
+    {
+        if(script->nsl_terminate)
+            nsl_call = script->nsl_terminate(args);
     }
     return nsl_call;
 }
