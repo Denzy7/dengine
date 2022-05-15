@@ -114,7 +114,7 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
         dengine_framebuffer_attach(DENGINE_FRAMEBUFFER_DEPTH, &depth, &shadowop->shadow_map);
 
     if(glad_glReadBuffer)
-        glReadBuffer(GL_NONE); DENGINE_CHECKGL;
+    {glReadBuffer(GL_NONE); DENGINE_CHECKGL;}
 
     if(glad_glDrawBuffers)
     {

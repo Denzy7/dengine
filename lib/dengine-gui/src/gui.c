@@ -252,7 +252,7 @@ void _denginegui_drawquad()
     glGetIntegerv(GL_BLEND, &blnd); DENGINE_CHECKGL;
 
     if(!blnd)
-        glEnable(GL_BLEND); DENGINE_CHECKGL;
+    {glEnable(GL_BLEND); DENGINE_CHECKGL;}
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); DENGINE_CHECKGL;
 
@@ -266,10 +266,10 @@ void _denginegui_drawquad()
     glBlendFunc(srcalpha, dstalpha); DENGINE_CHECKGL;
 
     if(!blnd)
-        glDisable(GL_BLEND); DENGINE_CHECKGL;
+    {glDisable(GL_BLEND); DENGINE_CHECKGL;}
 
     if (depthmask)
-        glDepthMask(GL_TRUE);
+    {glDepthMask(GL_TRUE); DENGINE_CHECKGL;}
 
     dengine_shader_use(NULL);
 }

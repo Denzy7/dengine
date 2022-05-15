@@ -545,8 +545,6 @@ void dengine_primitive_gen_grid(uint16_t slice, Primitive* primitive, Shader* sh
 void dengine_primitive_gen_axis(Primitive* primitive, Shader* shader)
 {
     memset(primitive,0,sizeof (Primitive));
-
-    const float letteroff = 0.1f;
     static float axis_vertices[]=
     {
         //Lines

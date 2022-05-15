@@ -49,7 +49,7 @@ void dengine_shader_destroy(Shader* shader)
     glDeleteShader(shader->vertex_id); DENGINE_CHECKGL;
 
     if(shader->geometry_code)
-        glDeleteShader(shader->geometry_id); DENGINE_CHECKGL;
+        {glDeleteShader(shader->geometry_id); DENGINE_CHECKGL;}
 
     glDeleteProgram(shader->program_id); DENGINE_CHECKGL;
 }

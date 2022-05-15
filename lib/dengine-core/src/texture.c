@@ -20,7 +20,7 @@ void dengine_texture_gen(size_t count, Texture* textures)
     DENGINE_DEBUG_ENTER;
 
     for(size_t i = 0; i < count; i++)
-        glGenTextures(1, &textures[i].texture_id); DENGINE_CHECKGL;
+    {glGenTextures(1, &textures[i].texture_id); DENGINE_CHECKGL;}
 }
 
 void dengine_texture_bind(uint32_t target, Texture* texture)
@@ -213,10 +213,10 @@ void dengine_texture_set_params(uint32_t target, Texture* texture)
     DENGINE_DEBUG_ENTER;
 
     if(texture->filter_mag)
-        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, texture->filter_mag); DENGINE_CHECKGL;
+    {glTexParameteri(target, GL_TEXTURE_MAG_FILTER, texture->filter_mag); DENGINE_CHECKGL;}
 
     if(texture->filter_min)
-        glTexParameteri(target,GL_TEXTURE_MIN_FILTER,texture->filter_min); DENGINE_CHECKGL;
+    {glTexParameteri(target,GL_TEXTURE_MIN_FILTER,texture->filter_min); DENGINE_CHECKGL;}
 
     if(texture->wrap)
     {
@@ -225,7 +225,7 @@ void dengine_texture_set_params(uint32_t target, Texture* texture)
 
         //GL_TEXTURE_WRAP_R_OES for GLES2?
         if(target == GL_TEXTURE_CUBE_MAP)
-            glTexParameteri(target, GL_TEXTURE_WRAP_R, texture->wrap); DENGINE_CHECKGL;
+        {glTexParameteri(target, GL_TEXTURE_WRAP_R, texture->wrap); DENGINE_CHECKGL;}
     }
 }
 
@@ -242,7 +242,7 @@ void dengine_texture_destroy(size_t count, Texture* textures)
     DENGINE_DEBUG_ENTER;
 
     for(size_t i = 0; i < count; i++)
-        glDeleteTextures(1, &textures[i].texture_id); DENGINE_CHECKGL;
+    {glDeleteTextures(1, &textures[i].texture_id); DENGINE_CHECKGL;}
 }
 
 Texture* dengine_texture_new_white(const int width, const int height)

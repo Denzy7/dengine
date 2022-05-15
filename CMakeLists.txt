@@ -131,6 +131,9 @@ configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
 set(dengine dengine-utils dengine-core dengine-gui dengine-scene dengine-script)
 
+if (NOT MSVC)
+    add_compile_options(-Wall)
+endif()
 add_subdirectory(lib/dengine-utils "dengine-utils-build")
 add_subdirectory(lib/dengine-core "dengine-core-build")
 add_subdirectory(lib/dengine-gui "dengine-gui-build")

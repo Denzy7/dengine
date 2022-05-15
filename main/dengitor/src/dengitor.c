@@ -511,7 +511,7 @@ void dengitor_glarea_evbox_onkeypress(GtkEventBox* evbox, GdkEventKey* key)
     vec3 front;
     denginescene_ecs_get_front(dengitor->scene_camera, front);
 
-    if(dengitor->glarea_evbox_rot && key->keyval == GDK_KEY_w || key->keyval == GDK_KEY_W)
+    if(dengitor->glarea_evbox_rot && (key->keyval == GDK_KEY_w || key->keyval == GDK_KEY_W))
     {
         for(int i = 0; i < 3; i++)
         {
