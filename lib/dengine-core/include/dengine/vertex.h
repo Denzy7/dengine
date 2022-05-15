@@ -25,7 +25,7 @@
  */
 typedef struct VertexAttribute
 {
-    uint32_t index; /*!< Index of attrib. Automatically got from shader */
+    int32_t index; /*!< Index of attrib. Automatically got from shader */
     int size; /*!< Size/components in attribute */
     uint32_t type; /*!< Type of attribute. Typically FLOAT */
     uint32_t normalize; /*!< Normalize? Typically false */
