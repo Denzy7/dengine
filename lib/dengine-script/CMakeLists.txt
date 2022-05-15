@@ -51,6 +51,20 @@ if(NOT WIN32)
     target_link_libraries(dengine-script dl)
 endif()
 
+
+
+if(DENGINE_HAS_BULLET)
+    add_library(nsl-bulletphysics SHARED
+        src/nsl-bulletphysics/basic.cpp
+    )
+    set_target_properties(nsl-bulletphysics PROPERTIES
+        PREFIX ""
+        SUFFIX ".nsl"
+        LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests-build/bin"
+    )
+    target_link_libraries(nsl-bulletphysics ${dengine} ${bullet_LIBRARIES})
+endif()
+
 add_library(nsl-test SHARED
     src/nsl-test/printmouse.c
     src/nsl-test/constantrotation.c
@@ -58,11 +72,13 @@ add_library(nsl-test SHARED
     src/nsl-test/pingpongscale.c
     src/nsl-test/pingpongposition.c
 )
-set_target_properties(nsl-test PROPERTIES PREFIX "")
-set_target_properties(nsl-test PROPERTIES SUFFIX ".nsl")
-target_link_libraries(nsl-test ${dengine})
+
 set_target_properties(nsl-test PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests-build/bin")
+    PREFIX ""
+    SUFFIX ".nsl"
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests-build/bin"
+)
+target_link_libraries(nsl-test ${dengine})
 
 install(TARGETS dengine-script DESTINATION lib)
 install(FILES ${dengine-script-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-script)

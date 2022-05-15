@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(dengine VERSION 0.5.2 LANGUAGES C)
+project(dengine VERSION 0.5.2)
 
 #this is just a slight nuance with cmake rather than renaming the project
 set(DENGINE_VERSION "${dengine_VERSION}")
@@ -28,7 +28,7 @@ option(DENGINE_BUILD_TESTS "Build the test suite and examples" ON)
 option(DENGINE_MT "Build for multithreading using mutexes" ON)
 
 option(DENGINE_SCRIPTING_PYTHON "Enable support for Python scripts" ON)
-option(DENGINE_USE_SYSTEM_PYTHON "Use system python or build custom. Might cause some serious path issues if using system Python" OFF)
+option(DENGINE_USE_SYSTEM_PYTHON "Use system python or build custom. Might cause some serious path issues if using system Python" ON)
 find_library(DENGINE_HAS_LIBZ z)
 
 if(NOT ANDROID)
@@ -70,6 +70,13 @@ if(NOT ANDROID)
                 #most if not all distros have python3
                 message(WARNING ">>> Could not find python3. Python scripting will not work! Consider installing it")
             endif()
+        endif()
+
+        pkg_check_modules(bullet bullet)
+        if(bullet_LIBRARIES)
+            include_directories(${bullet_INCLUDE_DIRS})
+            link_directories(${bullet_LIBRARY_DIRS})
+            set(DENGINE_HAS_BULLET 1)
         endif()
     else()
         message(WARNING ">>> Could not find pkg-config. Will compile From sources")
