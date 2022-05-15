@@ -89,7 +89,10 @@ int main(int argc, char *argv[])
 
         dengine_update();
     }
+    denginescene_destroy(scene);
     free(prtbf);
+    free(stdshdr);
+    dengine_material_destroy(&cube_mat);
     denginescript_nsl_free(nsl);
 
     dengine_terminate();
