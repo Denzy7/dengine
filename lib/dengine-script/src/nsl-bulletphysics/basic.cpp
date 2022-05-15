@@ -4,6 +4,10 @@
 #include <dengine/dengine.h>
 
 btDynamicsWorld* world = NULL;
+btDefaultCollisionConfiguration* config = NULL;
+btCollisionDispatcher* dispatcher = NULL;
+btBroadphaseInterface* broadphase = NULL;
+btSequentialImpulseConstraintSolver* solver = NULL;
 btAlignedObjectArray<btCollisionShape*> shapes;
 
 void addBox(const btVector3& box_size, const btVector3& origin, const btVector3& rotation, const float& mass)
@@ -41,12 +45,12 @@ extern "C" int basic_start(Entity* entity)
 {
     if(!world)
     {
-        btDefaultCollisionConfiguration* config = new btDefaultCollisionConfiguration();
-        btCollisionDispatcher* dispather = new btCollisionDispatcher(config);
-        btBroadphaseInterface* broadphase = new btDbvtBroadphase();
-        btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver();
+        config = new btDefaultCollisionConfiguration();
+        dispatcher = new btCollisionDispatcher(config);
+        broadphase = new btDbvtBroadphase();
+        solver = new btSequentialImpulseConstraintSolver();
 
-        world = new btDiscreteDynamicsWorld(dispather, broadphase, solver, config);
+        world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, config);
         world->setGravity(btVector3(0, -10, 0));
     }
 
@@ -64,11 +68,54 @@ extern "C" int basic_start(Entity* entity)
 
 extern "C" int basic_update(Entity* entity)
 {
-    world->stepSimulation(0.2f);
+    world->stepSimulation(1.f / 60.f, 10);
     btCollisionObject* obj = world->getCollisionObjectArray()[1];
     float model_mtx[16];
     obj->getWorldTransform().getOpenGLMatrix(model_mtx);
     // physics always in world space
     memcpy(&entity->transform.world_model[0][0], model_mtx, sizeof(model_mtx));
+    return 1;
+}
+
+extern "C" int basic_terminate(void* args)
+{
+    //remove the rigidbodies from the dynamics world and delete them
+    for (int i = world->getNumCollisionObjects() - 1; i >= 0; i--)
+    {
+        btCollisionObject* obj = world->getCollisionObjectArray()[i];
+        btRigidBody* body = btRigidBody::upcast(obj);
+        if (body && body->getMotionState())
+        {
+            delete body->getMotionState();
+        }
+        world->removeCollisionObject(obj);
+        delete obj;
+    }
+
+    //delete collision shapes
+    for (int j = 0; j < shapes.size(); j++)
+    {
+        btCollisionShape* shape = shapes[j];
+        shapes[j] = 0;
+        delete shape;
+    }
+
+    //delete dynamics world
+    delete world;
+
+    //delete solver
+    delete solver;
+
+    //delete broadphase
+    delete broadphase;
+
+    //delete dispatcher
+    delete dispatcher;
+
+    delete config;
+
+    //next line is optional: it will be cleared by the destructor when the array goes out of scope
+    shapes.clear();
+
     return 1;
 }
