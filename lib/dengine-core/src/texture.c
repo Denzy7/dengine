@@ -177,29 +177,34 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture)
         return 0;
     }else
     {
-        FILE* ftex_cache_write = fopen(texcacheprtbf, "wb");
-        if(ftex_cache_write && dengineutils_filesys_isinit() && texturecache)
+
+        if(dengineutils_filesys_isinit() && texturecache)
         {
-            //write blksz
-            fwrite(&cache_blk_sz, sizeof(cache_blk_sz), 1, ftex_cache_write);
+            FILE* ftex_cache_write = fopen(texcacheprtbf, "wb");
+            if(ftex_cache_write)
+            {
+                //write blksz
+                fwrite(&cache_blk_sz, sizeof(cache_blk_sz), 1, ftex_cache_write);
 
-            //write w, h, and channels
-            fwrite(&texture->width, sizeof(texture->width), 1, ftex_cache_write);
-            fwrite(&texture->height, sizeof(texture->height), 1, ftex_cache_write);
-            fwrite(&texture->channels, sizeof(texture->channels), 1, ftex_cache_write);
+                //write w, h, and channels
+                fwrite(&texture->width, sizeof(texture->width), 1, ftex_cache_write);
+                fwrite(&texture->height, sizeof(texture->height), 1, ftex_cache_write);
+                fwrite(&texture->channels, sizeof(texture->channels), 1, ftex_cache_write);
 
-            //write data
-            fwrite(texture->data,
-                    cache_blk_sz * texture->width * texture->height * texture->channels,
-                    1,
-                    ftex_cache_write);
+                //write data
+                fwrite(texture->data,
+                        cache_blk_sz * texture->width * texture->height * texture->channels,
+                        1,
+                        ftex_cache_write);
 
-            dengineutils_logging_log("TODO::save tex bin %d-byte %dx%d %dch : %s",
-                                      (int)cache_blk_sz,
-                                      texture->width, texture->height,
-                                      texture->channels,
-                                      texfileondisk);
-            fclose(ftex_cache_write);
+                dengineutils_logging_log("TODO::save tex bin %d-byte %dx%d %dch : %s",
+                                          (int)cache_blk_sz,
+                                          texture->width, texture->height,
+                                          texture->channels,
+                                          texfileondisk);
+                fclose(ftex_cache_write);
+            }
+
         }
 
         if(texture->auto_dataonload)
