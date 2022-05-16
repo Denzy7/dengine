@@ -41,6 +41,24 @@ typedef struct
     int last_cam;
 }CameraComponent;
 
+typedef enum
+{
+    DENGINE_ECS_PHYSICS_COLSHAPE_BOX,
+}ECSPhysicsColShape;
+
+typedef struct
+{
+    vec3 extends;
+}ECSPhysicsColShapeConfigBox;
+
+typedef struct
+{
+    ECSPhysicsColShape shape;
+    void* colshapeconfig;
+    float mass;
+    int bodyid; /* assuming you don't create up to 2147483647 rigidbodies (strangely enough, bullet uses signed int as internal counter for world? */
+}PhysicsComponent;
+
 typedef struct _Entity
 {
     uint32_t entity_id;
@@ -61,6 +79,8 @@ typedef struct _Entity
     MeshComponent* mesh_component;
     LightComponent* light_component;
     CameraComponent* camera_component;
+    /* Some simple data to pass to a physics engine i.e. Bullet (nsl) */
+    PhysicsComponent* physics_component;
 }Entity;
 
 typedef struct
@@ -113,6 +133,8 @@ MeshComponent* denginescene_ecs_new_meshcomponent(const Primitive* mesh, const M
 CameraComponent* denginescene_ecs_new_cameracomponent(const Camera* camera);
 
 LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light);
+
+PhysicsComponent* denginescene_ecs_new_physicscomponent(ECSPhysicsColShape type, const void* colshapeconfig, const float mass);
 
 void denginescene_ecs_add_script(Entity* entity, const Script* script);
 

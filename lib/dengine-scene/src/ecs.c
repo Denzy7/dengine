@@ -36,6 +36,12 @@ void _denginescene_ecs_destroy_entity_components(Entity* root)
         free(root->light_component->light);
         free(root->light_component);
     }
+    if(root->physics_component)
+    {
+        if(root->physics_component->colshapeconfig)
+            free(root->physics_component->colshapeconfig);
+        free(root->physics_component);
+    }
 
     vtor_free(&root->scripts);
 }
@@ -178,6 +184,24 @@ LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light)
     return comp;
 }
 
+PhysicsComponent* denginescene_ecs_new_physicscomponent(ECSPhysicsColShape type, const void* colshapeconfig, const float mass)
+{
+    PhysicsComponent* comp = calloc(1, sizeof(PhysicsComponent));
+    if(!comp)
+        return NULL;
+
+    if(colshapeconfig)
+    {
+        if(type == DENGINE_ECS_PHYSICS_COLSHAPE_BOX)
+        {
+            comp->colshapeconfig = malloc(sizeof (ECSPhysicsColShapeConfigBox));
+            memcpy(comp->colshapeconfig, colshapeconfig, sizeof(ECSPhysicsColShapeConfigBox));
+        }
+    }
+    comp->mass = mass;
+    return comp;
+}
+
 void denginescene_ecs_add_script(Entity* entity, const Script* script)
 {
     vtor_pushback(&entity->scripts, script);
@@ -230,3 +254,4 @@ void denginescene_ecs_get_up(Entity* entity, vec3 up)
     denginescene_ecs_get_front(entity, front);
     glm_vec3_cross(right, front, up);
 }
+
