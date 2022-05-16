@@ -377,7 +377,7 @@ void denginescript_nsl_free(NSL nsl)
 #endif
 }
 
-nslfunc denginescript_nsl_get_func(const char* name, const NSL nsl)
+nslfunc denginescript_nsl_get_func(const NSL nsl, const char* name)
 {
 #ifdef DENGINE_LINUX
     return dlsym(nsl, name);
