@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     cam_ent->transform.rotation[1] = 225.0f;
     denginescene_add_entity(scene, cam_ent);
 
-    Shader* stdshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_DEBUG_NORMALS);
+    Shader* stdshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_STANDARD);
 
     Primitive cube, plane;
     dengine_primitive_gen_cube(&cube, stdshdr);
@@ -79,6 +79,18 @@ int main(int argc, char *argv[])
     denginescene_add_entity(scene, cube_ent);
     denginescene_ecs_add_script(cube_ent, &basic);
 
+    PointLight pl;
+    memset(&pl, 0, sizeof(PointLight));
+    dengine_lighting_light_setup(DENGINE_LIGHT_POINT, &pl);
+    Entity* pl_ent = denginescene_ecs_new_entity();
+    LightComponent* dl_ent_lightcomp = denginescene_ecs_new_lightcomponent(
+                DENGINE_LIGHT_POINT, &pl);
+    pl_ent->light_component = dl_ent_lightcomp;
+    pl_ent->transform.position[0] = 0.0f;
+    pl_ent->transform.position[1] = 5.0f;
+    pl_ent->transform.position[2] = 0.0f;
+    denginescene_add_entity(scene, pl_ent);
+
     denginescene_ecs_do_script_scene(scene, DENGINE_SCRIPT_FUNC_START);
 
     while (dengine_window_isrunning()) {
@@ -98,12 +110,13 @@ int main(int argc, char *argv[])
             "Z to apply -ve upward torque",
             "X to apply +ve upward torque",
             "Q to apply +ve forward torque",
-            "E to apply -ve forward torque"
+            "E to apply -ve forward torque",
+            "R to reset position",
         };
 
         for(int i = 0; i < DENGINE_ARY_SZ(staticmessageslist); i++)
         {
-            denginegui_text(0, h - fontsz - i * fontsz, staticmessageslist[i], NULL);
+            denginegui_text(fontsz / 4, h - fontsz - i * fontsz, staticmessageslist[i], NULL);
         }
 
         denginegui_text(0, 0, (char*)glGetString(GL_VERSION), NULL);

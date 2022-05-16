@@ -106,6 +106,22 @@ extern "C" int basic_update(Entity* entity)
     if(dengine_input_get_key('Q'))
         applyTorque(body, btVector3(0, 0, -force));
 
+    if(dengine_input_get_key_once('R'))
+    {
+        btTransform transform;
+        transform.setIdentity();
+
+        transform.setOrigin(btVector3(0, 5, 0));
+        transform.setRotation(btQuaternion(0, 0, 0));
+
+        body->setWorldTransform(transform);
+        body->getMotionState()->setWorldTransform(transform);
+
+        body->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
+        body->setAngularVelocity(btVector3(0.0f, 0.0f, 0.0f));
+        body->clearForces();
+    }
+
     world->stepSimulation(1.f / 60.f, 10);
     float model_mtx[16];
     obj->getWorldTransform().getOpenGLMatrix(model_mtx);
