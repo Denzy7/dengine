@@ -92,11 +92,16 @@ extern "C" int basic_world_start(void* args)
 extern "C" int basic_update(Entity* entity)
 {
     btCollisionObject* obj = world->getCollisionObjectArray()[entity->physics_component->bodyid];
-    world->stepSimulation(1.f/60.f, 1);
     float model_mtx[16];
     obj->getWorldTransform().getOpenGLMatrix(model_mtx);
     // physics always in world space
     memcpy(&entity->transform.world_model[0][0], model_mtx, sizeof(model_mtx));
+    return 1;
+}
+
+extern "C" int basic_world_update(void* args)
+{
+    world->stepSimulation(1./60., 10);
     return 1;
 }
 
