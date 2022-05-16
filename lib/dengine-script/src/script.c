@@ -377,7 +377,7 @@ void denginescript_nsl_free(NSL nsl)
 #endif
 }
 
-void* _denginescript_nsl_getsym(const NSL nsl, const char* name)
+nslfunc denginescript_nsl_get_func(const char* name, const NSL nsl)
 {
 #ifdef DENGINE_LINUX
     return dlsym(nsl, name);
@@ -391,11 +391,11 @@ int denginescript_nsl_get_script(const char* name, Script* script, const NSL nsl
     memset(script, 0, sizeof(Script));
     char buf[256];
     snprintf(buf, sizeof(buf), "%s_start",name);
-    script->nsl_start = _denginescript_nsl_getsym(nsl, buf);
+    script->nsl_start = denginescript_nsl_get_func(nsl, buf);
     snprintf(buf, sizeof(buf), "%s_update",name);
-    script->nsl_update = _denginescript_nsl_getsym(nsl, buf);
+    script->nsl_update = denginescript_nsl_get_func(nsl, buf);
     snprintf(buf, sizeof(buf), "%s_terminate",name);
-    script->nsl_terminate = _denginescript_nsl_getsym(nsl, buf);
+    script->nsl_terminate = denginescript_nsl_get_func(nsl, buf);
     if(script->nsl_start || script->nsl_update)
     {
         script->type = DENGINE_SCRIPT_TYPE_NSL;

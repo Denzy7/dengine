@@ -72,6 +72,8 @@ void denginescript_nsl_free(NSL nsl);
 int denginescript_nsl_get_script(const char* name, Script* script, const NSL nsl);
 
 int denginescript_nsl_call(const Script* script, ScriptFunc func, void* args);
+
+nslfunc denginescript_nsl_get_func(const char* name, const NSL nsl);
 #ifdef __cplusplus
 }
 #endif
