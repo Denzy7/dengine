@@ -77,25 +77,22 @@ extern "C" int basic_create_rb(Entity* entity)
     }
 }
 
-extern "C" int basic_start(Entity* entity)
+extern "C" int basic_world_start(void* args)
 {
-    if(!world)
-    {
-        config = new btDefaultCollisionConfiguration();
-        dispatcher = new btCollisionDispatcher(config);
-        broadphase = new btDbvtBroadphase();
-        solver = new btSequentialImpulseConstraintSolver();
+    config = new btDefaultCollisionConfiguration();
+    dispatcher = new btCollisionDispatcher(config);
+    broadphase = new btDbvtBroadphase();
+    solver = new btSequentialImpulseConstraintSolver();
 
-        world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, config);
-        world->setGravity(btVector3(0, -10, 0));
-    }
+    world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, config);
+    world->setGravity(btVector3(0, -10, 0));
     return 1;
 }
 
 extern "C" int basic_update(Entity* entity)
 {
     btCollisionObject* obj = world->getCollisionObjectArray()[entity->physics_component->bodyid];
-    world->stepSimulation(1.f / 60.f, 10);
+    world->stepSimulation(1.f/60.f, 1);
     float model_mtx[16];
     obj->getWorldTransform().getOpenGLMatrix(model_mtx);
     // physics always in world space
@@ -103,7 +100,7 @@ extern "C" int basic_update(Entity* entity)
     return 1;
 }
 
-extern "C" int basic_terminate(void* args)
+extern "C" int basic_world_terminate(void* args)
 {
     //remove the rigidbodies from the dynamics world and delete them
     for (int i = world->getNumCollisionObjects() - 1; i >= 0; i--)
@@ -149,7 +146,7 @@ extern "C" int forces_update(Entity* entity)
     btCollisionObject* obj = world->getCollisionObjectArray()[entity->physics_component->bodyid];
     btRigidBody* body = btRigidBody::upcast(obj);
 
-    static const float force = 15.0f;
+    static const float force = 150.0f;
     if(dengine_input_get_key('F'))
         applyForce(body, btVector3(0, force, 0));
     if(dengine_input_get_key('G'))
