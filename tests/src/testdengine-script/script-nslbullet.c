@@ -22,8 +22,14 @@ int main(int argc, char *argv[])
     Script basic, basic_world;
     denginescript_nsl_get_script("basic", &basic, nsl);
     denginescript_nsl_get_script("basic_world", &basic_world, nsl);
+
+    ECSPhysicsWorld world;
+    world.substeps = 10;
+    world.timestep = 1.f/40.f;
+    world.timestep_fixed = 1.f/ 60.f;
+
     //manually call start to create world
-    denginescript_call(&basic_world, DENGINE_SCRIPT_FUNC_START, NULL);
+    denginescript_call(&basic_world, DENGINE_SCRIPT_FUNC_START, &world);
 
     Script forces;
     denginescript_nsl_get_script("forces", &forces, nsl);
@@ -179,7 +185,7 @@ int main(int argc, char *argv[])
 
     while (dengine_window_isrunning()) {
         //stepSimulation
-        denginescript_call(&basic_world, DENGINE_SCRIPT_FUNC_UPDATE, NULL);
+        denginescript_call(&basic_world, DENGINE_SCRIPT_FUNC_UPDATE, &world);
 
         denginescene_update(scene);
 

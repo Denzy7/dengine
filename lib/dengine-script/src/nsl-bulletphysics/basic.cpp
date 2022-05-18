@@ -77,7 +77,7 @@ extern "C" int basic_create_rb(Entity* entity)
     }
 }
 
-extern "C" int basic_world_start(void* args)
+extern "C" int basic_world_start(ECSPhysicsWorld* wrld)
 {
     config = new btDefaultCollisionConfiguration();
     dispatcher = new btCollisionDispatcher(config);
@@ -99,9 +99,9 @@ extern "C" int basic_update(Entity* entity)
     return 1;
 }
 
-extern "C" int basic_world_update(void* args)
+extern "C" int basic_world_update(ECSPhysicsWorld* wld)
 {
-    world->stepSimulation(1./60., 10);
+    world->stepSimulation(wld->timestep, wld->substeps, wld->timestep_fixed);
     return 1;
 }
 
