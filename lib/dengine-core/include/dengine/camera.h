@@ -52,7 +52,7 @@ void dengine_camera_setup(Camera* camera);
  * \param aspect Aspect ratio of view frustrum. Typically window width / window height
  * \param camera Camera to apply prespective projection
  */
-void dengine_camera_project_perspective(float aspect, Camera* camera);
+void dengine_camera_project_perspective(const float aspect, Camera* camera);
 
 /*!
  * \brief Generate a view matrix looking at a specific target
@@ -70,7 +70,7 @@ void dengine_camera_lookat(float* target, Camera* camera);
  * \param shader Shader to apply to
  * \param camera Camera to use
  */
-void dengine_camera_apply(Shader* shader, Camera* camera);
+void dengine_camera_apply(const Shader* shader, const Camera* camera);
 
 /*!
  * \brief Set render mode. If not set, use the default framebuffer
@@ -84,7 +84,7 @@ void dengine_camera_set_rendermode(CameraRenderMode mode, Camera* camera);
  * \brief Use a camera. Bind and clear its framebuffer if set
  * \param camera Camera to use
  */
-void dengine_camera_use(Camera* camera);
+void dengine_camera_use(const Camera* camera);
 
 /*!
  * \brief Resize the camera framebuffer render output

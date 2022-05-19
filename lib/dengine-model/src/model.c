@@ -11,9 +11,9 @@
 
 #include <cglm/cglm.h> //normalize, sub
 
-Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* meshes, Shader* shader);
+Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* meshes, const Shader* shader);
 
-Primitive* denginemodel_load_file(DengineModelFormat format, const char* file, size_t* meshes , Shader* shader)
+Primitive* denginemodel_load_file(DengineModelFormat format, const char* file, size_t* meshes , const Shader* shader)
 {
     FILE* f_model = fopen(file, "rb");
     if(!f_model)
@@ -43,7 +43,7 @@ Primitive* denginemodel_load_file(DengineModelFormat format, const char* file, s
     return load;
 }
 
-Primitive* denginemodel_load_mem(DengineModelFormat format, const void* mem, const size_t sz, size_t* meshes, Shader* shader)
+Primitive* denginemodel_load_mem(DengineModelFormat format, const void* mem, const size_t sz, size_t* meshes, const Shader* shader)
 {
     if(format == DENGINE_MODEL_FORMAT_OBJ)
         return _denginemodel_load_obj(mem, sz, meshes, shader);
@@ -51,7 +51,7 @@ Primitive* denginemodel_load_mem(DengineModelFormat format, const void* mem, con
         return NULL;
 }
 
-Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* meshes, Shader* shader)
+Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* meshes, const Shader* shader)
 {
     const char* filestr = mem;
 

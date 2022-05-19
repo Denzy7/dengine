@@ -19,7 +19,7 @@ void dengine_vao_gen(size_t count, VAO* vaos)
     }
 }
 
-void dengine_vao_bind(VAO* vao)
+void dengine_vao_bind(const VAO* vao)
 {
     uint32_t _vao = 0;
     if(vao)

@@ -41,13 +41,13 @@ extern "C" {
  * \brief Define the vertex attribute
  * \param attribute VertexAttribute to define
  */
-void dengine_vertex_attribute_setup(VertexAttribute* attribute);
+void dengine_vertex_attribute_setup(const VertexAttribute* attribute);
 
 /*!
  * \brief Enable a vertex attribute
  * \param attribute VertexAttribute to enable
  */
-void dengine_vertex_attribute_enable(VertexAttribute* attribute);
+void dengine_vertex_attribute_enable(const VertexAttribute* attribute);
 
 /*!
  * \brief Get the index of an attribute from a shader
@@ -55,7 +55,7 @@ void dengine_vertex_attribute_enable(VertexAttribute* attribute);
  * \param attribute Attribute to search
  * \param attribute_name Attribute name in shader
  */
-void dengine_vertex_attribute_indexfromshader(Shader* shader, VertexAttribute* attribute, const char* attribute_name);
+void dengine_vertex_attribute_indexfromshader(const Shader* shader, VertexAttribute* attribute, const char* attribute_name);
 
 #ifdef __cplusplus
 }

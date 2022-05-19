@@ -93,15 +93,15 @@ int dengine_lighting_init(const uint32_t n_PL, const uint32_t n_SL);
 void dengine_lighting_terminate();
 
 
-void dengine_lighting_light_setup(LightType type, Light light);
+void dengine_lighting_light_setup(LightType type, const Light light);
 
-void dengine_lighting_light_apply(LightType type, Light light, Shader* shader);
+void dengine_lighting_light_apply(LightType type, const Light light, const Shader* shader);
 
-void dengine_lighting_light_shadow_draw(LightType type, Light light, Shader* shader, Primitive* primitive, float* modelmtx);
+void dengine_lighting_light_shadow_draw(LightType type, Light light, const Shader* shader, const Primitive* primitive, const float* modelmtx);
 
 //Shadow op
 
-void dengine_lighting_shadowop_clear(ShadowOp* shadowop);
+void dengine_lighting_shadowop_clear(const ShadowOp* shadowop);
 
 void dengine_lighting_shadowop_resize(uint32_t shadowmap_target, ShadowOp* shadowop, int size);
 
@@ -109,25 +109,25 @@ void dengine_lighting_shadowop_resize(uint32_t shadowmap_target, ShadowOp* shado
 
 void dengine_lighting_setup_dirlight(DirLight* dirLight);
 
-void dengine_lighting_apply_dirlight(DirLight* dirLight, Shader* shader);
+void dengine_lighting_apply_dirlight(const DirLight* dirLight, const Shader* shader);
 
-void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, Shader* shader, Primitive* primitive, float* modelmtx);
+void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, const Shader* shader, const Primitive* primitive, const float* modelmtx);
 
 //PointLight
 
 void dengine_lighting_setup_pointlight(PointLight* pointLight);
 
-void dengine_lighting_apply_pointlight(PointLight* pointLight, Shader* shader);
+void dengine_lighting_apply_pointlight(const PointLight* pointLight, const Shader* shader);
 
-void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, Shader* shader, Primitive* primitive, float* modelmtx);
+void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, const Shader* shader, const Primitive* primitive, const float* modelmtx);
 
 //Spotlight
 
 void dengine_lighting_setup_spotlight(SpotLight* spotLight);
 
-void dengine_lighting_apply_spotlight(SpotLight* spotLight, Shader* shader);
+void dengine_lighting_apply_spotlight(const SpotLight* spotLight, const Shader* shader);
 
-void dengine_lighting_shadow_spotlight_draw(SpotLight* spotLight, Shader* shader, Primitive* primitive, float* modelmtx);
+void dengine_lighting_shadow_spotlight_draw(SpotLight* spotLight, const Shader* shader, const Primitive* primitive, const float* modelmtx);
 
 
 Lighting* dengine_lighting_get();

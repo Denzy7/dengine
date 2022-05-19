@@ -150,7 +150,7 @@ Lighting* dengine_lighting_get()
     return &lighting;
 }
 
-void dengine_lighting_shadowop_clear(ShadowOp* shadowop)
+void dengine_lighting_shadowop_clear(const ShadowOp* shadowop)
 {
     if (shadowop->shadow_map.depth.texture_id == 0)
         return;
@@ -218,7 +218,7 @@ void dengine_lighting_setup_dirlight(DirLight* dirLight)
     dirLight->light.strength = 0.55;
 }
 
-void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, Shader* shader, Primitive* primitive, float* modelmtx)
+void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, const Shader* shader, const Primitive* primitive, const float* modelmtx)
 {
     //Guard for no shadow
     if(!dirLight->shadow.enable || !dirLight->shadow.shadow_map.depth.texture_id) {
@@ -264,7 +264,7 @@ void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, Shader* shader, P
     memcpy(dirLight->shadow_projview, projview[0], sizeof(mat4));
 }
 
-void dengine_lighting_apply_dirlight(DirLight* dirLight, Shader* shader)
+void dengine_lighting_apply_dirlight(const DirLight* dirLight, const Shader* shader)
 {
     static const char* possible_pos[]=
     {
@@ -309,7 +309,7 @@ void dengine_lighting_setup_pointlight(PointLight* pointLight)
     pointLight->shadow.near_shadow = 0.1f;
 }
 
-void dengine_lighting_apply_pointlight(PointLight* pointLight, Shader* shader)
+void dengine_lighting_apply_pointlight(const PointLight* pointLight, const Shader* shader)
 {
     size_t bufsz = sizeof (prtbuf);
     for (uint32_t i = 0; i < 1; i++) {
@@ -356,7 +356,7 @@ void dengine_lighting_apply_pointlight(PointLight* pointLight, Shader* shader)
     dengine_shader_set_float(shader, "shadowfar", pointLight->shadow.far_shadow);
 }
 
-void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, Shader* shader, Primitive* primitive, float* modelmtx)
+void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, const Shader* shader, const Primitive* primitive, const float* modelmtx)
 {
     //Guard for no shadow
     if (!pointLight->shadow.shadow_map.depth.texture_id|| !pointLight->shadow.enable)
@@ -428,7 +428,7 @@ void dengine_lighting_setup_spotlight(SpotLight* spotLight)
     spotLight->pointLight.shadow.near_shadow = 0.1f;
 }
 
-void dengine_lighting_apply_spotlight(SpotLight* spotLight, Shader* shader)
+void dengine_lighting_apply_spotlight(const SpotLight* spotLight, const Shader* shader)
 {
     float oCut_rad = glm_rad(45.0f - glm_clamp(spotLight->outerCutOff, 0.0f, 45.0f));
     float iCut_rad = glm_rad(45.0f - glm_clamp(spotLight->innerCutOff, 0.0f, spotLight->outerCutOff));
@@ -492,7 +492,7 @@ void dengine_lighting_apply_spotlight(SpotLight* spotLight, Shader* shader)
     dengine_shader_set_float(shader, "iCut", iCut_rad);
 }
 
-void dengine_lighting_shadow_spotlight_draw(SpotLight* spotLight, Shader* shader, Primitive* primitive, float* modelmtx)
+void dengine_lighting_shadow_spotlight_draw(SpotLight* spotLight, const Shader* shader, const Primitive* primitive, const float* modelmtx)
 {
     dengine_lighting_shadow_pointlight_draw(&spotLight->pointLight, shader, primitive, modelmtx);
 }
@@ -506,7 +506,7 @@ void dengine_lighting_terminate()
         free(lighting.sLights);
 }
 
-void dengine_lighting_light_setup(LightType type, Light light)
+void dengine_lighting_light_setup(LightType type, const Light light)
 {
     if(type == DENGINE_LIGHT_DIR)
         dengine_lighting_setup_dirlight(light);
@@ -516,7 +516,7 @@ void dengine_lighting_light_setup(LightType type, Light light)
         dengine_lighting_setup_spotlight(light);
 }
 
-void dengine_lighting_light_apply(LightType type, Light light, Shader* shader)
+void dengine_lighting_light_apply(LightType type, const Light light, const Shader* shader)
 {
     if(type == DENGINE_LIGHT_DIR)
         dengine_lighting_apply_dirlight(light, shader);
@@ -526,7 +526,7 @@ void dengine_lighting_light_apply(LightType type, Light light, Shader* shader)
         dengine_lighting_apply_spotlight(light, shader);
 }
 
-void dengine_lighting_light_shadow_draw(LightType type, Light light, Shader* shader, Primitive* primitive, float* modelmtx)
+void dengine_lighting_light_shadow_draw(LightType type, Light light, const Shader* shader, const Primitive* primitive, const float* modelmtx)
 {
     if(type == DENGINE_LIGHT_DIR)
         dengine_lighting_shadow_dirlight_draw(light, shader, primitive, modelmtx);

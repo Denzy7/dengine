@@ -4,7 +4,7 @@
 #include "dengine/entrygl.h"
 #include "dengine/buffer.h" //bind
 
-void dengine_draw_primitive(Primitive* primitive, Shader* shader)
+void dengine_draw_primitive(const Primitive* primitive, const Shader* shader)
 {
     Buffer entry_vbo, entry_ibo;
     VAO entry_vao;

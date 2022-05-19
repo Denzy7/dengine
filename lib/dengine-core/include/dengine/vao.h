@@ -41,7 +41,7 @@ void dengine_vao_destroy(size_t count, VAO* vaos);
  * \brief Bind a VAO
  * \param vao VAO to bind
  */
-void dengine_vao_bind(VAO* vao);
+void dengine_vao_bind(const VAO* vao);
 
 #ifdef __cplusplus
 }

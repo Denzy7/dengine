@@ -16,7 +16,7 @@ static int texturecache = 0;
 
 void _dengine_texture_autoload(Texture* texture);
 
-void dengine_texture_gen(size_t count, Texture* textures)
+void dengine_texture_gen(const size_t count, Texture* textures)
 {
     DENGINE_DEBUG_ENTER;
 
@@ -24,7 +24,7 @@ void dengine_texture_gen(size_t count, Texture* textures)
     {glGenTextures(1, &textures[i].texture_id); DENGINE_CHECKGL;}
 }
 
-void dengine_texture_bind(uint32_t target, Texture* texture)
+void dengine_texture_bind(const uint32_t target, const Texture* texture)
 {
     if(texture)
         glBindTexture(target, texture->texture_id);
@@ -33,7 +33,7 @@ void dengine_texture_bind(uint32_t target, Texture* texture)
     DENGINE_CHECKGL;
 }
 
-void dengine_texture_data(uint32_t target, Texture* texture)
+void dengine_texture_data(const uint32_t target, const Texture* texture)
 {
     DENGINE_DEBUG_ENTER;
 
@@ -42,7 +42,7 @@ void dengine_texture_data(uint32_t target, Texture* texture)
     DENGINE_CHECKGL;
 }
 
-int dengine_texture_load_mem(void* mem, size_t size, int flip, Texture* texture)
+int dengine_texture_load_mem(const void* mem, const size_t size, const int flip, Texture* texture)
 {
     DENGINE_DEBUG_ENTER;
 

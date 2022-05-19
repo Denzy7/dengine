@@ -56,21 +56,21 @@ void dengine_material_setup(Material* material);
  * \param shader Shader to use
  * \param material Material to use
  */
-void dengine_material_set_shader_color(Shader* shader, Material* material);
+void dengine_material_set_shader_color(const Shader* shader, Material* material);
 
 /*!
  * \brief Set the 2D shadow shader
  * \param shader Shader to use
  * \param material Material to use
  */
-void dengine_material_set_shader_shadow(Shader* shader, Material* material);
+void dengine_material_set_shader_shadow(const Shader* shader, Material* material);
 
 /*!
  * \brief Set the 3D shadow shader
  * \param shader Shader to use
  * \param material Material to use
  */
-void dengine_material_set_shader_shadow3d(Shader* shader, Material* material);
+void dengine_material_set_shader_shadow3d(const Shader* shader, Material* material);
 
 /*!
  * \brief Set a texture in a material
@@ -78,13 +78,13 @@ void dengine_material_set_shader_shadow3d(Shader* shader, Material* material);
  * \param sampler Sampler to search in the color shader for assigning texture
  * \param material Material to use
  */
-int dengine_material_set_texture(Texture* texture, const char* sampler, Material* material);
+int dengine_material_set_texture(const Texture* texture, const char* sampler, Material* material);
 
 /*!
  * \brief Use a material in a shader
  * \param material Material to use
  */
-void dengine_material_use(Material* material);
+void dengine_material_use(const Material* material);
 
 /*!
  * \brief Free resources being used by a material. Does NOT destroy the used textures.

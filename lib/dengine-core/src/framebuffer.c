@@ -6,7 +6,7 @@
 #include "dengine/loadgl.h"
 
 #include <string.h> //memset
-void dengine_framebuffer_gen(size_t count, Framebuffer* framebuffers)
+void dengine_framebuffer_gen(const size_t count, Framebuffer* framebuffers)
 {
     DENGINE_DEBUG_ENTER;
 
@@ -23,7 +23,7 @@ void dengine_framebuffer_gen(size_t count, Framebuffer* framebuffers)
     }
 }
 
-void dengine_framebuffer_bind(uint32_t target, Framebuffer* framebuffer)
+void dengine_framebuffer_bind(uint32_t target, const Framebuffer* framebuffer)
 {
     DENGINE_DEBUG_ENTER;
 
@@ -133,7 +133,7 @@ void dengine_framebuffer_attachRB(FramebufferAttachmentType attachment, Renderbu
 #endif
 }
 
-void dengine_framebuffer_readback(Texture* dest, Framebuffer* framebuffer)
+void dengine_framebuffer_readback(Texture* dest, const Framebuffer* framebuffer)
 {
     dengine_framebuffer_bind(GL_FRAMEBUFFER, framebuffer);
     glReadPixels(0, 0, dest->width, dest->height, dest->format, dest->type, dest->data);

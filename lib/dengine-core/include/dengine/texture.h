@@ -65,21 +65,21 @@ extern "C" {
  * \param count Number of textures
  * \param textures Pointer to texture array
  */
-void dengine_texture_gen(size_t count, Texture* textures);
+void dengine_texture_gen(const size_t count, Texture* textures);
 
 /*!
  * \brief Bind a texture to target. NULL unbinds the texture bound at target
  * \param target Target to bind
  * \param texture Texture to bind
  */
-void dengine_texture_bind(uint32_t target, Texture* texture);
+void dengine_texture_bind(const uint32_t target, const Texture* texture);
 
 /*!
  * \brief Update the data in the currently bound texture at target
  * \param target Target to use
  * \param texture Texture to use
  */
-void dengine_texture_data(uint32_t target, Texture* texture);
+void dengine_texture_data(const uint32_t target, const Texture* texture);
 
 /*!
  * \brief Attempt to load from memory
@@ -89,7 +89,7 @@ void dengine_texture_data(uint32_t target, Texture* texture);
  * \param texture Texture to use
  * \return 0 on failure
  */
-int dengine_texture_load_mem(void* mem, size_t size, int flip, Texture* texture);
+int dengine_texture_load_mem(const void* mem, const size_t size, const int flip, Texture* texture);
 
 /*!
  * \brief Attempt to load from filesystem

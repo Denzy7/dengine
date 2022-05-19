@@ -132,10 +132,10 @@ void denginegui_terminate()
 #endif
 }
 
-int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_size)
+int denginegui_set_font(const void* ttf, const float fontsize, const uint32_t bitmap_size)
 {
-    void* mem = ttf;
-    int use_sysfont = 0;
+    const void* mem = ttf;
+    void* sysfontmem = NULL;
     if (!ttf) {
         const char* file = _denginegui_get_defaultfont();
         FILE* f = fopen(file, "rb");
@@ -152,11 +152,9 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
             fseek(f, 0, SEEK_END);
             size_t sz = ftell(f);
             rewind(f);
-            void* rdmem = malloc(sz);
-            fread(rdmem, sz, 1, f);
+            sysfontmem = malloc(sz);
+            fread(sysfontmem, sz, 1, f);
             fclose(f);
-            mem = rdmem;
-            use_sysfont = 1;
         }
     }
 
@@ -222,8 +220,8 @@ int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_siz
 
     _fontsz = fontsize;
 
-    if(use_sysfont)
-        free(mem);
+    if(sysfontmem)
+        free(sysfontmem);
 
     free(baked_bmp);
     free(baked_bmp_rgb);

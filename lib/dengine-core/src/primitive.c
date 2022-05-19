@@ -6,7 +6,7 @@
 
 #include <string.h> //memset
 
-void dengine_primitive_setup(Primitive* primitive, Shader* shader)
+void dengine_primitive_setup(Primitive* primitive, const Shader* shader)
 {
     VAO entry_vao;
     Buffer entry_ibo, entry_vbo;
@@ -75,7 +75,7 @@ void dengine_primitive_destroy(Primitive* primitive)
     dengine_buffer_destroy(1, &primitive->index);
 }
 
-void dengine_primitive_gen_quad(Primitive* primitive, Shader* shader)
+void dengine_primitive_gen_quad(Primitive* primitive, const Shader* shader)
 {
     memset(primitive,0,sizeof (Primitive));
 
@@ -121,7 +121,7 @@ void dengine_primitive_gen_quad(Primitive* primitive, Shader* shader)
     dengine_primitive_setup(primitive, shader);
 }
 
-void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader)
+void dengine_primitive_gen_plane(Primitive* primitive, const Shader* shader)
 {
     memset(primitive,0,sizeof (Primitive));
 
@@ -241,7 +241,7 @@ void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader)
         vtor_free(&plane_array);
 }
 
-void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
+void dengine_primitive_gen_cube(Primitive* primitive, const Shader* shader)
 {
     memset(primitive,0,sizeof (Primitive));
 
@@ -469,7 +469,7 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader)
     vtor_free(&cube_vertices);
 }
 
-void dengine_primitive_gen_grid(uint16_t slice, Primitive* primitive, Shader* shader)
+void dengine_primitive_gen_grid(const uint16_t slice, Primitive* primitive, const Shader* shader)
 {
     memset(primitive,0,sizeof (Primitive));
 
@@ -542,7 +542,7 @@ void dengine_primitive_gen_grid(uint16_t slice, Primitive* primitive, Shader* sh
     vtor_free(&grid_indices);
 }
 
-void dengine_primitive_gen_axis(Primitive* primitive, Shader* shader)
+void dengine_primitive_gen_axis(Primitive* primitive, const Shader* shader)
 {
     memset(primitive,0,sizeof (Primitive));
     static float axis_vertices[]=

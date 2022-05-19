@@ -11,7 +11,7 @@ int denginegui_init();
 
 void denginegui_terminate();
 
-int denginegui_set_font(void* ttf, const float fontsize, unsigned int bitmap_size);
+int denginegui_set_font(const void* ttf, const float fontsize, const uint32_t bitmap_size);
 
 float denginegui_get_fontsz();
 

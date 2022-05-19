@@ -45,14 +45,14 @@ extern "C" {
  * \param count Number of framebuffers
  * \param framebuffers Pointer with framebuffers
  */
-void dengine_framebuffer_gen(size_t count, Framebuffer* framebuffers);
+void dengine_framebuffer_gen(const size_t count, Framebuffer* framebuffers);
 
 /*!
  * \brief Bind a framebuffer
  * \param target Can be GL_FRAMEBUFFER, GL_READBUFFER,...
  * \param framebuffer Framebuffer to bind
  */
-void dengine_framebuffer_bind(uint32_t target, Framebuffer* framebuffer);
+void dengine_framebuffer_bind(uint32_t target, const Framebuffer* framebuffer);
 
 /*!
  * \brief Attach a texture to a framebuffer (GL/ES 3.2+)
@@ -93,7 +93,7 @@ void dengine_framebuffer_attachRB(FramebufferAttachmentType attachment, Renderbu
  * \param dest Texture to write to
  * \param framebuffer Framebuffer to read from
  */
-void dengine_framebuffer_readback(Texture* dest, Framebuffer* framebuffer);
+void dengine_framebuffer_readback(Texture* dest, const Framebuffer* framebuffer);
 
 /*!
  * \brief Get the last glClearColor

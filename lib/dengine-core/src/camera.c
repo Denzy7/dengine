@@ -55,7 +55,7 @@ void dengine_camera_setup(Camera* camera)
     camera->clearonuse = 1;
 }
 
-void dengine_camera_project_perspective(float aspect, Camera* camera)
+void dengine_camera_project_perspective(const float aspect, Camera* camera)
 {
     DENGINE_DEBUG_ENTER;
 
@@ -88,7 +88,7 @@ void dengine_camera_lookat(float* target, Camera* camera)
     memcpy(camera->uview_mat, uview, sizeof(camera->uview_mat));
 }
 
-void dengine_camera_apply(Shader* shader, Camera* camera)
+void dengine_camera_apply(const Shader* shader, const Camera* camera)
 {
     DENGINE_DEBUG_ENTER;
 
@@ -162,7 +162,7 @@ void dengine_camera_set_rendermode(CameraRenderMode mode, Camera* camera)
     }
 }
 
-void dengine_camera_use(Camera* camera)
+void dengine_camera_use(const Camera* camera)
 {
     DENGINE_DEBUG_ENTER;
 

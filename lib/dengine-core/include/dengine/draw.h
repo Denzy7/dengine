@@ -18,7 +18,7 @@ extern "C" {
  * \param primitive Primitive to draw
  * \param shader Shader to use
  */
-void dengine_draw_primitive(Primitive* primitive, Shader* shader);
+void dengine_draw_primitive(const Primitive* primitive, const Shader* shader);
 
 #ifdef __cplusplus
 }

@@ -17,7 +17,7 @@ void dengine_material_setup(Material* material)
     dengine_texture_make_color(8, 8, normal, 3, &material->normalmap);
 }
 
-void dengine_material_set_shader_color(Shader* shader, Material* material)
+void dengine_material_set_shader_color(const Shader* shader, Material* material)
 {
     material->shader_color = *shader;
 
@@ -69,17 +69,17 @@ void dengine_material_set_shader_color(Shader* shader, Material* material)
     free(uniform_name);
 }
 
-void dengine_material_set_shader_shadow(Shader* shader, Material* material)
+void dengine_material_set_shader_shadow(const Shader* shader, Material* material)
 {
     material->shader_shadow = *shader;
 }
 
-void dengine_material_set_shader_shadow3d(Shader* shader, Material* material)
+void dengine_material_set_shader_shadow3d(const Shader* shader, Material* material)
 {
     material->shader_shadow3d = *shader;
 }
 
-int dengine_material_set_texture(Texture* texture, const char* sampler, Material* material)
+int dengine_material_set_texture(const Texture* texture, const char* sampler, Material* material)
 {
     int ok = 0;
     for (size_t i = 0; i < material->textures_count; i++)
@@ -92,7 +92,7 @@ int dengine_material_set_texture(Texture* texture, const char* sampler, Material
     return ok;
 }
 
-void dengine_material_use(Material* material)
+void dengine_material_use(const Material* material)
 {
     if (material) {
         for (size_t i = 0; i < material->textures_count; i++) {

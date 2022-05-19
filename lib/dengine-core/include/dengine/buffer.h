@@ -27,28 +27,28 @@ typedef struct{
  * \param count The number of buffers in buffer pointer
  * \param buffers Pointer allocated with Buffer struct
  */
-void dengine_buffer_gen(size_t count, Buffer* buffers);
+void dengine_buffer_gen(const size_t count, Buffer* buffers);
 
 /*!
  * \brief Bind a buffer
  * \param target Can be of GL_UNIFORM, GL_ARRAY, GL_INDEX, ....
  * \param buffer Buffer to bind. NULL unbinds the currently bound buffer in target
  */
-void dengine_buffer_bind(uint32_t target, Buffer* buffer);
+void dengine_buffer_bind(const uint32_t target, const Buffer* buffer);
 
 /*!
  * \brief Update data in buffer to OpenGL
  * \param target Can be of GL_UNIFORM, GL_ARRAY, GL_INDEX, ....
  * \param buffer Buffer to update
  */
-void dengine_buffer_data(uint32_t target, Buffer* buffer);
+void dengine_buffer_data(const uint32_t target, const Buffer* buffer);
 
 /*!
  * \brief Release resources used by a buffer
  * \param count Number of buffers
  * \param buffers Pointer to the buffers
  */
-void dengine_buffer_destroy(size_t count, Buffer* buffers);
+void dengine_buffer_destroy(const size_t count, Buffer* buffers);
 
 #ifdef __cplusplus
 }

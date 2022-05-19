@@ -54,7 +54,7 @@ extern "C" {
  * \param primitive Primitive to use
  * \param shader Shader to use
  */
-void dengine_primitive_setup(Primitive* primitive, Shader* shader);
+void dengine_primitive_setup(Primitive* primitive, const Shader* shader);
 
 /*!
  * \brief Release resources being used by a set up primitive
@@ -67,21 +67,21 @@ void dengine_primitive_destroy(Primitive* primitive);
  * \param primitive Primitive to use
  * \param shader Shader to use
  */
-void dengine_primitive_gen_quad(Primitive* primitive, Shader* shader);
+void dengine_primitive_gen_quad(Primitive* primitive, const Shader* shader);
 
 /*!
  * \brief Generate a 3D plane
  * \param primitive Primitive to use
  * \param shader Shader to use
  */
-void dengine_primitive_gen_plane(Primitive* primitive, Shader* shader);
+void dengine_primitive_gen_plane(Primitive* primitive, const Shader* shader);
 
 /*!
  * \brief Generate a 3D cube
  * \param primitive Primitive to use
  * \param shader Shader to use
  */
-void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader);
+void dengine_primitive_gen_cube(Primitive* primitive, const Shader* shader);
 
 /*!
  * \brief Generates a plane then cuts it into \slice slices
@@ -89,7 +89,7 @@ void dengine_primitive_gen_cube(Primitive* primitive, Shader* shader);
  * \param primitive Primitive to use
  * \param shader Shader to use
  */
-void dengine_primitive_gen_grid(uint16_t slice, Primitive* primitive, Shader* shader);
+void dengine_primitive_gen_grid(const uint16_t slice, Primitive* primitive, const Shader* shader);
 
 /*!
  * \brief Generate a 3D axis pointing at positive X, Y and Z
@@ -108,7 +108,7 @@ void dengine_primitive_gen_grid(uint16_t slice, Primitive* primitive, Shader* sh
  * \param primitive Primitive to use
  * \param shader Shader to use
  */
-void dengine_primitive_gen_axis(Primitive* primitive, Shader* shader);
+void dengine_primitive_gen_axis(Primitive* primitive, const Shader* shader);
 
 #ifdef __cplusplus
 }
