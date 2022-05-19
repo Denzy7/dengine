@@ -64,6 +64,21 @@
 //Name of log file to use
 #define DENGINE_LOG_FILE "dengine.log"
 
+//How many textures can a material have
+#define DENGINE_MAX_MATERIAL_TEXTURES 8
+
+/*
+ * How long is a texture sampler uniform name?
+ * ie.
+ *
+ *  GLSL:
+ *   uniform sampler2D this_is_a_2d_sampler;
+ *
+ * return value of strlen("this_is_a_2d_sampler")
+ * this is the longest uniform name you have in a shader
+ */
+#define DENGINE_MAX_MATERIAL_TEXTURE_SAMPLER_LENGTH 64
+
 //Size of buffer with the name of the entity
 #define DENGINE_ECS_MAXNAME 1024
 
