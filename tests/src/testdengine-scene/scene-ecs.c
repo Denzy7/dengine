@@ -9,13 +9,14 @@
 #include <dengine-utils/timer.h>
 #include <dengine-utils/filesys.h>
 #include <dengine-utils/os.h>
+#include <dengine-utils/macros.h>
+#include <dengine-utils/rng.h>
 
 #include <dengine/input.h>
 #include <dengine/window.h>
 #include <dengine/draw.h>
 #include <dengine/camera.h>
 #include <dengine/loadgl.h>
-
 #include <dengine-gui/gui.h>
 
 #include <dengine-model/model.h>
@@ -326,19 +327,6 @@ int main(int argc, char *argv[])
     }
     denginescene_ecs_add_script(ent_plight, &pingpongposition);
 
-    MeshComponent* cube_mesh, * cube_mesh2,* plane_mesh,* duck_mesh,* grid_mesh;
-    cube_mesh = denginescene_ecs_new_meshcomponent(&cube, &cube_mat);
-    plane_mesh = denginescene_ecs_new_meshcomponent(&plane, &cube_mat);
-    duck_mesh = denginescene_ecs_new_meshcomponent(duck, &duck_mat);
-    grid_mesh = denginescene_ecs_new_meshcomponent(&grid, &dft_mat);
-    cube_mesh2 = denginescene_ecs_new_meshcomponent(&cube, &cube_mat);
-
-    ent1->mesh_component=plane_mesh;
-    ent6->mesh_component=cube_mesh;
-    ent7->mesh_component=cube_mesh2;
-    ent3->mesh_component=duck_mesh;
-    ent14->mesh_component=grid_mesh;
-
     Texture duck_tex;
     memset(&duck_tex,0,sizeof (Texture));
     duck_tex.auto_dataonload=1;
@@ -348,7 +336,32 @@ int main(int argc, char *argv[])
     dengine_texture_load_file(prtbf,1,&duck_tex);
 
     dengine_material_set_texture(&duck_tex,"diffuseTex",&duck_mat);
+    ent3->mesh_component = denginescene_ecs_new_meshcomponent(duck, &duck_mat);
 
+    dengineutils_rng_set_seedwithtime();
+    //feel free to increase pool
+    Texture cube_tex_pool[6];
+    for(int i = 0; i < DENGINE_ARY_SZ(cube_tex_pool); i++)
+    {
+        Texture* cube_tex = &cube_tex_pool[i];
+        memset(cube_tex, 0, sizeof(Texture));
+        uint8_t col[] = { dengineutils_rng_int(255),
+                          dengineutils_rng_int(255),
+                          dengineutils_rng_int(255)};
+        //simple color
+        //dengine_texture_make_color(8, 8, col, 3, cube_tex);
+
+        //fancy checkerboard
+        uint8_t bg[] = {255 - col[2], 255 - col[1], 255 - col[0]};
+        dengine_texture_make_checkerboard(8, 8, 2, col, bg, 0, 3, cube_tex);
+    }
+    ent1->mesh_component=denginescene_ecs_new_meshcomponent(&plane, &cube_mat);
+    dengine_material_set_texture(&cube_tex_pool[dengineutils_rng_int(DENGINE_ARY_SZ(cube_tex_pool))],"diffuseTex",ent1->mesh_component->material);
+    ent6->mesh_component=denginescene_ecs_new_meshcomponent(&cube, &cube_mat);
+    dengine_material_set_texture(&cube_tex_pool[dengineutils_rng_int(DENGINE_ARY_SZ(cube_tex_pool))],"diffuseTex",ent6->mesh_component->material);
+    ent7->mesh_component=denginescene_ecs_new_meshcomponent(&cube, &cube_mat);
+    dengine_material_set_texture(&cube_tex_pool[dengineutils_rng_int(DENGINE_ARY_SZ(cube_tex_pool))],"diffuseTex",ent7->mesh_component->material);
+    ent14->mesh_component=denginescene_ecs_new_meshcomponent(&grid, &dft_mat);
     /*
      *            SCENE -- 13(camera),14=grid
      *            |    |
