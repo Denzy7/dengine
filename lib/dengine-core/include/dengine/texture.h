@@ -121,7 +121,7 @@ void dengine_texture_free_data(Texture* texture);
 void dengine_texture_destroy(size_t count, Texture* textures);
 
 
-void dengine_texture_make_color(const int width, const int height, const uint8_t* color, const int channels, Texture* texture);
+void dengine_texture_make_color(const int width, const int height, const float* color, const int channels, Texture* texture);
 
 /*!
  * \brief Make a checkerboard pattern in texture

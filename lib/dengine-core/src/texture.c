@@ -251,18 +251,39 @@ void dengine_texture_destroy(size_t count, Texture* textures)
     {glDeleteTextures(1, &textures[i].texture_id); DENGINE_CHECKGL;}
 }
 
-void dengine_texture_make_color(const int width, const int height, const uint8_t* color, const int channels, Texture* texture)
+void dengine_texture_make_color(const int width, const int height, const float* color, const int channels, Texture* texture)
 {
     DENGINE_DEBUG_ENTER;
-
     memset(texture, 0, sizeof (Texture));
-    uint8_t* data = malloc(width * height * channels);
-    for(size_t i = 0; i < width * height; i++)
+
+    texture->format = channels == 3 ? GL_RGB : GL_RGBA;
+    texture->internal_format = texture->format;
+
+    void* data;
+    if(dengine_texture_issupprorted(GL_TEXTURE_2D, GL_FLOAT, texture->internal_format, texture->format))
     {
-        for(int j = 0; j < channels; j++)
+        data = malloc(width * height * channels * sizeof(float));
+        float* _data = data;
+        for(size_t i = 0; i < width * height; i++)
         {
-            data[i * channels + j] = color[j];
+            for(int j = 0; j < channels; j++)
+            {
+                _data[i * channels + j] = color[j];
+            }
         }
+        texture->type = GL_FLOAT;
+    }else
+    {
+        data =  malloc(width * height * channels);
+        uint8_t* _data = data;
+        for(size_t i = 0; i < width * height; i++)
+        {
+            for(int j = 0; j < channels; j++)
+            {
+                _data[i * channels + j] = color[j] * 255;
+            }
+        }
+        texture->type = GL_UNSIGNED_BYTE;
     }
 
     texture->data = data;
@@ -270,9 +291,6 @@ void dengine_texture_make_color(const int width, const int height, const uint8_t
     texture->filter_mag = GL_NEAREST;
     texture->width = width;
     texture->height = height;
-    texture->format = channels == 3 ? GL_RGB : GL_RGBA;
-    texture->internal_format = texture->format;
-    texture->type = GL_UNSIGNED_BYTE;
 
     const Texture* entrytex = dengine_entrygl_texture(GL_TEXTURE_2D);
 
