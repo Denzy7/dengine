@@ -305,9 +305,9 @@ void dengine_texture_make_color(const int width, const int height, const float* 
 
 void dengine_texture_make_checkerboard(const int width, const int height,
                                          const int segments,
-                                         unsigned char* foreground,
-                                         unsigned char* background,
-                                         int foreground_first,
+                                         const float* foreground,
+                                         const float*  background,
+                                         const int foreground_first,
                                          const int channels,
                                        Texture* texture)
 {
@@ -320,13 +320,25 @@ void dengine_texture_make_checkerboard(const int width, const int height,
     texture->height = height;
     texture->format = channels == 3 ? GL_RGB : GL_RGBA;
     texture->internal_format = texture->format;
-    texture->type = GL_UNSIGNED_BYTE;
-    uint8_t* dat = malloc(width * height * channels);
+
+    int fltsupport = dengine_texture_issupprorted(GL_TEXTURE_2D, GL_FLOAT,
+                                                  texture->internal_format,
+                                                  texture->format);
+    void* dat;
+    if(fltsupport)
+    {
+        dat = malloc(width * height * channels * sizeof(float));
+        texture->type = GL_FLOAT;
+    }else
+    {
+        dat = malloc(width * height * channels);
+        texture->type = GL_UNSIGNED_BYTE;
+    }
 
     int swap = 0;
     int fill = foreground_first; /* set to 1 to fill fg first*/
     int box_sz = width / segments;
-    uint8_t* col = NULL;
+    const float* col = NULL;
     for(int i = 0; i < width * height; i++)
     {
         if(i % (width * box_sz) == 0 && i != 0)
@@ -351,7 +363,16 @@ void dengine_texture_make_checkerboard(const int width, const int height,
 
         for(int j = 0; j < channels; j++)
         {
-            dat[i*channels + j] = col[j];
+            if(fltsupport)
+            {
+                float* _dat = dat;
+                _dat[i*channels + j] = col[j];
+            }else
+            {
+                uint8_t* _dat = dat;
+                _dat[i*channels + j] = col[j] * 255;
+            }
+
         }
     }
 

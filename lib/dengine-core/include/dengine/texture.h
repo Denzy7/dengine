@@ -135,9 +135,9 @@ void dengine_texture_make_color(const int width, const int height, const float* 
  */
 void dengine_texture_make_checkerboard(const int width, const int height,
                                          const int segments,
-                                         unsigned char* foreground,
-                                         unsigned char* background,
-                                         int foreground_first,
+                                         const float* foreground,
+                                         const float* background,
+                                         const int foreground_first,
                                          const int channels,
                                        Texture* texture);
 
