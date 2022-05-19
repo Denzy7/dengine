@@ -154,6 +154,7 @@ int denginegui_set_font(const void* ttf, const float fontsize, const uint32_t bi
             rewind(f);
             sysfontmem = malloc(sz);
             fread(sysfontmem, sz, 1, f);
+            mem = sysfontmem;
             fclose(f);
         }
     }
