@@ -11,56 +11,61 @@
 void dengine_material_setup(Material* material)
 {
     memset(material, 0, sizeof(Material));
-    material->white=dengine_texture_new_white(256,256);
-    material->normalmap = dengine_texture_new_normalmap(256, 256);
+    static const uint8_t white[] = {255, 255, 255};
+    static const uint8_t normal[] = {127, 127, 255};
+    dengine_texture_make_color(8, 8, white, 3, &material->white);
+    dengine_texture_make_color(8, 8, normal, 3, &material->normalmap);
 }
 
 void dengine_material_set_shader_color(Shader* shader, Material* material)
 {
     material->shader_color = *shader;
 
-    int count, max_uniform_ln, size;
+    int count, max_uniform_ln, size, max_units;
     uint32_t type;
     glGetProgramiv(shader->program_id, GL_ACTIVE_UNIFORMS, &count); DENGINE_CHECKGL;
     glGetProgramiv(shader->program_id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_uniform_ln); DENGINE_CHECKGL;
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_units);
     char* uniform_name = malloc(max_uniform_ln);
-    
-    vtor tex;
-    vtor_create(&tex, sizeof (int));
 
+    memset(&material->textures, 0, sizeof(material->textures));
+    material->textures_count = 0;
     for (int i = 0; i < count; i++)
     {
         glGetActiveUniform(shader->program_id, i, max_uniform_ln, NULL, &size, &type, uniform_name); DENGINE_CHECKGL;
-        if(type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE)
+        if (type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE)
         {
-            vtor_pushback(&tex, &i);
+            if(material->textures_count > max_units)
+            {
+                dengineutils_logging_log("WARNING::This OpenGL driver has a maximum of %d texture units."
+                                         "%s will not be activated", max_units, uniform_name);
+            }else if(material->textures_count > DENGINE_MAX_MATERIAL_TEXTURES)
+            {
+                dengineutils_logging_log("WARNING::Reached material texture limit. Recompile to increase limit");
+            }else{
+                MaterialTexture* texture = &material->textures[material->textures_count];
+                strncpy(texture->sampler, uniform_name, sizeof(texture->sampler));
+                texture->target = dengine_shader_sampler2target(type);
+                if(type == GL_SAMPLER_2D)
+                {
+                    //assign some blank 2D textures
+
+                    //guess if its a normalmap
+                    if(strstr(uniform_name, "normal"))
+                        texture->texture = material->normalmap;
+                    else
+                        texture->texture = material->white;
+                }
+                dengine_shader_set_int(shader, uniform_name, material->textures_count);
+                material->textures_count++;
+            }
         }
     }
-    
-    MaterialTexture* textures = malloc(tex.count * sizeof (MaterialTexture));
-    memset(textures, 0, tex.count * sizeof (MaterialTexture));
 
-    int* tex_idx = tex.data;
-    for (size_t i = 0; i < tex.count; i++) {
-        glGetActiveUniform(shader->program_id, tex_idx[i], max_uniform_ln, NULL, &size, &type, uniform_name); DENGINE_CHECKGL;
-        if (type == GL_SAMPLER_2D) {
-            textures[i].target = GL_TEXTURE_2D;
-            //guess if its a normalmap
-            if(strstr(uniform_name, "normal"))
-                textures[i].texture = *material->normalmap;
-            else
-                textures[i].texture = *material->white;
-        }else if (type == GL_SAMPLER_CUBE) {
-            textures[i].target = GL_TEXTURE_CUBE_MAP;
-        }
-        textures[i].sampler = strdup(uniform_name);
-        dengine_shader_set_int(shader, uniform_name, i);
-    }
+    //clamp to the max units
+    if(material->textures_count > max_units)
+        material->textures_count = max_units;
 
-    material->textures = textures;
-    material->textures_count = tex.count;
-
-    vtor_free(&tex);
     free(uniform_name);
 }
 
@@ -108,35 +113,13 @@ void dengine_material_use(Material* material)
 
 void dengine_material_destroy(Material* material)
 {
-    if(material->destroyed)
-        return;
-
-    if (material && material->textures) {
-        for (size_t i = 0; i < material->textures_count; i++) {
-            free(material->textures[i].sampler);
-        }
-        free(material->textures);
-    }
-    if (material)
-    {
-        dengine_texture_free_data(material->white);
-        dengine_texture_destroy(1,material->white);
-        free(material->white);
-
-        dengine_texture_free_data(material->normalmap);
-        dengine_texture_destroy(1,material->normalmap);
-        free(material->normalmap);
-    }
-
-    material->destroyed = 1;
+    dengine_texture_destroy(1, &material->white);
+    dengine_texture_destroy(1, &material->normalmap);
 }
 
-Texture* dengine_material_get_texture(const char* sampler, Material* material)
+const Texture* dengine_material_get_texture(const char* sampler, Material* material)
 {
-    if (!material || !material->textures)
-        return NULL;
-
-    Texture* find = NULL;
+    const Texture* find = NULL;
 
     for (size_t i = 0; i < material->textures_count; i++) {
         if (!strcmp(sampler, material->textures[i].sampler)) {

@@ -14,9 +14,10 @@
 #include "dengine/shader.h"
 #include "dengine/texture.h"
 
+#include "dengine_config.h"
 typedef struct
 {
-    char* sampler;
+    char sampler[DENGINE_MAX_MATERIAL_TEXTURE_SAMPLER_LENGTH];
     Texture texture;
     uint32_t target;
 }MaterialTexture;
@@ -30,11 +31,11 @@ typedef struct
     Shader shader_shadow; /*!< 2D shadow shader */
     Shader shader_shadow3d; /*!< 3D shadow shader */
 
-    MaterialTexture* textures; /*!< Added Textures */
-    size_t textures_count; /*!< Added Texture count*/
+    MaterialTexture textures[DENGINE_MAX_MATERIAL_TEXTURES]; /*!< Added Textures */
+    uint32_t textures_count; /*!< Added Texture count*/
 
-    Texture* white; /*!< White texture this material uses */
-    Texture* normalmap; /*!< Empty normal map texture this material uses */
+    Texture white; /*!< White texture this material uses */
+    Texture normalmap; /*!< Empty normal map texture this material uses */
 
     int destroyed; /*!< HACK : Flag when material is destroyed to maintain compatibility */
 }Material;
@@ -98,7 +99,7 @@ void dengine_material_destroy(Material* material);
  * \param material Material to use
  * \return A texture object if found. NULL if not
  */
-Texture* dengine_material_get_texture(const char* sampler, Material* material);
+const Texture* dengine_material_get_texture(const char* sampler, Material* material);
 
 #ifdef __cplusplus
 }
