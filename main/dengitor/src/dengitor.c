@@ -531,8 +531,7 @@ void dengitor_glarea_onrender(GtkGLArea* area)
 
     if(dengitor->glarea_mode == DENGITOR_GLAREA_MODE_SCENE)
     {
-        Framebuffer entry_fb;
-        dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entry_fb);
+        const Framebuffer* entry_fb = dengine_entrygl_framebuffer(GL_FRAMEBUFFER);
 
         Camera* scene_camera = dengitor->scene_camera->camera_component->camera;
         out = scene_camera;
@@ -624,7 +623,7 @@ void dengitor_glarea_onrender(GtkGLArea* area)
 
         glLineWidth(init_width);
 
-        dengine_framebuffer_bind(GL_FRAMEBUFFER, &entry_fb);
+        dengine_framebuffer_bind(GL_FRAMEBUFFER, entry_fb);
         dengine_viewport_set(x, y, w, h);
     }else
     {

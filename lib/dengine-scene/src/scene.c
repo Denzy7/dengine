@@ -219,8 +219,7 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     denginescene_ecs_get_front(camera, front);
 
     //we might not have entered with fb 0, save binding for later
-    Framebuffer entryfb;
-    dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entryfb);
+    const Framebuffer* entryfb = dengine_entrygl_framebuffer(GL_FRAMEBUFFER);
 
     //store entry viewport
     int x, y, w, h;
@@ -250,7 +249,7 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     denginescene_ecs_do_skybox_scene(scene, camera->camera_component->camera);
 
     //now bind what we entered with
-    dengine_framebuffer_bind(GL_FRAMEBUFFER, &entryfb);
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, entryfb);
 
     dengine_viewport_set(x, y, w, h);
 }

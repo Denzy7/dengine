@@ -274,14 +274,13 @@ void dengine_texture_make_color(const int width, const int height, const uint8_t
     texture->internal_format = texture->format;
     texture->type = GL_UNSIGNED_BYTE;
 
-    Texture entrytex;
-    dengine_entrygl_texture(GL_TEXTURE_2D, &entrytex);
+    const Texture* entrytex = dengine_entrygl_texture(GL_TEXTURE_2D);
 
     dengine_texture_gen(1, texture);
     dengine_texture_bind(GL_TEXTURE_2D, texture);
     dengine_texture_data(GL_TEXTURE_2D, texture);
     dengine_texture_set_params(GL_TEXTURE_2D, texture);
-    dengine_texture_bind(GL_TEXTURE_2D, &entrytex);
+    dengine_texture_bind(GL_TEXTURE_2D, entrytex);
 
     free(data);
 }
@@ -338,15 +337,14 @@ void dengine_texture_make_checkerboard(const int width, const int height,
         }
     }
 
-    Texture entrytex;
-    dengine_entrygl_texture(GL_TEXTURE_2D, &entrytex);
+    const Texture* entrytex = dengine_entrygl_texture(GL_TEXTURE_2D);
 
     texture->data = dat;
     dengine_texture_gen(1, texture);
     dengine_texture_bind(GL_TEXTURE_2D, texture);
     dengine_texture_data(GL_TEXTURE_2D, texture);
     dengine_texture_set_params(GL_TEXTURE_2D, texture);
-    dengine_texture_bind(GL_TEXTURE_2D, &entrytex);
+    dengine_texture_bind(GL_TEXTURE_2D, entrytex);
 
     free(dat);
 }
@@ -410,14 +408,13 @@ void dengine_texture_make_canreadback_color(const int width, const int height, T
     uint8_t* data = calloc(width * height * 4, sizeof(uint8_t));
     texture->data = data;
 
-    Texture entrytex;
-    dengine_entrygl_texture(GL_TEXTURE_2D, &entrytex);
+    const Texture* entrytex = dengine_entrygl_texture(GL_TEXTURE_2D);
 
     dengine_texture_gen(1, texture);
     dengine_texture_bind(GL_TEXTURE_2D, texture);
     dengine_texture_data(GL_TEXTURE_2D, texture);
     dengine_texture_set_params(GL_TEXTURE_2D, texture);
-    dengine_texture_bind(GL_TEXTURE_2D, &entrytex);
+    dengine_texture_bind(GL_TEXTURE_2D, entrytex);
 }
 
 int dengine_texture_issupprorted(uint32_t target, uint32_t type, uint32_t internal_format, uint32_t format)

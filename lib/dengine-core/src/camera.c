@@ -114,11 +114,8 @@ void dengine_camera_set_rendermode(CameraRenderMode mode, Camera* camera)
     DENGINE_DEBUG_ENTER;
 
     // get entry stuff
-    Texture entry_tex;
-    dengine_entrygl_texture(GL_TEXTURE_2D, &entry_tex);
-
-    Framebuffer entry_fb;
-    dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entry_fb);
+    const Texture* entry_tex = dengine_entrygl_texture(GL_TEXTURE_2D);
+    const Framebuffer* entry_fb = dengine_entrygl_framebuffer(GL_FRAMEBUFFER);
 
     if (mode == DENGINE_CAMERA_RENDER_FOWARD) {
         Texture rgba_depth[2];
@@ -157,8 +154,8 @@ void dengine_camera_set_rendermode(CameraRenderMode mode, Camera* camera)
         dengine_framebuffer_attach2D(DENGINE_FRAMEBUFFER_COLOR, rgba, &camera->framebuffer);
         dengine_framebuffer_attach2D(DENGINE_FRAMEBUFFER_DEPTH, depth, &camera->framebuffer);
 
-        dengine_texture_bind(GL_TEXTURE_2D, &entry_tex);
-        dengine_framebuffer_bind(GL_FRAMEBUFFER, &entry_fb);
+        dengine_texture_bind(GL_TEXTURE_2D, entry_tex);
+        dengine_framebuffer_bind(GL_FRAMEBUFFER, entry_fb);
     }
 }
 
@@ -189,8 +186,7 @@ void dengine_camera_use(const Camera* camera)
 
 void dengine_camera_resize(Camera* camera, int width, int height)
 {
-    Texture entry_tex;
-    dengine_entrygl_texture(GL_TEXTURE_2D, &entry_tex);
+    const Texture* entry_tex = dengine_entrygl_texture(GL_TEXTURE_2D);
 
     for(uint32_t i = 0; i < camera->framebuffer.n_color; i++)
     {
@@ -216,5 +212,5 @@ void dengine_camera_resize(Camera* camera, int width, int height)
     camera->render_width = width;
     camera->render_height = height;
 
-    dengine_texture_bind(GL_TEXTURE_2D, &entry_tex);
+    dengine_texture_bind(GL_TEXTURE_2D, entry_tex);
 }
