@@ -196,7 +196,6 @@ int main(int argc, char *argv[])
     dengine_lighting_light_setup(DENGINE_LIGHT_POINT, &pl);
     pl.light.strength = 3.0f;
     pl.quadratic = 0.010;
-    pl.light.diffuse[0] = 0.5;
     Entity* pl_ent = denginescene_ecs_new_entity();
     LightComponent* dl_ent_lightcomp = denginescene_ecs_new_lightcomponent(
                 DENGINE_LIGHT_POINT, &pl);
