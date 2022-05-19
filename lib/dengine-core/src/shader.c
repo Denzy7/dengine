@@ -489,3 +489,13 @@ void dengine_shader_set_shadercache(int state)
 {
      shadercache = state;
 }
+
+const uint32_t dengine_shader_sampler2target(const uint32_t sampler)
+{
+    if(sampler == GL_SAMPLER_2D)
+        return GL_TEXTURE_2D;
+    else if(sampler == GL_SAMPLER_CUBE)
+        return GL_TEXTURE_CUBE_MAP;
+    else
+        return 0;
+}
