@@ -336,7 +336,7 @@ void dengine_shader_set_float(const Shader* shader, const char* name, const floa
     glUniform1f(location, value); DENGINE_CHECKGL;
 }
 
-int dengine_shader_make_shader_standard(StandardShader stdshader, Shader* stdshdr)
+int dengine_shader_make_standard(StandardShader stdshader, Shader* stdshdr)
 {
     DENGINE_DEBUG_ENTER;
 
