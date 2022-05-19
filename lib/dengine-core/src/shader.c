@@ -404,7 +404,7 @@ int dengine_shader_make_standard(StandardShader stdshader, Shader* stdshdr)
     stdshdr->geometry_code = stdshdrsrc[2];
 
 
-    dengine_shader_setup(stdshdr);
+    int setup = dengine_shader_setup(stdshdr);
 
     for (int i = 0; i < 2; i++) {
         char* stdshdrsrcdup = stdshdrsrc[i];
@@ -421,7 +421,7 @@ int dengine_shader_make_standard(StandardShader stdshader, Shader* stdshdr)
         dengine_shader_set_vec3(stdshdr,"color", default_shader_col);
     }
 
-    return 1;
+    return setup;
 }
 
 int dengine_shader_set_binary(Shader* shader, void* binary, int length)
