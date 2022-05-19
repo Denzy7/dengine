@@ -242,7 +242,6 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     dengine_material_setup(&sky_equireq);
     dengine_material_set_shader_color(&dengitor->shader_skybox_2d, &sky_equireq);
 
-    // TODO : memory leak if not destroyed!
     dengine_material_setup(&std_mat);
     dengine_material_set_shader_color(&dengitor->shader_standard, &std_mat);
     dengine_material_set_shader_shadow(&dengitor->shader_shadow2d, &std_mat);
