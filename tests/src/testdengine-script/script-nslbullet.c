@@ -149,9 +149,9 @@ int main(int argc, char *argv[])
     {
         Texture* cube_tex = &cube_tex_pool[i];
         memset(cube_tex, 0, sizeof(Texture));
-        uint8_t col[] = { abs(dengineutils_rng_int(255)),
-                          abs(dengineutils_rng_int(255)),
-                          abs(dengineutils_rng_int(255))};
+        uint8_t col[] = { dengineutils_rng_int(255),
+                          dengineutils_rng_int(255),
+                          dengineutils_rng_int(255)};
 
         //simple color
         //dengine_texture_make_color(8, 8, col, 3, cube_tex);
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
             dengine_material_setup(&cube_mat);
             dengine_material_set_shader_color(&stdshdr, &cube_mat);
 
-            int pick = abs(dengineutils_rng_int(DENGINE_ARY_SZ(cube_tex_pool)));
+            int pick = dengineutils_rng_int(DENGINE_ARY_SZ(cube_tex_pool));
             Texture* coltex = &cube_tex_pool[pick];
             dengine_material_set_texture(coltex, "diffuseTex", &cube_mat);
 
