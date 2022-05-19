@@ -149,15 +149,14 @@ int main(int argc, char *argv[])
     {
         Texture* cube_tex = &cube_tex_pool[i];
         memset(cube_tex, 0, sizeof(Texture));
-        uint8_t col[] = { dengineutils_rng_int(255),
-                          dengineutils_rng_int(255),
-                          dengineutils_rng_int(255)};
-
+        float col[] = { (float)dengineutils_rng_int(255) / 255.,
+                          (float)dengineutils_rng_int(255) / 255.,
+                          (float)dengineutils_rng_int(255) / 255.};
         //simple color
         //dengine_texture_make_color(8, 8, col, 3, cube_tex);
 
         //fancy checkerboard
-        uint8_t bg[] = {255 - col[2], 255 - col[1], 255 - col[0]};
+        float bg[] = {255. - col[2], 255. - col[1], 255. - col[0]};
         dengine_texture_make_checkerboard(8, 8, 2, col, bg, 0, 3, cube_tex);
     }
 
@@ -197,6 +196,7 @@ int main(int argc, char *argv[])
     dengine_lighting_light_setup(DENGINE_LIGHT_POINT, &pl);
     pl.light.strength = 3.0f;
     pl.quadratic = 0.010;
+    pl.light.diffuse[0] = 0;
     Entity* pl_ent = denginescene_ecs_new_entity();
     LightComponent* dl_ent_lightcomp = denginescene_ecs_new_lightcomponent(
                 DENGINE_LIGHT_POINT, &pl);
@@ -205,6 +205,8 @@ int main(int argc, char *argv[])
     pl_ent->transform.position[1] = 10.0f;
     pl_ent->transform.position[2] = 0.0f;
     denginescene_add_entity(scene, pl_ent);
+    Texture pl_ent_gizmo;
+    dengine_texture_make_color(8, 8, pl.light.diffuse, 3, &pl_ent_gizmo);
 
     while (dengine_window_isrunning()) {
         //stepSimulation
@@ -234,6 +236,9 @@ int main(int argc, char *argv[])
         {
             denginegui_text(fontsz / 4, h - fontsz - i * fontsz, staticmessageslist[i], NULL);
         }
+        vec2 pos2d_light;
+        dengine_camera_world2screen(cam_ent->camera_component->camera, pl_ent->transform.position, pos2d_light);
+        denginegui_panel(pos2d_light[0], pos2d_light[1], 30, 30, &pl_ent_gizmo, NULL, GLM_VEC4_BLACK);
 
         static char fpstr[100];
         static vec4 yellow = {1.0, 1.0, 0.0, 1.0};

@@ -11,8 +11,8 @@
 void dengine_material_setup(Material* material)
 {
     memset(material, 0, sizeof(Material));
-    static const uint8_t white[] = {255, 255, 255};
-    static const uint8_t normal[] = {127, 127, 255};
+    static const float white[] = {1., 1., 1.};
+    static const float normal[] = {0.5, 0.5, 1.};
     dengine_texture_make_color(8, 8, white, 3, &material->white);
     dengine_texture_make_color(8, 8, normal, 3, &material->normalmap);
 }

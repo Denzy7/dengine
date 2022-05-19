@@ -345,14 +345,14 @@ int main(int argc, char *argv[])
     {
         Texture* cube_tex = &cube_tex_pool[i];
         memset(cube_tex, 0, sizeof(Texture));
-        uint8_t col[] = { dengineutils_rng_int(255),
-                          dengineutils_rng_int(255),
-                          dengineutils_rng_int(255)};
+        float col[] = { (float)dengineutils_rng_int(255) / 255.,
+                          (float)dengineutils_rng_int(255) / 255.,
+                          (float)dengineutils_rng_int(255) / 255.};
         //simple color
         //dengine_texture_make_color(8, 8, col, 3, cube_tex);
 
         //fancy checkerboard
-        uint8_t bg[] = {255 - col[2], 255 - col[1], 255 - col[0]};
+        float bg[] = {255. - col[2], 255. - col[1], 255. - col[0]};
         dengine_texture_make_checkerboard(8, 8, 2, col, bg, 0, 3, cube_tex);
     }
     ent1->mesh_component=denginescene_ecs_new_meshcomponent(&plane, &cube_mat);
