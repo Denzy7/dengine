@@ -11,17 +11,17 @@
 extern "C" {
 #endif
 
-void dengine_entrygl_texture(uint32_t target, Texture* texture);
+const Texture* dengine_entrygl_texture(uint32_t target);
 
-void dengine_entrygl_texture_active(int* texture_active);
+const int dengine_entrygl_texture_active();
 
-void dengine_entrygl_framebuffer(uint32_t target, Framebuffer* framebuffer);
+const Framebuffer* dengine_entrygl_framebuffer(uint32_t target);
 
-void dengine_entrygl_buffer(uint32_t target, Buffer* buffer);
+const Buffer* dengine_entrygl_buffer(uint32_t target);
 
-void dengine_entrygl_vao(VAO* vao);
+const VAO* dengine_entrygl_vao();
 
-void dengine_entrygl_shader(Shader* shader);
+const Shader* dengine_entrygl_shader();
 
 #ifdef __cplusplus
 }
