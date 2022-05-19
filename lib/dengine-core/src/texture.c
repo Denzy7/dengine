@@ -1,6 +1,7 @@
 #include "dengine/texture.h"
 #include "dengine/loadgl.h"  //glGen,Bind,Tex...
 #include "dengine-utils/logging.h" //log
+#include "dengine/entrygl.h"
 
 #include <string.h>
 #include <stb_image.h> //stbi_load, stbi_error
@@ -250,49 +251,60 @@ void dengine_texture_destroy(size_t count, Texture* textures)
     {glDeleteTextures(1, &textures[i].texture_id); DENGINE_CHECKGL;}
 }
 
-Texture* dengine_texture_new_white(const int width, const int height)
+void dengine_texture_make_color(const int width, const int height, const uint8_t* color, const int channels, Texture* texture)
 {
     DENGINE_DEBUG_ENTER;
 
-    Texture* white = malloc(sizeof (Texture));
-    memset(white, 0, sizeof (Texture));
-    white->filter_min = GL_NEAREST;
-    white->filter_mag = GL_NEAREST;
-    white->height = width;
-    white->width = height;
-    white->internal_format = GL_RGB;
-    white->format = GL_RGB;
-    white->type = GL_UNSIGNED_BYTE;
-    uint8_t* dat = malloc(sizeof (uint8_t) * width * height * 3 );
-    memset(dat, 255, sizeof (uint8_t) * width * height * 3 );
-    white->data = dat;
-    dengine_texture_gen(1, white);
-    dengine_texture_bind(GL_TEXTURE_2D, white);
-    dengine_texture_data(GL_TEXTURE_2D, white);
-    dengine_texture_set_params(GL_TEXTURE_2D, white);
-    dengine_texture_bind(GL_TEXTURE_2D, NULL);
-    return white;
+    memset(texture, 0, sizeof (Texture));
+    uint8_t* data = malloc(width * height * channels);
+    for(size_t i = 0; i < width * height; i++)
+    {
+        for(int j = 0; j < channels; j++)
+        {
+            data[i * channels + j] = color[j];
+        }
+    }
+
+    texture->data = data;
+    texture->filter_min = GL_NEAREST;
+    texture->filter_mag = GL_NEAREST;
+    texture->width = width;
+    texture->height = height;
+    texture->format = channels == 3 ? GL_RGB : GL_RGBA;
+    texture->internal_format = texture->format;
+    texture->type = GL_UNSIGNED_BYTE;
+
+    Texture entrytex;
+    dengine_entrygl_texture(GL_TEXTURE_2D, &entrytex);
+
+    dengine_texture_gen(1, texture);
+    dengine_texture_bind(GL_TEXTURE_2D, texture);
+    dengine_texture_data(GL_TEXTURE_2D, texture);
+    dengine_texture_set_params(GL_TEXTURE_2D, texture);
+    dengine_texture_bind(GL_TEXTURE_2D, &entrytex);
+
+    free(data);
 }
 
-Texture* dengine_texture_new_checkerboard(const int width, const int height,
+void dengine_texture_make_checkerboard(const int width, const int height,
                                          const int segments,
                                          unsigned char* foreground,
                                          unsigned char* background,
                                          int foreground_first,
-                                         const int channels)
+                                         const int channels,
+                                       Texture* texture)
 {
     DENGINE_DEBUG_ENTER;
 
-    Texture* check = malloc(sizeof (Texture));
-    memset(check, 0, sizeof (Texture));
-    check->filter_min = GL_NEAREST;
-    check->filter_mag = GL_NEAREST;
-    check->width = width;
-    check->height = height;
-    check->format = channels == 3 ? GL_RGB : GL_RGBA;
-    check->internal_format = check->format;
-    check->type = GL_UNSIGNED_BYTE;
-    uint8_t* dat = calloc(width * height * channels, sizeof (uint8_t));
+    memset(texture, 0, sizeof (Texture));
+    texture->filter_min = GL_NEAREST;
+    texture->filter_mag = GL_NEAREST;
+    texture->width = width;
+    texture->height = height;
+    texture->format = channels == 3 ? GL_RGB : GL_RGBA;
+    texture->internal_format = texture->format;
+    texture->type = GL_UNSIGNED_BYTE;
+    uint8_t* dat = malloc(width * height * channels);
 
     int swap = 0;
     int fill = foreground_first; /* set to 1 to fill fg first*/
@@ -326,13 +338,17 @@ Texture* dengine_texture_new_checkerboard(const int width, const int height,
         }
     }
 
-    check->data = dat;
-    dengine_texture_gen(1, check);
-    dengine_texture_bind(GL_TEXTURE_2D, check);
-    dengine_texture_data(GL_TEXTURE_2D, check);
-    dengine_texture_set_params(GL_TEXTURE_2D, check);
-    dengine_texture_bind(GL_TEXTURE_2D, NULL);
-    return check;
+    Texture entrytex;
+    dengine_entrygl_texture(GL_TEXTURE_2D, &entrytex);
+
+    texture->data = dat;
+    dengine_texture_gen(1, texture);
+    dengine_texture_bind(GL_TEXTURE_2D, texture);
+    dengine_texture_data(GL_TEXTURE_2D, texture);
+    dengine_texture_set_params(GL_TEXTURE_2D, texture);
+    dengine_texture_bind(GL_TEXTURE_2D, &entrytex);
+
+    free(dat);
 }
 
 void dengine_texture_mipmap(uint32_t target, Texture* texture)
@@ -381,53 +397,27 @@ int dengine_texture_writeout(const char* outfile, const int flip, Texture* textu
     return write;
 }
 
-Texture* dengine_texture_new_canreadback_color(const int width, const int height)
+void dengine_texture_make_canreadback_color(const int width, const int height, Texture* texture)
 {
-    Texture* tex = malloc(sizeof(Texture));
-    memset(tex, 0, sizeof(Texture));
-    tex->width = width;
-    tex->height = height;
-    tex->type = GL_UNSIGNED_BYTE;
-    tex->format = GL_RGBA;
-    tex->internal_format = GL_RGBA;
-    tex->filter_min = GL_LINEAR;
-    tex->filter_mag = GL_LINEAR;
+    memset(texture, 0, sizeof(Texture));
+    texture->width = width;
+    texture->height = height;
+    texture->type = GL_UNSIGNED_BYTE;
+    texture->format = GL_RGBA;
+    texture->internal_format = GL_RGBA;
+    texture->filter_min = GL_LINEAR;
+    texture->filter_mag = GL_LINEAR;
     uint8_t* data = calloc(width * height * 4, sizeof(uint8_t));
-    tex->data = data;
-    dengine_texture_gen(1, tex);
-    dengine_texture_bind(GL_TEXTURE_2D, tex);
-    dengine_texture_data(GL_TEXTURE_2D, tex);
-    dengine_texture_set_params(GL_TEXTURE_2D, tex);
-    dengine_texture_bind(GL_TEXTURE_2D, NULL);
-    return tex;
-}
+    texture->data = data;
 
-Texture* dengine_texture_new_normalmap(const int width, const int height)
-{
-    Texture* tex = malloc(sizeof(Texture));
-    memset(tex, 0, sizeof(Texture));
-    tex->width = width;
-    tex->height = height;
-    tex->type = GL_UNSIGNED_BYTE;
-    tex->format = GL_RGB;
-    tex->internal_format = GL_RGB;
-    tex->filter_min = GL_LINEAR;
-    tex->filter_mag = GL_LINEAR;
-    uint8_t* data = calloc(width * height * 3, sizeof(uint8_t));
-    for(size_t i = 0; i < width * height; i++)
-    {
-        data[i * 3] = 255 / 2;
-        data[i * 3 + 1] = 255 / 2;
-        data[i * 3 + 2] = 255;
-    }
+    Texture entrytex;
+    dengine_entrygl_texture(GL_TEXTURE_2D, &entrytex);
 
-    tex->data = data;
-    dengine_texture_gen(1, tex);
-    dengine_texture_bind(GL_TEXTURE_2D, tex);
-    dengine_texture_data(GL_TEXTURE_2D, tex);
-    dengine_texture_set_params(GL_TEXTURE_2D, tex);
-    dengine_texture_bind(GL_TEXTURE_2D, NULL);
-    return tex;
+    dengine_texture_gen(1, texture);
+    dengine_texture_bind(GL_TEXTURE_2D, texture);
+    dengine_texture_data(GL_TEXTURE_2D, texture);
+    dengine_texture_set_params(GL_TEXTURE_2D, texture);
+    dengine_texture_bind(GL_TEXTURE_2D, &entrytex);
 }
 
 int dengine_texture_issupprorted(uint32_t target, uint32_t type, uint32_t internal_format, uint32_t format)

@@ -108,7 +108,7 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture);
 void dengine_texture_set_params(uint32_t target, Texture* texture);
 
 /*!
- * \brief Free data that was loaded with texture_load_* or texture_new_* as its no longer needed
+ * \brief Free data that was loaded with texture_load_* or texture_make_canreadback_* as its no longer needed
  * \param texture Texture to use
  */
 void dengine_texture_free_data(Texture* texture);
@@ -120,24 +120,11 @@ void dengine_texture_free_data(Texture* texture);
  */
 void dengine_texture_destroy(size_t count, Texture* textures);
 
-/*!
- * \brief Create an instance of a 2D white texture
- * \param width width
- * \param height height
- * \return A 2D white texture of width x height
- */
-Texture* dengine_texture_new_white(const int width, const int height);
+
+void dengine_texture_make_color(const int width, const int height, const uint8_t* color, const int channels, Texture* texture);
 
 /*!
- * \brief Create an instance of an empty normal map
- * \param width width
- * \param height height
- * \return An empty 2D RGB normalmap width x height
- */
-Texture* dengine_texture_new_normalmap(const int width, const int height);
-
-/*!
- * \brief Create an instance of a checkerboard pattern
+ * \brief Make a checkerboard pattern in texture
  * \param width width
  * \param height height
  * \param segments segments to split width and height
@@ -145,22 +132,22 @@ Texture* dengine_texture_new_normalmap(const int width, const int height);
  * \param background background color
  * \param foreground_first 1 = foreground first, 0 = background first
  * \param channels color channels in both foreground and background
- * \return A 2D checkerboard pattern split by segments using the width
  */
-Texture* dengine_texture_new_checkerboard(const int width, const int height,
+void dengine_texture_make_checkerboard(const int width, const int height,
                                          const int segments,
                                          unsigned char* foreground,
                                          unsigned char* background,
                                          int foreground_first,
-                                         const int channels);
+                                         const int channels,
+                                       Texture* texture);
 
 /*!
- * \brief Create a Texture that can readback framebuffer color attachments
+ * \brief Make a Texture that can readback framebuffer color attachments.
+ * Remember to free data after reading back.
  * \param width width of texture
  * \param height height of texture
- * \return A 2D RGBA texture
  */
-Texture* dengine_texture_new_canreadback_color(const int width, const int height);
+void dengine_texture_make_canreadback_color(const int width, const int height, Texture* texture);
 
 /*!
  * \brief Bind texture then generate mipmap then unbind
