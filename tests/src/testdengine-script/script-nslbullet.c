@@ -143,9 +143,23 @@ int main(int argc, char *argv[])
     denginescene_ecs_add_script(cube_ent, &forces);
     dengineutils_rng_set_seedwithtime();
 
-    Material cube_mat;
-    dengine_material_setup(&cube_mat);
-    dengine_material_set_shader_color(&stdshdr, &cube_mat);
+    //feel free to increase pool
+    Texture cube_tex_pool[3];
+    for(int i = 0; i < DENGINE_ARY_SZ(cube_tex_pool); i++)
+    {
+        Texture* cube_tex = &cube_tex_pool[i];
+        memset(cube_tex, 0, sizeof(Texture));
+        uint8_t col[] = { abs(dengineutils_rng_int(255)),
+                          abs(dengineutils_rng_int(255)),
+                          abs(dengineutils_rng_int(255))};
+
+        //simple color
+        //dengine_texture_make_color(8, 8, col, 3, cube_tex);
+
+        //fancy checkerboard
+        uint8_t bg[] = {255 - col[2], 255 - col[1], 255 - col[0]};
+        dengine_texture_make_checkerboard(8, 8, 2, col, bg, 0, 3, cube_tex);
+    }
 
     const int coef = 4;
     const float spread = 1.24;;
@@ -153,6 +167,14 @@ int main(int argc, char *argv[])
     {
         for(int j = -coef; j < coef; j++)
         {
+            Material cube_mat;
+            dengine_material_setup(&cube_mat);
+            dengine_material_set_shader_color(&stdshdr, &cube_mat);
+
+            int pick = abs(dengineutils_rng_int(DENGINE_ARY_SZ(cube_tex_pool)));
+            Texture* coltex = &cube_tex_pool[pick];
+            dengine_material_set_texture(coltex, "diffuseTex", &cube_mat);
+
             Entity* tiny = denginescene_ecs_new_entity();
             tiny->transform.position[0] = (float)i * coef * spread;
             tiny->transform.position[1] = 10.4 * (float)dengineutils_rng_int(3);
@@ -232,7 +254,6 @@ int main(int argc, char *argv[])
 
     denginescene_destroy(scene);
     free(prtbf);
-    dengine_material_destroy(&cube_mat);
     dengine_material_destroy(&plane_mat);
     dengine_material_destroy(&cube2_mat);
     denginescript_nsl_free(nsl);
