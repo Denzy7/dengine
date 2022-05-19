@@ -74,7 +74,7 @@ void dengine_shader_set_float(const Shader* shader, const char* name, const floa
 
 void dengine_shader_set_int(const Shader* shader, const char* name, const int value);
 
-Shader* dengine_shader_new_shader_standard(StandardShader stdshader);
+int dengine_shader_make_shader_standard(StandardShader stdshader, Shader* shader);
 
 void dengine_shader_set_shadercache(int state);
 

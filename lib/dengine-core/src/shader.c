@@ -336,11 +336,10 @@ void dengine_shader_set_float(const Shader* shader, const char* name, const floa
     glUniform1f(location, value); DENGINE_CHECKGL;
 }
 
-Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
+int dengine_shader_make_shader_standard(StandardShader stdshader, Shader* stdshdr)
 {
     DENGINE_DEBUG_ENTER;
 
-    Shader* stdshdr = malloc(sizeof(Shader));
     memset(stdshdr,0,sizeof(Shader));
 
     dengine_shader_create(stdshdr);
@@ -372,7 +371,7 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
         {
             free(cached);
             free(prtbuf);
-            return stdshdr;
+            return 1;
         }
     }
 
@@ -422,7 +421,7 @@ Shader* dengine_shader_new_shader_standard(StandardShader stdshader)
         dengine_shader_set_vec3(stdshdr,"color", default_shader_col);
     }
 
-    return stdshdr;
+    return 1;
 }
 
 int dengine_shader_set_binary(Shader* shader, void* binary, int length)
