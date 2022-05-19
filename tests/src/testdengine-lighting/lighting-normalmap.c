@@ -12,12 +12,13 @@ int main(int argc, char *argv[])
     const size_t prtbuf_sz = 1024;
     char* prtbuf = malloc(prtbuf_sz);
 
-    Shader* stdshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_STANDARD);
-    Shader* dftshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_DEFAULT);
+    Shader stdshdr,dftshdr ;
+    dengine_shader_make_standard(DENGINE_SHADER_STANDARD, &stdshdr);
+    dengine_shader_make_standard(DENGINE_SHADER_DEFAULT, &dftshdr);
 
     Material plane_mat;
     dengine_material_setup(&plane_mat);
-    dengine_material_set_shader_color(stdshdr, &plane_mat);
+    dengine_material_set_shader_color(&stdshdr, &plane_mat);
 
     Texture diffuseTex;
     memset(&diffuseTex, 0, sizeof(Texture));
@@ -37,11 +38,11 @@ int main(int argc, char *argv[])
     dengine_material_set_texture(&normalTex, "normalTex", &plane_mat);
 
     Primitive axis;
-    dengine_primitive_gen_axis(&axis, dftshdr);
+    dengine_primitive_gen_axis(&axis, &dftshdr);
 
     Primitive plane, cube;
-    dengine_primitive_gen_plane(&plane, stdshdr);
-    dengine_primitive_gen_cube(&cube, stdshdr);
+    dengine_primitive_gen_plane(&plane, &stdshdr);
+    dengine_primitive_gen_cube(&cube, &stdshdr);
 
     PointLight pLight;
     memset(&pLight, 0, sizeof(PointLight));
@@ -55,8 +56,8 @@ int main(int argc, char *argv[])
 
     Camera camera;
     dengine_camera_setup(&camera);
-    dengine_camera_apply(stdshdr, &camera);
-    dengine_camera_apply(dftshdr, &camera);
+    dengine_camera_apply(&stdshdr, &camera);
+    dengine_camera_apply(&dftshdr, &camera);
 
     mat4 model;
     vec3 scale = {5.0f, 5.0f, 5.0f};
@@ -74,13 +75,13 @@ int main(int argc, char *argv[])
 
         glm_mat4_identity(model);
         glm_scale(model, scale);
-        dengine_shader_set_mat4(stdshdr, "model", model[0]);
-        dengine_draw_primitive(&plane, stdshdr);
+        dengine_shader_set_mat4(&stdshdr, "model", model[0]);
+        dengine_draw_primitive(&plane, &stdshdr);
 
         glm_mat4_identity(model);
         glm_translate(model, position);
-        dengine_shader_set_mat4(stdshdr, "model", model[0]);
-        dengine_draw_primitive(&cube, stdshdr);
+        dengine_shader_set_mat4(&stdshdr, "model", model[0]);
+        dengine_draw_primitive(&cube, &stdshdr);
 
         dengine_material_use(NULL);
 
@@ -93,7 +94,7 @@ int main(int argc, char *argv[])
         }
         static const float speed = 6.0f;
 
-        dengine_lighting_apply_pointlight(&pLight, stdshdr);
+        dengine_lighting_apply_pointlight(&pLight, &stdshdr);
 
         if(dengine_input_get_key('W'))
             pLight.position[2] -= delta * speed;
@@ -115,9 +116,9 @@ int main(int argc, char *argv[])
 
         glm_mat4_identity(model);
         glm_translate(model, pLight.position);
-        dengine_shader_set_mat4(dftshdr, "model", model[0]);
-        dengine_shader_set_vec3(dftshdr, "color", yellow);
-        dengine_draw_primitive(&axis, dftshdr);
+        dengine_shader_set_mat4(&dftshdr, "model", model[0]);
+        dengine_shader_set_vec3(&dftshdr, "color", yellow);
+        dengine_draw_primitive(&axis, &dftshdr);
 
         denginegui_text(10, 10, GL, NULL);
 
@@ -128,8 +129,6 @@ int main(int argc, char *argv[])
         dengine_update();
     }
     free(prtbuf);
-    free(stdshdr);
-    free(dftshdr);
     dengine_material_destroy(&plane_mat);
 
     dengine_terminate();

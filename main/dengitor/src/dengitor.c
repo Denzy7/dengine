@@ -216,16 +216,17 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
                      &camera_component->camera->fov);
 
     // compile some standard shaders
-    dengitor->shader_default = dengine_shader_new_shader_standard(DENGINE_SHADER_DEFAULT);
-    dengitor->shader_standard = dengine_shader_new_shader_standard(DENGINE_SHADER_STANDARD);
-    dengitor->shader_shadow2d = dengine_shader_new_shader_standard(DENGINE_SHADER_SHADOW2D);
-    dengitor->shader_shadow3d = dengine_shader_new_shader_standard(DENGINE_SHADER_SHADOW3D);
-    dengitor->shader_debug_normals = dengine_shader_new_shader_standard(DENGINE_SHADER_DEBUG_NORMALS);
-    dengitor->shader_skybox_cube = dengine_shader_new_shader_standard(DENGINE_SHADER_SKYBOXCUBE);
-    dengitor->shader_skybox_2d = dengine_shader_new_shader_standard(DENGINE_SHADER_SKYBOX2D);
+    dengine_shader_make_standard(DENGINE_SHADER_DEFAULT, &dengitor->shader_default);
+    dengine_shader_make_standard(DENGINE_SHADER_STANDARD, &dengitor->shader_standard);
+    dengine_shader_make_standard(DENGINE_SHADER_SHADOW2D, &dengitor->shader_shadow2d);
+    dengine_shader_make_standard(DENGINE_SHADER_SHADOW3D, &dengitor->shader_shadow3d);
+    dengine_shader_make_standard(DENGINE_SHADER_DEBUG_NORMALS, &dengitor->shader_debug_normals);
+    dengine_shader_make_standard(DENGINE_SHADER_SKYBOXCUBE, &dengitor->shader_skybox_cube);
+    dengine_shader_make_standard(DENGINE_SHADER_SKYBOX2D, &dengitor->shader_skybox_2d);
+    dengine_shader_make_standard(DENGINE_SHADER_DEFAULT, &dengitor->shader_default);
 
-    dengine_primitive_gen_grid(10, &dengitor->scene_grid, dengitor->shader_default);
-    dengine_primitive_gen_axis(&dengitor->scene_axis, dengitor->shader_default);
+    dengine_primitive_gen_grid(10, &dengitor->scene_grid, &dengitor->shader_default);
+    dengine_primitive_gen_axis(&dengitor->scene_axis, &dengitor->shader_default);
     dengitor->scene_axis.index_count = 2;
 
 #if 1
@@ -233,18 +234,18 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
 
     // A SIMPLE SCENE
     Primitive cube;
-    dengine_primitive_gen_cube(&cube, dengitor->shader_standard);
+    dengine_primitive_gen_cube(&cube, &dengitor->shader_standard);
 
     Material std_mat;
     Material sky_equireq;
 
     dengine_material_setup(&sky_equireq);
-    dengine_material_set_shader_color(dengitor->shader_skybox_2d, &sky_equireq);
+    dengine_material_set_shader_color(&dengitor->shader_skybox_2d, &sky_equireq);
 
     // TODO : memory leak if not destroyed!
     dengine_material_setup(&std_mat);
-    dengine_material_set_shader_color(dengitor->shader_standard, &std_mat);
-    dengine_material_set_shader_shadow(dengitor->shader_shadow2d, &std_mat);
+    dengine_material_set_shader_color(&dengitor->shader_standard, &std_mat);
+    dengine_material_set_shader_shadow(&dengitor->shader_shadow2d, &std_mat);
 
     //skybox
     Texture equireq;
@@ -287,12 +288,12 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
     denginescene_add_entity(dengitor->scene_current, cube_ent);
 
     Primitive plane;
-    dengine_primitive_gen_plane(&plane, dengitor->shader_standard);
+    dengine_primitive_gen_plane(&plane, &dengitor->shader_standard);
 
     Material plane_mat;
     dengine_material_setup(&plane_mat);
-    dengine_material_set_shader_color(dengitor->shader_standard, &plane_mat);
-    dengine_material_set_shader_shadow(dengitor->shader_shadow2d, &plane_mat);
+    dengine_material_set_shader_color(&dengitor->shader_standard, &plane_mat);
+    dengine_material_set_shader_shadow(&dengitor->shader_shadow2d, &plane_mat);
 
     static const char* plane_tex_files_tgt[][2]=
     {
@@ -441,14 +442,6 @@ void dengitor_glarea_onunrealize(GtkGLArea* area)
     // clean scene cam
     denginescene_ecs_destroy_entity(dengitor->scene_camera);
 
-    free(dengitor->shader_default);
-    free(dengitor->shader_standard);
-    free(dengitor->shader_shadow2d);
-    free(dengitor->shader_shadow3d);
-    free(dengitor->shader_debug_normals);
-    free(dengitor->shader_skybox_cube);
-    free(dengitor->shader_skybox_2d);
-
     g_free(dengitor->glarea_alloc);
     g_object_unref(dengitor->cursor_blank);
     g_object_unref(dengitor->cursor_arrow);
@@ -570,7 +563,7 @@ void dengitor_glarea_onrender(GtkGLArea* area)
         denginescene_ecs_get_front(dengitor->scene_camera, front);
         dengine_camera_lookat(front,
                               scene_camera);
-        dengine_camera_apply(dengitor->shader_default, scene_camera);
+        dengine_camera_apply(&dengitor->shader_default, scene_camera);
 
         static mat4 mat_4;
         static vec3 vec_3;
@@ -585,11 +578,11 @@ void dengitor_glarea_onrender(GtkGLArea* area)
             vec_3[2] = dengitor->scene_grid_scale;
 
             glm_scale(mat_4, vec_3);
-            dengine_shader_set_vec3(dengitor->shader_default, "color", dengitor->scene_grid_color);
-            dengine_shader_set_mat4(dengitor->shader_default, "model",mat_4[0]);
+            dengine_shader_set_vec3(&dengitor->shader_default, "color", dengitor->scene_grid_color);
+            dengine_shader_set_mat4(&dengitor->shader_default, "model",mat_4[0]);
 
             glLineWidth(dengitor->scene_grid_width);
-            dengine_draw_primitive(&dengitor->scene_grid, dengitor->shader_default);
+            dengine_draw_primitive(&dengitor->scene_grid, &dengitor->shader_default);
         }
 
         glm_mat4_identity(mat_4);
@@ -603,7 +596,7 @@ void dengitor_glarea_onrender(GtkGLArea* area)
         vec_3[1] = dengitor->scene_axis_scale;
         vec_3[2] = dengitor->scene_axis_scale;
         glm_scale(mat_4, vec_3);
-        dengine_shader_set_mat4(dengitor->shader_default, "model",mat_4[0]);
+        dengine_shader_set_mat4(&dengitor->shader_default, "model",mat_4[0]);
 
         if(dengitor->scene_current)
         {
@@ -618,14 +611,14 @@ void dengitor_glarea_onrender(GtkGLArea* area)
         glDepthFunc(GL_ALWAYS);
 
         glLineWidth(dengitor->scene_axis_width);
-        dengitor_draw_axis(&dengitor->scene_axis, dengitor->shader_default);
+        dengitor_draw_axis(&dengitor->scene_axis, &dengitor->shader_default);
 
         //draw a local axis for current entity
         if(current_ent)
         {
             glLineWidth(dengitor->scene_entity_current_axis_width);
-            dengine_shader_set_mat4(dengitor->shader_default, "model", current_ent->transform.world_model[0]);
-            dengitor_draw_axis(&dengitor->scene_axis, dengitor->shader_default);
+            dengine_shader_set_mat4(&dengitor->shader_default, "model", current_ent->transform.world_model[0]);
+            dengitor_draw_axis(&dengitor->scene_axis, &dengitor->shader_default);
         }
         glDepthFunc(dfunc);
 

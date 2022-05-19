@@ -144,10 +144,15 @@ int main(int argc, char *argv[])
     CameraComponent* camc = denginescene_ecs_new_cameracomponent(&cam);
     ent13->camera_component=camc;
 
-    Shader* stdshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_STANDARD);
-    Shader* dftshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_DEFAULT);
-    Shader* shadow2d = dengine_shader_new_shader_standard(DENGINE_SHADER_SHADOW2D);
-    Shader* skycube = dengine_shader_new_shader_standard(DENGINE_SHADER_SKYBOXCUBE);
+    Shader stdshdr;
+    Shader dftshdr;
+    Shader shadow2d;
+    Shader skycube;
+
+    dengine_shader_make_standard(DENGINE_SHADER_STANDARD, &stdshdr);
+    dengine_shader_make_standard(DENGINE_SHADER_DEFAULT, &dftshdr);
+    dengine_shader_make_standard(DENGINE_SHADER_SHADOW2D, &shadow2d);
+    dengine_shader_make_standard(DENGINE_SHADER_SKYBOXCUBE, &skycube);
 
     Material cube_mat,duck_mat,dft_mat, skymat;
 
@@ -156,25 +161,25 @@ int main(int argc, char *argv[])
     dengine_material_setup(&dft_mat);
     dengine_material_setup(&skymat);
 
-    dengine_material_set_shader_color(stdshdr,&cube_mat);
-    dengine_material_set_shader_color(stdshdr,&duck_mat);
-    dengine_material_set_shader_color(dftshdr,&dft_mat);
-    dengine_material_set_shader_color(skycube,&skymat);
+    dengine_material_set_shader_color(&stdshdr,&cube_mat);
+    dengine_material_set_shader_color(&stdshdr,&duck_mat);
+    dengine_material_set_shader_color(&dftshdr,&dft_mat);
+    dengine_material_set_shader_color(&skycube,&skymat);
 
-    dengine_material_set_shader_shadow(shadow2d, &cube_mat);
-    dengine_material_set_shader_shadow(shadow2d, &duck_mat);
+    dengine_material_set_shader_shadow(&shadow2d, &cube_mat);
+    dengine_material_set_shader_shadow(&shadow2d, &duck_mat);
 
     Primitive cube,plane,grid;
-    dengine_primitive_gen_cube(&cube,stdshdr);
-    dengine_primitive_gen_plane(&plane,stdshdr);
-    dengine_primitive_gen_grid(10,&grid,dftshdr);
+    dengine_primitive_gen_cube(&cube,&stdshdr);
+    dengine_primitive_gen_plane(&plane,&stdshdr);
+    dengine_primitive_gen_grid(10,&grid,&dftshdr);
 
     const int prtbf_sz=2048;
     char* prtbf=malloc(prtbf_sz);
     File2Mem f2m;
 
     snprintf(prtbf,prtbf_sz,"%s/models/duck.obj",dengineutils_filesys_get_assetsdir());
-    Primitive* duck = denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ,prtbf,NULL,stdshdr);
+    Primitive* duck = denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ,prtbf,NULL,&stdshdr);
 
     Script duckscript;
     if(usensl)
@@ -216,7 +221,7 @@ int main(int argc, char *argv[])
     //load separated planes
     snprintf(prtbf,prtbf_sz,"%s/models/sperated-planes.obj",dengineutils_filesys_get_assetsdir());
     size_t n_planes = 0;
-    Primitive* sep_planes = denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ,prtbf,&n_planes,stdshdr);
+    Primitive* sep_planes = denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ,prtbf,&n_planes,&stdshdr);
 
     //Entity** child_sep = NULL;
     Entity* ent15 = denginescene_ecs_new_entity();
@@ -224,8 +229,8 @@ int main(int argc, char *argv[])
     Material sep_planes_mat;
     dengine_material_setup(&sep_planes_mat);
 
-    dengine_material_set_shader_color(stdshdr,&sep_planes_mat);
-    dengine_material_set_shader_shadow(shadow2d, &sep_planes_mat);
+    dengine_material_set_shader_color(&stdshdr,&sep_planes_mat);
+    dengine_material_set_shader_shadow(&shadow2d, &sep_planes_mat);
 
     Texture sep_plane_tex;
     memset(&sep_plane_tex,0,sizeof (Texture));
@@ -441,7 +446,7 @@ int main(int argc, char *argv[])
     int poly = 1;
 
     vec3 gridcolor = {0.0f, 1.0f, 0.0f};
-    dengine_shader_set_vec3(dftshdr, "color", gridcolor);
+    dengine_shader_set_vec3(&dftshdr, "color", gridcolor);
 
     denginescene_ecs_do_script_scene(scene, DENGINE_SCRIPT_FUNC_START);
 
@@ -460,12 +465,12 @@ int main(int argc, char *argv[])
 
         if(dengine_input_get_key_once('T'))
         {
-            Texture* rd = dengine_texture_new_canreadback_color(cam.render_width, cam.render_height);
-            dengine_framebuffer_readback(rd, &cam.framebuffer);
-            if(dengine_texture_writeout("fb.jpg", 1, rd))
+            Texture rd;
+            dengine_texture_make_canreadback_color(cam.render_width, cam.render_height, &rd);
+            dengine_framebuffer_readback(&rd, &cam.framebuffer);
+            if(dengine_texture_writeout("fb.jpg", 1, &rd))
                 dengineutils_os_dialog_messagebox( "screenshot successful","write to fb.jpg", 0);
-            dengine_texture_free_data(rd);
-            free(rd);
+            dengine_texture_free_data(&rd);
         }
 
         if(dengine_input_get_key_once('G'))
@@ -518,13 +523,8 @@ int main(int argc, char *argv[])
     dengine_material_destroy(&sep_planes_mat);
     dengine_material_destroy(&skymat);
 
-    dengine_shader_destroy(stdshdr);
-    dengine_shader_destroy(dftshdr);
-
-    free(stdshdr);
-    free(dftshdr);
-    free(shadow2d);
-    free(skycube);
+    dengine_shader_destroy(&stdshdr);
+    dengine_shader_destroy(&dftshdr);
 
     free(prtbf);
     free(duck);

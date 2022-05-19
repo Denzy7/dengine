@@ -55,7 +55,8 @@ int main(int argc, char *argv[])
 
     dengineutils_rng_set_seedwithtime();
 
-    Shader* stdshader=dengine_shader_new_shader_standard(DENGINE_SHADER_STANDARD);
+    Shader stdshader;
+    dengine_shader_make_standard(DENGINE_SHADER_STANDARD, &stdshader);
 
     Camera camera;
     dengine_camera_setup(&camera);
@@ -77,14 +78,14 @@ int main(int argc, char *argv[])
         dengineutils_logging_log("pass a scaler 1 - 100 to scale camera aspect ratio with -camscl <scaler>");
     }
 
-    dengine_camera_apply(stdshader, &camera);
+    dengine_camera_apply(&stdshader, &camera);
 
     Material cube_mat;
     dengine_material_setup(&cube_mat);
-    dengine_material_set_shader_color(stdshader, &cube_mat);
+    dengine_material_set_shader_color(&stdshader, &cube_mat);
 
     Primitive cube;
-    dengine_primitive_gen_cube(&cube, stdshader);
+    dengine_primitive_gen_cube(&cube, &stdshader);
 
     mat4 model;
     vec3 pos;
@@ -101,8 +102,8 @@ int main(int argc, char *argv[])
     pLight.light.diffuse[2] = 0;
     pLight.light.specular[2] = 0;
 
-    dengine_lighting_apply_dirlight(&dLight, stdshader);
-    dengine_lighting_apply_pointlight(&pLight,stdshader);
+    dengine_lighting_apply_dirlight(&dLight, &stdshader);
+    dengine_lighting_apply_pointlight(&pLight,&stdshader);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -116,14 +117,12 @@ int main(int argc, char *argv[])
         if(denginegui_button(0,360,200,50,"Dump to fb.jpg",NULL))
         {
             dengine_framebuffer_bind(GL_FRAMEBUFFER,&camera.framebuffer);
-            Texture* readback = dengine_texture_new_canreadback_color(camera.render_width,
-                                                                      camera.render_height);
-            dengine_framebuffer_readback(readback, &camera.framebuffer);
-            dengine_texture_writeout("fb.jpg", 1, readback);
+            Texture readback;
+            dengine_texture_make_canreadback_color(camera.render_width, camera.render_height, &readback);
+            dengine_framebuffer_readback(&readback, &camera.framebuffer);
+            dengine_texture_writeout("fb.jpg", 1, &readback);
 
-            dengine_texture_free_data(readback);
-            free(readback);
-
+            dengine_texture_free_data(&readback);
             snprintf(prtbf,prtbf_sz,"dumped to %s/fb.jpg",dengineutils_os_get_cwd());
             dengineutils_os_dialog_messagebox("dump success",prtbf,0);
 
@@ -150,9 +149,9 @@ int main(int argc, char *argv[])
                     pos[2] = (float)j+(float)i*(float)j;
 
                     glm_translate(model, pos);
-                    dengine_shader_set_mat4(stdshader, "model", model[0]);
+                    dengine_shader_set_mat4(&stdshader, "model", model[0]);
 
-                    dengine_draw_primitive(&cube, stdshader);
+                    dengine_draw_primitive(&cube, &stdshader);
                 }
             }
 
@@ -167,8 +166,7 @@ int main(int argc, char *argv[])
     }
 
     free(prtbf);
-    dengine_shader_destroy(stdshader);
-    free(stdshader);
+    dengine_shader_destroy(&stdshader);
 
     dengine_material_destroy(&cube_mat);
 

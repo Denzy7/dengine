@@ -21,17 +21,18 @@ int main(int argc, char *argv[])
     const size_t prtbf_sz = 2048;
     char* prtbf = malloc(prtbf_sz);
 
-    Shader* sky = dengine_shader_new_shader_standard(DENGINE_SHADER_SKYBOXCUBE);
-    Shader* dft = dengine_shader_new_shader_standard(DENGINE_SHADER_DEFAULT);
+    Shader sky, dft;
+    dengine_shader_make_standard(DENGINE_SHADER_SKYBOXCUBE, &sky);
+    dengine_shader_make_standard(DENGINE_SHADER_DEFAULT, &dft);
 
     Primitive cube, axis;
-    dengine_primitive_gen_cube(&cube, sky);
-    dengine_primitive_gen_axis(&axis, dft);
+    dengine_primitive_gen_cube(&cube, &sky);
+    dengine_primitive_gen_axis(&axis, &dft);
     axis.index_count = 2;
 
     Material cubemap_mat;
     dengine_material_setup(&cubemap_mat);
-    dengine_material_set_shader_color(sky, &cubemap_mat);
+    dengine_material_set_shader_color(&sky, &cubemap_mat);
 
     Camera camera;
     dengine_camera_setup(&camera);
@@ -89,22 +90,22 @@ int main(int argc, char *argv[])
             camera.position[1] -= speed * delta;
 
         dengine_camera_lookat(NULL, &camera);
-        dengine_camera_apply(sky, &camera);
-        dengine_camera_apply(dft, &camera);
+        dengine_camera_apply(&sky, &camera);
+        dengine_camera_apply(&dft, &camera);
 
         //GEOMETRY
         glDepthFunc(GL_LESS);
 
         glm_mat4_identity(model);
-        dengine_shader_set_mat4(dft, "model", model[0]);
-        draw_axis(&axis, dft);
+        dengine_shader_set_mat4(&dft, "model", model[0]);
+        draw_axis(&axis, &dft);
 
-        //SKYBOX
+        //&skyBOX
         glDepthFunc(GL_LEQUAL);
 
         dengine_material_use(&cubemap_mat);
 
-        dengine_draw_primitive(&cube, sky);
+        dengine_draw_primitive(&cube, &sky);
 
         dengine_material_use(NULL);
 
@@ -119,8 +120,6 @@ int main(int argc, char *argv[])
     dengine_material_destroy(&cubemap_mat);
 
     free(prtbf);
-    free(sky);
-    free(dft);
     dengine_terminate();
     return 0;
 }

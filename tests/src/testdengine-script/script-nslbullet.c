@@ -65,15 +65,16 @@ int main(int argc, char *argv[])
     cam_ent->transform.rotation[1] = 225.0f;
     denginescene_add_entity(scene, cam_ent);
 
-    Shader* stdshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_STANDARD);
+    Shader stdshdr;
+    dengine_shader_make_standard(DENGINE_SHADER_STANDARD, &stdshdr);
 
     Primitive cube, plane;
-    dengine_primitive_gen_cube(&cube, stdshdr);
-    dengine_primitive_gen_plane(&plane, stdshdr);
+    dengine_primitive_gen_cube(&cube, &stdshdr);
+    dengine_primitive_gen_plane(&plane, &stdshdr);
 
     Material plane_mat;
     dengine_material_setup(&plane_mat);
-    dengine_material_set_shader_color(stdshdr, &plane_mat);
+    dengine_material_set_shader_color(&stdshdr, &plane_mat);
     static const char* texs_plane[][2]=
     {
         {"textures/2d/plane_diff.png", "diffuseTex"},
@@ -105,7 +106,7 @@ int main(int argc, char *argv[])
 
     Material cube2_mat;
     dengine_material_setup(&cube2_mat);
-    dengine_material_set_shader_color(stdshdr, &cube2_mat);
+    dengine_material_set_shader_color(&stdshdr, &cube2_mat);
 
     static const char* texs_cube[][2]=
     {
@@ -144,7 +145,7 @@ int main(int argc, char *argv[])
 
     Material cube_mat;
     dengine_material_setup(&cube_mat);
-    dengine_material_set_shader_color(stdshdr, &cube_mat);
+    dengine_material_set_shader_color(&stdshdr, &cube_mat);
 
     const int coef = 4;
     const float spread = 1.24;;
@@ -231,7 +232,6 @@ int main(int argc, char *argv[])
 
     denginescene_destroy(scene);
     free(prtbf);
-    free(stdshdr);
     dengine_material_destroy(&cube_mat);
     dengine_material_destroy(&plane_mat);
     dengine_material_destroy(&cube2_mat);

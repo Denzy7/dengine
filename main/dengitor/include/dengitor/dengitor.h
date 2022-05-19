@@ -70,13 +70,13 @@ typedef struct
     GtkTreeView* scene_treeview;
     GtkTreeStore* scene_treeview_store;
 
-    Shader* shader_default;
-    Shader* shader_standard;
-    Shader* shader_shadow2d;
-    Shader* shader_shadow3d;
-    Shader* shader_debug_normals;
-    Shader* shader_skybox_cube;
-    Shader* shader_skybox_2d;
+    Shader shader_default;
+    Shader shader_standard;
+    Shader shader_shadow2d;
+    Shader shader_shadow3d;
+    Shader shader_debug_normals;
+    Shader shader_skybox_cube;
+    Shader shader_skybox_2d;
 }Dengitor;
 
 void dengitor_onactivate(GtkApplication* app);
