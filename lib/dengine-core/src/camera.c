@@ -214,3 +214,25 @@ void dengine_camera_resize(Camera* camera, int width, int height)
 
     dengine_texture_bind(GL_TEXTURE_2D, entry_tex);
 }
+
+void dengine_camera_world2screen(const Camera* camera, const float* world, float* screen)
+{
+    vec4 clip_v, clip_p;
+    mat4 proj, view;
+    vec3 ndc;
+    vec2 sz = {camera->render_width, camera->render_height};
+    vec4 vp;
+
+    memcpy(&proj[0][0], camera->projection_mat, sizeof(camera->projection_mat));
+    memcpy(&view[0][0], camera->view_mat, sizeof(camera->view_mat));
+    glm_vec4_one(vp);
+    memcpy(vp, world, sizeof(vec3));
+
+    glm_mat4_mulv(view, vp, clip_v);
+    glm_mat4_mulv(proj, clip_v, clip_p);
+    glm_vec3_divs(clip_p, clip_p[3], ndc);
+    glm_vec2_adds(ndc, 1.0, ndc);
+    glm_vec2_divs(ndc, 2.0, ndc);
+    glm_vec2_mul(ndc, sz, ndc);
+    memcpy(screen, ndc, sizeof(vec2));
+}

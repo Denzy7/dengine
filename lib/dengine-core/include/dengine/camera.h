@@ -94,6 +94,14 @@ void dengine_camera_use(const Camera* camera);
  */
 void dengine_camera_resize(Camera* camera, int width, int height);
 
+/*!
+ * \brief Convert 3D space position to a 2D screen position
+ * \param camera Camera to use
+ * \param world 3D X,Y,Z
+ * \param screen 2D X,Y
+ */
+void dengine_camera_world2screen(const Camera* camera, const float* world, float* screen);
+
 #ifdef __cplusplus
 }
 #endif
