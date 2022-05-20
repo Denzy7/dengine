@@ -10,7 +10,7 @@ typedef struct
 {
     int windowinit;
     Material cube_mat,duck_mat,dft_mat, skymat, sep_planes_mat;
-    Shader* stdshdr,* dftshdr,* shadow2d,* skycube;
+    Shader stdshdr, dftshdr, shadow2d, skycube;
     Scene* scene;
     Primitive* duck,* sep_planes;
     Camera cam;
@@ -71,10 +71,10 @@ static void init(struct android_app* app)
         CameraComponent* camc = denginescene_ecs_new_cameracomponent(&ds.cam);
         ent13->camera_component=camc;
 
-        ds.stdshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_STANDARD);
-        ds.dftshdr = dengine_shader_new_shader_standard(DENGINE_SHADER_DEFAULT);
-        ds.shadow2d = dengine_shader_new_shader_standard(DENGINE_SHADER_SHADOW2D);
-        ds.skycube = dengine_shader_new_shader_standard(DENGINE_SHADER_SKYBOXCUBE);
+        dengine_shader_make_standard(DENGINE_SHADER_STANDARD, &ds.stdshdr);
+        dengine_shader_make_standard(DENGINE_SHADER_DEFAULT, &ds.dftshdr);
+        dengine_shader_make_standard(DENGINE_SHADER_SHADOW2D, &ds.shadow2d);
+        dengine_shader_make_standard(DENGINE_SHADER_SKYBOXCUBE, &ds.skycube);
 
         dengine_material_setup(&ds.cube_mat);
         dengine_material_setup(&ds.duck_mat);
@@ -90,14 +90,14 @@ static void init(struct android_app* app)
         dengine_material_set_shader_shadow(ds.shadow2d, &ds.duck_mat);
 
         Primitive cube,plane,grid;
-        dengine_primitive_gen_cube(&cube, ds.stdshdr);
-        dengine_primitive_gen_plane(&plane, ds.stdshdr);
-        dengine_primitive_gen_grid(10,&grid, ds.dftshdr);
+        dengine_primitive_gen_cube(&cube, &ds.stdshdr);
+        dengine_primitive_gen_plane(&plane, &ds.stdshdr);
+        dengine_primitive_gen_grid(10,&grid, &ds.dftshdr);
 
         File2Mem f2m;
         f2m.file = "models/duck.obj";
         dengineutils_android_asset2file2mem(&f2m);
-        ds.duck = denginemodel_load_mem(DENGINE_MODEL_FORMAT_OBJ, f2m.mem, f2m.size, NULL, ds.stdshdr);
+        ds.duck = denginemodel_load_mem(DENGINE_MODEL_FORMAT_OBJ, f2m.mem, f2m.size, NULL, &ds.stdshdr);
         dengineutils_filesys_file2mem_free(&f2m);
 
 // android input is not working atm
@@ -123,7 +123,7 @@ static void init(struct android_app* app)
         f2m.file = "models/sperated-planes.obj";
         dengineutils_android_asset2file2mem(&f2m);
         size_t n_planes = 0;
-        ds.sep_planes = denginemodel_load_mem(DENGINE_MODEL_FORMAT_OBJ, f2m.mem, f2m.size, &n_planes, ds.stdshdr);
+        ds.sep_planes = denginemodel_load_mem(DENGINE_MODEL_FORMAT_OBJ, f2m.mem, f2m.size, &n_planes, &ds.stdshdr);
         dengineutils_filesys_file2mem_free(&f2m);
 
         Entity* ent15 = denginescene_ecs_new_entity();
@@ -150,7 +150,7 @@ static void init(struct android_app* app)
                 if(ent)
                 {
                     ent->transform.position[1] = (float)i / (float)n_planes;
-                    ent->transform.rotation[1] = i * 10.0f;
+                    ent->transform.rotation[1] = (float)i * 10.0f;
 
                     MeshComponent* sep_plane_mesh = denginescene_ecs_new_meshcomponent(&ds.sep_planes[i], &ds.sep_planes_mat);
                     ent->mesh_component = sep_plane_mesh;
@@ -302,7 +302,7 @@ static void init(struct android_app* app)
         ds.scene->skybox = sky;
 
         vec3 gridcolor = {0.0f, 1.0f, 0.0f};
-        dengine_shader_set_vec3(ds.dftshdr, "color", gridcolor);
+        dengine_shader_set_vec3(&ds.dftshdr, "color", gridcolor);
 
         printf("test stdout to logcat!");
 
@@ -317,11 +317,6 @@ static void term(struct  android_app* app)
     dengine_material_destroy(&ds.dft_mat);
     dengine_material_destroy(&ds.sep_planes_mat);
     dengine_material_destroy(&ds.skymat);
-
-    free(ds.stdshdr);
-    free(ds.dftshdr);
-    free(ds.shadow2d);
-    free(ds.skycube);
 
     free(ds.duck);
     if(ds.sep_planes)

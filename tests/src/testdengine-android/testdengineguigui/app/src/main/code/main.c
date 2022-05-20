@@ -14,7 +14,6 @@ int window_init = 0;
 static void init(struct android_app* app)
 {
     ANativeWindow_acquire(app->window);
-    dengine_window_android_set_nativewindow(app->window);
 
     dengine_window_request_GL(2, 0, 0);
 

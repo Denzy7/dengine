@@ -57,14 +57,14 @@ vec3 gizmoscl = {.75f, .75f, .75f};
 vec3 up = {.0f, 1.f, .0f};
 mat4 view;
 
-static void draw_axis(Primitive* axis, Shader* _shader)
+static void draw_axis(Primitive* _axis, Shader* _shader)
 {
     float color[3];
     for (int i = 0; i < 3; i++) {
         color[0] = i == 0 ? 1.0f : 0.0f, color[1] = i == 1 ? 1.0f : 0.0f, color[2] = i == 2 ? 1.0f : 0.0f;
-        axis->offset = (void*)(i*2*sizeof (uint16_t));
+        _axis->offset = (void*)(i * 2 * sizeof (uint16_t));
         dengine_shader_set_vec3(_shader, "color", color);
-        dengine_draw_primitive(axis, _shader);
+        dengine_draw_primitive(_axis, _shader);
     }
 }
 
