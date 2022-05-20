@@ -75,8 +75,10 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
 
     shadowop->invisiblemesh = 0;
 
-    const Framebuffer* entry_fb = dengine_entrygl_framebuffer(GL_FRAMEBUFFER);
-    const Texture* entry_tex = dengine_entrygl_texture(shadowmap_target);
+    Framebuffer entry_fb;
+    dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entry_fb);
+    Texture entry_tex;
+    dengine_entrygl_texture(shadowmap_target, &entry_tex );
 
     Texture depth;
     memset(&depth, 0, sizeof(Texture));
@@ -119,8 +121,8 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
         glDrawBuffers(1, none); DENGINE_CHECKGL;
     }
 
-    dengine_texture_bind(shadowmap_target, entry_tex);
-    dengine_framebuffer_bind(GL_FRAMEBUFFER, entry_fb);
+    dengine_texture_bind(shadowmap_target, &entry_tex);
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, &entry_fb);
 
     shadowop->near_shadow = 0.01f;
     shadowop->far_shadow = 25.0f;
@@ -153,18 +155,20 @@ void dengine_lighting_shadowop_clear(const ShadowOp* shadowop)
         return;
 
     //we might not have entered with fb 0, save binding for later
-    const Framebuffer* entry_fb = dengine_entrygl_framebuffer(GL_FRAMEBUFFER);
+    Framebuffer entry_fb;
+    dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entry_fb);
 
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &shadowop->shadow_map);
     glClear(GL_DEPTH_BUFFER_BIT); DENGINE_CHECKGL;
 
     //bind entry fb
-    dengine_framebuffer_bind(GL_FRAMEBUFFER, entry_fb);
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, &entry_fb);
 }
 
 void dengine_lighting_shadowop_resize(uint32_t shadowmap_target, ShadowOp* shadowop, int size)
 {
-    const Texture* entry_tex = dengine_entrygl_texture(shadowmap_target);
+    Texture entry_tex;
+    dengine_entrygl_texture(shadowmap_target, &entry_tex);
 
     Texture* depth = &shadowop->shadow_map.depth;
     if(depth->texture_id)
@@ -186,7 +190,7 @@ void dengine_lighting_shadowop_resize(uint32_t shadowmap_target, ShadowOp* shado
     }
 
     shadowop->shadow_map_size = size;
-    dengine_texture_bind(shadowmap_target, entry_tex);
+    dengine_texture_bind(shadowmap_target, &entry_tex);
 }
 
 void dengine_lighting_setup_dirlight(DirLight* dirLight)

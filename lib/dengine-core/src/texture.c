@@ -292,13 +292,14 @@ void dengine_texture_make_color(const int width, const int height, const float* 
     texture->width = width;
     texture->height = height;
 
-    const Texture* entrytex = dengine_entrygl_texture(GL_TEXTURE_2D);
+    Texture entrytex;
+    dengine_entrygl_texture(GL_TEXTURE_2D, &entrytex);
 
     dengine_texture_gen(1, texture);
     dengine_texture_bind(GL_TEXTURE_2D, texture);
     dengine_texture_data(GL_TEXTURE_2D, texture);
     dengine_texture_set_params(GL_TEXTURE_2D, texture);
-    dengine_texture_bind(GL_TEXTURE_2D, entrytex);
+    dengine_texture_bind(GL_TEXTURE_2D, &entrytex);
 
     free(data);
 }
@@ -376,14 +377,15 @@ void dengine_texture_make_checkerboard(const int width, const int height,
         }
     }
 
-    const Texture* entrytex = dengine_entrygl_texture(GL_TEXTURE_2D);
+    Texture entrytex;
+    dengine_entrygl_texture(GL_TEXTURE_2D, &entrytex);
 
     texture->data = dat;
     dengine_texture_gen(1, texture);
     dengine_texture_bind(GL_TEXTURE_2D, texture);
     dengine_texture_data(GL_TEXTURE_2D, texture);
     dengine_texture_set_params(GL_TEXTURE_2D, texture);
-    dengine_texture_bind(GL_TEXTURE_2D, entrytex);
+    dengine_texture_bind(GL_TEXTURE_2D, &entrytex);
 
     free(dat);
 }
@@ -447,13 +449,14 @@ void dengine_texture_make_canreadback_color(const int width, const int height, T
     uint8_t* data = calloc(width * height * 4, sizeof(uint8_t));
     texture->data = data;
 
-    const Texture* entrytex = dengine_entrygl_texture(GL_TEXTURE_2D);
+    Texture entrytex;
+    dengine_entrygl_texture(GL_TEXTURE_2D, &entrytex);
 
     dengine_texture_gen(1, texture);
     dengine_texture_bind(GL_TEXTURE_2D, texture);
     dengine_texture_data(GL_TEXTURE_2D, texture);
     dengine_texture_set_params(GL_TEXTURE_2D, texture);
-    dengine_texture_bind(GL_TEXTURE_2D, entrytex);
+    dengine_texture_bind(GL_TEXTURE_2D, &entrytex);
 }
 
 int dengine_texture_issupprorted(uint32_t target, uint32_t type, uint32_t internal_format, uint32_t format)

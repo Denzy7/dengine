@@ -219,7 +219,8 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     denginescene_ecs_get_front(camera, front);
 
     //we might not have entered with fb 0, save binding for later
-    const Framebuffer entryfb = *dengine_entrygl_framebuffer(GL_FRAMEBUFFER);
+    Framebuffer entryfb;
+    dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entryfb);
 
     //store entry viewport
     int x, y, w, h;
