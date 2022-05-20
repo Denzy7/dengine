@@ -120,7 +120,14 @@ void dengine_texture_free_data(Texture* texture);
  */
 void dengine_texture_destroy(size_t count, Texture* textures);
 
-
+/*!
+ * \brief Make a texture of specified color
+ * \param width width
+ * \param height height
+ * \param color color (0.0-1.0 per channel) in float array
+ * \param channels channels in color (preferably 3 for rgb or 4 for rgba)
+ * \param texture Texture to make
+ */
 void dengine_texture_make_color(const int width, const int height, const float* color, const int channels, Texture* texture);
 
 /*!
@@ -128,10 +135,11 @@ void dengine_texture_make_color(const int width, const int height, const float* 
  * \param width width
  * \param height height
  * \param segments segments to split width and height
- * \param foreground foreground color
- * \param background background color
+ * \param foreground foreground color (0.0-1.0 per channel) in float array
+ * \param background background color (0.0-1.0 per channel) in float array
  * \param foreground_first 1 = foreground first, 0 = background first
- * \param channels color channels in both foreground and background
+ * \param channels color channels in both foreground and background (preferably 3 or 4)
+ * \param texture Texture to make
  */
 void dengine_texture_make_checkerboard(const int width, const int height,
                                          const int segments,
