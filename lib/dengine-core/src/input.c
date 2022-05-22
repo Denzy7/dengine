@@ -15,7 +15,6 @@
 #endif
 
 #ifdef DENGINE_LINUX
-
 #include <dirent.h> //opendir /dev/input
 #include <linux/input.h>
 #include <unistd.h>
@@ -202,20 +201,7 @@ void _dengine_input_gamepad_validate();
 
 void dengine_input_init()
 {
-#ifdef DENGINE_WIN_GLFW
-    GLFWwindow* current = dengine_window_glfw_get_currentwindow();
-    if(current)
-    {
-        glfwSetKeyCallback(current, dengine_input_glfw_callback_key);
-        glfwSetMouseButtonCallback(current, dengine_input_glfw_callback_mousebtn);
-        glfwSetScrollCallback(current, dengine_input_glfw_callback_mousescroll);
-        glfwSetCursorPosCallback(current, dengine_input_glfw_callback_mousepos);
-    }
-    glfwSetJoystickCallback(dengine_input_glfw_callback_joystick);
 
-    _dengine_input_gamepad_validate();
-
-#endif
 }
 
 
@@ -294,83 +280,6 @@ double dengine_input_get_mousepos_y()
     return mouseposy;
 }
 
-//GLFW callbacks
-#ifdef DENGINE_WIN_GLFW
-void dengine_input_glfw_callback_key(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    for(int i = 0; i < DENGINE_INPUT_MAXKEYPRESS; i++)
-    {
-        if(keys[i].scancode == scancode && action == GLFW_RELEASE)
-        {
-            keys[i].scancode = 0;
-            keys[i].key = 0;
-            //printf("rm key : %c, code : %d, action : %d, mods : %d\n", key, scancode, action, mods);
-            break;
-        }
-
-        //don't dupe
-        if(keys[i].scancode == scancode && action > 0)
-            break;
-
-        if(keys[i].scancode != scancode && action == GLFW_PRESS)
-        {
-            //printf("add key : %c, code : %d, action : %d, mods : %d\n", key, scancode, action, mods);
-            keys[i].scancode = scancode;
-            keys[i].key = key;
-            break;
-        }
-    }
-}
-
-void dengine_input_glfw_callback_mousebtn(GLFWwindow* window, int button, int action, int mods)
-{
-    for(int i = 0; i < DENGINE_INPUT_MAXMOUSEBTN; i++)
-    {
-        if(mousebtns[i] == button && action == GLFW_RELEASE)
-        {
-            mousebtns[i] = -1;
-            //printf("rm mousebtn : %d, action : %d, mods : %d\n", button, action, mods);
-            break;
-        }
-
-        //don't dupe
-        if(mousebtns[i] == button && action > 0)
-            break;
-
-        if(mousebtns[i] != button && action == GLFW_PRESS)
-        {
-            //printf("add mousebtn : %d, action : %d, mods : %d\n", button, action, mods);
-            mousebtns[i] = button;
-            break;
-        }
-    }
-}
-
-void dengine_input_glfw_callback_mousescroll(GLFWwindow* window, double x, double y)
-{
-    mousescrollx = x;
-    mousescrolly = y;
-
-    //printf("mousescroll, x : %f, y : %f\n", x, y);
-}
-
-void dengine_input_glfw_callback_mousepos(GLFWwindow* window, double x, double y)
-{
-    mouseposx = x;
-    //flip y, glfw reads top to bottom
-    int h;
-    dengine_window_get_window_height(&h);
-    mouseposy = h - y;
-    //printf("mousepos, x : %f, y : %f\n", x, y);
-}
-
-void dengine_input_glfw_callback_joystick(int jid, int event)
-{
-    _dengine_input_gamepad_validate();
-}
-
-#endif
-
 void _dengine_input_gamepad_validate()
 {
     memset(padjid, -1, sizeof(padjid));
@@ -378,12 +287,7 @@ void _dengine_input_gamepad_validate()
     for(int i = 0; i < 16; i++)
     {
 
-        #ifdef DENGINE_WIN_GLFW
-        if(glfwJoystickIsGamepad(i))
-        {
-            padjid[i] = i;
-        }
-        #endif
+        //check is pad
 
         #ifdef DENGINE_LINUX
         if(linux_pads[i].fd != -1)
@@ -401,46 +305,22 @@ void _dengine_input_gamepad_validate()
 
 int dengine_input_gamepad_get_btn(int pad, int btn)
 {
-    #ifdef DENGINE_WIN_GLFW
-    GLFWgamepadstate state;
-    if(glfwGetGamepadState(pad, &state) && btn < 15)
-        return state.buttons[btn];
-    else
-        return 0;
-    #else
     return 0;
-    #endif
 }
 
 float dengine_input_gamepad_get_axis(int pad, int axis)
 {
-    #ifdef DENGINE_WIN_GLFW
-    GLFWgamepadstate state;
-    if(glfwGetGamepadState(pad, &state) && axis < 6)
-        return (state.axes[axis] + 1.0f) / 2.0f;
-    else
-        return 0.0f;
-    #else
     return 0.0f;
-    #endif
 }
 
 int dengine_input_gamepad_get_isconnected(int pad)
 {
-    #ifdef DENGINE_WIN_GLFW
-    return glfwJoystickIsGamepad(pad);
-    #else
     return 0;
-    #endif
 }
 
 const char* dengine_input_gamepad_get_name(int pad)
 {
-    #ifdef DENGINE_WIN_GLFW
-    return glfwGetJoystickName(pad);
-    #else
     return NULL;
-    #endif
 }
 
 int dengine_input_gamepad_vibration_set_basic(int pad, float leftmotor, float rightmotor)
@@ -473,13 +353,6 @@ const char* dengine_input_gamepad_vibration_get_error()
 
 void dengine_input_pollevents()
 {
-    #if defined(DENGINE_WIN_GLFW)
-    dengine_window_glfw_pollevents();
-    #elif defined(DENGINE_ANDROID)
-    dengineutils_android_pollevents();
-    //TODO: get pointer positions...
-    #endif
-
 #ifdef DENGINE_HAS_GTK3
     //do gtk main non-blocking loop to unfreeze dialogs
     gtk_main_iteration_do(0);
