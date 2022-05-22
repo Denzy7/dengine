@@ -1,6 +1,5 @@
 # have you cloned me before?
 Its a good idea to check if you have cloned the following deps before to save some disk space.
-- [glfw](https://github.com/glfw/glfw.git)
 - [stb](https://github.com/nothings/stb.git)
 - [cglm](https://github.com/recp/cglm.git)
 - [cpython v3.9](https://github.com/python/cpython)
@@ -22,10 +21,9 @@ Get default deps
 
 # optional deps
 **If you will be compiling for Windows or Android you might want to get all optional deps to avoid missing libraries and header files**  
-**GLFW is only needed for Windows**  
 **If you want Python scripting, update deps/cpython (will take some time!)**  
 
-`git submodule update deps/glfw deps/cpython`
+`git submodule update deps/cpython`
 
 # python
 Depends if python is found on your system. And is compatible with the build system. If not this will result in a lenghty compile process. It might also result in an incompatible module set.
@@ -33,12 +31,11 @@ Depends if python is found on your system. And is compatible with the build syst
 A general rule of thumb if you are using Linux, no need to build python. Just set CMake option DENGINE_USE_SYSTEM_PYTHON to ON. Otherwise if you are going to build on another system, definitely set it to OFF
 
 # debian & ubuntu
-`# apt install libglfw3-dev libgtk-3-dev libpython3.9-dev `
-**Substitute libglfw3 for libglfw3-wayland if on wayland**
-
+`# apt install libgtk-3-dev libpython3.9-dev `
+**If on Wayland ensure you have XWayland installed and running**
 # arch
-`# pacman -S glfw-x11 gtk3 python`
-**Substitute glfw-x11 for glfw3-wayland if on wayland**
+`# pacman -S gtk3 python`
+**If on Wayland ensure you have XWayland installed and running**
 
 # dengitor and gtk3
 Building GTK+ 3 is really complicated. However [some really smart people in the AUR](https://aur.archlinux.org/packages/mingw-w64-gtk3) have already figured it out.

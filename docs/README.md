@@ -34,7 +34,8 @@
 	- dengine.h - Inlines some basic init and terminate functions
 
 	**DEPENDS**  
-	- GLFW – Context and Input for Desktop GL
+	- GLX,WGL – Context for Desktop GL
+	- XInput, X -  Input for Desktop GL
 	- CGLM – Math for OpenGL
 	- GLAD – Function and extension loader for OpenGL
 	- EGL – Context creation for GLES
