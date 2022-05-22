@@ -23,6 +23,7 @@ src/stb_image_write.c
 src/viewport.c
 ${CMAKE_CURRENT_BINARY_DIR}/src/dengine-core.rc
 ${PROJECT_SOURCE_DIR}/deps/glad/src/glad.c
+#src/dgl.c
 src/entrygl.c
 ${PROJECT_SOURCE_DIR}/LICENSE.c
 )
@@ -48,6 +49,7 @@ include/dengine/renderbuffer.h
 include/dengine/dengine.h
 include/dengine/viewport.h
 include/dengine/entrygl.h
+include/dengine/dgl.h
 )
 
 add_library(dengine-core ${dengine-core-hdr} ${dengine-core-src})
@@ -59,21 +61,24 @@ set_target_properties(dengine-core PROPERTIES
 #link everything here to avoid cmake link errors
 target_link_libraries(dengine-core dengine-utils)
 
-if(NOT ANDROID)
-    target_link_libraries(dengine-core glfw)
+if(DENGINE_HAS_X11)
+    target_link_libraries(dengine-core ${x11_LIBRARIES})
 endif()
 
+if(DENGINE_HAS_EGL)
+    target_link_libraries(dengine-core ${DENGINE_HAS_EGL})
+endif()
+
+IF(DENGINE_HAS_GLX)
+    target_link_libraries(dengine-core ${glx_LIBRARIES})
+endif()
 if(UNIX)
     target_link_libraries(dengine-core m)
 endif()
 
-#xinput basic vibration
+# xinput = basic vibration, opengl32 = wgl
 if(WIN32)
-    target_link_libraries(dengine-core xinput)
-endif()
-
-if(ANDROID)
-    target_link_libraries(dengine-core EGL)
+    target_link_libraries(dengine-core xinput opengl32)
 endif()
 
 set_property(TARGET dengine-core PROPERTY C_STANDARD 99)

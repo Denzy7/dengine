@@ -7,31 +7,6 @@
  * Includes all the stuff we'd expect to use
  */
 
-typedef struct
-{
-    int window_width;
-    int window_height;
-    const char* window_title;
-    int window_msaa;
-    int window_createnative;
-
-    int gl_max;
-    int gl_min;
-    int gl_core;
-    int gl_loaddefault;
-
-    int enable_depth;
-    int enable_backfaceculling;
-
-    float font_size;
-    int font_bitmapsize;
-
-    int cache_textures;
-    int cache_shaders;
-
-    int enable_logthread;
-}DengineInitOpts;
-
 #include <dengine/window.h>
 #include <dengine/input.h>
 #include <dengine/primitive.h>
@@ -61,6 +36,32 @@ typedef struct
 #include <dengine-scene/scene.h>
 
 #include <dengine-script/script.h>
+
+typedef struct
+{
+    DengineWindow* window;
+    int window_width;
+    int window_height;
+    const char* window_title;
+    int window_msaa;
+    int window_createnative;
+
+    int gl_max;
+    int gl_min;
+    int gl_core;
+    int gl_loaddefault;
+
+    int enable_depth;
+    int enable_backfaceculling;
+
+    float font_size;
+    int font_bitmapsize;
+
+    int cache_textures;
+    int cache_shaders;
+
+    int enable_logthread;
+}DengineInitOpts;
 
 static DengineInitOpts DENGINE_INIT_OPTS;
 static int DENGINE_HAS_GOT_INIT_OPTS = 0;
@@ -221,15 +222,26 @@ DENGINE_INLINE int dengine_init()
     if(DENGINE_INIT_OPTS.window_createnative)
     {
         if(!dengine_window_init())
+        {
+            dengineutils_logging_log("ERROR::Cannot init window");
             return 0;
+        }
 
 #ifndef DENGINE_ANDROID
-        //Android creates a window already in init... how convinient and limiting?
-        Window window;
-        if(!dengine_window_create(DENGINE_INIT_OPTS.window_width, DENGINE_INIT_OPTS.window_height, DENGINE_INIT_OPTS.window_title, &window))
-            return 0;
+        //Android creates a window already in init
 
-         dengine_window_makecurrent(&window);
+        DENGINE_INIT_OPTS.window = dengine_window_create(DENGINE_INIT_OPTS.window_width, DENGINE_INIT_OPTS.window_height, DENGINE_INIT_OPTS.window_title, NULL);
+        if(!DENGINE_INIT_OPTS.window)
+        {
+            dengineutils_logging_log("ERROR::Cannot create window");
+            return 0;
+        }
+
+         if(!dengine_window_makecurrent(DENGINE_INIT_OPTS.window))
+         {
+             dengineutils_logging_log("ERROR::Cannot makecurrent window");
+             return 0;
+         }
 #endif
     }
 
@@ -237,12 +249,19 @@ DENGINE_INLINE int dengine_init()
     {
         //use default glad loader
         if(!gladLoadGL())
+        {
+            dengineutils_logging_log("ERROR::Cannot gladLoadGL");
             return 0;
+        }
+
     }else
     {
         //use window loader
-        if(!dengine_window_loadgl())
+        if(!dengine_window_loadgl(DENGINE_INIT_OPTS.window))
+        {
+            dengineutils_logging_log("ERROR::Cannot dengine_window_loadgl");
             return 0;
+        }
     }
 
     //caching
@@ -313,14 +332,17 @@ DENGINE_INLINE void dengine_terminate()
     if(DENGINE_INIT_OPTS.enable_logthread)
         dengineutils_logging_terminate();
 
+    dengine_window_destroy(DENGINE_INIT_OPTS.window);
     dengine_window_terminate();
 }
 
-DENGINE_INLINE void dengine_update()
+DENGINE_INLINE int dengine_update()
 {
     dengineutils_timer_update();
-    dengine_window_swapbuffers();
-    dengine_input_pollevents();
+    dengine_window_swapbuffers(DENGINE_INIT_OPTS.window);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    dengine_window_poll(DENGINE_INIT_OPTS.window);
+    return dengine_window_isrunning(DENGINE_INIT_OPTS.window);
 }
 
 #endif // DENGINE_H

@@ -7,11 +7,6 @@
 
 #include "dengine_config.h"
 
-#ifdef DENGINE_WIN_GLFW
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,21 +42,6 @@ int dengine_input_gamepad_vibration_set_basic(int pad, float leftmotor, float ri
 const char* dengine_input_gamepad_vibration_get_error();
 
 void dengine_input_pollevents();
-
-//GLFW callbacks
-#ifdef DENGINE_WIN_GLFW
-
-void dengine_input_glfw_callback_key(GLFWwindow* window,int key,int scancode,int action,int mods);
-
-void dengine_input_glfw_callback_mousebtn(GLFWwindow* window, int button, int action, int mods);
-
-void dengine_input_glfw_callback_mousescroll(GLFWwindow* window, double x, double y);
-
-void dengine_input_glfw_callback_mousepos(GLFWwindow* window, double x, double y);
-
-void dengine_input_glfw_callback_joystick(int jid, int event);
-
-#endif
 
 #ifdef __cplusplus
 }

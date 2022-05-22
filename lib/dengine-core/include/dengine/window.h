@@ -3,44 +3,19 @@
  * Execute window operations
  */
 
-//USES ONLY ONE NATIVE WINDOW.
-
 #ifndef WINDOW_H
 #define WINDOW_H
 
 #include "dengine_config.h" //DENGINE_WIN_, DENGINE_GL_
 
-#if defined (DENGINE_WIN_GLFW)
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-#elif defined (DENGINE_WIN_EGL)
-#include <EGL/egl.h>
-#else
-#error "Plz define at least one Windowing Framework"
-#endif // defined
-
-#ifdef DENGINE_ANDROID
-#include <dengine-utils/platform/android.h>
-#endif
-
-/*!
- * \struct Window
- * This is really just a dummy struct for internal purposes
- */
-typedef struct
+typedef enum
 {
-    #if defined(DENGINE_ANDROID)
-    struct ANativeWindow* window;
-    #elif defined(DENGINE_WIN_GLFW)
-    GLFWwindow* window;
-    #endif
+    DENGINE_CONTEXT_TYPE_GLX = 1,
+    DENGINE_CONTEXT_TYPE_WGL,
+    DENGINE_CONTEXT_TYPE_EGL
+}ContextType;
 
-    #if defined(DENGINE_WIN_EGL)
-    EGLDisplay display;
-    EGLSurface surface;
-    EGLContext context;
-    #endif
-}Window;
+typedef struct _DengineWindow DengineWindow;
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,56 +31,32 @@ void dengine_window_request_MSAA(int samples);
 
 void dengine_window_request_defaultall();
 
-void dengine_window_get_window_width(int* width);
+void dengine_window_request_context(ContextType type);
 
-void dengine_window_get_window_height(int* height);
+DengineWindow* dengine_window_create(int width, int height, const char* title, const DengineWindow* share);
 
-void dengine_window_get_window_dim(int* width, int* height);
+void dengine_window_destroy(DengineWindow* window);
 
-void dengine_window_swapbuffers();
+void dengine_window_get_dim(DengineWindow* window, int* width, int* height);
 
-int dengine_window_isrunning();
+int dengine_window_poll(DengineWindow* window);
 
-int dengine_window_loadgl();
+void dengine_window_swapbuffers(DengineWindow* window);
 
-int dengine_window_create(int width, int height, const char* title, Window* window);
+int dengine_window_isrunning(DengineWindow* window);
 
-void dengine_window_makecurrent(Window* window);
+int dengine_window_loadgl(DengineWindow* window);
 
-void dengine_window_set_swapinterval(int interval);
+int dengine_window_makecurrent(DengineWindow* window);
 
-//GLFW Specific Calls
-#if defined(DENGINE_WIN_GLFW)
+int dengine_window_set_swapinterval(DengineWindow* window, int interval);
 
-//callbacks
+void* dengine_window_get_proc(const char* name);
 
+//#ifdef DENGINE_ANDROID
 
-void dengine_window_glfw_callback_error(int code, const char* description);
-
-void dengine_window_glfw_callback_fbsize(GLFWwindow* window, int width, int height);
-
-void dengine_window_glfw_callback_windowclose(GLFWwindow* window);
-
-int dengine_window_glfw_create(int width, int height, const char* title);
-
-void dengine_window_glfw_set_monitor(GLFWmonitor* monitor, int xpos, int ypos, int refresh_rate);
-
-void dengine_window_glfw_set_swapinterval(int interval);
-
-GLFWwindow* dengine_window_glfw_get_currentwindow();
-
-void dengine_window_glfw_pollevents();
-
-void dengine_window_glfw_context_makecurrent(GLFWwindow* window);
-
-int dengine_window_glfw_context_gladloadgl();
-
-#endif // DENGINE_WIN_GLFW
-
-#ifdef DENGINE_ANDROID
-
-int dengine_window_android_egl_context_gladloadgl();
-#endif
+//int dengine_window_android_egl_context_gladloadgl();
+//#endif
 
 #ifdef __cplusplus
 }
