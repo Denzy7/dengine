@@ -288,8 +288,9 @@ DENGINE_INLINE int dengine_init()
                              "VIEWPORT : %dx%d %s",
                              GL, GLSL, VENDOR, RENDERDER,
                              viewport[2], viewport[3], msaastr);
-    //INPUT
-    dengine_input_init();
+
+    //set window to poll for input
+    dengine_input_set_window(DENGINE_INIT_OPTS.window);
 
     //DEBUGGING, INCASE OF SIGSEGV OR SIGABRT
     dengineutils_debug_init();

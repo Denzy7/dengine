@@ -7,21 +7,27 @@
 
 #include "dengine_config.h"
 
+#include "dengine/window.h" //windowset
+#include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void dengine_input_init();
+#define DENGINE_INPUT_MSEBTN_PRIMARY 0
+#define DENGINE_INPUT_MSEBTN_SECONDARY 1
+#define DENGINE_INPUT_MSEBTN_MIDDLE 2
 
-int dengine_input_get_key_once(int key);
+void dengine_input_set_window(DengineWindow* window);
 
-int dengine_input_get_key(int key);
+int dengine_input_get_key_once(char key);
+
+int dengine_input_get_key(char key);
 
 int dengine_input_get_mousebtn_once(int btn);
 
 int dengine_input_get_mousebtn(int btn);
 
-double dengine_input_get_mousescroll_x();
+//double dengine_input_get_mousescroll_x();
 
 double dengine_input_get_mousescroll_y();
 
@@ -40,8 +46,6 @@ float dengine_input_gamepad_get_axis(int pad, int axis);
 int dengine_input_gamepad_vibration_set_basic(int pad, float leftmotor, float rightmotor);
 
 const char* dengine_input_gamepad_vibration_get_error();
-
-void dengine_input_pollevents();
 
 #ifdef __cplusplus
 }

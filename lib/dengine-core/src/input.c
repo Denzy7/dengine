@@ -1,8 +1,6 @@
 #include "dengine/input.h"
-#include "dengine/window.h" //glfw_current
 
 #include <string.h> //memset
-
 #include <stdio.h> // snprintf
 
 #ifdef DENGINE_ANDROID
@@ -19,10 +17,6 @@
 #include <linux/input.h>
 #include <unistd.h>
 #include <fcntl.h>
-
-#ifdef DENGINE_HAS_GTK3
-#include <gtk/gtk.h>
-#endif
 
 struct input_event play, stop, gain;
 //2 basic rumble effects
@@ -183,47 +177,32 @@ int _dengine_input_gamepad_linux_vibrate(int pad, float left, float right)
 
 #endif
 
-typedef struct key
-{
-    int key;
-    int scancode;
-}key;
-
-#define DENGINE_INPUT_MAXKEYPRESS 10
-#define DENGINE_INPUT_MAXMOUSEBTN 3
-key keys[DENGINE_INPUT_MAXKEYPRESS];
-int mousebtns[3] = {-1, -1, -1};
-double mousescrollx = 0.0, mousescrolly = 0.0;
-double mouseposx = 0.0,mouseposy = 0.0;
-int padjid[16];
-
+WindowInput* _windowinp;
 void _dengine_input_gamepad_validate();
 
-void dengine_input_init()
+void dengine_input_set_window(DengineWindow* window)
 {
-
+    _windowinp = dengine_window_get_input(window);
 }
 
-
-int dengine_input_get_key_once(int key)
+int dengine_input_get_key_once(char key)
 {
-    for(int i = 0; i < DENGINE_INPUT_MAXKEYPRESS; i++)
+    for(int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
     {
-        if(keys[i].key == key)
+        if(_windowinp->alpnum[i] == key)
         {
-            keys[i].scancode = 0;
-            keys[i].key = 0;
+            _windowinp->alpnum[i] = 0;
             return 1;
         }
     }
     return 0;
 }
 
-int dengine_input_get_key(int key)
+int dengine_input_get_key(char key)
 {
-    for(int i = 0; i < DENGINE_INPUT_MAXKEYPRESS; i++)
+    for(int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
     {
-        if(keys[i].key == key)
+        if(_windowinp->alpnum[i] == key)
         {
             return 1;
         }
@@ -233,56 +212,51 @@ int dengine_input_get_key(int key)
 
 int dengine_input_get_mousebtn_once(int btn)
 {
-    for(int i = 0; i < DENGINE_INPUT_MAXMOUSEBTN; i++)
+    if(_windowinp->msebtn[btn] == 1)
     {
-        if(mousebtns[i] == btn)
-        {
-            mousebtns[i] = -1;
-            return 1;
-        }
+        _windowinp->msebtn[btn]  = 0;
+        return 1;
     }
     return 0;
 }
 
 int dengine_input_get_mousebtn(int btn)
 {
-    for(int i = 0; i < DENGINE_INPUT_MAXMOUSEBTN; i++)
+    if(_windowinp->msebtn[btn] == 1)
     {
-        if(mousebtns[i] == btn)
-        {
-            return 1;
-        }
+        return 1;
     }
     return 0;
 }
 
-double dengine_input_get_mousescroll_x()
-{
-    double temp = mousescrollx;
-    mousescrollx = 0.0;
-    return temp;
-}
+//double dengine_input_get_mousescroll_x()
+//{
+//    double temp = mousescrollx;
+//    mousescrollx = 0.0;
+//    return temp;
+//    return 0.0;
+//}
 
 double dengine_input_get_mousescroll_y()
 {
-    double temp = mousescrolly;
-    mousescrolly = 0.0;
+    double temp = _windowinp->msesrl_y;
+    _windowinp->msesrl_y = 0.0;
     return temp;
 }
 
 double dengine_input_get_mousepos_x()
 {
-    return mouseposx;
+    return _windowinp->mse_x;
 }
 
 double dengine_input_get_mousepos_y()
 {
-    return mouseposy;
+    return _windowinp->mse_y;
 }
 
 void _dengine_input_gamepad_validate()
 {
-    memset(padjid, -1, sizeof(padjid));
+//    memset(padjid, -1, sizeof(padjid));
     //Validate connected gamepads
     for(int i = 0; i < 16; i++)
     {
@@ -349,13 +323,5 @@ const char* dengine_input_gamepad_vibration_get_error()
     #else
     return "";
     #endif
-}
-
-void dengine_input_pollevents()
-{
-#ifdef DENGINE_HAS_GTK3
-    //do gtk main non-blocking loop to unfreeze dialogs
-    gtk_main_iteration_do(0);
-#endif
 }
 

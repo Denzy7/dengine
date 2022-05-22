@@ -15,6 +15,16 @@ typedef enum
     DENGINE_CONTEXT_TYPE_EGL
 }ContextType;
 
+#define DENGINE_WINDOW_ALPNUM 4
+#define DENGINE_WINDOW_MSEBTN 3
+typedef struct
+{
+    char alpnum[DENGINE_WINDOW_ALPNUM];
+    int msebtn[DENGINE_WINDOW_MSEBTN];
+    double msesrl_y;
+    double mse_x, mse_y;
+}WindowInput;
+
 typedef struct _DengineWindow DengineWindow;
 
 #ifdef __cplusplus
@@ -52,6 +62,8 @@ int dengine_window_makecurrent(DengineWindow* window);
 int dengine_window_set_swapinterval(DengineWindow* window, int interval);
 
 void* dengine_window_get_proc(const char* name);
+
+WindowInput* dengine_window_get_input(DengineWindow* window);
 
 //#ifdef DENGINE_ANDROID
 

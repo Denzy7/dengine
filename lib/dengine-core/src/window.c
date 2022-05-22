@@ -9,6 +9,7 @@
 #include <stdio.h>  //printf
 #include <stdlib.h> //malloc
 #include <string.h> //memcpy
+#include <ctype.h> //toupper
 
 //WINDOW CREATION INCL.
 #ifdef DENGINE_WIN_X11
@@ -28,6 +29,11 @@
 #include <GL/glx.h>
 #elif defined (DENGINE_CONTEXT_WGL)
 #include <GL/wgl.h>
+#endif
+
+//unfreeze gtk
+#ifdef DENGINE_HAS_GTK3
+#include <gtk/gtk.h>
 #endif
 
 #ifdef DENGINE_LINUX
@@ -71,6 +77,8 @@ struct _DengineWindow
 #ifdef DENGINE_ANDROID
     ANativeWindow* and_win;
 #endif
+
+    WindowInput input;
 };
 #define DFT_GL_MAX 2
 #define DFT_GL_MIN 0
@@ -225,7 +233,14 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     memset(&window, 0, sizeof (DengineWindow));
 
     Window root = DefaultRootWindow(x_dpy);
-    window.x_swa.event_mask = ExposureMask | KeyReleaseMask | KeyPressMask;
+    window.x_swa.event_mask =
+            ExposureMask |
+            KeyPressMask | KeyReleaseMask |
+            ButtonPressMask | ButtonReleaseMask |
+            PointerMotionMask;
+
+    //disable annoying repeat
+    //XAutoRepeatOff(x_dpy);
 
 #ifdef DENGINE_CONTEXT_GLX
     int conf_vi_attr[]=
@@ -403,6 +418,17 @@ int dengine_window_isrunning(DengineWindow* window)
 
 void* dengine_window_get_proc(const char* name)
 {
+    /*
+  void *p = (void *)wglGetProcAddress(name);
+  if(p == 0 ||
+    (p == (void*)0x1) || (p == (void*)0x2) || (p == (void*)0x3) ||
+    (p == (void*)-1) )
+  {
+    HMODULE module = LoadLibraryA("opengl32.dll");
+    p = (void *)GetProcAddress(module, name);
+  }
+     */
+
     void* sym = dengineutils_dynlib_get_sym(gl, name);
 #ifdef DENGINE_CONTEXT_WGL
     //special case for glGetStringi in wgl not being exported to openg32.dll for some reason
@@ -496,21 +522,108 @@ int dengine_window_poll(DengineWindow* window)
 {
     int polled = 0;
 #ifdef DENGINE_WIN_X11
-   if(XPending(x_dpy))
-   {
-       polled = XCheckWindowEvent(x_dpy, window->x_win,
-                                  window->x_swa.event_mask,
-                                  &window->ev);
-       dengineutils_logging_log("%d", window->ev.type);
-       if(window->ev.type == Expose && _gl_load)
-       {
-           int w,h;
-           dengine_window_get_dim(window, &w, &h);
-           dengine_viewport_set(0, 0, w, h);
-       }
+    char key;
+    KeySym keysym;
+    if(XPending(x_dpy))
+    {
+        polled = XCheckWindowEvent(x_dpy, window->x_win,
+                  window->x_swa.event_mask,
+                  &window->ev);
+        if(window->ev.type == Expose && _gl_load)
+        {
+            int w,h;
+            dengine_window_get_dim(window, &w, &h);
+            dengine_viewport_set(0, 0, w, h);
+        }
 
+        if(window->ev.type == KeyPress)
+        {
+            XLookupString(&window->ev.xkey, &key, 1, &keysym, NULL);
+            char up = toupper(key);
+            if(up >= 33 && up <= 126)
+            {
+                for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++) {
+                    //dont dupe;
+                    if(window->input.alpnum[i] == up)
+                        break;
 
-   }
+                    if(window->input.alpnum[i] != up && window->input.alpnum[i] == 0)
+                    {
+                        window->input.alpnum[i] = up;
+                        break;
+                    }
+                }
+//                for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
+//                {
+//                    printf("[%c] ", window->input.alpnum[i]);
+//                }
+//                printf("\n");
+            }
+        }
+
+        if(window->ev.type == KeyRelease)
+        {
+            XLookupString(&window->ev.xkey, &key, 1, &keysym, NULL);
+            char up = toupper(key);
+            if(up >= 33 && up <= 126)
+            {
+                for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++) {
+                    if(window->input.alpnum[i] == up)
+                    {
+                        window->input.alpnum[i] = 0;
+                        break;
+                    }
+                }
+//                for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
+//                {
+//                    printf("[%c] ", window->input.alpnum[i]);
+//                }
+//                printf("\n");
+            }
+        }
+
+        if(window->ev.type == ButtonPress)
+        {
+            if(window->ev.xbutton.button >= Button1 &&
+                    window->ev.xbutton.button <= Button3)
+            {
+                window->input.msebtn[window->ev.xbutton.button - 1] = 1;
+//                printf("press %u %u\n", window->ev.xbutton.button,
+//                       window->ev.xbutton.state);
+            }
+        }
+
+        if(window->ev.type == ButtonRelease)
+        {
+            if(window->ev.xbutton.button >= Button1 &&
+                    window->ev.xbutton.button <= Button3)
+            {
+                window->input.msebtn[window->ev.xbutton.button - 1] = 0;
+//                printf("press %u %u\n", window->ev.xbutton.button,
+//                       window->ev.xbutton.state);
+            }
+        }
+
+        if(window->ev.xbutton.button == Button5)
+        {
+            window->input.msesrl_y = -1.0;
+        }
+
+        if(window->ev.xbutton.button == Button4)
+        {
+            window->input.msesrl_y = 1.0;
+        }
+
+        if(window->ev.type == MotionNotify)
+        {
+            int h;
+            dengine_window_get_dim(window, NULL, &h);
+
+            window->input.mse_x = window->ev.xmotion.x;
+            window->input.mse_y = h - window->ev.xmotion.y;
+        }
+    }
+
 #elif defined(DENGINE_WIN32)
     GetMessageW(&window->win32_msg, window->win32_hwnd, 0, 0);
     TranslateMessage(&window->win32_msg);
@@ -518,6 +631,11 @@ int dengine_window_poll(DengineWindow* window)
 #elif defined(DENGINE_ANDROID)
     dengineutils_android_pollevents();
 #endif
+
+#ifdef DENGINE_HAS_GTK3
+   gtk_main_iteration_do(0);
+#endif
+
    return polled;
 }
 
@@ -714,3 +832,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 #endif
+
+WindowInput* dengine_window_get_input(DengineWindow* window)
+{
+    return &window->input;
+}
