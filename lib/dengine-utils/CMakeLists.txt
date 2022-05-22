@@ -15,6 +15,7 @@ src/debug.c
 ${CMAKE_CURRENT_BINARY_DIR}/src/dengine-utils.rc
 src/stream.c
 src/zipread.c
+src/dynlib.c
 )
 
 set(dengine-utils-hdr
@@ -30,6 +31,7 @@ include/dengine-utils/debug.h
 include/dengine-utils/stream.h
 include/dengine-utils/zipread.h
 include/dengine-utils/macros.h
+include/dengine-utils/dynlib.h
 )
 
 if(ANDROID)
