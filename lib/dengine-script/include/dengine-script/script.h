@@ -3,6 +3,7 @@
 
 #include "dengine_config.h" //DENGINE_SCRIPTING_PYTHON
 
+#include "dengine-utils/dynlib.h"
 #ifdef DENGINE_SCRIPTING_PYTHON
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
@@ -15,7 +16,7 @@ typedef enum
 }ScriptType;
 
 //NATIVE SCRIPT LIBRARY types
-typedef void* NSL;
+typedef DynLib NSL;
 typedef int (*nslfunc)(void*);
 
 typedef struct

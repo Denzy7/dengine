@@ -12,13 +12,6 @@
 #include "dengine-utils/platform/android.h"
 #endif
 
-#ifdef DENGINE_LINUX
-#include <dlfcn.h> //dlopen
-#elif defined(DENGINE_WIN32)
-#include <libloaderapi.h> //LoadLibrary
-#include <errhandlingapi.h> //GetLastError
-#endif
-
 #ifdef DENGINE_SCRIPTING_PYTHON //init table for main python module
 
 PyMODINIT_FUNC PyInit_inpt(); //input_mod
@@ -321,69 +314,22 @@ int denginescript_isavailable(ScriptType type)
 
 NSL denginescript_nsl_load(const char* file)
 {
-    NSL load = NULL;
-    char* errmsg = NULL;
-#ifdef DENGINE_LINUX
-    load = dlopen(file, RTLD_LAZY);
-    if(!load)
-        errmsg = strdup(dlerror());
-#elif defined(DENGINE_WIN32)
-    char* dlpath = strdup(file);
-    for(size_t i = 0; i < strlen(dlpath); i++)
-    {
-        if(dlpath[i] == '/')
-            dlpath[i] = '\\';
-    }
-    load = LoadLibrary(dlpath);
+    NSL load = dengineutils_dynlib_open(file);
     if(!load)
     {
-          DWORD dw = GetLastError();
-//        LPVOID lpMsgBuf;
-
-
-//        FormatMessage(
-//            FORMAT_MESSAGE_ALLOCATE_BUFFER |
-//            FORMAT_MESSAGE_FROM_SYSTEM |
-//            FORMAT_MESSAGE_IGNORE_INSERTS,
-//            NULL,
-//            dw,
-//            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-//            (LPTSTR) &lpMsgBuf,
-//            0, NULL );
-//        int len = lstrlen((LPCTSTR)lpMsgBuf);
-        errmsg = malloc(256);
-        snprintf(errmsg, 256, "Failed to load DLL : %ld", dw);
-//        LocalFree(lpMsgBuf);
-    }
-    free(dlpath);
-#else
-    dengineutils_logging_log("ERROR::NSL not supported on this platform!");
-    return NULL;;
-#endif
-    if(errmsg)
-    {
-        dengineutils_logging_log("ERROR::Cannot load NSL [%s]\nReason : %s\n", file, errmsg);
-        free(errmsg);
+        dengineutils_logging_log("ERROR::Cannot load NSL [%s]", file);
     }
     return load;
 }
 
 void denginescript_nsl_free(NSL nsl)
 {
-#ifdef DENGINE_LINUX
-    dlclose(nsl);
-#elif defined(DENGINE_WIN32)
-    FreeLibrary(nsl);
-#endif
+    dengineutils_dynlib_close(nsl);
 }
 
 nslfunc denginescript_nsl_get_func(const NSL nsl, const char* name)
 {
-#ifdef DENGINE_LINUX
-    return dlsym(nsl, name);
-#elif defined(DENGINE_WIN32)
-    return GetProcAddress(nsl, name);
-#endif
+    return dengineutils_dynlib_get_sym(nsl, name);
 }
 
 int denginescript_nsl_get_script(const char* name, Script* script, const NSL nsl)
