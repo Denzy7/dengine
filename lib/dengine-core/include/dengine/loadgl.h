@@ -14,6 +14,8 @@
 #if defined (DENGINE_GL_GLAD)
     //USE GLAD
     #include <glad/glad.h>
+#elif defined(DENGINE_GL_DGL)
+    #include "dengine/dgl.h"
 #else
     #warning "Not using OpenGL. Define at least one OpenGL function loader to use OpenGL"
     #define DENGINE_GL_NONE
