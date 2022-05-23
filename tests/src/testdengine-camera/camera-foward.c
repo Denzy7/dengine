@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
     dengineutils_debug_init();
 
-    Window window;
+    DengineWindow window;
     dengine_window_init();
     dengine_window_create(1280, 720, "testdengine-camera-foward", &window);
     dengine_window_makecurrent(&window);

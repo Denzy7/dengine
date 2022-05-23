@@ -37,28 +37,29 @@ int main(int argc, char** argv)
 {
     dengineutils_debug_init();
 
-    Window window;
     dengine_window_init();
     dengine_window_request_MSAA(4);
 
     dengineutils_logging_set_filelogging(1);
 
     dengine_window_request_GL(3,2,0);
-    if(!dengine_window_create(1280,720,"testdengine-lighting-standard", &window))
+    DengineWindow* window = dengine_window_create(1280,720,"testdengine-lighting-standard", NULL);
+    if(!window)
     {
         //Use defaults then without shadows
         dengine_window_request_defaultall();
-        if(!dengine_window_create(1280, 720, "testdengine-lighting-standard(noshadow)", &window))
+        window = dengine_window_create(1280, 720, "testdengine-lighting-standard(noshadow)", NULL);
+        if(!window)
         {
             dengineutils_logging_log("ERROR::cannot request an OpenGL 3.0 window!");
             return 1;
         }
     }
-    dengine_window_makecurrent(&window);
+    dengine_window_makecurrent(window);
 
     //Remove vsync (not recommended)
     //dengine_window_set_swapinterval(0);
-    if (!dengine_window_loadgl()) {
+    if (!dengine_window_loadgl(window)) {
         dengineutils_logging_log("ERROR::cannot load gl");
         return 1;
     }
@@ -382,7 +383,7 @@ int main(int argc, char** argv)
 
     glLineWidth(4.0f);
 
-    while (dengine_window_isrunning()) {
+    while (dengine_window_isrunning(window)) {
         snprintf(shadowtogglestr, sizeof (shadowtogglestr), "Click to toggle 3D shadows : %d", use_shadow3d);
 
         dengineutils_timer_update();
@@ -411,8 +412,7 @@ int main(int argc, char** argv)
         if (dengine_input_get_key('S'))
             ptr[2] +=.01 * delta;
 
-
-        dengine_window_get_window_dim(&w,&h);
+        dengine_window_get_dim(window, &w,&h);
 
         dengine_camera_lookat(NULL, &camera);
         dengine_camera_project_perspective((float)w / (float)h, &camera);
@@ -527,10 +527,11 @@ int main(int argc, char** argv)
             use_shadow3d =!use_shadow3d;
         }
 
-        dengine_window_swapbuffers();
+        dengine_window_swapbuffers(window);
         dengine_input_pollevents();
     }
 
+    dengine_window_destroy(window);
     denginegui_terminate();
 
     free(assets_dir);

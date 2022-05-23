@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    Window window;
+    DengineWindow window;
     dengine_window_init();
     dengine_window_create(1280,720,"testdengine-scene-ecs",&window);
     dengine_window_makecurrent(&window);

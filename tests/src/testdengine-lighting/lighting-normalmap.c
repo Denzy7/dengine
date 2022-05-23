@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     double elapsed = 0;
     float fontsz = denginegui_get_fontsz();
 
-    while(dengine_window_isrunning())
+    while(dengine_update())
     {
         dengine_material_use(&plane_mat);
 
@@ -125,8 +125,6 @@ int main(int argc, char *argv[])
         denginegui_text(10, 10 + fontsz, fps, yellow);
 
         denginegui_text(10, 10 + 3 * fontsz, "WASD = MOVE LIGHT, EC = UP/DOWN", NULL);
-
-        dengine_update();
     }
     free(prtbuf);
     dengine_material_destroy(&plane_mat);

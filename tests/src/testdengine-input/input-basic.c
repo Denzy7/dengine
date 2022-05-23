@@ -7,26 +7,30 @@
 int padhint;
 int main()
 {
-    if(!dengine_window_init() || !dengine_window_glfw_create(1280, 720, "testdengine-windowcolored"))
+    if(!dengine_window_init())
     {
-        printf("cannot create window\n");
+        printf("cannot create init window!\n");
         return 1;
     }
-    GLFWwindow* current = dengine_window_glfw_get_currentwindow();
-    dengine_window_glfw_context_makecurrent(current);
-
-    dengine_input_init();
-
-    if(!dengine_window_glfw_context_gladloadgl())
+    DengineWindow* window = dengine_window_create(1280, 720, "testdengine-input-basic", NULL);
+    if(!window)
     {
-        printf("cannot load gl!\n");
+        printf("cannot create create window!\n");
+        return 1;
+    }
+    if(!dengine_window_makecurrent(window))
+    {
+        printf("cannot create makecurrent window!\n");
         return 1;
     }
 
+    if(!dengine_window_loadgl(window))
+    {
+        printf("cannot loadgl window!\n");
+        return 1;
+    }
     int w, h;
-    dengine_window_get_window_width(&w);
-    dengine_window_get_window_height(&h);
-
+    dengine_window_get_dim(window, &w, &h);
     printf("init window %dx%d\n", w, h);
 
     //use fullscreen 60Hz on primary monitor
@@ -37,7 +41,9 @@ int main()
     printf("press w, x, lmb or rmb\n");
     printf("drag scroll wheel\n");
 
-    while(dengine_window_isrunning())
+    dengine_input_set_window(window);
+
+    while(dengine_window_isrunning(window))
     {
         if(dengine_input_gamepad_get_isconnected(0) && !padhint)
         {
@@ -47,7 +53,7 @@ int main()
         }
 
         //most important function
-        dengine_window_glfw_pollevents();
+        dengine_window_poll(window);
 
         double mousex = dengine_input_get_mousepos_x();
         double mousey = dengine_input_get_mousepos_y();
@@ -55,7 +61,7 @@ int main()
         glClearColor(mousex / 1280.0, mousey / 720.0, 1.0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        dengine_window_swapbuffers();
+        dengine_window_swapbuffers(window);
 
         if(dengine_input_get_key('X'))
         {
