@@ -619,8 +619,17 @@ int dengine_window_poll(DengineWindow* window)
             int h;
             dengine_window_get_dim(window, NULL, &h);
 
-            window->input.mse_x = window->ev.xmotion.x;
-            window->input.mse_y = h - window->ev.xmotion.y;
+            Window root, child;
+            int x_root, y_root, x, y;
+            uint32_t masks;
+            XQueryPointer(x_dpy, window->x_win,
+                          &root, &child,
+                          &x_root, &y_root,
+                          &x, &y,
+                          &masks);
+
+            window->input.mse_x = x;
+            window->input.mse_y = h - y;
         }
     }
 
