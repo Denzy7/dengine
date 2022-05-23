@@ -14,6 +14,7 @@
 //WINDOW CREATION INCL.
 #ifdef DENGINE_WIN_X11
 #include <X11/Xlib.h> //Window
+#include <X11/XKBlib.h>
 #elif defined (DENGINE_WIN32)
 #include <windows.h> //HWND
 #elif defined (DENGINE_ANDROID)
@@ -92,6 +93,7 @@ static int _gl_load = 0;
 
 #ifdef DENGINE_WIN_X11
 Display* x_dpy;
+Atom wm_delete;
 #endif
 #ifdef DENGINE_CONTEXT_EGL
 EGLDisplay egl_dpy;
@@ -122,6 +124,17 @@ int dengine_window_init()
     x_dpy = XOpenDisplay(NULL);
     if(x_dpy)
     {
+        wm_delete = XInternAtom(x_dpy, "WM_DELETE_WINDOW", False);
+
+        //disable annoying repeat
+        int setdetect = XkbSetDetectableAutoRepeat(x_dpy, True, NULL);
+        if(!setdetect)
+        {
+            dengineutils_logging_log("WARNING::Could not disable autorepeat with "
+                                     "XkbSetDetectableAutoRepeat. "
+                                     "This will cause issues with input_key_get_once");
+
+        }
 #ifdef DENGINE_CONTEXT_EGL
         egl_dpy = eglGetDisplay((EGLNativeDisplayType)x_dpy);
 #endif
@@ -195,7 +208,7 @@ int dengine_window_init()
 void dengine_window_terminate()
 {
 #ifdef DENGINE_WIN_X11
-   XCloseDisplay(x_dpy);
+    XCloseDisplay(x_dpy);
 #endif
 #ifdef DENGINE_WIN32
     if(gl)
@@ -238,10 +251,6 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
             KeyPressMask | KeyReleaseMask |
             ButtonPressMask | ButtonReleaseMask |
             PointerMotionMask;
-
-    //disable annoying repeat
-    //XAutoRepeatOff(x_dpy);
-
 #ifdef DENGINE_CONTEXT_GLX
     int conf_vi_attr[]=
     {
@@ -275,6 +284,9 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         dengineutils_logging_log("ERROR::Cannot XCreateWindow");
         return NULL;
     }
+
+    // x11 delete message. why on earth is there no simple exit event?
+    XSetWMProtocols(x_dpy, window.x_win, &wm_delete, 1);
 
     if(!glXCreateContextAttribsARB)
     {
@@ -524,11 +536,23 @@ int dengine_window_poll(DengineWindow* window)
 #ifdef DENGINE_WIN_X11
     char key;
     KeySym keysym;
+
     if(XPending(x_dpy))
     {
         polled = XCheckWindowEvent(x_dpy, window->x_win,
                   window->x_swa.event_mask,
                   &window->ev);
+
+        XEvent closeev;
+        XPeekEvent(x_dpy, &closeev);
+        if(closeev.type == ClientMessage)
+        {
+            if(closeev.xclient.data.l[0] == wm_delete)
+            {
+                window->running = 0;
+            }
+        }
+
         if(window->ev.type == Expose && _gl_load)
         {
             int w,h;
@@ -544,18 +568,20 @@ int dengine_window_poll(DengineWindow* window)
             {
                 for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++) {
                     //dont dupe;
-                    if(window->input.alpnum[i] == up)
+                    if(window->input.alpnum[i].key == up)
                         break;
 
-                    if(window->input.alpnum[i] != up && window->input.alpnum[i] == 0)
+                    if(window->input.alpnum[i].key != up &&
+                            window->input.alpnum[i].key == 0 &&
+                            window->input.alpnum[i].state != -1)
                     {
-                        window->input.alpnum[i] = up;
+                        window->input.alpnum[i].key = up;
                         break;
                     }
                 }
 //                for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
 //                {
-//                    printf("[%c] ", window->input.alpnum[i]);
+//                    printf("[%c] ", window->input.alpnum[i].key);
 //                }
 //                printf("\n");
             }
@@ -568,15 +594,16 @@ int dengine_window_poll(DengineWindow* window)
             if(up >= 33 && up <= 126)
             {
                 for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++) {
-                    if(window->input.alpnum[i] == up)
+                    if(window->input.alpnum[i].key == up)
                     {
-                        window->input.alpnum[i] = 0;
+                        window->input.alpnum[i].state = 0;
+                        window->input.alpnum[i].key = 0;
                         break;
                     }
                 }
 //                for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
 //                {
-//                    printf("[%c] ", window->input.alpnum[i]);
+//                    printf("[%c] ", window->input.alpnum[i].key);
 //                }
 //                printf("\n");
             }

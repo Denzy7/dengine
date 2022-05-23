@@ -189,9 +189,9 @@ int dengine_input_get_key_once(char key)
 {
     for(int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
     {
-        if(_windowinp->alpnum[i] == key)
+        if(_windowinp->alpnum[i].key == key && _windowinp->alpnum[i].state != -1)
         {
-            _windowinp->alpnum[i] = 0;
+            _windowinp->alpnum[i].state = -1;
             return 1;
         }
     }
@@ -202,7 +202,7 @@ int dengine_input_get_key(char key)
 {
     for(int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
     {
-        if(_windowinp->alpnum[i] == key)
+        if(_windowinp->alpnum[i].key == key)
         {
             return 1;
         }

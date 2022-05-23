@@ -17,9 +17,16 @@ typedef enum
 
 #define DENGINE_WINDOW_ALPNUM 4
 #define DENGINE_WINDOW_MSEBTN 3
+
 typedef struct
 {
-    char alpnum[DENGINE_WINDOW_ALPNUM];
+    char key;
+    char state;
+}KeyInfo;
+
+typedef struct
+{
+    KeyInfo alpnum[DENGINE_WINDOW_ALPNUM];
     int msebtn[DENGINE_WINDOW_MSEBTN];
     double msesrl_y;
     double mse_x, mse_y;
