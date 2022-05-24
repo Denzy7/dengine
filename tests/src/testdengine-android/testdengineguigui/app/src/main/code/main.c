@@ -9,20 +9,11 @@
 #include <dengine-gui/gui.h>
 
 double elapsed;
-int window_init = 0;
 
 static void init(struct android_app* app)
 {
-    ANativeWindow_acquire(app->window);
-
-    dengine_window_request_GL(2, 0, 0);
-
     if(dengine_window_init())
     {
-        window_init = 1;
-		
-        dengine_window_loadgl();
-
         dengineutils_filesys_init();
 
         dengineutils_logging_log("init window success");
@@ -39,8 +30,6 @@ static void init(struct android_app* app)
 static void term(struct  android_app* app)
 {
     dengine_window_terminate();
-    ANativeWindow_release(app->window);
-    ANativeActivity_finish(app->activity);
 }
 
 static void draw()
@@ -54,7 +43,7 @@ static void draw()
     denginegui_text(50.0f, 50.0f, "Colored Text...~", rgba);
     denginegui_button(100.0f, 100.0f, 300.0f, 200.0f, "Click Me!", NULL);
 
-    dengine_window_swapbuffers();
+    dengine_window_swapbuffers(DENGINE_WINDOW_CURRENT);
 }
 
 void android_main(struct android_app* app)
@@ -83,7 +72,10 @@ void android_main(struct android_app* app)
             dengineutils_logging_log("step");
             elapsed = 0;
         }
-        if(window_init)
+        if(DENGINE_WINDOW_CURRENT)
+        {
             draw();
+        }
+
     }
 }

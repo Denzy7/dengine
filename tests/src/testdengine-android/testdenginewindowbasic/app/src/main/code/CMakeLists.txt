@@ -17,13 +17,10 @@ ${DENGINE_DIR}  ${DENGINE_BUILD}
 add_library(GFX SHARED
 	main.c
 )
-
+get_directory_property(dengine-incldirs DIRECTORY ${DENGINE_DIR} INCLUDE_DIRECTORIES)
 target_include_directories(GFX PUBLIC
 		${ANDROID_NDK}/sources/android/native_app_glue
-		"${PROJECT_BINARY_DIR}/${DENGINE_BUILD}"
-		${DENGINE_DIR}/lib/dengine-core/include
-		${DENGINE_DIR}/lib/dengine-utils/include
-		${DENGINE_DIR}/deps/glad/include
+        ${dengine-incldirs}
 		)
 
 

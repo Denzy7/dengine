@@ -8,25 +8,14 @@
 #include <dengine-utils/timer.h>
 #include <dengine-utils/platform/android.h>
 double elapsed;
-int window_init = 0;
 
 Primitive quad;
 Shader shader;
 
 static void init(struct android_app* app)
 {
-    //Acquire win
-    ANativeWindow_acquire(app->window);
-    dengine_window_request_GL(2, 0, 0);
-
     if(dengine_window_init())
     {
-		if(!dengine_window_loadgl()){
-			dengineutils_logging_log("ERROR::Cannot load GL!");
-		}
-		
-		window_init = 1;
-
         dengineutils_logging_log("init window success");
 
         dengineutils_logging_log("GL : %s", glGetString(GL_VERSION));
@@ -53,8 +42,6 @@ static void init(struct android_app* app)
 static void term(struct  android_app* app)
 {
     dengine_window_terminate();
-    ANativeWindow_release(app->window);
-    ANativeActivity_finish(app->activity);
 }
 
 static void draw()
@@ -64,7 +51,7 @@ static void draw()
 
     dengine_draw_primitive(&quad, &shader);
 
-    dengine_window_swapbuffers();
+    dengine_window_swapbuffers(DENGINE_WINDOW_CURRENT);
 }
 
 void android_main(struct android_app* state)
@@ -87,8 +74,6 @@ void android_main(struct android_app* state)
         if(state->destroyRequested != 0)
         {
             dengineutils_logging_log("Destroy Requested");
-            //state->activity->vm->DetachCurrentThread();
-
             dengineutils_logging_log("Goodbye!");
             return;
         }
@@ -102,7 +87,7 @@ void android_main(struct android_app* state)
             dengineutils_logging_log("step");
             elapsed = 0;
         }
-		if(window_init)
+        if(DENGINE_WINDOW_CURRENT)
         	draw();
     }
 }

@@ -1,31 +1,23 @@
 #include <dengine/dengine.h>
 
-int window_init = 0;
-
 Primitive cube, plane;
 Material material;
 Camera camera;
 DirLight dLight;
-Shader* shadow2d,* std;
+Shader shadow2d, std;
 mat4 model;
 vec3 pos = {0.0f, 1.0f, 0.0f};
 vec3 scale = {5.0f, 5.0f, 5.0f};
 
 static void init(struct android_app* app)
 {
-    //Acquire win
-    ANativeWindow_acquire(app->window);
-    dengine_window_request_GL(2, 0, 0);
-
     if(dengine_init())
     {
-        window_init = 1;
+        dengine_shader_make_standard(DENGINE_SHADER_STANDARD, &std);
+        dengine_shader_make_standard(DENGINE_SHADER_SHADOW2D, &shadow2d);
 
-        std = dengine_shader_new_shader_standard(DENGINE_SHADER_STANDARD);
-        shadow2d = dengine_shader_new_shader_standard(DENGINE_SHADER_SHADOW2D);
-
-        dengine_primitive_gen_cube(&cube, std);
-        dengine_primitive_gen_plane(&plane, std);
+        dengine_primitive_gen_cube(&cube, &std);
+        dengine_primitive_gen_plane(&plane, &std);
 
         memset(&dLight, 0, sizeof (DirLight));
         dLight.shadow.enable = 1;
@@ -33,10 +25,10 @@ static void init(struct android_app* app)
         dengine_lighting_setup_dirlight(&dLight);
 
         dengine_camera_setup(&camera);
-        dengine_camera_apply(std, &camera);
+        dengine_camera_apply(&std, &camera);
 
         dengine_material_setup(&material);
-        dengine_material_set_shader_color(std, &material);
+        dengine_material_set_shader_color(&std, &material);
 
         dengine_material_set_texture(&dLight.shadow.shadow_map.depth, "dLightShadow", &material);
     }
@@ -45,43 +37,40 @@ static void init(struct android_app* app)
 static void term(struct  android_app* app)
 {
     dengine_material_destroy(&material);
-    free(std);
-    free(shadow2d);
     dengine_terminate();
-
-    ANativeWindow_release(app->window);
-    ANativeActivity_finish(app->activity);
 }
 
 static void draw()
 {
+    dengine_update();
+
     double delta = dengineutils_timer_get_delta() / 1000.0;
 
-    dengine_lighting_apply_dirlight(&dLight, std);
+    dengine_lighting_apply_dirlight(&dLight, &std);
 
     //SHADOW PASS
     dengine_lighting_shadowop_clear(&dLight.shadow);
 
     glm_mat4_identity(model);
     glm_scale(model, scale);
-    dengine_lighting_shadow_dirlight_draw(&dLight, shadow2d, &plane, model[0]);
+    dengine_lighting_shadow_dirlight_draw(&dLight, &shadow2d, &plane, model[0]);
 
     glm_mat4_identity(model);
     glm_translate(model, pos);
-    dengine_lighting_shadow_dirlight_draw(&dLight, shadow2d, &cube, model[0]);
+    dengine_lighting_shadow_dirlight_draw(&dLight, &shadow2d, &cube, model[0]);
 
     //COLOR PASS
     dengine_material_use(&material);
 
     glm_mat4_identity(model);
     glm_scale(model, scale);
-    dengine_shader_set_mat4(std, "model", model[0]);
-    dengine_draw_primitive(&plane, std);
+    dengine_shader_set_mat4(&std, "model", model[0]);
+    dengine_draw_primitive(&plane, &std);
 
     glm_mat4_identity(model);
     glm_translate(model, pos);
-    dengine_shader_set_mat4(std, "model", model[0]);
-    dengine_draw_primitive(&cube, std);
+    dengine_shader_set_mat4(&std, "model", model[0]);
+    dengine_draw_primitive(&cube, &std);
 
     dengine_material_use(NULL);
 
@@ -92,9 +81,6 @@ static void draw()
 
     if(dengine_input_get_key('C'))
         pos[1] -= delta * 5.0f;
-
-    dengine_update();
-
 }
 
 void android_main(struct android_app* state)
@@ -110,8 +96,7 @@ void android_main(struct android_app* state)
 
     while(1)
     {
-        dengineutils_android_pollevents();
-		
+        dengine_window_poll(DENGINE_WINDOW_CURRENT);
         //Quit and detach
         if(state->destroyRequested != 0)
         {
@@ -120,7 +105,8 @@ void android_main(struct android_app* state)
             return;
         }
 
-        if (window_init)
+        if (dengine_window_isrunning(DENGINE_WINDOW_CURRENT))
             draw();
+
     }
 }

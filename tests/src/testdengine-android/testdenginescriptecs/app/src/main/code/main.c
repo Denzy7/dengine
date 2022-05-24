@@ -3,9 +3,6 @@
 #include <stdlib.h>
 #include <dengine/dengine.h>
 
-#include <android/native_window.h>
-#include <android/native_activity.h>
-
 typedef struct
 {
     int windowinit;
@@ -22,13 +19,8 @@ static dt_script ds;
 static void init(struct android_app* app)
 {
     memset(&ds,0,sizeof(dt_script));
-    //Acquire win
-    ANativeWindow_acquire(app->window);
-    dengine_window_request_GL(2, 0, 0);
     if(dengine_init())
     {
-        ds.windowinit = 1;
-
         Entity* ent1 = denginescene_ecs_new_entity();
         Entity* ent2 = denginescene_ecs_new_entity();
         Entity* ent3 = denginescene_ecs_new_entity();
@@ -81,13 +73,13 @@ static void init(struct android_app* app)
         dengine_material_setup(&ds.dft_mat);
         dengine_material_setup(&ds.skymat);
 
-        dengine_material_set_shader_color(ds.stdshdr,&ds.cube_mat);
-        dengine_material_set_shader_color(ds.stdshdr,&ds.duck_mat);
-        dengine_material_set_shader_color(ds.dftshdr,&ds.dft_mat);
-        dengine_material_set_shader_color(ds.skycube,&ds.skymat);
+        dengine_material_set_shader_color(&ds.stdshdr,&ds.cube_mat);
+        dengine_material_set_shader_color(&ds.stdshdr,&ds.duck_mat);
+        dengine_material_set_shader_color(&ds.dftshdr,&ds.dft_mat);
+        dengine_material_set_shader_color(&ds.skycube,&ds.skymat);
 
-        dengine_material_set_shader_shadow(ds.shadow2d, &ds.cube_mat);
-        dengine_material_set_shader_shadow(ds.shadow2d, &ds.duck_mat);
+        dengine_material_set_shader_shadow(&ds.shadow2d, &ds.cube_mat);
+        dengine_material_set_shader_shadow(&ds.shadow2d, &ds.duck_mat);
 
         Primitive cube,plane,grid;
         dengine_primitive_gen_cube(&cube, &ds.stdshdr);
@@ -100,18 +92,19 @@ static void init(struct android_app* app)
         ds.duck = denginemodel_load_mem(DENGINE_MODEL_FORMAT_OBJ, f2m.mem, f2m.size, NULL, &ds.stdshdr);
         dengineutils_filesys_file2mem_free(&f2m);
 
-// android input is not working atm
-//        char* duckscriptfile = "scripts/moveduck.py";
-//        Script duckscript;
-//        f2m.file = duckscriptfile;
-//        dengineutils_android_asset2file2mem(&f2m);
-//        denginescript_python_compile(f2m.mem, duckscriptfile, &duckscript);
-//        denginescene_ecs_add_script(ent3, &duckscript);
-//        //note the same script can be added to other entities for the same effects:
-//        //denginescene_ecs_add_script(ent1, &duckscript);
-//        //denginescene_ecs_add_script(ent2, &duckscript);
-//        dengineutils_filesys_file2mem_free(&f2m);
 #ifdef DENGINE_SCRIPTING_PYTHON
+        // android keyboard input is not working atm
+        //char* duckscriptfile = "scripts/moveduck.py";
+        //Script duckscript;
+        //f2m.file = duckscriptfile;
+        //dengineutils_android_asset2file2mem(&f2m);
+        //denginescript_python_compile(f2m.mem, duckscriptfile, &duckscript);
+        //denginescene_ecs_add_script(ent3, &duckscript);
+        //note the same script can be added to other entities for the same effects:
+        //denginescene_ecs_add_script(ent1, &duckscript);
+        //denginescene_ecs_add_script(ent2, &duckscript);
+        //dengineutils_filesys_file2mem_free(&f2m);
+
         char* pingpongscalefile = "scripts/pingpongscale.py";
         Script pingpongscale;
         f2m.file = pingpongscalefile;
@@ -129,8 +122,8 @@ static void init(struct android_app* app)
         Entity* ent15 = denginescene_ecs_new_entity();
         dengine_material_setup(&ds.sep_planes_mat);
 
-        dengine_material_set_shader_color(ds.stdshdr,&ds.sep_planes_mat);
-        dengine_material_set_shader_shadow(ds.shadow2d, &ds.sep_planes_mat);
+        dengine_material_set_shader_color(&ds.stdshdr,&ds.sep_planes_mat);
+        dengine_material_set_shader_shadow(&ds.shadow2d, &ds.sep_planes_mat);
 
         Texture sep_plane_tex;
         memset(&sep_plane_tex,0,sizeof (Texture));
@@ -207,6 +200,17 @@ static void init(struct android_app* app)
         dengineutils_filesys_file2mem_free(&f2m);
         denginescene_ecs_add_script(ent_plight, &pingpongposition);
 #endif
+        
+        Texture duck_tex;
+        memset(&duck_tex,0,sizeof (Texture));
+        duck_tex.auto_dataonload=1;
+        duck_tex.interface=DENGINE_TEXTURE_INTERFACE_8_BIT;
+        f2m.file = "textures/2d/duck.png";
+        dengineutils_android_asset2file2mem(&f2m);
+        dengine_texture_load_mem(f2m.mem, f2m.size,1,&duck_tex);
+
+        dengine_material_set_texture(&duck_tex,"diffuseTex",&ds.duck_mat);
+
         MeshComponent* cube_mesh, * cube_mesh2,* plane_mesh,* duck_mesh,* grid_mesh;
         cube_mesh = denginescene_ecs_new_meshcomponent(&cube, &ds.cube_mat);
         plane_mesh = denginescene_ecs_new_meshcomponent(&plane, &ds.cube_mat);
@@ -219,16 +223,6 @@ static void init(struct android_app* app)
         ent7->mesh_component=cube_mesh2;
         ent3->mesh_component=duck_mesh;
         ent14->mesh_component=grid_mesh;
-
-        Texture duck_tex;
-        memset(&duck_tex,0,sizeof (Texture));
-        duck_tex.auto_dataonload=1;
-        duck_tex.interface=DENGINE_TEXTURE_INTERFACE_8_BIT;
-        f2m.file = "textures/2d/duck.png";
-        dengineutils_android_asset2file2mem(&f2m);
-        dengine_texture_load_mem(f2m.mem, f2m.size,1,&duck_tex);
-
-        dengine_material_set_texture(&duck_tex,"diffuseTex",&ds.duck_mat);
 
         vec3 p={6.1f,6.18f,5.4f};
         memcpy(ent13->transform.position,p,sizeof (vec3));
@@ -323,19 +317,18 @@ static void term(struct  android_app* app)
         free(ds.sep_planes);
 
     dengine_terminate();
-    ANativeWindow_release(app->window);
-    ANativeActivity_finish(app->activity);
 }
 
 static void draw()
 {
     //render scene
     denginescene_update(ds.scene);
-    int width, height;
-    dengine_viewport_get(NULL, NULL, &width, &height);
+    int w, h;
+    dengine_viewport_get(NULL, NULL, &w, &h);
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    dengine_update();
+
     double delta = dengineutils_timer_get_delta();
     double delta_s = delta / 1000.0;
     static double elaped = 9999.0;
@@ -350,12 +343,27 @@ static void draw()
     }
 
     //SCENE COLOR OUTPUT
-    denginegui_panel(0, 0, (float)width, (float)height, ds.cam.framebuffer.color, NULL, blackrgba);
+    denginegui_panel(0, 0, (float)w, (float)h, ds.cam.framebuffer.color, NULL, blackrgba);
+
+    //INPUT
+    const int wid = 75;
+    const float wid_off = 5.0f;
+    float fontsz = denginegui_get_fontsz();
+    float offset = fontsz / 4;
+
+    if (denginegui_button(offset, (float)h - 11 * fontsz, wid, 2 * fontsz, "FWD", NULL))
+    {
+        //ptr[2] -=.01f * delta;
+    }
+
+    if (denginegui_button(offset + wid, (float)h - 11 * fontsz, wid, 2 * fontsz, "BAK", NULL))
+    {
+        //ptr[2] +=.01f * delta;
+    }
+
 
     //FPS
     denginegui_text(10,10,fpsstr, yellow);
-
-    dengine_update();
 }
 
 void android_main(struct android_app* state)
@@ -371,7 +379,7 @@ void android_main(struct android_app* state)
 
     while(1)
     {
-        dengineutils_android_pollevents();
+        dengine_window_poll(DENGINE_WINDOW_CURRENT); 
 
         //Quit and detach
         if(state->destroyRequested != 0)
@@ -381,7 +389,7 @@ void android_main(struct android_app* state)
             return;
         }
 
-        if (ds.windowinit)
+        if (dengine_window_isrunning(DENGINE_WINDOW_CURRENT))
             draw();
     }
 }

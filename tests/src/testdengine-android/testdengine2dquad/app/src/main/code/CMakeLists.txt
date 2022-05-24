@@ -22,7 +22,7 @@ add_library(GFX SHARED
 
 target_include_directories(GFX PUBLIC
 		${ANDROID_NDK}/sources/android/native_app_glue
-		"${PROJECT_BINARY_DIR}/${DENGINE_BUILD}"
+                "${PROJECT_BINARY_DIR}/${DENGINE_BUILD}/dengine_config"
 		${DENGINE_DIR}/lib/dengine-core/include
 		${DENGINE_DIR}/lib/dengine-utils/include
 		${DENGINE_DIR}/deps/cglm/include

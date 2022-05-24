@@ -6,34 +6,17 @@
 #include <dengine-utils/platform/android.h>
 
 double elapsed;
-int window_init = 0;
+
 static void init(struct android_app* app)
 {
-    //Acquire win
-    ANativeWindow_acquire(app->window);
-    dengine_window_request_GL(2, 0, 0);
-
     if(dengine_window_init())
     {
-		if(!dengine_window_loadgl())
-		{
-			dengineutils_logging_log("ERROR::Cannot load GL!");
-		}else
-		{
-			window_init = 1;
-		}
-		
-        dengineutils_logging_log("init window success");
-
         dengineutils_logging_log("GL : %s", glGetString(GL_VERSION));
     }
 }
-
 static void term(struct  android_app* app)
 {
     dengine_window_terminate();
-    ANativeWindow_release(app->window);
-    ANativeActivity_finish(app->activity);
 }
 
 static void draw()
@@ -41,7 +24,7 @@ static void draw()
     glClearColor(0.3, 0.2, 0.1, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 	
-    dengine_window_swapbuffers();
+    dengine_window_swapbuffers(DENGINE_WINDOW_CURRENT);
 }
 
 void android_main(struct android_app* state)
@@ -55,15 +38,14 @@ void android_main(struct android_app* state)
         dengineutils_logging_log("Restoring from save state");
     }
 
+    //wait for window
     while(1)
     {
         dengineutils_android_pollevents();
-
         //Quit and detach
         if(state->destroyRequested != 0)
         {
             dengineutils_logging_log("Destroy Requested");
-
             dengineutils_logging_log("Goodbye!");
             return;
         }
@@ -77,8 +59,7 @@ void android_main(struct android_app* state)
             dengineutils_logging_log("step");
             elapsed = 0;
         }
-		
-		if(window_init)
-        	draw();
+        if(DENGINE_WINDOW_CURRENT)
+            draw();
     }
 }

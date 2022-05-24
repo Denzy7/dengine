@@ -70,21 +70,11 @@ static void draw_axis(Primitive* _axis, Shader* _shader)
 
 static void init(struct android_app* app)
 {
-    //Acquire win
-    ANativeWindow_acquire(app->window);
-    dengine_window_request_GL(2, 0, 0);
     dengineutils_debug_init();
 
     if(dengine_window_init())
     {
-		dengine_window_loadgl();
-
-		dengine_window_set_swapinterval(2);
-
-        window_init = 1;
-
-        dengine_window_get_window_width(&w);
-        dengine_window_get_window_height(&h);
+        dengine_window_get_dim(DENGINE_WINDOW_CURRENT, &w, &h);
         dengineutils_logging_log("INFO::init window %dx%d\n", w, h);
 
         dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
@@ -163,7 +153,6 @@ static void init(struct android_app* app)
         shadow3d.vertex_code = shadow3dsrc[0];
         shadow3d.fragment_code = shadow3dsrc[1];
         shadow3d.geometry_code = shadow3dsrc[2];
-
 
         dengine_shader_setup(&shadow3d);
 
@@ -339,12 +328,7 @@ static void term(struct  android_app* app)
     dengineutils_debug_terminate();
     dengine_material_destroy(&cube_mat);
     dengine_material_destroy(&plane_mat);
-
-    window_init = 0;
-    dengineutils_logging_log("ptr : %p", app->window);
     dengine_window_terminate();
-    ANativeWindow_release(app->window);
-    ANativeActivity_finish(app->activity);
 }
 
 static void draw()
@@ -360,7 +344,7 @@ static void draw()
     }
     float* ptr = posflt[curpstr];
 
-    dengine_window_get_window_dim(&w,&h);
+    dengine_window_get_dim(DENGINE_WINDOW_CURRENT, &w,&h);
 
     dengine_camera_lookat(NULL, &camera);
     dengine_camera_project_perspective((float)w / (float)h, &camera);
@@ -510,8 +494,7 @@ static void draw()
         ptr[1] -=.01f * delta;
     }
 
-    dengine_window_swapbuffers();
-    dengine_input_pollevents();
+    dengine_window_swapbuffers(DENGINE_WINDOW_CURRENT);
 }
 
 void android_main(struct android_app* state)
@@ -527,7 +510,14 @@ void android_main(struct android_app* state)
 
     while(1)
     {
-        dengineutils_android_pollevents();
+        /*
+         * dengine_window_poll(DENGINE_WINDOW_CURRENT) is viable
+         * here as it just calls dengineutils_android_pollevents and
+         * set input values.
+         * this might create some ambiguity because we are checking
+         * DENGINE_WINDOW_CURRENT before drawing
+         */
+        dengine_window_poll(DENGINE_WINDOW_CURRENT);
 		
         //Quit and detach
         if(state->destroyRequested != 0)
@@ -537,7 +527,7 @@ void android_main(struct android_app* state)
             return;
         }
 
-        if (window_init)
+        if (DENGINE_WINDOW_CURRENT)
             draw();
     }
 }
