@@ -228,8 +228,6 @@ DENGINE_INLINE int dengine_init()
         }
 
 #ifndef DENGINE_ANDROID
-        //Android creates a window already in init
-
         DENGINE_INIT_OPTS.window = dengine_window_create(DENGINE_INIT_OPTS.window_width, DENGINE_INIT_OPTS.window_height, DENGINE_INIT_OPTS.window_title, NULL);
         if(!DENGINE_INIT_OPTS.window)
         {
@@ -242,6 +240,9 @@ DENGINE_INLINE int dengine_init()
              dengineutils_logging_log("ERROR::Cannot makecurrent window");
              return 0;
          }
+#else
+        //Android creates a window already in init and sets it current
+        DENGINE_INIT_OPTS.window = dengine_window_get_current();
 #endif
     }
 

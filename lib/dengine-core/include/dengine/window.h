@@ -74,11 +74,6 @@ void* dengine_window_get_proc(const char* name);
 
 WindowInput* dengine_window_get_input(DengineWindow* window);
 
-//#ifdef DENGINE_ANDROID
-
-//int dengine_window_android_egl_context_gladloadgl();
-//#endif
-
 #ifdef __cplusplus
 }
 #endif // __cplusplus
