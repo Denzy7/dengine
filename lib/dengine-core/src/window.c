@@ -113,7 +113,7 @@ WNDCLASSW wc = { };
 static const wchar_t* wc_class = L"Dengine_Win32";
 #endif
 
-DengineWindow current;
+DengineWindow* current = NULL;
 DynLib gl = NULL;
 
 int dengine_window_init()
@@ -194,13 +194,7 @@ int dengine_window_init()
      * directly create current (android only supports 1 window and display afaik)
      * and make it current
      */
-    current.egl_dpy = egl_dpy;
-    ANativeWindow* android_native_window = dengineutils_android_get_window();
-    if(!_dengine_window_egl_createctx(current.egl_dpy, &current.egl_sfc, &current.egl_ctx, android_native_window));
-        dengineutils_logging_log("ERROR::WINDOW::Cannot create EGLContext");
-
-    if(!eglMakeCurrent(current.egl_dpy, current.egl_sfc, current.egl_sfc, current.egl_ctx))
-        dengineutils_logging_log("ERROR::WINDOW::CANNOT_MAKE_CONTEXT_CURRENT!");
+    current = dengine_window_create(0, 0, NULL, NULL);
 #endif
     return init;
 }
@@ -369,6 +363,25 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     }
     ret->running = 1;
     ShowWindow(ret->win32_hwnd, SW_NORMAL);
+    return ret;
+#elif defined(DENGINE_ANDROID)
+    DengineWindow window;
+    memset(&window, 0, sizeof(DengineWindow));
+    window.and_win = dengineutils_android_get_window();
+    window.egl_dpy = egl_dpy;
+    if(!_dengine_window_egl_createctx(window.egl_dpy, &window.egl_sfc, &window.egl_ctx, window.and_win));
+    {
+        dengineutils_logging_log("ERROR::WINDOW::Cannot create EGLContext");
+        return NULL;
+    }
+
+    if(!eglMakeCurrent(window.egl_dpy, window.egl_sfc, window.egl_sfc, window.egl_ctx))
+    {
+        dengineutils_logging_log("ERROR::WINDOW::CANNOT_MAKE_CONTEXT_CURRENT!");
+        return NULL;
+    }
+    DengineWindow* ret = malloc(sizeof(DengineWindow));
+    memcpy(ret, &window, sizeof(DengineWindow));
     return ret;
 #endif
 }
