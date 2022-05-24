@@ -369,7 +369,7 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     memset(&window, 0, sizeof(DengineWindow));
     window.and_win = dengineutils_android_get_window();
     window.egl_dpy = egl_dpy;
-    if(!_dengine_window_egl_createctx(window.egl_dpy, &window.egl_sfc, &window.egl_ctx, window.and_win));
+    if(!_dengine_window_egl_createctx(window.egl_dpy, &window.egl_sfc, &window.egl_ctx, NULL, window.and_win))
     {
         dengineutils_logging_log("ERROR::WINDOW::Cannot create EGLContext");
         return NULL;
@@ -424,9 +424,9 @@ void dengine_window_get_dim(DengineWindow* window, int* width, int* height)
         *height = (int)(rect.bottom - rect.top);
 #elif defined(DENGINE_ANDROID)
     if(width)
-        *width = (int)ANativeWindow_getWidth(window->and_window);
+        *width = (int)ANativeWindow_getWidth(window->and_win);
     if(height)
-        *height = (int)ANativeWindow_getHeight(window->and_window);
+        *height = (int)ANativeWindow_getHeight(window->and_win);
 #endif
 }
 
