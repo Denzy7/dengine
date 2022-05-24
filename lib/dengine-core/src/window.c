@@ -526,7 +526,16 @@ int dengine_window_makecurrent(DengineWindow* window)
     if(window->win32_ctx)
         make = 1;
 #endif
+    if(make)
+        current = window;
+    else
+        dengineutils_logging_log("WARNING::Unable to make current [%p]", window);
     return make;
+}
+
+DengineWindow* dengine_window_get_current()
+{
+    return current;
 }
 
 int dengine_window_set_swapinterval(DengineWindow* window, int interval)

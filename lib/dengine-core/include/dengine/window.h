@@ -66,6 +66,8 @@ int dengine_window_loadgl(DengineWindow* window);
 
 int dengine_window_makecurrent(DengineWindow* window);
 
+DengineWindow* dengine_window_get_current();
+
 int dengine_window_set_swapinterval(DengineWindow* window, int interval);
 
 void* dengine_window_get_proc(const char* name);
