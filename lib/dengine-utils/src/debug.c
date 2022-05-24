@@ -38,7 +38,8 @@ void dengineutils_debug_terminate()
         return;
 
     for (int i = 0; i < DENGINE_DEBUG_TRACESIZE; i++) {
-        free(trace[i]);
+        if(trace[i])
+            free(trace[i]);
     }
     free(trace);
     free(fmt);

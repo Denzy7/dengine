@@ -1,7 +1,6 @@
 set(DENGINE_DLL_FILENAME "dengine-core.dll")
 set(DENGINE_DLL_FILEDESC "Core")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../dengine-lib.rc.in src/dengine-core.rc)
-
 set(dengine-core-src
 src/window.c
 src/shader.c

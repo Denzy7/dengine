@@ -209,8 +209,11 @@ void dengine_window_terminate()
 #endif
 
 #ifdef DENGINE_CONTEXT_EGL
+#ifndef DENGINE_ANDROID
+    //crash on android. but leaks on others
     eglMakeCurrent(egl_dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglTerminate(egl_dpy);
+#endif
 #endif
 
 #ifdef DENGINE_WIN_X11
@@ -377,11 +380,6 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         return NULL;
     }
 
-    if(!eglMakeCurrent(window.egl_dpy, window.egl_sfc, window.egl_sfc, window.egl_ctx))
-    {
-        dengineutils_logging_log("ERROR::WINDOW::CANNOT_MAKE_CONTEXT_CURRENT!");
-        return NULL;
-    }
     DengineWindow* ret = malloc(sizeof(DengineWindow));
     memcpy(ret, &window, sizeof(DengineWindow));
     return ret;
@@ -425,10 +423,12 @@ void dengine_window_get_dim(DengineWindow* window, int* width, int* height)
     if(height)
         *height = (int)(rect.bottom - rect.top);
 #elif defined(DENGINE_ANDROID)
-    if(width)
-        *width = (int)ANativeWindow_getWidth(window->and_win);
-    if(height)
-        *height = (int)ANativeWindow_getHeight(window->and_win);
+    if(dengineutils_android_iswindowrunning()) {
+        if(width)
+            *width = (int)ANativeWindow_getWidth(window->and_win);
+        if(height)
+            *height = (int)ANativeWindow_getHeight(window->and_win);
+    }
 #endif
 }
 
@@ -714,7 +714,7 @@ int dengine_window_poll(DengineWindow* window)
     polled = DispatchMessageW(&window->win32_msg);
 #elif defined(DENGINE_ANDROID)
     dengineutils_android_pollevents();
-    if(window)
+    if(window && dengineutils_android_iswindowrunning())
     {
         dengine_window_get_dim(window, NULL, &h);
         AndroidInput* andr_input = dengineutils_android_get_input();

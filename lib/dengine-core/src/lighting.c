@@ -229,8 +229,8 @@ void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, const Shader* sha
     int h = viewport[3], w = viewport[2];
 
     //we might not have entered with fb 0, save binding for later
-    int bind;
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &bind); DENGINE_CHECKGL;
+    Framebuffer entryfb;
+    dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entryfb);
 
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &dirLight->shadow.shadow_map);
 
@@ -258,7 +258,7 @@ void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, const Shader* sha
     glViewport(0, 0, w, h);
 
     //bind entry fb
-    glBindFramebuffer(GL_FRAMEBUFFER, bind); DENGINE_CHECKGL;
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, &entryfb);
 
     memcpy(dirLight->shadow_projview, projview[0], sizeof(mat4));
 }

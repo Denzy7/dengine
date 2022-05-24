@@ -279,8 +279,11 @@ void* _dengineutils_logging_logthr_pthread(void* arg)
         LoggingCallbackVtor* cbs = logcallbacks.data;
         for(size_t i = 0; i < logcallbacks.count; i++)
         {
-            LoggingCallback cb = cbs[i].cb;
-            cb(LOG_BUFFER, trip);
+            if(cbs)
+            {
+                LoggingCallback cb = cbs[i].cb;
+                cb(LOG_BUFFER, trip);
+            }
         }
     }
 #endif

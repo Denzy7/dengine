@@ -128,9 +128,7 @@ void vtor_free(vtor* vtor)
     if(vtor->data)
     {
         free(vtor->data);
-
-        vtor->data = NULL;
-
+        memset(vtor, 0, sizeof (vtor));
 #ifdef VTOR_VERBOSE
         printf("free vec type_sz : %zu, capacity : %zu, count : %zu\n", vtor->type_sz, vtor->capacity, vtor->count);
     }else{
