@@ -136,11 +136,7 @@ int dengine_window_init()
 
         }
 #ifdef DENGINE_CONTEXT_EGL
-    #ifdef DENGINE_ANDROID
-        egl_dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    #else
         egl_dpy = eglGetDisplay((EGLNativeDisplayType)x_dpy);
-    #endif
 #endif
 #ifdef DENGINE_CONTEXT_GLX
         //LOOK FOR GLX EXTENSIONS
@@ -154,6 +150,7 @@ int dengine_window_init()
         init = 0;
     }
 #elif defined(DENGINE_ANDROID)
+    egl_dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if(egl_dpy == EGL_NO_DISPLAY)
     {
         dengineutils_logging_log("ERROR::WINDOW::CANNOT_OPEN_EGL_DISPLAY!");
