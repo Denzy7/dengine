@@ -437,10 +437,6 @@ int denginegui_button(float x,float y, float width, float height, const char* te
             denginegui_panel(x, y, width, height, NULL, NULL, press);
         }else{
             denginegui_panel(x, y, width, height, NULL, NULL, hover);
-#ifdef DENGINE_ANDROID
-            //HACK : For Android. Just for debugging in the meantime 😃
-            down = 1;
-#endif
         }
 
         if(dengine_input_get_mousebtn_once(0))
