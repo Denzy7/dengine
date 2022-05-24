@@ -37,12 +37,12 @@
 #include <gtk/gtk.h>
 #endif
 
-#ifdef DENGINE_LINUX
+#ifdef DENGINE_ANDROID
+#define GL "/system/lib/libGLESv3.so"
+#elif  defined(DENGINE_LINUX)
 #define GL "/lib/libGL.so"
 #elif defined(DENGINE_WIN32)
 #define GL "C:\\windows\\system32\\opengl32.dll"
-#elif defined(DENGINE_ANDROID)
-#define GL "/system/lib/libGLESv3.so"
 #endif
 
 #ifdef DENGINE_WIN32
@@ -195,6 +195,7 @@ int dengine_window_init()
      * and make it current
      */
     current = dengine_window_create(0, 0, NULL, NULL);
+    dengine_window_loadgl(current);
 #endif
     return init;
 }
@@ -447,12 +448,11 @@ void dengine_window_swapbuffers(DengineWindow* window)
 
 int dengine_window_isrunning(DengineWindow* window)
 {
+#ifdef DENGINE_ANDROID
+    return dengineutils_android_iswindowrunning();
+#else
     return window->running;
-//    #ifndef DENGINE_GL_NONE
-//    if(glinit)
-//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//    #endif // DENGINE_GL_NONE
-//    return isrunning;
+#endif
 }
 
 void* dengine_window_get_proc(const char* name)
@@ -535,7 +535,14 @@ int dengine_window_makecurrent(DengineWindow* window)
 
 DengineWindow* dengine_window_get_current()
 {
+#ifdef DENGINE_ANDROID
+    if(dengineutils_android_iswindowrunning())
+        return current;
+    else
+        return NULL;
+#else
     return current;
+#endif
 }
 
 int dengine_window_set_swapinterval(DengineWindow* window, int interval)

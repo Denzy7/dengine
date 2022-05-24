@@ -18,6 +18,8 @@ typedef enum
 #define DENGINE_WINDOW_ALPNUM 4
 #define DENGINE_WINDOW_MSEBTN 3
 
+#define DENGINE_WINDOW_CURRENT dengine_window_get_current()
+
 typedef struct
 {
     char key;
