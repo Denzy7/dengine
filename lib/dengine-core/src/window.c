@@ -194,8 +194,9 @@ int dengine_window_init()
      * directly create current (android only supports 1 window and display afaik)
      * and make it current
      */
-    current = dengine_window_create(0, 0, NULL, NULL);
-    dengine_window_loadgl(current);
+    DengineWindow* _andr = dengine_window_create(0, 0, NULL, NULL);
+    dengine_window_makecurrent(_andr);
+    dengine_window_loadgl(_andr);
 #endif
     return init;
 }
