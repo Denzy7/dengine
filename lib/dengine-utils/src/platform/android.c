@@ -12,6 +12,9 @@ struct android_app* _app;
 DengineAndroidAppFunc initfunc = NULL;
 DengineAndroidAppFunc termfunc = NULL;
 
+int iswindowrunning = 0;
+AndroidInput input;
+
 void _dengineutils_android_terminate(struct android_app* app);
 
 int dengineutils_android_asset2file2mem(File2Mem* f2m)
@@ -35,7 +38,7 @@ int dengineutils_android_asset2file2mem(File2Mem* f2m)
     return rd;
 }
 
-void dengineutils_android_pollevents()
+int dengineutils_android_pollevents()
 {
     int events;
     struct android_poll_source* source;
@@ -46,20 +49,39 @@ void dengineutils_android_pollevents()
             source->process(_app, source);
         }
     }
+    return events;
 }
 
 static int32_t input_event(struct android_app* app, AInputEvent* event)
 {
-    size_t ptrs = AMotionEvent_getPointerCount(event);
-    if(ptrs)
-    {
-        double x = AMotionEvent_getX(event, ptrs - 1);
-        double y = AMotionEvent_getY(event, ptrs - 1);
+    uint32_t type = AInputEvent_getType(event);
+    switch (type) {
+        case AINPUT_EVENT_TYPE_MOTION:
+        {
+            int32_t action = AMotionEvent_getAction(event);
+            int32_t id = AMotionEvent_getPointerId(event, 0);
 
-        //save pointer locations
-    }else
-    {
-        //clear pointer locations
+            //-1 state for get_mouse_once
+            if(input.pointer0.state != -1)
+            {
+                input.pointer0.x = AMotionEvent_getX(event, 0);
+                input.pointer0.y = AMotionEvent_getY(event, 0);
+            }
+
+            if(action == AMOTION_EVENT_ACTION_POINTER_UP )
+            {
+                input.pointer0.x = 0.0;
+                input.pointer0.y = 0.0;
+                input.pointer0.state = 0;
+                dengineutils_logging_log("rel");
+            }
+            dengineutils_logging_log("%f %f %d", input.pointer0.x, input.pointer0.y, id);
+
+            break;
+        }
+
+        default:
+            break;
     }
     return 0;
 }
@@ -74,16 +96,21 @@ static void cmd_handle(struct android_app* app, int32_t cmd)
 
         case APP_CMD_INIT_WINDOW:
             dengineutils_logging_log("Getting window ready...");
+            ANativeWindow_acquire(_app->window);
             if(initfunc)
                 initfunc(app);
+            iswindowrunning = 1;
             //Buggy fullscreen
             //ANativeActivity_setWindowFlags(app->activity, AWINDOW_FLAG_FULLSCREEN, 0);
             break;
 
         case APP_CMD_TERM_WINDOW:
             dengineutils_logging_log("Term window");
+            iswindowrunning = 0;
             if(termfunc)
                 termfunc(app);
+            ANativeWindow_release(app->window);
+            ANativeActivity_finish(app->activity);
             break;
 
         case APP_CMD_GAINED_FOCUS:
@@ -201,4 +228,14 @@ ANativeWindow* dengineutils_android_get_window()
 AAssetManager* dengineutils_android_get_assetmgr()
 {
     return _app->activity->assetManager;
+}
+
+int dengineutils_android_iswindowrunning()
+{
+    return iswindowrunning;
+}
+
+AndroidInput* dengineutils_android_get_input()
+{
+    return &input;
 }
