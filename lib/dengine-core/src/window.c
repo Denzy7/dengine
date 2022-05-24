@@ -136,7 +136,11 @@ int dengine_window_init()
 
         }
 #ifdef DENGINE_CONTEXT_EGL
+    #ifdef DENGINE_ANDROID
+        egl_dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    #else
         egl_dpy = eglGetDisplay((EGLNativeDisplayType)x_dpy);
+    #endif
 #endif
 #ifdef DENGINE_CONTEXT_GLX
         //LOOK FOR GLX EXTENSIONS
@@ -150,7 +154,6 @@ int dengine_window_init()
         init = 0;
     }
 #elif defined(DENGINE_ANDROID)
-    egl_dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if(egl_dpy == EGL_NO_DISPLAY)
     {
         dengineutils_logging_log("ERROR::WINDOW::CANNOT_OPEN_EGL_DISPLAY!");
@@ -207,18 +210,23 @@ int dengine_window_init()
 
 void dengine_window_terminate()
 {
-#ifdef DENGINE_WIN_X11
+    dengineutils_dynlib_close(gl);
+#ifdef DENGINE_CONTEXT_GLX
     glXMakeCurrent(x_dpy, None, NULL);
+#endif
+
+#ifdef DENGINE_CONTEXT_EGL
+    eglMakeCurrent(egl_dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    eglTerminate(egl_dpy);
+#endif
+
+#ifdef DENGINE_WIN_X11
     XCloseDisplay(x_dpy);
 #endif
 #ifdef DENGINE_WIN32
-    if(gl)
-        dengineutils_dynlib_close(gl);
     UnregisterClassW(wc_class, wc.hInstance);
 #endif
-#ifdef DENGINE_CONTEXT_EGL
-   eglTerminate(egl_dpy);
-#endif
+
 }
 
 void dengine_window_request_GL(int gl_major, int gl_minor, int gl_core)
@@ -286,9 +294,6 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         return NULL;
     }
 
-    // x11 delete message. why on earth is there no simple exit event?
-    XSetWMProtocols(x_dpy, window.x_win, &wm_delete, 1);
-
     if(!glXCreateContextAttribsARB)
     {
         dengineutils_logging_log("ERROR::Cannot getproc glXCreateContextAttribsARB");
@@ -337,6 +342,8 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         return NULL;
     }
 #endif
+    // x11 delete message. why on earth is there no simple exit event?
+    XSetWMProtocols(x_dpy, window.x_win, &wm_delete, 1);
     XMapWindow(x_dpy, window.x_win);
     XStoreName(x_dpy, window.x_win, title);
 
@@ -373,11 +380,16 @@ void dengine_window_destroy(DengineWindow* window)
 {
 #ifdef DENGINE_CONTEXT_GLX
     glXDestroyContext(x_dpy, window->glx_ctx);
+    XFreeColormap(x_dpy, window->x_swa.colormap);
+#endif
+
+#ifdef DENGINE_CONTEXT_EGL
+    eglDestroyContext(window->egl_dpy, window->egl_ctx);
+    eglDestroySurface(window->egl_dpy, window->egl_sfc);
 #endif
 
 #ifdef DENGINE_WIN_X11
    XUnmapWindow(x_dpy, window->x_win);
-   XFreeColormap(x_dpy, window->x_swa.colormap);
    XDestroyWindow(x_dpy, window->x_win);
 #endif
 
