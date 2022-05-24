@@ -208,6 +208,7 @@ int dengine_window_init()
 void dengine_window_terminate()
 {
 #ifdef DENGINE_WIN_X11
+    glXMakeCurrent(x_dpy, None, NULL);
     XCloseDisplay(x_dpy);
 #endif
 #ifdef DENGINE_WIN32
@@ -312,6 +313,9 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         dengineutils_logging_log("ERROR::Cannot glXCreateContext");
         return NULL;
     }
+
+    XFree(vi);
+    XFree(conf);
 #elif defined(DENGINE_CONTEXT_EGL)
     window.x_win = XCreateWindow(x_dpy, root, 0, 0, width, height, 0,
                             CopyFromParent, InputOutput, CopyFromParent, CWEventMask,
@@ -368,11 +372,12 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
 void dengine_window_destroy(DengineWindow* window)
 {
 #ifdef DENGINE_CONTEXT_GLX
-  glXDestroyContext(x_dpy, window->glx_ctx);
+    glXDestroyContext(x_dpy, window->glx_ctx);
 #endif
 
 #ifdef DENGINE_WIN_X11
    XUnmapWindow(x_dpy, window->x_win);
+   XFreeColormap(x_dpy, window->x_swa.colormap);
    XDestroyWindow(x_dpy, window->x_win);
 #endif
 
@@ -629,16 +634,16 @@ int dengine_window_poll(DengineWindow* window)
 //                printf("press %u %u\n", window->ev.xbutton.button,
 //                       window->ev.xbutton.state);
             }
-        }
 
-        if(window->ev.xbutton.button == Button5)
-        {
-            window->input.msesrl_y = -1.0;
-        }
+            if(window->ev.xbutton.button == Button5)
+            {
+                window->input.msesrl_y = -1.0;
+            }
 
-        if(window->ev.xbutton.button == Button4)
-        {
-            window->input.msesrl_y = 1.0;
+            if(window->ev.xbutton.button == Button4)
+            {
+                window->input.msesrl_y = 1.0;
+            }
         }
 
         if(window->ev.type == MotionNotify)
