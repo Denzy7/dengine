@@ -581,12 +581,15 @@ int dengine_window_set_swapinterval(DengineWindow* window, int interval)
 int dengine_window_poll(DengineWindow* window)
 {
     int polled = 0;
+    int h;
 #ifdef DENGINE_WIN_X11
+    dengine_window_get_dim(window, NULL, &h);
     char key;
     KeySym keysym;
 
     if(XPending(x_dpy))
     {
+        XNextEvent(x_dpy, &window->ev);
         polled = XCheckWindowEvent(x_dpy, window->x_win,
                   window->x_swa.event_mask,
                   &window->ev);
@@ -691,9 +694,6 @@ int dengine_window_poll(DengineWindow* window)
 
         if(window->ev.type == MotionNotify)
         {
-            int h;
-            dengine_window_get_dim(window, NULL, &h);
-
             Window root, child;
             int x_root, y_root, x, y;
             uint32_t masks;
@@ -714,6 +714,24 @@ int dengine_window_poll(DengineWindow* window)
     polled = DispatchMessageW(&window->win32_msg);
 #elif defined(DENGINE_ANDROID)
     dengineutils_android_pollevents();
+    if(window)
+    {
+        dengine_window_get_dim(window, NULL, &h);
+        AndroidInput* andr_input = dengineutils_android_get_input();
+        if(andr_input->pointer0.state == 0)
+        {
+            window->input.mse_x = andr_input->pointer0.x;
+            window->input.mse_y = (float)h - andr_input->pointer0.y;
+            andr_input->pointer0.state = -1;
+            if(window->input.msebtn[0] != -1)
+                window->input.msebtn[0] = 1;
+        }else
+        {
+            window->input.msebtn[0] = 0;
+            window->input.mse_x = 0.0;
+            window->input.mse_y = 0.0;
+        }
+    }
 #endif
 
 #ifdef DENGINE_HAS_GTK3

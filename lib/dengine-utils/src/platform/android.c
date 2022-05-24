@@ -58,24 +58,9 @@ static int32_t input_event(struct android_app* app, AInputEvent* event)
     switch (type) {
         case AINPUT_EVENT_TYPE_MOTION:
         {
-            int32_t action = AMotionEvent_getAction(event);
-            int32_t id = AMotionEvent_getPointerId(event, 0);
-
-            //-1 state for get_mouse_once
-            if(input.pointer0.state != -1)
-            {
-                input.pointer0.x = AMotionEvent_getX(event, 0);
-                input.pointer0.y = AMotionEvent_getY(event, 0);
-            }
-
-            if(action == AMOTION_EVENT_ACTION_POINTER_UP )
-            {
-                input.pointer0.x = 0.0;
-                input.pointer0.y = 0.0;
-                input.pointer0.state = 0;
-                dengineutils_logging_log("rel");
-            }
-            dengineutils_logging_log("%f %f %d", input.pointer0.x, input.pointer0.y, id);
+            input.pointer0.state = 0;
+            input.pointer0.x = AMotionEvent_getX(event, 0);
+            input.pointer0.y = AMotionEvent_getY(event, 0);
 
             break;
         }
