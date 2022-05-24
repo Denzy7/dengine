@@ -2,7 +2,7 @@
 
 #include "dengine/viewport.h" //set_view
 #include "dengine/loadgl.h" //glad
-
+#include "dengine/input.h" //setwindow
 #include "dengine-utils/logging.h"//log
 #include "dengine-utils/dynlib.h" //getsym
 
@@ -527,9 +527,13 @@ int dengine_window_makecurrent(DengineWindow* window)
         make = 1;
 #endif
     if(make)
+    {
         current = window;
-    else
+        dengine_input_set_window(current);
+    }
+    else{
         dengineutils_logging_log("WARNING::Unable to make current [%p]", window);
+    }
     return make;
 }
 
