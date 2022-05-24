@@ -96,21 +96,21 @@ static void cmd_handle(struct android_app* app, int32_t cmd)
 
         case APP_CMD_INIT_WINDOW:
             dengineutils_logging_log("Getting window ready...");
+            iswindowrunning = 1;
             ANativeWindow_acquire(_app->window);
             if(initfunc)
                 initfunc(app);
-            iswindowrunning = 1;
             //Buggy fullscreen
             //ANativeActivity_setWindowFlags(app->activity, AWINDOW_FLAG_FULLSCREEN, 0);
             break;
 
         case APP_CMD_TERM_WINDOW:
             dengineutils_logging_log("Term window");
-            iswindowrunning = 0;
             if(termfunc)
                 termfunc(app);
             ANativeWindow_release(app->window);
             ANativeActivity_finish(app->activity);
+            iswindowrunning = 0;
             break;
 
         case APP_CMD_GAINED_FOCUS:
