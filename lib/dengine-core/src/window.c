@@ -17,6 +17,7 @@
 #include <X11/XKBlib.h>
 #elif defined (DENGINE_WIN32)
 #include <windows.h> //HWND
+#include <windowsx.h> //GET_X_LPARAM
 #elif defined (DENGINE_ANDROID)
 #include <dengine-utils/platform/android.h> //ANativeWindow
 #else
@@ -714,7 +715,7 @@ int dengine_window_poll(DengineWindow* window)
     }
 
 #elif defined(DENGINE_WIN32)
-    GetMessageW(&window->win32_msg, window->win32_hwnd, 0, 0);
+    PeekMessageW(&window->win32_msg, window->win32_hwnd, 0, 0, PM_REMOVE);
     TranslateMessage(&window->win32_msg);
     polled = DispatchMessageW(&window->win32_msg);
 #elif defined(DENGINE_ANDROID)
@@ -833,11 +834,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_CLOSE:
     {
-        if(MessageBoxW(hwnd, L"Do you want to quit?", L"Dengine", MB_OKCANCEL) == IDOK)
-        {
+//        if(MessageBoxW(hwnd, L"Do you want to quit?", L"Dengine", MB_OKCANCEL) == IDOK)
+//        {
             window->running = 0;
             return 0;
-        }
+//        }
     }
 
     case WM_CREATE:{
@@ -931,6 +932,49 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
         ReleaseDC(hwnd, hdc);
 
+        return 0;
+    }
+
+    case WM_LBUTTONDOWN:
+    {
+        if(window->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] != -1)
+            window->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] = 1;
+        return 0;
+    }
+    case WM_LBUTTONUP:
+    {
+        window->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] = 0;
+        return 0;
+    }
+    case WM_RBUTTONDOWN:
+    {
+        if(window->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] != -1)
+            window->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] = 1;
+        return 0;
+    }
+    case WM_RBUTTONUP:
+    {
+        window->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] = 0;
+        return 0;
+    }
+    case WM_MBUTTONDOWN:
+    {
+        if(window->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] != -1)
+            window->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] = 1;
+        return 0;
+    }
+    case WM_MBUTTONUP:
+    {
+        window->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] = 0;
+        return 0;
+    }
+
+    case WM_MOUSEMOVE:
+    {
+        int h;
+        dengine_window_get_dim(window, NULL, &h);
+        window->input.mse_x = GET_X_LPARAM(lParam);
+        window->input.mse_y = h - GET_Y_LPARAM(lParam);
         return 0;
     }
 

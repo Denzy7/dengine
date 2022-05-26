@@ -214,7 +214,7 @@ int dengine_input_get_mousebtn_once(int btn)
 {
     if(_windowinp->msebtn[btn] == 1)
     {
-        _windowinp->msebtn[btn]  = 0;
+        _windowinp->msebtn[btn] = -1;
         return 1;
     }
     return 0;
