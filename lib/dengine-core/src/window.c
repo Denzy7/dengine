@@ -403,6 +403,11 @@ void dengine_window_destroy(DengineWindow* window)
    XDestroyWindow(x_dpy, window->x_win);
 #endif
 
+#ifdef DENGINE_WIN32
+   wglDeleteContext(window->win32_ctx);
+   DestroyWindow(window->win32_hwnd);
+#endif
+
     free(window);
 }
 
@@ -797,6 +802,17 @@ int _dengine_window_egl_createctx(EGLDisplay dpy, EGLSurface* egl_sfc, EGLContex
 #ifdef DENGINE_WIN32
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+    DengineWindow* window;
+    if(uMsg == WM_CREATE)
+    {
+        CREATESTRUCT* create = (CREATESTRUCT*)lParam;
+        window = create->lpCreateParams;
+        SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)window);
+    }else
+    {
+        window = (DengineWindow*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+    }
+
     switch (uMsg) {
 
     case WM_SIZE:{
@@ -817,11 +833,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_CLOSE:
     {
-        if(MessageBoxW(hwnd, L"Do you want to quit?", L"App", MB_OKCANCEL) == IDOK)
+        if(MessageBoxW(hwnd, L"Do you want to quit?", L"Dengine", MB_OKCANCEL) == IDOK)
         {
-            DengineWindow* win = (DengineWindow*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-            win->running = 0;
-            DestroyWindow(hwnd);
+            window->running = 0;
             return 0;
         }
     }
@@ -848,11 +862,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             0,                                // reserved
             0, 0, 0
         };
-
-        CREATESTRUCT* create = (CREATESTRUCT*)lParam;
-        DengineWindow* w = create->lpCreateParams;
-        SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)w);
-        DengineWindow* win = (DengineWindow*) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 
         HDC hdc = GetDC(hwnd);
         int pix = ChoosePixelFormat(hdc, &pfd);
@@ -903,13 +912,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 0
             };
 
-            win->win32_ctx = wglCreateContextAttribsARB(hdc, win->win32_ctx_shr, ctx_attrs);
-            if(!win->win32_ctx)
+            window->win32_ctx = wglCreateContextAttribsARB(hdc, window->win32_ctx_shr, ctx_attrs);
+            if(!window->win32_ctx)
             {
                 MessageBox(hwnd, "wglCreateContextAttribsARB failed", "Error", MB_OK | MB_ICONEXCLAMATION);
             }else
             {
-                wglMakeCurrent(hdc, win->win32_ctx);
+                wglMakeCurrent(hdc, window->win32_ctx);
                 //get wglEXTS
                 wglSwapIntervalEXT = wglGetProcAddress("wglSwapIntervalEXT");
                 wglGetStringi = (PFNGLGETSTRINGIPROC) wglGetProcAddress("glGetStringi");
@@ -917,7 +926,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             }
         }else
         {
-            win->win32_ctx = dummy;
+            window->win32_ctx = dummy;
             dengineutils_logging_log("WARNING::Using dummy wglCreateContext Context");
         }
         ReleaseDC(hwnd, hdc);
