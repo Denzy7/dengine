@@ -20,7 +20,7 @@
 
 #include <stddef.h> //size_t
 
-typedef struct
+typedef struct _vtor
 {
     void* data;
     size_t count;
@@ -128,7 +128,7 @@ void vtor_free(vtor* vtor)
     if(vtor->data)
     {
         free(vtor->data);
-        memset(vtor, 0, sizeof (vtor));
+        memset(vtor, 0, sizeof (struct _vtor));
 #ifdef VTOR_VERBOSE
         printf("free vec type_sz : %zu, capacity : %zu, count : %zu\n", vtor->type_sz, vtor->capacity, vtor->count);
     }else{
