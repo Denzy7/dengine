@@ -1,20 +1,20 @@
 #include "dengine-utils/logging.h"
 
+#include "dengine_config.h" //MAX_LOG_STR_SIZE
+
 #include "dengine-utils/os.h"
 #include "dengine-utils/vtor.h" //callbacks
 #include "dengine-utils/filesys.h" //files_dir
+#include "dengine-utils/thread.h" //logthr
+#include "dengine-utils/macros.h"
 
 #include <stdio.h>  //printf
 #include <stdarg.h> //vsprint
 #include <string.h> //sprintf
 #include <time.h> //ctime
 
-#include "dengine_config.h" //MAX_LOG_STR_SIZE
-
-#include "dengine-utils/macros.h"
-
 #ifdef DENGINE_LINUX
-#include <unistd.h>
+#include <unistd.h> //pipe2
 //ANSI COLORS
 #define ANSI_Red "\033[0;31m"
 #define ANSI_Green "\033[0;32m"
@@ -41,12 +41,6 @@
 #define ANDROID_LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, DENGINE_ANDROID_LOG_TAG, __VA_ARGS__))
 #define ANDROID_LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, DENGINE_ANDROID_LOG_TAG, __VA_ARGS__))
 void _dengineutils_logging_androidcb(const char* log, const char* trip);
-#endif
-
-//PTHREAD
-#ifdef DENGINE_HAS_PTHREAD_H
-#include <pthread.h>
-void* _dengineutils_logging_logthr_pthread(void* arg);
 #endif
 
 //PLAFORM SPECIFIC GLOBAL VARS
@@ -79,7 +73,7 @@ typedef struct
 }LoggingCallbackVtor;
 
 // start log thread
-int _dengineutils_logging_logthr_start();
+void* _dengineutils_logging_logthr(void* arg);
 int logthrstarted = 0;
 vtor logcallbacks;
 
@@ -111,7 +105,18 @@ void _dengineutils_logging_androidcb(const char* log, const char* trip)
 
 int dengineutils_logging_init()
 {
-    return _dengineutils_logging_logthr_start();
+    Thread logthr;
+    if(dengineutils_thread_create(_dengineutils_logging_logthr, NULL, &logthr))
+        logthrstarted = 1;
+
+    vtor_create(&logcallbacks, sizeof(LoggingCallbackVtor));
+
+    // android stdout stderr callback
+#ifdef DENGINE_ANDROID
+    dengineutils_logging_addcallback(_dengineutils_logging_androidcb);
+#endif
+
+    return 1;
 }
 
 void dengineutils_logging_terminate()
@@ -226,33 +231,7 @@ int dengineutils_logging_get_msgboxerror()
     return msgboxerr;
 }
 
-int _dengineutils_logging_logthr_start()
-{
-#ifdef DENGINE_HAS_PTHREAD_H
-    if(logthrstarted)
-        return 0;
-
-    pthread_t thr;
-    pthread_create(&thr, NULL, _dengineutils_logging_logthr_pthread, NULL);
-    pthread_detach(thr);
-    logthrstarted = 1;
-#endif
-
-#ifdef DENGINE_WIN32
-   //TODO: Win32 impl.
-#endif
-
-    vtor_create(&logcallbacks, sizeof(LoggingCallbackVtor));
-
-    // android stdout stderr callback
-#ifdef DENGINE_ANDROID
-    dengineutils_logging_addcallback(_dengineutils_logging_androidcb);
-#endif
-
-    return 1;
-}
-
-void* _dengineutils_logging_logthr_pthread(void* arg)
+void* _dengineutils_logging_logthr(void* arg)
 {
 #ifdef DENGINE_LINUX
     ssize_t sz;
