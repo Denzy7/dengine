@@ -3,6 +3,7 @@ set(DENGINE_DLL_FILEDESC "Core Utilities DLL")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../dengine-lib.rc.in src/dengine-utils.rc)
 
 set(dengine-utils-src
+src/thread.c
 src/logging.c
 src/confserialize.c
 src/filesys.c
@@ -19,6 +20,7 @@ src/dynlib.c
 )
 
 set(dengine-utils-hdr
+include/dengine-utils/thread.h
 include/dengine-utils/logging.h
 include/dengine-utils/confserialize.h
 include/dengine-utils/filesys.h
