@@ -124,10 +124,10 @@ if(DENGINE_SCRIPTING_PYTHON)
     endif()
 endif()
 
-include(CheckFunctionExists)
+include(CheckSymbolExists)
 include(CheckIncludeFile)
 
-check_function_exists(clock_gettime DENGINE_HAS_CLOCK_GETTIME)
+check_symbol_exists(clock_gettime "time.h" DENGINE_HAS_CLOCK_GETTIME)
 check_include_file(pthread.h DENGINE_HAS_PTHREAD_H)
 
 set(DENGINE_PYTHON_DENGINE_SCRIPT_VER 1)
