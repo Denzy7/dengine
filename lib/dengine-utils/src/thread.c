@@ -38,3 +38,43 @@ void dengineutils_thread_exit(Thread* thread)
     pthread_cancel(thread->thr);
 #endif
 }
+
+int dengineutils_thread_mutex_create(Mutex* mutex)
+{
+#ifdef DENGINE_WIN32
+    mutex->hMutex = CreateMutex(NULL, FALSE, NULL);
+    if(mutex->hMutex == NULL)
+        return 0;
+    else
+        return 1;
+#else
+    return pthread_mutex_init(&mutex->mutex, NULL);
+#endif
+}
+
+int dengineutils_thread_mutex_destroy(Mutex* mutex)
+{
+#ifdef DENGINE_WIN32
+    return CloseHandle(mutex->hMutex);
+#else
+    return pthread_mutex_destroy(&mutex->mutex);
+#endif
+}
+
+int dengineutils_thread_mutex_lock(Mutex* mutex)
+{
+#ifdef DENGINE_WIN32
+    return WaitForSingleObject(mutex->hMutex, INFINITE);
+#else
+    return pthread_mutex_lock(&mutex->mutex);
+#endif
+}
+
+int dengineutils_thread_mutex_unlock(Mutex* mutex)
+{
+#ifdef DENGINE_WIN32
+    return ReleaseMutex(mutex->hMutex);
+#else
+    return pthread_mutex_unlock(&mutex->mutex);
+#endif
+}
