@@ -47,12 +47,6 @@ if(WIN32)
     set_target_properties(dengine-script PROPERTIES PREFIX "")
 endif()
 
-if(NOT WIN32)
-    target_link_libraries(dengine-script dl)
-endif()
-
-
-
 if(DENGINE_HAS_BULLET)
     add_library(nsl-bulletphysics SHARED
         src/nsl-bulletphysics/basic.cpp

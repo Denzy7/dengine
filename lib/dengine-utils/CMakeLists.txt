@@ -53,6 +53,12 @@ if(GTK3_LIBRARIES AND UNIX)
     target_link_libraries(dengine-utils ${GTK3_LIBRARIES})
 endif()
 
+if(NOT WIN32)
+    #dlsym, dlopen
+    target_link_libraries(dengine-utils dl)
+endif()
+
+#native app glue
 if(ANDROID)
     target_include_directories(dengine-utils PUBLIC
             #FOR debugging without Android studio
@@ -63,10 +69,12 @@ if(ANDROID)
             )
 endif()
 
+#android and logcat
 if(ANDROID)
     target_link_libraries(dengine-utils android log)
 endif()
 
+# zlib deflate
 if(DENGINE_HAS_LIBZ)
     target_link_libraries(dengine-utils ${DENGINE_HAS_LIBZ})
 endif()
