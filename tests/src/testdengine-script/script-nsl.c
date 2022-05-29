@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
     opts->window_title = "testdengine-script-nsl";
     dengine_init();
 
-    NSL nsl = denginescript_nsl_load("nsl-test.nsl");
+    NSL nsl = denginescript_nsl_load("./nsl-test.nsl");
     if(!nsl)
         return -1;
 

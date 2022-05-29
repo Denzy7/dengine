@@ -329,7 +329,7 @@ void denginescript_nsl_free(NSL nsl)
 
 nslfunc denginescript_nsl_get_func(const NSL nsl, const char* name)
 {
-    return dengineutils_dynlib_get_sym(nsl, name);
+    return dengineutils_dynlib_get_sym(nsl, name);;
 }
 
 int denginescript_nsl_get_script(const char* name, Script* script, const NSL nsl)

@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 
     if(usensl)
     {
-        nsl = denginescript_nsl_load("nsl-test.nsl");
+        nsl = denginescript_nsl_load("./nsl-test.nsl");
         if(!nsl)
         {
             dengineutils_logging_log("ERROR::nsl-test.nsl not found. place it next to executable");

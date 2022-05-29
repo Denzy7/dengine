@@ -71,7 +71,7 @@ void dengineutils_dynlib_close(DynLib dynlib)
 #endif
 }
 
-void* dengineutils_dynlib_get_sym(DynLib dynlib, const char* name)
+void* dengineutils_dynlib_get_sym(const DynLib dynlib, const char* name)
 {
 #ifdef DENGINE_LINUX
     return dlsym(dynlib, name);
