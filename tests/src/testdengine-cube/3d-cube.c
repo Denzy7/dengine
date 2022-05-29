@@ -11,7 +11,7 @@
 int main(int argc, char** argv)
 {
     DengineWindow* window = NULL;
-    if(!dengine_window_init() || !(window = dengine_window_create(1280, 720, "testdengine-3dplane", NULL)))
+    if(!dengine_window_init() || !(window = dengine_window_create(1280, 720, "testdengine-3d-cube", NULL)))
     {
         dengineutils_logging_log("ERROR::cannot create window\n");
         return 1;

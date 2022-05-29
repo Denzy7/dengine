@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
     Texture pl_ent_gizmo;
     dengine_texture_make_color(8, 8, pl.light.diffuse, 3, &pl_ent_gizmo);
 
-    while (dengine_window_isrunning()) {
+    while (dengine_update()) {
         //stepSimulation
         denginescript_call(&basic_world, DENGINE_SCRIPT_FUNC_UPDATE, &world);
 
@@ -251,7 +251,6 @@ int main(int argc, char *argv[])
         }
         denginegui_text(fontsz, fontsz, fpstr, yellow);
 
-        dengine_update();
     }
     //destroy world
     denginescript_call(&basic_world, DENGINE_SCRIPT_FUNC_TERMINATE, NULL);

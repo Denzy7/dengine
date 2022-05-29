@@ -68,7 +68,6 @@ int main(int argc, char** argv)
     dengineutils_logging_log("INFO::GLSL : %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     //Init systems...
-    dengine_input_init();
     dengineutils_filesys_init();
 
     float fontsz = 20.0f;
@@ -528,7 +527,7 @@ int main(int argc, char** argv)
         }
 
         dengine_window_swapbuffers(window);
-        dengine_input_pollevents();
+        dengine_window_poll(window);
     }
 
     dengine_window_destroy(window);

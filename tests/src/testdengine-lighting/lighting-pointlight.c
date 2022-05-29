@@ -19,39 +19,36 @@
 #include <dengine-utils/timer.h> //delta
 int main(int argc, char** argv)
 {
+    DengineWindow* window;
     dengine_window_init();
     //we need at least a 3.2 context for glFramebufferTexture (and GLSL 150 for GEOM shader)...
     //for shadow cubemap.
     //a core context is not a must AFAIK, but set to 1 if crash
     dengine_window_request_GL(3, 2, 0);
-    if(!dengine_window_glfw_create(1280, 720, "testdengine-pointlight"))
+    if(!(window=dengine_window_create(1280, 720, "testdengine-pointlight", NULL)))
     {
         dengineutils_logging_log("WARNING::cannot request an OpenGL 3.2 window. Shadows disabled\n");
 		
 		//Too bad we can't have 3.2
 		//Use 3.0 then without shadows
         dengine_window_request_defaultall();
-		if(!dengine_window_glfw_create(1280, 720, "testdengine-pointlight(noshadow)"))
+        if(!(window=dengine_window_create(1280, 720, "testdengine-pointlight(noshadow)", NULL)))
 		{
 			dengineutils_logging_log("WARNING::cannot request an OpenGL 3.0 window!");
 			return 1;
 		}
     }
 
-    GLFWwindow* current = dengine_window_glfw_get_currentwindow();
-    dengine_window_glfw_context_makecurrent(current);
-
-    dengineutils_filesys_init();
-
-    if(!dengine_window_glfw_context_gladloadgl())
+    dengine_window_makecurrent(window);
+    if(!dengine_window_loadgl(window))
     {
-        dengineutils_logging_log("ERROR::cannot load gl!\n");
+        dengineutils_logging_log("ERROR::Cannot loadgl");
         return 1;
     }
+    dengineutils_filesys_init();
 
     int w, h;
-    dengine_window_get_window_width(&w);
-    dengine_window_get_window_height(&h);
+    dengine_window_get_dim(window, &w, &h);
     dengineutils_logging_log("INFO::init window %dx%d\n", w, h);
 
     //use fullscreen 60Hz on primary monitor
@@ -282,8 +279,6 @@ int main(int argc, char** argv)
 
     //no face culling for quad
     //glEnable(GL_CULL_FACE);
-    dengine_input_init();
-
     //Change line size
     glLineWidth(4.0f);
     float color[3];
@@ -298,7 +293,7 @@ int main(int argc, char** argv)
     double elapsed = 0;
     snprintf(fps, sizeof (fps), "FPS : ...");
 
-    while(dengine_window_isrunning())
+    while(dengine_window_isrunning(window))
     {
         dengine_camera_project_perspective((float)w / (float)h, &camera);
         dengine_camera_lookat(target, &camera);
@@ -420,12 +415,13 @@ int main(int argc, char** argv)
 
         denginegui_text(sizeof (fps), h - fontsz, fps, NULL);
 
-        dengine_window_swapbuffers();
-        dengine_input_pollevents();
+        dengine_window_swapbuffers(window);
+        dengine_window_poll(window);
     }
     dengineutils_filesys_terminate();
     denginegui_terminate();
 
+    dengine_window_destroy(window);
     dengine_window_terminate();
     return 0;
 }

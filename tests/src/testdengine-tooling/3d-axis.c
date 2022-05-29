@@ -6,35 +6,29 @@
 #include <dengine/primitive.h>
 #include <dengine/draw.h>
 #include <dengine/camera.h>
-
+#include <dengine-utils/logging.h>
 #include <cglm/cglm.h>
 #include <string.h>
 int main()
 {
-    if(!dengine_window_init() || !dengine_window_glfw_create(1280, 720, "testdengine-tooling3dgrid"))
+    DengineWindow* window;
+    if(!dengine_window_init() || !(window=dengine_window_create(1280, 720, "testdengine-tool-axis",NULL)))
     {
-        printf("cannot create window\n");
+        dengineutils_logging_log("ERROR::cannot create window\n");
         return 1;
     }
-
-    GLFWwindow* current = dengine_window_glfw_get_currentwindow();
-    dengine_window_glfw_context_makecurrent(current);
-
-    if(!dengine_window_glfw_context_gladloadgl())
+    dengine_window_makecurrent(window);
+    if(!dengine_window_loadgl(window))
     {
-        printf("cannot load gl!\n");
+        dengineutils_logging_log("ERROR::cannot load gl!\n");
         return 1;
     }
 
     int w, h;
-    dengine_window_get_window_width(&w);
-    dengine_window_get_window_height(&h);
-    printf("init window %dx%d\n", w, h);
+    dengine_window_get_dim(window, &w, &h);
+    dengineutils_logging_log("INFO::init window %dx%d\n", w, h);
 
-    //use fullscreen 60Hz on primary monitor
-    //dengine_window_glfw_set_monitor(glfwGetPrimaryMonitor(), 0, 0, 60);
-
-    printf("GL : %s\n", glGetString(GL_VERSION));
+    dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
 
     Shader shader;
     shader.vertex_code=
@@ -86,7 +80,7 @@ int main()
     //Change line size
     glLineWidth(4.0f);
     float color[3];
-    while(dengine_window_isrunning())
+    while(dengine_window_isrunning(window))
     {
         glClearColor(0.1, 0.1, 0.1, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -109,12 +103,12 @@ int main()
         dengine_shader_set_vec3(&shader, "color", color);
         dengine_draw_primitive(&axis, &shader);
 
-        dengine_window_swapbuffers();
-        dengine_window_glfw_pollevents();
+        dengine_window_swapbuffers(window);
+        dengine_window_poll(window);
     }
 
+    dengine_window_destroy(window);
     dengine_window_terminate();
-
 
     printf("Hello world!\n");
     return 0;

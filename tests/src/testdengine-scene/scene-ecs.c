@@ -55,15 +55,14 @@ int main(int argc, char *argv[])
         }
     }
 
-    DengineWindow window;
+    DengineWindow* window;
     dengine_window_init();
-    dengine_window_create(1280,720,"testdengine-scene-ecs",&window);
-    dengine_window_makecurrent(&window);
-    dengine_window_loadgl();
+    window = dengine_window_create(1280,720,"testdengine-scene-ecs",NULL);
+    dengine_window_makecurrent(window);
+    dengine_window_loadgl(window);
 
     dengineutils_filesys_init();
 
-    dengine_input_init();
     NSL nsl = NULL;
 
     if(!usensl)
@@ -463,10 +462,10 @@ int main(int argc, char *argv[])
 
     denginescene_ecs_do_script_scene(scene, DENGINE_SCRIPT_FUNC_START);
 
-    while (dengine_window_isrunning()) {
+    while (dengine_window_isrunning(window)) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE + poly);
 
-        dengine_input_pollevents();
+        dengine_window_poll(window);
 
         static double elapsed=9999.0;
 
@@ -525,7 +524,7 @@ int main(int argc, char *argv[])
 
         denginegui_panel(0, 480, 720 - 480, 720 - 480, &dLight.shadow.shadow_map.depth, NULL, NULL);
 
-        dengine_window_swapbuffers();
+        dengine_window_swapbuffers(window);
     }
 
     denginescene_destroy(scene);
@@ -554,6 +553,7 @@ int main(int argc, char *argv[])
     denginegui_terminate();
     denginescript_terminate();
     dengineutils_filesys_terminate();
+    dengine_window_destroy(window);
     dengine_window_terminate();
 
     return 0;

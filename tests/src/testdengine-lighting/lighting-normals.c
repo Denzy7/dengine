@@ -172,6 +172,7 @@ int main(int argc, char** argv)
         dengine_window_poll(window);
     }
 
+    dengine_window_destroy(window);
     dengine_window_terminate();
     return 0;
 }

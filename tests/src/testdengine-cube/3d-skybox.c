@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     glLineWidth(4.0);
 
     mat4 model;
-    while(dengine_window_isrunning())
+    while(dengine_update())
     {
         double delta = dengineutils_timer_get_delta() / 1000.0;
         double speed = 5;
@@ -113,8 +113,6 @@ int main(int argc, char *argv[])
         glDepthFunc(GL_LESS);
 
         denginegui_text(10, 10, "USE WASD=move camera, EC = up/dowm", NULL);
-
-        dengine_update();
     }
 
     dengine_material_destroy(&cubemap_mat);

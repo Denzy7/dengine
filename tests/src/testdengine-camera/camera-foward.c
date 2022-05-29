@@ -38,18 +38,17 @@ int main(int argc, char *argv[])
 
     dengineutils_debug_init();
 
-    DengineWindow window;
+    DengineWindow* window;
     dengine_window_init();
-    dengine_window_create(1280, 720, "testdengine-camera-foward", &window);
-    dengine_window_makecurrent(&window);
-    dengine_window_loadgl();
+    window = dengine_window_create(1280, 720, "testdengine-camera-foward", NULL);
+    dengine_window_makecurrent(window);
+    dengine_window_loadgl(window);
     dengineutils_filesys_init();
 
     const int prtbf_sz=1024;
     char* prtbf=malloc(prtbf_sz);
 
     denginegui_init();
-    dengine_input_init();
     float fontsz=24.0f;
     denginegui_set_font(NULL,fontsz,512);
 
@@ -108,7 +107,7 @@ int main(int argc, char *argv[])
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    while (dengine_window_isrunning()) {
+    while (dengine_window_isrunning(window)) {
 
         glClearColor(.3, .2, .1, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -161,8 +160,8 @@ int main(int argc, char *argv[])
             dengine_viewport_set(0, 0, w, h);
         }
 
-        dengine_input_pollevents();
-        dengine_window_swapbuffers();
+        dengine_window_poll(window);
+        dengine_window_swapbuffers(window);
     }
 
     free(prtbf);
@@ -175,6 +174,7 @@ int main(int argc, char *argv[])
     dengineutils_filesys_terminate();
 
     dengineutils_debug_terminate();
+    dengine_window_destroy(window);
     dengine_window_terminate();
 
 

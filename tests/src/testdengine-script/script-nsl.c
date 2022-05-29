@@ -29,10 +29,9 @@ int main(int argc, char *argv[])
     if(get)
         denginescript_call(&printmouse, DENGINE_SCRIPT_FUNC_START, NULL);
 
-    while (dengine_window_isrunning()) {
+    while (dengine_update()) {
         if(get)
             denginescript_call(&printmouse, DENGINE_SCRIPT_FUNC_UPDATE, NULL);
-        dengine_update();
     }
     free(prtbf);
     denginescript_nsl_free(nsl);

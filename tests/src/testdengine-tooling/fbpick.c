@@ -18,31 +18,26 @@
 #include <math.h> //round
 int main(int argc, char** argv)
 {
-    if(!dengine_window_init() || !dengine_window_glfw_create(1280, 720, "testdengine-tooling-fbpick"))
+    DengineWindow* window;
+    if(!dengine_window_init() || !(window=dengine_window_create(1280, 720, "testdengine-tool-fbpick",NULL)))
     {
         dengineutils_logging_log("ERROR::cannot create window\n");
         return 1;
     }
-    GLFWwindow* current = dengine_window_glfw_get_currentwindow();
-    dengine_window_glfw_context_makecurrent(current);
-
-    if(!dengine_window_glfw_context_gladloadgl())
+    dengine_window_makecurrent(window);
+    if(!dengine_window_loadgl(window))
     {
         dengineutils_logging_log("ERROR::cannot load gl!\n");
         return 1;
     }
 
-    dengineutils_filesys_init();
-
     int w, h;
-    dengine_window_get_window_width(&w);
-    dengine_window_get_window_height(&h);
+    dengine_window_get_dim(window, &w, &h);
     dengineutils_logging_log("INFO::init window %dx%d\n", w, h);
 
-    //use fullscreen 60Hz on primary monitor
-    //dengine_window_glfw_set_monitor(glfwGetPrimaryMonitor(), 0, 0, 60);
-
     dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
+
+    dengineutils_filesys_init();
 
     Shader shader;
     shader.vertex_code =
@@ -72,7 +67,6 @@ int main(int argc, char** argv)
     float scl = 25.0f;
     vec3 pos, scale = {scl, scl, scl};
 
-    dengine_input_init();
     denginegui_init();
 
     char* fontfile = dengineutils_os_dialog_fileopen("Open a .tff or .otf font file...");
@@ -97,7 +91,7 @@ int main(int argc, char** argv)
 
     float space = 0.3f;
 
-    while(dengine_window_isrunning())
+    while(dengine_window_isrunning(window))
     {
         glClearColor(0.0, 0.0, 0.0, 0.0); //zero out to avoid color mixup
         glClear(GL_COLOR_BUFFER_BIT);
@@ -134,13 +128,14 @@ int main(int argc, char** argv)
 
         denginegui_text(0.0, scl + (3 * fontsz), "This is just a demo reading window framebuffer. In an actual situation, a sole MRT framebuffer is used", NULL);
 
-        dengine_window_swapbuffers();
-        dengine_input_pollevents();
+        dengine_window_swapbuffers(window);
+        dengine_window_poll(window);
     }
     denginegui_terminate();
     dengineutils_filesys_terminate();
 
     dengineutils_filesys_file2mem_free(&ttf);
+    dengine_window_destroy(window);
     dengine_window_terminate();
     return 0;
 }

@@ -15,19 +15,22 @@ float fontsz = 32.0;
 
 int main(int argc, char** argv)
 {
-    if(!dengine_window_init() || !dengine_window_glfw_create(1280, 720, "testdengine-windowtext"))
+    DengineWindow* window;
+    if(!dengine_window_init() || !(window=dengine_window_create(1280, 720, "testdengine-gui-panel",NULL)))
     {
         dengineutils_logging_log("ERROR::cannot create window\n");
         return 1;
     }
-    GLFWwindow* current = dengine_window_glfw_get_currentwindow();
-    dengine_window_glfw_context_makecurrent(current);
-
-    if(!dengine_window_glfw_context_gladloadgl())
+    dengine_window_makecurrent(window);
+    if(!dengine_window_loadgl(window))
     {
         dengineutils_logging_log("ERROR::cannot load gl!\n");
         return 1;
     }
+
+    int w, h;
+    dengine_window_get_dim(window, &w, &h);
+    dengineutils_logging_log("INFO::init window %dx%d\n", w, h);
 
     dengineutils_filesys_init();
     dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
@@ -47,8 +50,6 @@ int main(int argc, char** argv)
 
     if(!denginegui_init())
         dengineutils_logging_log("ERROR::init gui failed!");
-
-    dengine_input_init();
 
     glEnable(GL_CULL_FACE );
     //glEnable(GL_DEPTH_TEST);
@@ -79,7 +80,7 @@ int main(int argc, char** argv)
     dengine_texture_bind(GL_TEXTURE_2D, NULL);
     dengine_texture_free_data(&texture);
 
-    while(dengine_window_isrunning())
+    while(dengine_window_isrunning(window))
     {
         glClearColor(0.1, 0.1, 0.1, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -98,7 +99,7 @@ int main(int argc, char** argv)
         denginegui_panel(450.0, 450.0 + (fontsz / 2) , 300.0, fontsz + (fontsz / 2), &texture, NULL, NULL);
         denginegui_text(450.0 + (fontsz / 4), 450.0 + fontsz, "This panel has a texture", NULL);
         int h;
-        dengine_window_get_window_height(&h);
+        dengine_window_get_dim(window, NULL, &h);
 
         char fontmsg[100];
         snprintf(fontmsg, sizeof(fontmsg), "Press Q or E to increase or decrease font size by +/- 1.0. Current : %.1f. Panels are also scaled", fontsz);
@@ -115,13 +116,14 @@ int main(int argc, char** argv)
         }
 
 
-        dengine_window_swapbuffers();
-        dengine_input_pollevents();
+        dengine_window_swapbuffers(window);
+        dengine_window_poll(window);
     }
 
     denginegui_terminate();
     dengineutils_filesys_terminate();
     dengineutils_filesys_file2mem_free(&fontmem);
+    dengine_window_destroy(window);
     dengine_window_terminate();
     return 0;
 }

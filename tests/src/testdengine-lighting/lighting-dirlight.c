@@ -19,32 +19,38 @@
 
 int main(int argc, char** argv)
 {
-
-    if(!dengine_window_init() || !dengine_window_glfw_create(1280, 720, "testdengine-dirlight"))
+    DengineWindow* window;
+    if(!dengine_window_init())
     {
-        dengineutils_logging_log("ERROR::cannot init window\n");
+        dengineutils_logging_log("ERROR::cannot init window");
         return 1;
     }
+    window = dengine_window_create(1280, 720, "testdengine-dirlight", NULL);
+    if(!window)
+    {
+        dengineutils_logging_log("ERROR::cannot create window");
+        return 1;
+    }
+
+    if(!dengine_window_makecurrent(window))
+    {
+        dengineutils_logging_log("ERROR::cannot makecurrent window");
+        return 1;
+    }
+
+    if(!dengine_window_loadgl(window))
+    {
+        dengineutils_logging_log("ERROR::cannot loadgl");
+        return 1;
+    }
+
     dengineutils_filesys_init();
 
-    GLFWwindow* current = dengine_window_glfw_get_currentwindow();
-    dengine_window_glfw_context_makecurrent(current);
-
-    if(!dengine_window_glfw_context_gladloadgl())
-    {
-        dengineutils_logging_log("ERROR::cannot load gl!\n");
-        return 1;
-    }
-
     int w, h;
-    dengine_window_get_window_width(&w);
-    dengine_window_get_window_height(&h);
-    dengineutils_logging_log("INFO::init window %dx%d\n", w, h);
+    dengine_window_get_dim(window, &w, &h);
+    dengineutils_logging_log("INFO::init window %dx%d", w, h);
 
-    //use fullscreen 60Hz on primary monitor
-    //dengine_window_glfw_set_monitor(glfwGetPrimaryMonitor(), 0, 0, 60);
-
-    dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
+    dengineutils_logging_log("INFO::GL : %s", glGetString(GL_VERSION));
     Shader shader;
     shader.vertex_code =
             "#version 100\n"
@@ -203,9 +209,10 @@ int main(int argc, char** argv)
     //face culling
     glEnable(GL_CULL_FACE);
     denginegui_init();
-    dengine_input_init();
-    while(dengine_window_isrunning())
+    while(dengine_window_isrunning(window))
     {
+        dengine_window_poll(window);
+
         //FIXME : Break on resize window framebuffer
         dengine_camera_project_perspective((float)w / (float)h, &camera);
         dengine_camera_lookat(target, &camera);
@@ -254,13 +261,10 @@ int main(int argc, char** argv)
         dengine_draw_primitive(&plane, &shader);
         dengine_lighting_shadow_dirlight_draw(&dLight, &shadow, &plane, model[0]);
 
-
-
         float rgba[] = {0.0, 0.0, 0.0, 1.0};
         denginegui_panel(10, 10, 200, 200, &dLight.shadow.shadow_map.depth, NULL, rgba);
 
-        dengine_window_swapbuffers();
-        dengine_input_pollevents();
+        dengine_window_swapbuffers(window);
     }
     denginegui_terminate();
     dengineutils_filesys_terminate();

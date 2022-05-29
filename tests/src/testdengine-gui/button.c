@@ -15,23 +15,25 @@ float fontsz = 32.0;
 
 int main(int argc, char** argv)
 {
-    if(!dengine_window_init() || !dengine_window_glfw_create(1280, 720, "testdengine-windowtext"))
+    DengineWindow* window;
+    if(!dengine_window_init() || !(window=dengine_window_create(1280, 720, "testdengine-gui-button",NULL)))
     {
         dengineutils_logging_log("ERROR::cannot create window\n");
         return 1;
     }
-    GLFWwindow* current = dengine_window_glfw_get_currentwindow();
-    dengine_window_glfw_context_makecurrent(current);
-
-    dengineutils_filesys_init();
-
-    if(!dengine_window_glfw_context_gladloadgl())
+    dengine_window_makecurrent(window);
+    if(!dengine_window_loadgl(window))
     {
         dengineutils_logging_log("ERROR::cannot load gl!\n");
         return 1;
     }
 
+    int w, h;
+    dengine_window_get_dim(window, &w, &h);
+    dengineutils_logging_log("INFO::init window %dx%d\n", w, h);
+
     dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
+
     File2Mem fontmem;
 
     char* ttf = dengineutils_os_dialog_fileopen("Select a .ttf font file");
@@ -40,6 +42,8 @@ int main(int argc, char** argv)
         dengineutils_logging_log("ERROR::no file selected");
         return 1;
     }
+
+    dengineutils_filesys_init();
     fontmem.file = ttf;
     dengineutils_filesys_file2mem_load(&fontmem);
     free(ttf);
@@ -49,19 +53,16 @@ int main(int argc, char** argv)
     if(!denginegui_init())
         dengineutils_logging_log("ERROR::init gui failed!");
 
-    dengine_input_init();
-
     glEnable(GL_CULL_FACE );
 
-    while(dengine_window_isrunning())
+    while(dengine_window_isrunning(window))
     {
         glClearColor(0.1, 0.1, 0.1, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
 
         char fontmsg[100];
         snprintf(fontmsg, sizeof(fontmsg), "Press Q or E to increase or decrease font size by +/- 1.0. Current : %.1f", fontsz);
-        int h;
-        dengine_window_get_window_height(&h);
+        dengine_window_get_dim(window, NULL, &h);
         denginegui_text(10.0, h - 40.0, fontmsg, NULL);
 
         if(dengine_input_get_key_once('Q'))
@@ -84,14 +85,15 @@ int main(int argc, char** argv)
             dengineutils_logging_log("ERROR::Don't click me!!");
         }
 
-        dengine_window_swapbuffers();
-        dengine_input_pollevents();
+        dengine_window_swapbuffers(window);
+        dengine_window_poll(window);
     }
 
     denginegui_terminate();
     dengineutils_filesys_file2mem_free(&fontmem);
 
     dengineutils_filesys_terminate();
+    dengine_window_destroy(window);
     dengine_window_terminate();
     return 0;
 }

@@ -10,27 +10,22 @@
 
 int main(int argc, char** argv)
 {
-    if(!dengine_window_init() || !dengine_window_glfw_create(1280, 720, "testdengine-3dplane"))
+    DengineWindow* window;
+    if(!dengine_window_init() || !(window=dengine_window_create(1280, 720, "testdengine-3dplane",NULL)))
     {
         dengineutils_logging_log("ERROR::cannot create window\n");
         return 1;
     }
-    GLFWwindow* current = dengine_window_glfw_get_currentwindow();
-    dengine_window_glfw_context_makecurrent(current);
-
-    if(!dengine_window_glfw_context_gladloadgl())
+    dengine_window_makecurrent(window);
+    if(!dengine_window_loadgl(window))
     {
         dengineutils_logging_log("ERROR::cannot load gl!\n");
         return 1;
     }
 
     int w, h;
-    dengine_window_get_window_width(&w);
-    dengine_window_get_window_height(&h);
+    dengine_window_get_dim(window, &w, &h);
     dengineutils_logging_log("INFO::init window %dx%d\n", w, h);
-
-    //use fullscreen 60Hz on primary monitor
-    //dengine_window_glfw_set_monitor(glfwGetPrimaryMonitor(), 0, 0, 60);
 
     dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
 
@@ -76,17 +71,18 @@ int main(int argc, char** argv)
     dengine_shader_set_mat4(&shader, "view", camera.view_mat);
     dengine_shader_set_mat4(&shader, "model", model[0]);
 
-    while(dengine_window_isrunning())
+    while(dengine_window_isrunning(window))
     {
         glClearColor(1.0, 0.5, 0.3, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
 
         dengine_draw_primitive(&plane, &shader);
 
-        dengine_window_swapbuffers();
-        dengine_window_glfw_pollevents();
+        dengine_window_swapbuffers(window);
+        dengine_window_poll(window);
     }
 
+    dengine_window_destroy(window);
     dengine_window_terminate();
     return 0;
 }
