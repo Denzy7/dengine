@@ -642,6 +642,7 @@ void* _dengine_window_pollinf(void* arg)
     DengineWindow* window = arg;
     while(window->running)
     {
+#ifdef DENGINE_WIN_X11
         XEvent closeev;
         XPeekEvent(x_dpy, &closeev);
         if(closeev.type == ClientMessage)
@@ -651,6 +652,7 @@ void* _dengine_window_pollinf(void* arg)
                 window->running = 0;
             }
         }
+#endif
     }
     return NULL;
 }
