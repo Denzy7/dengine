@@ -50,6 +50,8 @@
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #endif
 
+void _dengine_window_processkey(WindowInput* input, char key, int isrelease);
+
 #ifdef DENGINE_CONTEXT_EGL
 int _dengine_window_egl_createctx(EGLDisplay dpy, EGLSurface* egl_sfc, EGLContext* egl_ctx, EGLContext share, EGLNativeWindowType win);
 #endif
@@ -224,6 +226,50 @@ void dengine_window_terminate()
     UnregisterClassW(wc_class, wc.hInstance);
 #endif
 
+}
+
+void _dengine_window_processkey(WindowInput* input, char key, int isrelease)
+{
+    if(key >= 33 && key <= 126)
+    {
+        if(isrelease)
+        {
+            for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++) {
+                if(input->alpnum[i].key == key)
+                {
+                    input->alpnum[i].state = 0;
+                    input->alpnum[i].key = 0;
+                    break;
+                }
+            }
+//            for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
+//            {
+//                printf("[%c] ", input->alpnum[i].key);
+//            }
+//            printf("\n");
+        }else
+        {
+            for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++) {
+                //dont dupe;
+                if(input->alpnum[i].key == key)
+                    break;
+
+                if(input->alpnum[i].key != key &&
+                        input->alpnum[i].key == 0 &&
+                        input->alpnum[i].state != -1)
+                {
+                    input->alpnum[i].key = key;
+                    break;
+                }
+            }
+//            for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
+//            {
+//                printf("[%c] ", input->alpnum[i].key);
+//            }
+//            printf("\n");
+        }
+
+    }
 }
 
 void dengine_window_request_GL(int gl_major, int gl_minor, int gl_core)
@@ -814,6 +860,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         window = (DengineWindow*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
     }
 
+    char key[MB_CUR_MAX];
+    wctomb(key, wParam);
+
     switch (uMsg) {
 
     case WM_SIZE:{
@@ -978,6 +1027,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         return 0;
     }
 
+    case WM_KEYUP:
+    {
+        _dengine_window_processkey(&window->input, key[0], 1);
+        return 0;
+    }
+
+    case WM_KEYDOWN:
+    {
+        _dengine_window_processkey(&window->input, key[0], 0);
+        return 0;
+    }
 
     default:{
         return DefWindowProcW(hwnd, uMsg, wParam, lParam);;
