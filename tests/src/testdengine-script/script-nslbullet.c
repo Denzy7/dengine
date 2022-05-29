@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
     opts->window_title = "testdengine-script-nslbullet";
     dengine_init();
 
-    NSL nsl = denginescript_nsl_load("nsl-bulletphysics.nsl");
+    NSL nsl = denginescript_nsl_load("./nsl-bulletphysics.nsl");
     if(!nsl)
         return -1;
 
