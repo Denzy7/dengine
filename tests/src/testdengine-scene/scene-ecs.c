@@ -176,7 +176,6 @@ int main(int argc, char *argv[])
 
     const int prtbf_sz=2048;
     char* prtbf=malloc(prtbf_sz);
-    File2Mem f2m;
 
     snprintf(prtbf,prtbf_sz,"%s/models/duck.obj",dengineutils_filesys_get_assetsdir());
     Primitive* duck = denginemodel_load_file(DENGINE_MODEL_FORMAT_OBJ,prtbf,NULL,&stdshdr);
@@ -188,6 +187,7 @@ int main(int argc, char *argv[])
     }else
     {
 #ifdef DENGINE_SCRIPTING_PYTHON
+    File2Mem f2m;
     const char* duckscriptfile = "scripts/moveduck.py";
     snprintf(prtbf, prtbf_sz, "%s/%s", dengineutils_filesys_get_assetsdir(), duckscriptfile);
     f2m.file = prtbf;
