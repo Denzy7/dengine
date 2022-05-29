@@ -5,6 +5,7 @@
 #include "dengine/input.h" //setwindow
 #include "dengine-utils/logging.h"//log
 #include "dengine-utils/dynlib.h" //getsym
+#include "dengine-utils/thread.h"
 
 #include <stdio.h>  //printf
 #include <stdlib.h> //malloc
@@ -51,6 +52,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #endif
 
 void _dengine_window_processkey(WindowInput* input, char key, int isrelease);
+void* _dengine_window_pollinf(void* arg);
 
 #ifdef DENGINE_CONTEXT_EGL
 int _dengine_window_egl_createctx(EGLDisplay dpy, EGLSurface* egl_sfc, EGLContext* egl_ctx, EGLContext share, EGLNativeWindowType win);
@@ -124,6 +126,7 @@ int dengine_window_init()
     int init = 0;
     gl = dengineutils_dynlib_open(GL);
 #ifdef DENGINE_WIN_X11
+    XInitThreads();
     x_dpy = XOpenDisplay(NULL);
     if(x_dpy)
     {
@@ -393,6 +396,10 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     DengineWindow* ret = malloc(sizeof(DengineWindow));
     memcpy(ret, &window, sizeof(DengineWindow));
     ret->running = 1;
+
+    Thread input_thr;
+    dengineutils_thread_create(_dengine_window_pollinf, ret, &input_thr);
+
     return ret;
 #elif defined(DENGINE_WIN32)
     wchar_t title_wcs[256];
@@ -630,6 +637,24 @@ int dengine_window_set_swapinterval(DengineWindow* window, int interval)
     return itv;
 }
 
+void* _dengine_window_pollinf(void* arg)
+{
+    DengineWindow* window = arg;
+    while(window->running)
+    {
+        XEvent closeev;
+        XPeekEvent(x_dpy, &closeev);
+        if(closeev.type == ClientMessage)
+        {
+            if(closeev.xclient.data.l[0] == wm_delete)
+            {
+                window->running = 0;
+            }
+        }
+    }
+    return NULL;
+}
+
 int dengine_window_poll(DengineWindow* window)
 {
     int polled = 0;
@@ -641,20 +666,9 @@ int dengine_window_poll(DengineWindow* window)
 
     if(XPending(x_dpy))
     {
-        XNextEvent(x_dpy, &window->ev);
         polled = XCheckWindowEvent(x_dpy, window->x_win,
                   window->x_swa.event_mask,
                   &window->ev);
-
-        XEvent closeev;
-        XPeekEvent(x_dpy, &closeev);
-        if(closeev.type == ClientMessage)
-        {
-            if(closeev.xclient.data.l[0] == wm_delete)
-            {
-                window->running = 0;
-            }
-        }
 
         if(window->ev.type == Expose && _gl_load)
         {
@@ -667,49 +681,14 @@ int dengine_window_poll(DengineWindow* window)
         {
             XLookupString(&window->ev.xkey, &key, 1, &keysym, NULL);
             char up = toupper(key);
-            if(up >= 33 && up <= 126)
-            {
-                for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++) {
-                    //dont dupe;
-                    if(window->input.alpnum[i].key == up)
-                        break;
-
-                    if(window->input.alpnum[i].key != up &&
-                            window->input.alpnum[i].key == 0 &&
-                            window->input.alpnum[i].state != -1)
-                    {
-                        window->input.alpnum[i].key = up;
-                        break;
-                    }
-                }
-//                for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
-//                {
-//                    printf("[%c] ", window->input.alpnum[i].key);
-//                }
-//                printf("\n");
-            }
+            _dengine_window_processkey(&window->input, up, 0);
         }
 
         if(window->ev.type == KeyRelease)
         {
             XLookupString(&window->ev.xkey, &key, 1, &keysym, NULL);
             char up = toupper(key);
-            if(up >= 33 && up <= 126)
-            {
-                for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++) {
-                    if(window->input.alpnum[i].key == up)
-                    {
-                        window->input.alpnum[i].state = 0;
-                        window->input.alpnum[i].key = 0;
-                        break;
-                    }
-                }
-//                for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
-//                {
-//                    printf("[%c] ", window->input.alpnum[i].key);
-//                }
-//                printf("\n");
-            }
+            _dengine_window_processkey(&window->input, up, 1);
         }
 
         if(window->ev.type == ButtonPress)
