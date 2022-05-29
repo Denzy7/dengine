@@ -244,11 +244,11 @@ void _dengine_window_processkey(WindowInput* input, char key, int isrelease)
                     input->alpnum[i].key = 0;
                 }
             }
-            for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
-            {
-                printf("[%c] ", input->alpnum[i].key);
-            }
-            printf("\n");
+//            for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
+//            {
+//                printf("[%c] ", input->alpnum[i].key);
+//            }
+//            printf("\n");
         }else
         {
             for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++) {
@@ -264,11 +264,11 @@ void _dengine_window_processkey(WindowInput* input, char key, int isrelease)
                     break;
                 }
             }
-            for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
-            {
-                printf("[%c] ", input->alpnum[i].key);
-            }
-            printf("\n");
+//            for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
+//            {
+//                printf("[%c] ", input->alpnum[i].key);
+//            }
+//            printf("\n");
         }
 
     }
