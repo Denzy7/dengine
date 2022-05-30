@@ -26,17 +26,30 @@ typedef enum
     DENGINE_INPUT_PAD1,
     DENGINE_INPUT_PAD2,
     DENGINE_INPUT_PAD3,
+
+    /* INTERNAL. DO NOT USE */
     DENGINE_INPUT_PAD_COUNT,
 }GamepadID;
 
 typedef enum
 {
-    DENGINE_INPUT_PAD_BUTTON_X,
-    DENGINE_INPUT_PAD_BUTTON_Y,
-    DENGINE_INPUT_PAD_BUTTON_A,
-    DENGINE_INPUT_PAD_BUTTON_B,
+    DENGINE_INPUT_PAD_BUTTON_DPAD_UP,
+    DENGINE_INPUT_PAD_BUTTON_DPAD_DOWN,
+    DENGINE_INPUT_PAD_BUTTON_DPAD_LEFT,
+    DENGINE_INPUT_PAD_BUTTON_DPAD_RIGHT,
+    DENGINE_INPUT_PAD_BUTTON_START,
+    DENGINE_INPUT_PAD_BUTTON_BACK,
+    DENGINE_INPUT_PAD_BUTTON_LS,
+    DENGINE_INPUT_PAD_BUTTON_RS,
     DENGINE_INPUT_PAD_BUTTON_LB,
     DENGINE_INPUT_PAD_BUTTON_RB,
+    DENGINE_INPUT_PAD_BUTTON_A,
+    DENGINE_INPUT_PAD_BUTTON_B,
+    DENGINE_INPUT_PAD_BUTTON_X,
+    DENGINE_INPUT_PAD_BUTTON_Y,
+
+    /* INTERNAL. DO NOT USE */
+    DENGINE_INPUT_PAD_BUTTON_COUNT,
 }GamepadButton;
 
 typedef enum
@@ -47,9 +60,10 @@ typedef enum
     DENGINE_INPUT_PAD_AXIS_LY,
     DENGINE_INPUT_PAD_AXIS_RX,
     DENGINE_INPUT_PAD_AXIS_RY,
-}GamepadAxis;
 
-typedef struct Gamepad Gamepad;
+    /* INTERNAL. DO NOT USE */
+    DENGINE_INPUT_PAD_AXIS_COUNT
+}GamepadAxis;
 
 void dengine_input_set_window(DengineWindow* window);
 
@@ -78,6 +92,8 @@ int dengine_input_gamepad_poll();
 int dengine_input_gamepad_get_isconnected(GamepadID pad);
 
 int dengine_input_gamepad_get_btn(GamepadID pad, GamepadButton btn);
+
+int dengine_input_gamepad_get_btn_once(GamepadID pad, GamepadButton btn);
 
 float dengine_input_gamepad_get_axis(GamepadID pad, GamepadAxis axis);
 

@@ -27,14 +27,20 @@
 int _dengine_input_gamepad_linux_play(GamepadID pad, const struct ff_effect effect);
 #endif
 
-struct Gamepad
+typedef struct
 {
 #ifdef DENGINE_LINUX
     int fd; //from open
 #endif
+#ifdef DENGINE_WIN32
+   XINPUT_STATE state;
+#endif
     char connected;
     char hasrumble; //rumble support
-};
+
+    char buttons[DENGINE_INPUT_PAD_BUTTON_COUNT];
+    float axes[DENGINE_INPUT_PAD_AXIS_COUNT];
+}Gamepad;
 
 #ifdef DENGINE_LINUX
 int lastcount = 0; //track last count in /dev/input/eventXX
@@ -122,17 +128,33 @@ double dengine_input_get_mousepos_y()
 
 int dengine_input_gamepad_get_btn(GamepadID pad, GamepadButton btn)
 {
-    return 0;
+    if(_gamepads[pad].buttons[btn] == 1)
+        return 1;
+    else
+        return 0;
+}
+
+int dengine_input_gamepad_get_btn_once(GamepadID pad, GamepadButton btn)
+{
+    if(_gamepads[pad].buttons[btn] == 1)
+    {
+        _gamepads[pad].buttons[btn] = -1;
+        return 1;
+    }else
+    {
+        return 0;
+    }
 }
 
 float dengine_input_gamepad_get_axis(GamepadID pad, GamepadAxis axis)
 {
-    return 0.0f;
+    return _gamepads[pad].axes[axis];
 }
 
 int dengine_input_gamepad_get_isconnected(GamepadID pad)
 {
-    return 0;
+    dengine_input_gamepad_poll();
+    return _gamepads[pad].connected;
 }
 
 const char* dengine_input_gamepad_get_name(GamepadID pad)
@@ -180,84 +202,120 @@ const char* dengine_input_gamepad_vibration_get_error()
 int dengine_input_gamepad_poll()
 {
 #ifdef DENGINE_LINUX
-    //This returns 1 only when all effects have been successfully uploaded
-
     static const char* dev = "/dev/input";
     int current = dengineutils_os_dir_filecount(dev);
-    if(current == lastcount)
-        return 0;
-
-    DIR* dir = opendir(dev);
-    char path[PATH_MAX];
-    if(!dir)
-        return 0;
-
-    struct dirent* entry;
-    int count = 0;
-
-    memset(&_gamepads, 0, sizeof(_gamepads));
-    while((entry = readdir(dir)) && count < DENGINE_INPUT_PAD_COUNT)
+    if(current != lastcount)
     {
-        //only load eventXX
-        if(!strcmp("event", entry->d_name))
+        //open fd's and upload ff
+        DIR* dir = opendir(dev);
+        char path[PATH_MAX];
+        if(!dir)
+            return 0;
+
+        struct dirent* entry;
+        int count = 0;
+
+        memset(&_gamepads, 0, sizeof(_gamepads));
+        while((entry = readdir(dir)) && count < DENGINE_INPUT_PAD_COUNT)
         {
-            snprintf(path, sizeof(path), "%s/%s", dev, entry->d_name);
-            _gamepads[count].fd = open(path, O_RDWR );
-
-            if(_gamepads[count].fd != -1)
+            //only load eventXX
+            if(!strcmp("event", entry->d_name))
             {
-                char ffFeatures[(FF_CNT + 7) / 8] = {0};
+                snprintf(path, sizeof(path), "%s/%s", dev, entry->d_name);
+                _gamepads[count].fd = open(path, O_RDWR );
 
-                int fx = 0;
-                if(ioctl(_gamepads[count].fd, EVIOCGEFFECTS, &fx) == -1)
+                if(_gamepads[count].fd != -1)
                 {
-                    linux_error_str = "Cannot query number of effects";
-                }
+                    char ffFeatures[(FF_CNT + 7) / 8] = {0};
 
-                //Load effects
-                memset(ffFeatures, 0, sizeof(ffFeatures));
-                if (ioctl(_gamepads[count].fd, EVIOCGBIT(EV_FF, sizeof(ffFeatures)), ffFeatures) == -1) {
-                    linux_error_str = "Cannot query force feedback effects";
-                    return 0;
-                }
+                    int fx = 0;
+                    if(ioctl(_gamepads[count].fd, EVIOCGEFFECTS, &fx) == -1)
+                    {
+                        linux_error_str = "Cannot query number of effects";
+                        close(_gamepads[count].fd);
+                    }else
+                    {
+                        //Load effects
+                        memset(ffFeatures, 0, sizeof(ffFeatures));
+                        if (ioctl(_gamepads[count].fd, EVIOCGBIT(EV_FF, sizeof(ffFeatures)), ffFeatures) == -1) {
+                            linux_error_str = "Cannot query force feedback effects";
+                        }
 
-                //There are many tricks the Linux driver can do (Sine, Spring, Damp, etc...)
-                //We just use a simple rumble
+                        //There are many tricks the Linux driver can do (Sine, Spring, Damp, etc...)
+                        //We just use a simple rumble
 
-                //Do we have a rumble effect?
-                if(isBitSet(FF_RUMBLE, ffFeatures))
-                {
-                    _gamepads[count].hasrumble = 1;
+                        //Do we have a rumble effect?
+                        if(isBitSet(FF_RUMBLE, ffFeatures))
+                        {
+                            _gamepads[count].hasrumble = 1;
 
-                    memset(&rumble, 0, sizeof(rumble));
-                    //Now upload rumble
-                    rumble.type = FF_RUMBLE;
-                    rumble.id = -1;
-                    rumble.replay.length = 2000;
-                    if (ioctl(_gamepads[count].fd, EVIOCSFF, &rumble) == -1) {
-                        linux_error_str = "Cannot upload rumble";
-                        return 0;
+                            memset(&rumble, 0, sizeof(rumble));
+                            //Now upload rumble
+                            rumble.type = FF_RUMBLE;
+                            rumble.id = -1;
+                            rumble.replay.length = 2000;
+                            if (ioctl(_gamepads[count].fd, EVIOCSFF, &rumble) == -1) {
+                                linux_error_str = "Cannot upload rumble";
+                            }
+                        }
+
+                        struct input_event event;
+                        /* Set master gain to 75% if supported */
+                        if (isBitSet(FF_GAIN, ffFeatures)) {
+                            memset(&event, 0, sizeof(event));
+                            event.type = EV_FF;
+                            event.code = FF_GAIN;
+                            event.value = 0xC000; /* [0, 0xFFFF]) */
+
+                            if (write(_gamepads[count].fd, &event, sizeof(event)) != sizeof(event)) {
+                              linux_error_str = "Failed to upload gain";
+                            }
+                        }
+                        count++;
                     }
                 }
-
-                struct input_event event;
-                /* Set master gain to 75% if supported */
-                if (isBitSet(FF_GAIN, ffFeatures)) {
-                    memset(&event, 0, sizeof(event));
-                    event.type = EV_FF;
-                    event.code = FF_GAIN;
-                    event.value = 0xC000; /* [0, 0xFFFF]) */
-
-                    if (write(_gamepads[count].fd, &event, sizeof(event)) != sizeof(event)) {
-                      linux_error_str = "Failed to upload gain";
-                    }
-                }
-                count++;
             }
         }
+        lastcount = count;
+        closedir(dir);
     }
-    lastcount = count;
-    closedir(dir);
+
+    //TODO: check button and axis here
+
+    return 1;
+#elif defined(DENGINE_WIN32)
+    ZeroMemory(&_gamepads, sizeof(_gamepads));
+    for(int i = 0; i < DENGINE_INPUT_PAD_COUNT; i++)
+    {
+        //XINPUT_VIBRATION v;
+        //ZeroMemory(&v, sizeof(v));
+        if(XInputGetState(i, &_gamepads[i].state))
+        {
+            _gamepads[i].connected = 1;
+            //_gamepads[i].hasrumble = XInputSetState(i, &v);
+            for(int j = 0; j < DENGINE_INPUT_PAD_BUTTON_COUNT; j++)
+            {
+                DWORD key = 1 << j;
+                if((_gamepads[i].state.Gamepad.wButtons & key) &&
+                        _gamepads[i].buttons[j] != -1)
+                {
+                    _gamepads[i].buttons[j] = 1;
+                }else
+                {
+                    _gamepads[i].buttons[j] = 0;
+                }
+            }
+
+            _gamepads[i].axes[DENGINE_INPUT_PAD_AXIS_LT] = _gamepads->state.Gamepad.bLeftTrigger * 1.0f;
+            _gamepads[i].axes[DENGINE_INPUT_PAD_AXIS_RT] = _gamepads->state.Gamepad.bRightTrigger * 1.0f;
+
+            _gamepads[i].axes[DENGINE_INPUT_PAD_AXIS_LX] = _gamepads->state.Gamepad.sThumbLX * 1.0f;
+            _gamepads[i].axes[DENGINE_INPUT_PAD_AXIS_LY] = _gamepads->state.Gamepad.sThumbLY * 1.0f;
+
+            _gamepads[i].axes[DENGINE_INPUT_PAD_AXIS_RX] = _gamepads->state.Gamepad.sThumbRX * 1.0f;
+            _gamepads[i].axes[DENGINE_INPUT_PAD_AXIS_RY] = _gamepads->state.Gamepad.sThumbRY * 1.0f;
+        }
+    }
     return 1;
 #endif
 }
