@@ -111,7 +111,6 @@ PFNGLXSWAPINTERVALEXTPROC glXSwapIntervalEXT = NULL;
 PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = NULL;
 PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = NULL;
 PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
-PFNGLGETSTRINGIPROC wglGetStringi = NULL;
 #endif
 #ifdef DENGINE_WIN32
 WNDCLASSW wc = { };
@@ -516,28 +515,28 @@ int dengine_window_isrunning(DengineWindow* window)
 
 void* dengine_window_get_proc(const char* name)
 {
-    /*
-  void *p = (void *)wglGetProcAddress(name);
-  if(p == 0 ||
-    (p == (void*)0x1) || (p == (void*)0x2) || (p == (void*)0x3) ||
-    (p == (void*)-1) )
-  {
-    HMODULE module = LoadLibraryA("opengl32.dll");
-    p = (void *)GetProcAddress(module, name);
-  }
-     */
-
-    void* sym = dengineutils_dynlib_get_sym(gl, name);
+    void* sym = NULL;
 #ifdef DENGINE_CONTEXT_WGL
-    //special case for glGetStringi in wgl not being exported to openg32.dll for some reason
-    if(!strcmp(name, "glGetStringi") && !sym)
-    {
-        if(!wglGetStringi)
-            MessageBox(NULL, "wglGetStringi failed", "Critical Error", MB_OK | MB_ICONERROR);
-        sym = wglGetStringi;
-        dengineutils_logging_log("WARNING::Redirected %s to wglGetStringi", name);
-    }
+    sym = wglGetProcAddress(name);
+#elif defined(DENGINE_CONTEXT_GLX)
+    sym = glXGetProcAddress((GLubyte*) name);
+#elif defined(DENGINE_CONTEXT_EGL)
+    sym = eglGetProcAddress(name);
 #endif
+
+    if(
+            sym == 0 ||
+            sym == (void*)0x1 ||
+            sym == (void*)0x2 ||
+            sym == (void*)0x3 ||
+            sym == (void*)-1)
+    {
+        sym = dengineutils_dynlib_get_sym(gl, name);
+    }
+
+    if(!sym)
+        dengineutils_logging_log("WARNING::WINDOW::get_proc: %s not found", name);
+
     return sym;
 }
 
@@ -951,7 +950,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 wglMakeCurrent(hdc, window->win32_ctx);
                 //get wglEXTS
                 wglSwapIntervalEXT = wglGetProcAddress("wglSwapIntervalEXT");
-                wglGetStringi = (PFNGLGETSTRINGIPROC) wglGetProcAddress("glGetStringi");
                 wglMakeCurrent(hdc, NULL);
             }
         }else
