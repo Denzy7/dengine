@@ -747,6 +747,7 @@ int dengine_window_poll(DengineWindow* window)
     dengineutils_android_pollevents();
     if(window && dengineutils_android_iswindowrunning())
     {
+        int h;
         dengine_window_get_dim(window, NULL, &h);
         AndroidInput* andr_input = dengineutils_android_get_input();
         if(andr_input->pointer0.state == 0)
