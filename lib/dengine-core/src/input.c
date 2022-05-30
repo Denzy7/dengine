@@ -1,5 +1,6 @@
 #include "dengine/input.h"
 
+#include "dengine-utils/os.h" //dir_filecount
 #include <string.h> //memset
 #include <stdio.h> // snprintf
 
@@ -14,171 +15,36 @@
 
 #ifdef DENGINE_LINUX
 #include <dirent.h> //opendir /dev/input
-#include <linux/input.h>
-#include <unistd.h>
-#include <fcntl.h>
+#include <linux/input.h> //ff, ev
+#include <unistd.h> //O_RDWR
+#include <fcntl.h> //write, open
 
-struct input_event play, stop, gain;
-//2 basic rumble effects
-struct ff_effect effects[2];
-const char* linux_error_str = "";
-//16 pads
-typedef struct linux_pad
-{
-    int fd;  //fd from open()
-    int hasrumble;  //test bit;
-}linux_pad;
-
-linux_pad linux_pads[16];
-//Test a char bit
+//Test a char array bit
 #define isBitSet(bit, arr) (arr[(bit) / 8] & (1 << ((bit) % 8)))
-
-int _dengine_input_gamepad_linux_init();
-
-int _dengine_input_gamepad_linux_vibrate(int pad, float left, float right);
-
-
-int _dengine_input_gamepad_linux_init()
-{
-    //This returns 1 only when all effects have been successfully uploaded
-
-    const char* dev = "/dev/input";
-
-    DIR* dir = opendir(dev);
-    char path[PATH_MAX];
-    if(!dir)
-        return 0;
-
-    struct dirent* entry;
-    int count = 0;
-    memset(linux_pads, -1, sizeof(linux_pads));
-    while((entry = readdir(dir)))
-    {
-        memset(path, 0, sizeof(path));
-        //only load eventXX
-        if(!strncmp("event", entry->d_name, strlen("event")))
-        {
-            snprintf(path, sizeof(path), "%s/%s", dev, entry->d_name);
-            int fd = open(path, O_RDWR );
-
-            if(fd != -1)
-            {
-                linux_pads[count].fd = fd;
-                char ffFeatures[(FF_CNT + 7) / 8] = {0};
-
-                int fx = 0;
-                if(ioctl(linux_pads[count].fd, EVIOCGEFFECTS, &fx) == -1)
-                {
-                    linux_error_str = "Cannot query number of effects";
-                }
-
-                //Load effects
-                memset(ffFeatures, 0, sizeof(ffFeatures));
-                if (ioctl(linux_pads[count].fd, EVIOCGBIT(EV_FF, sizeof(ffFeatures)), ffFeatures) == -1) {
-                    linux_error_str = "Cannot query force feedback effects";
-                    return 0;
-                }
-
-                //There are many tricks the Linux driver can do (Sine, Spring, Damp, etc...)
-                //We just use a simple rumble
-
-                //Do we have a rumble effect?
-                if(isBitSet(FF_RUMBLE, ffFeatures))
-                {
-                    linux_pads[count].hasrumble = 1;
-
-                    //Now upload strong rumble (left motor)
-                    effects[0].type = FF_RUMBLE;
-                    effects[0].id = -1;
-                    effects[0].u.rumble.strong_magnitude = 0xFFFF;
-                    effects[0].u.rumble.weak_magnitude = 0;
-                    effects[0].replay.length = 2000;
-                    effects[0].replay.delay = 0;
-                    if (ioctl(linux_pads[count].fd, EVIOCSFF, &effects[0]) == -1) {
-                        linux_error_str = "Cannot upload rumble to left motor";
-                        return 0;
-                    }
-
-                    //Upload weak rumble, right motor
-                    effects[1].type = FF_RUMBLE;
-                    effects[1].id = -1;
-                    effects[1].u.rumble.strong_magnitude = 0;
-                    effects[1].u.rumble.weak_magnitude = 0xFFFF;
-                    effects[1].replay.length = 2000;
-                    effects[1].replay.delay = 0;
-                    if (ioctl(linux_pads[count].fd, EVIOCSFF, &effects[1]) == -1) {
-                        linux_error_str = "Cannot upload rumble to right motor";
-                        return 0;
-                    }
-                }
-
-                /* Set master gain to 75% if supported */
-                if (isBitSet(FF_GAIN, ffFeatures)) {
-                    memset(&gain, 0, sizeof(gain));
-                    gain.type = EV_FF;
-                    gain.code = FF_GAIN;
-                    gain.value = 0xC000; /* [0, 0xFFFF]) */
-
-                    if (write(linux_pads[count].fd, &gain, sizeof(gain)) != sizeof(gain)) {
-                      linux_error_str = "Failed to upload gain";
-                    }
-                }
-                count++;
-            }
-        }
-    }
-    closedir(dir);
-
-    return 1;
-}
-
-int _dengine_input_gamepad_linux_vibrate(int pad, float left, float right)
-{
-    if(linux_pads[pad].hasrumble == 1 && linux_pads[pad].fd != -1)
-    {
-        //Update effects
-        effects[0].u.rumble.strong_magnitude = 0xFFFF * left;
-        if (ioctl(linux_pads[pad].fd, EVIOCSFF, &effects[0]) == -1) {
-            linux_error_str = "Cannot upload left rumble";
-        }
-
-        effects[1].u.rumble.weak_magnitude = 0xFFFF * right;
-        if (ioctl(linux_pads[pad].fd, EVIOCSFF, &effects[1]) == -1) {
-            linux_error_str = "Cannot upload right rumble";
-        }
-
-        //Play effects
-        memset(&play,0,sizeof(play));
-        play.type = EV_FF;
-        play.code = effects[1].id;
-        play.value = 1;
-
-        if (write(linux_pads[pad].fd, (const void*) &play, sizeof(play)) == -1) {
-            linux_error_str = "Cannot play left motor";
-        }
-
-        memset(&play,0,sizeof(play));
-        play.type = EV_FF;
-        play.code = effects[0].id;
-        play.value = 1;
-
-        if (write(linux_pads[pad].fd, (const void*) &play, sizeof(play)) == -1) {
-            linux_error_str = "Cannot play right motor";
-            return 0;
-        }
-
-        return 1;
-    }else
-    {
-        linux_error_str = "Disconnected or has no rumble support";
-        return 0;
-    }
-}
-
 #endif
 
+#ifdef DENGINE_LINUX
+int _dengine_input_gamepad_linux_play(GamepadID pad, const struct ff_effect effect);
+#endif
+
+struct Gamepad
+{
+#ifdef DENGINE_LINUX
+    int fd; //from open
+#endif
+    char connected;
+    char hasrumble; //rumble support
+};
+
+#ifdef DENGINE_LINUX
+int lastcount = 0; //track last count in /dev/input/eventXX
+struct ff_effect rumble;
+const char* linux_error_str = "";
+#endif
+
+Gamepad _gamepads[DENGINE_INPUT_PAD_COUNT];
+
 WindowInput* _windowinp;
-void _dengine_input_gamepad_validate();
 
 void dengine_input_set_window(DengineWindow* window)
 {
@@ -210,7 +76,7 @@ int dengine_input_get_key(char key)
     return 0;
 }
 
-int dengine_input_get_mousebtn_once(int btn)
+int dengine_input_get_mousebtn_once(MouseButton btn)
 {
     if(_windowinp->msebtn[btn] == 1)
     {
@@ -220,7 +86,7 @@ int dengine_input_get_mousebtn_once(int btn)
     return 0;
 }
 
-int dengine_input_get_mousebtn(int btn)
+int dengine_input_get_mousebtn(MouseButton btn)
 {
     if(_windowinp->msebtn[btn] == 1)
     {
@@ -254,50 +120,27 @@ double dengine_input_get_mousepos_y()
     return _windowinp->mse_y;
 }
 
-void _dengine_input_gamepad_validate()
-{
-//    memset(padjid, -1, sizeof(padjid));
-    //Validate connected gamepads
-    for(int i = 0; i < 16; i++)
-    {
-
-        //check is pad
-
-        #ifdef DENGINE_LINUX
-        if(linux_pads[i].fd != -1)
-        {
-            close(linux_pads[i].fd);
-            linux_pads[i].fd = -1;
-        }
-        #endif
-    }
-
-    #ifdef DENGINE_LINUX
-    _dengine_input_gamepad_linux_init();
-    #endif
-}
-
-int dengine_input_gamepad_get_btn(int pad, int btn)
+int dengine_input_gamepad_get_btn(GamepadID pad, GamepadButton btn)
 {
     return 0;
 }
 
-float dengine_input_gamepad_get_axis(int pad, int axis)
+float dengine_input_gamepad_get_axis(GamepadID pad, GamepadAxis axis)
 {
     return 0.0f;
 }
 
-int dengine_input_gamepad_get_isconnected(int pad)
+int dengine_input_gamepad_get_isconnected(GamepadID pad)
 {
     return 0;
 }
 
-const char* dengine_input_gamepad_get_name(int pad)
+const char* dengine_input_gamepad_get_name(GamepadID pad)
 {
     return NULL;
 }
 
-int dengine_input_gamepad_vibration_set_basic(int pad, float leftmotor, float rightmotor)
+int dengine_input_gamepad_vibration_set_basic(GamepadID pad, float leftmotor, float rightmotor)
 {
     #if defined(DENGINE_WIN32)
     // Create a Vibraton State
@@ -310,7 +153,16 @@ int dengine_input_gamepad_vibration_set_basic(int pad, float leftmotor, float ri
     return XInputSetState(pad, &Vibration) == ERROR_SUCCESS ? 1 : 0;
 
     #elif defined(DENGINE_LINUX)
-    return _dengine_input_gamepad_linux_vibrate(pad, leftmotor, rightmotor);
+    rumble.u.rumble.strong_magnitude = 0xFFFF * leftmotor;
+    rumble.u.rumble.weak_magnitude = 0xFFFF * rightmotor;
+    if(_dengine_input_gamepad_linux_play(pad, rumble) &&
+            _dengine_input_gamepad_linux_play(pad, rumble))
+    {
+        return 1;
+    }else
+    {
+        return 0;
+    }
     #else
     return 0;
     #endif
@@ -325,3 +177,120 @@ const char* dengine_input_gamepad_vibration_get_error()
     #endif
 }
 
+int dengine_input_gamepad_poll()
+{
+#ifdef DENGINE_LINUX
+    //This returns 1 only when all effects have been successfully uploaded
+
+    static const char* dev = "/dev/input";
+    int current = dengineutils_os_dir_filecount(dev);
+    if(current == lastcount)
+        return 0;
+
+    DIR* dir = opendir(dev);
+    char path[PATH_MAX];
+    if(!dir)
+        return 0;
+
+    struct dirent* entry;
+    int count = 0;
+
+    memset(&_gamepads, 0, sizeof(_gamepads));
+    while((entry = readdir(dir)) && count < DENGINE_INPUT_PAD_COUNT)
+    {
+        //only load eventXX
+        if(!strcmp("event", entry->d_name))
+        {
+            snprintf(path, sizeof(path), "%s/%s", dev, entry->d_name);
+            _gamepads[count].fd = open(path, O_RDWR );
+
+            if(_gamepads[count].fd != -1)
+            {
+                char ffFeatures[(FF_CNT + 7) / 8] = {0};
+
+                int fx = 0;
+                if(ioctl(_gamepads[count].fd, EVIOCGEFFECTS, &fx) == -1)
+                {
+                    linux_error_str = "Cannot query number of effects";
+                }
+
+                //Load effects
+                memset(ffFeatures, 0, sizeof(ffFeatures));
+                if (ioctl(_gamepads[count].fd, EVIOCGBIT(EV_FF, sizeof(ffFeatures)), ffFeatures) == -1) {
+                    linux_error_str = "Cannot query force feedback effects";
+                    return 0;
+                }
+
+                //There are many tricks the Linux driver can do (Sine, Spring, Damp, etc...)
+                //We just use a simple rumble
+
+                //Do we have a rumble effect?
+                if(isBitSet(FF_RUMBLE, ffFeatures))
+                {
+                    _gamepads[count].hasrumble = 1;
+
+                    memset(&rumble, 0, sizeof(rumble));
+                    //Now upload rumble
+                    rumble.type = FF_RUMBLE;
+                    rumble.id = -1;
+                    rumble.replay.length = 2000;
+                    if (ioctl(_gamepads[count].fd, EVIOCSFF, &rumble) == -1) {
+                        linux_error_str = "Cannot upload rumble";
+                        return 0;
+                    }
+                }
+
+                struct input_event event;
+                /* Set master gain to 75% if supported */
+                if (isBitSet(FF_GAIN, ffFeatures)) {
+                    memset(&event, 0, sizeof(event));
+                    event.type = EV_FF;
+                    event.code = FF_GAIN;
+                    event.value = 0xC000; /* [0, 0xFFFF]) */
+
+                    if (write(_gamepads[count].fd, &event, sizeof(event)) != sizeof(event)) {
+                      linux_error_str = "Failed to upload gain";
+                    }
+                }
+                count++;
+            }
+        }
+    }
+    lastcount = count;
+    closedir(dir);
+    return 1;
+#endif
+}
+
+#ifdef DENGINE_LINUX
+int _dengine_input_gamepad_linux_play(GamepadID pad, const struct ff_effect effect)
+{
+    if(!_gamepads[pad].hasrumble)
+    {
+        linux_error_str = "No rumble support";
+        return 0;
+    }
+    if(_gamepads[pad].fd == -1)
+    {
+        linux_error_str = "Disconnected";
+        return 0;
+    }
+
+    struct input_event event;
+    memset(&event, 0, sizeof(event));
+    event.type = EV_FF;
+    event.code = effect.id;
+    event.value = 1;
+    if (ioctl(_gamepads[pad].fd, EVIOCSFF, &effect) == -1) {
+        linux_error_str = "Cannot upload effect";
+        return 0;
+    }
+
+    if (write(_gamepads[pad].fd, (const void*) &event, sizeof(event)) == -1) {
+        linux_error_str = "Cannot play effect";
+        return 0;
+    }
+
+    return 1;
+}
+#endif
