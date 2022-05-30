@@ -15,6 +15,8 @@ int main(int argc, char** argv)
     else
         dengineutils_logging_log("ERROR::cannot create dir %s", dir);
 
+    dengineutils_logging_log("INFO::dir . has %d files", dengineutils_os_dir_filecount("."));
+
     //Some dialogs
     dengineutils_os_dialog_messagebox("hello", "world", 0);
 

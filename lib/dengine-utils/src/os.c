@@ -110,6 +110,25 @@ int dengineutils_os_direxist(const char* directory)
     return ok;
 }
 
+int dengineutils_os_dir_filecount(const char* directory)
+{
+    int count = 0;
+    DIR* dir = opendir(directory);
+    if(!dir)
+        return 0;
+
+    struct dirent* entry;
+    while((entry = readdir(dir)))
+    {
+        if(entry->d_type == DT_REG)
+        {
+            count++;
+        }
+    }
+    closedir(dir);
+    return count;
+}
+
 void dengineutils_os_dialog_messagebox(const char* title, const char* message, int error)
 {
     if(!init)
