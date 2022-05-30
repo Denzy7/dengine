@@ -129,6 +129,7 @@ include(CheckIncludeFile)
 
 check_symbol_exists(clock_gettime "time.h" DENGINE_HAS_CLOCK_GETTIME)
 check_include_file(pthread.h DENGINE_HAS_PTHREAD_H)
+check_symbol_exists(pthread_cancel "pthread.h" DENGINE_HAS_PTHREAD_CANCEL)
 
 set(DENGINE_PYTHON_DENGINE_SCRIPT_VER 1)
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)

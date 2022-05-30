@@ -35,7 +35,11 @@ void dengineutils_thread_exit(Thread* thread)
 #ifdef DENGINE_WIN32
     CloseHandle(thread->hThread);
 #else
+
+#ifdef DENGINE_HAS_PTHREAD_CANCEL
     pthread_cancel(thread->thr);
+#endif
+
 #endif
 }
 
