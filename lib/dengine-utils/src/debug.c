@@ -2,6 +2,7 @@
 
 #include "dengine-utils/logging.h"
 #include "dengine-utils/timer.h"
+#include "dengine-utils/filesys.h"
 
 #include "dengine_config.h"
 
@@ -9,6 +10,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h> //ctime
 
 #include <signal.h>
 
@@ -63,7 +65,16 @@ void dengineutils_debug_trace_dump()
     if(!trace)
         return;
 
-    FILE* f=fopen(DENGINE_DEBUG_TRACEFILE,"a");
+    const char* tracefile = DENGINE_DEBUG_TRACEFILE;
+    char buf[2048];
+    if(dengineutils_filesys_isinit())
+    {
+        snprintf(buf, sizeof(buf), "%s/logs/%s", dengineutils_filesys_get_filesdir_dengine(), DENGINE_DEBUG_TRACEFILE);
+        if(fopen(buf, "r"))
+            tracefile = buf;
+    }
+
+    FILE* f=fopen(tracefile,"a");
     dengineutils_timer_update();
 
     for (uint32_t i = DENGINE_DEBUG_TRACESIZE; i > 0; i--) {
@@ -73,6 +84,12 @@ void dengineutils_debug_trace_dump()
         {
             fprintf(f,"%s\n",fmt);
         }
+    }
+    if(f)
+    {
+        time_t t = time(NULL);
+        fprintf(f, "%s\n", ctime(&t));
+        fclose(f);
     }
 }
 
