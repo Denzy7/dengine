@@ -658,8 +658,8 @@ void* _dengine_window_pollinf(void* arg)
 int dengine_window_poll(DengineWindow* window)
 {
     int polled = 0;
-    int h;
 #ifdef DENGINE_WIN_X11
+    int h;
     dengine_window_get_dim(window, NULL, &h);
     char key;
     KeySym keysym;
