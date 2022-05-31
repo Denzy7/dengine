@@ -113,6 +113,7 @@ int dengineutils_os_direxist(const char* directory)
 int dengineutils_os_dir_filecount(const char* directory)
 {
     int count = 0;
+#ifdef DENGINE_LINUX
     DIR* dir = opendir(directory);
     if(!dir)
         return 0;
@@ -126,6 +127,29 @@ int dengineutils_os_dir_filecount(const char* directory)
         }
     }
     closedir(dir);
+#elif defined(DENGINE_WIN32)
+    size_t sz = strlen(directory);
+                      // \*\0
+    char dirstr[PATH_MAX];
+    char sep = '\\';
+    if(directory[sz] == '\\' || directory[sz] == '/')
+        sep = 0;
+    snprintf(dirstr, PATH_MAX, "%s%c*",directory, sep);
+    WIN32_FIND_DATA data;
+    HANDLE find = FindFirstFile(dirstr, &data);
+    if(find == INVALID_HANDLE_VALUE)
+        return 0;
+    do
+    {
+        if(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+        {
+            continue;
+        }else
+        {
+            count++;
+        }
+    }while(FindNextFile(find, &data));
+#endif
     return count;
 }
 
