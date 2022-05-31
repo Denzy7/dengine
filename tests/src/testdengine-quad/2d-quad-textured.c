@@ -64,9 +64,9 @@ int main(int argc, char** argv)
     texture.type = GL_UNSIGNED_BYTE;
     texture.filter_min=GL_LINEAR;
 
-//    //resize to texture size
-//    if(texture.width > 0)
-//        glfwSetWindowSize(current, texture.width, texture.height);
+    //resize to texture size
+    if(texture.width > 0)
+        dengine_window_resize(window, texture.width, texture.height);
 
     dengine_texture_gen(1, &texture);
     dengine_texture_bind(GL_TEXTURE_2D, &texture);

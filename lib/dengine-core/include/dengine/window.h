@@ -74,6 +74,8 @@ int dengine_window_set_swapinterval(DengineWindow* window, int interval);
 
 void* dengine_window_get_proc(const char* name);
 
+int dengine_window_resize(DengineWindow* window, int width, int height);
+
 WindowInput* dengine_window_get_input(DengineWindow* window);
 
 #ifdef __cplusplus

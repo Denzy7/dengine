@@ -792,6 +792,17 @@ int dengine_window_poll(DengineWindow* window)
    return polled;
 }
 
+int dengine_window_resize(DengineWindow* window, int width, int height)
+{
+#ifdef DENGINE_WIN_X11
+    return XResizeWindow(x_dpy, window->x_win, width, height);
+#elif defined(DENGINE_WIN32)
+    return MoveWindow(window->win32_hwnd, 0, 0, width, height, TRUE);
+#else
+    return 0;
+#endif
+}
+
 /* PLATFORM SPECIFICS */
 
 #ifdef DENGINE_CONTEXT_EGL
