@@ -40,14 +40,13 @@
 #include <gtk/gtk.h>
 #endif
 
-static const char* known_gl_libs[]=
-{
-    "/system/lib/libGLESv3.so",  // ANDROID ES v3
-    "/system/lib/libGLESv2.so",  // ANDROID ES v2
-    "/usr/lib/libGL.so", // Arch Linux and derivatives
-    "/usr/lib/x86_64-linux-gnu/libGL.so.1", // Debian and derivatives
-    "C:\\windows\\system32\\opengl32.dll" // win32
-};
+#ifdef DENGINE_ANDROID
+#define GL "libGLESv3.so"
+#elif defined(DENGINE_LINUX)
+#define GL "libGL.so.1"
+#elif defined(DENGINE_WIN32)
+#define GL "opengl32.dll"
+#endif
 
 #ifdef DENGINE_WIN32
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -124,22 +123,13 @@ DynLib gl = NULL;
 
 int dengine_window_init()
 {
-    const char* GL = NULL;
-    for(int i = 0; i < DENGINE_ARY_SZ(known_gl_libs); i++)
+    gl = dengineutils_dynlib_open(GL);
+    if(!gl)
     {
-        if(fopen(known_gl_libs[i], "rb"))
-        {
-            GL = known_gl_libs[i];
-            break;
-        }
-    }
-    if(!GL)
-    {
-        dengineutils_logging_log("WARNING::Could not find valid GL library. Some missing OpenGL functions may cause a crash");
+        dengineutils_logging_log("WARNING::Could not find GL library [%s]. Some missing OpenGL functions may cause a crash", GL);
     }else
     {
         dengineutils_logging_log("INFO::Using GL library: %s", GL);
-        gl = dengineutils_dynlib_open(GL);
     }
 
     int init = 0;
