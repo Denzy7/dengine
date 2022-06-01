@@ -13,10 +13,8 @@
     extern unsigned char OpenSans_Italic_ttf[];
     #endif
 
-    #ifdef DENGINE_FONT_EMBED_OPENSANS_LIGHT
     extern const unsigned int OpenSans_Light_ttf_len;
     extern unsigned char OpenSans_Light_ttf[];
-    #endif
 
 // SOURCE SANS
     #ifdef DENGINE_FONT_EMBED_SOURCESANSPRO_REGULAR
