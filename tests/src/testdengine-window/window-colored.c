@@ -2,6 +2,7 @@
 
 #include <dengine/window.h>
 #include <dengine/loadgl.h>
+#include <dengine/input.h>
 
 int main()
 {
@@ -33,8 +34,8 @@ int main()
     dengine_window_get_dim(window, &w, &h);
     printf("init window %dx%d\n", w, h);
 
-    //use fullscreen 60Hz on primary monitor
-    //dengine_window_glfw_set_monitor(glfwGetPrimaryMonitor(), 0, 0, 60);
+    //use fullscreen
+    dengine_window_set_fullscreen(window, 1);
 
     printf("GL : %s\n", glGetString(GL_VERSION));
 

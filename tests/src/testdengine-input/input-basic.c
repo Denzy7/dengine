@@ -33,9 +33,6 @@ int main()
     dengine_window_get_dim(window, &w, &h);
     printf("init window %dx%d\n", w, h);
 
-    //use fullscreen 60Hz on primary monitor
-    //dengine_window_glfw_set_monitor(glfwGetPrimaryMonitor(), 0, 0, 60);
-
     printf("GL : %s\n", glGetString(GL_VERSION));
     printf("mouse mouse around to change color based on position\n");
     printf("press w, x, lmb or rmb\n");

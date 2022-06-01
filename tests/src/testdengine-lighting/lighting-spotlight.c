@@ -51,8 +51,6 @@ int main(int argc, char** argv)
     dengine_window_get_dim(window, &w, &h);
     dengineutils_logging_log("INFO::init window %dx%d\n", w, h);
 
-    //use fullscreen 60Hz on primary monitor
-    //dengine_window_glfw_set_monitor(glfwGetPrimaryMonitor(), 0, 0, 60);
     dengineutils_logging_log("INFO::GL : %s\n", glGetString(GL_VERSION));
     Shader shader;
     shader.vertex_code =

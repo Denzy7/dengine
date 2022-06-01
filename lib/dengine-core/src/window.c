@@ -62,6 +62,7 @@ struct _DengineWindow
 {
     ContextType type;
     int running;
+    int width, height;
 #ifdef DENGINE_WIN_X11
     Window x_win;
     XSetWindowAttributes x_swa;
@@ -139,7 +140,6 @@ int dengine_window_init()
     if(x_dpy)
     {
         wm_delete = XInternAtom(x_dpy, "WM_DELETE_WINDOW", False);
-
         //disable annoying repeat
         int setdetect = XkbSetDetectableAutoRepeat(x_dpy, True, NULL);
         if(!setdetect)
@@ -403,6 +403,8 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     DengineWindow* ret = malloc(sizeof(DengineWindow));
     memcpy(ret, &window, sizeof(DengineWindow));
     ret->running = 1;
+    ret->width = width;
+    ret->height = height;
 
     Thread input_thr;
     dengineutils_thread_create(_dengine_window_pollinf, ret, &input_thr);
@@ -428,6 +430,8 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         return NULL;
     }
     ret->running = 1;
+    ret->width = width;
+    ret->height = height;
     ShowWindow(ret->win32_hwnd, SW_NORMAL);
     return ret;
 #elif defined(DENGINE_ANDROID)
@@ -790,6 +794,40 @@ int dengine_window_resize(DengineWindow* window, int width, int height)
     return MoveWindow(window->win32_hwnd, 0, 0, width, height, TRUE);
 #else
     return 0;
+#endif
+}
+
+void dengine_window_set_fullscreen(DengineWindow* window, int state)
+{
+#ifdef DENGINE_WIN_X11
+    XWindowAttributes xwa;
+    XGetWindowAttributes( x_dpy, window->x_win, &xwa );
+
+    XEvent e = { 0 };
+    e.xclient.type = ClientMessage;
+    e.xclient.message_type = XInternAtom( x_dpy, "_NET_WM_STATE", False );
+    e.xclient.display = x_dpy;
+    e.xclient.window = window->x_win;
+    e.xclient.format = 32;
+    e.xclient.data.l[0] = state;
+    e.xclient.data.l[1] = XInternAtom( x_dpy, "_NET_WM_STATE_FULLSCREEN", False );
+    XSendEvent( x_dpy, xwa.root,
+        False, SubstructureNotifyMask | SubstructureRedirectMask, &e );
+#elif defined(DENGINE_WIN32)
+    int w = GetSystemMetrics(SM_CXSCREEN);
+    int h = GetSystemMetrics(SM_CYSCREEN);
+    HWND after = HWND_TOP;
+    DWORD style = WS_POPUP;
+    if(!state)
+    {
+        style = WS_OVERLAPPEDWINDOW;
+        after = NULL;
+        w = window->width;
+        h = window->height;
+    }
+
+    SetWindowLongPtr(window->win32_hwnd, GWL_STYLE, WS_VISIBLE | style);
+    SetWindowPos(window->win32_hwnd, after, 0, 0, w, h, SWP_FRAMECHANGED);
 #endif
 }
 

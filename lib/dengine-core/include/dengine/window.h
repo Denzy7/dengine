@@ -76,6 +76,8 @@ void* dengine_window_get_proc(const char* name);
 
 int dengine_window_resize(DengineWindow* window, int width, int height);
 
+void dengine_window_set_fullscreen(DengineWindow* window, int state);
+
 WindowInput* dengine_window_get_input(DengineWindow* window);
 
 #ifdef __cplusplus
