@@ -73,6 +73,7 @@ struct _DengineWindow
 #endif
 #ifdef DENGINE_WIN32
     HWND win32_hwnd;
+    HWND win32_after;
     HGLRC win32_ctx;
     HGLRC win32_ctx_shr;
     MSG win32_msg;
@@ -825,10 +826,26 @@ void dengine_window_set_fullscreen(DengineWindow* window, int state)
         w = window->width;
         h = window->height;
     }
+    window->win32_after = after;
 
     SetWindowLongPtr(window->win32_hwnd, GWL_STYLE, WS_VISIBLE | style);
     SetWindowPos(window->win32_hwnd, after, 0, 0, w, h, SWP_FRAMECHANGED);
 #endif
+}
+
+int dengine_window_set_position(DengineWindow* window, int x, int y)
+{
+    int set = 0;
+#ifdef DENGINE_WIN_X11
+    XWindowChanges changes;
+    changes.x = x;
+    changes.y = y;
+    set = XConfigureWindow(x_dpy, window->x_win, CWX | CWY, &changes);
+#elif defined(DENGINE_WIN32)
+    set = SetWindowPos(window->win32_hwnd, window->win32_after, x, y,
+                 window->width, window->height, SWP_FRAMECHANGED);
+#endif
+    return set;
 }
 
 /* PLATFORM SPECIFICS */
