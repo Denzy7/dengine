@@ -48,13 +48,20 @@ extern "C" {
 /*!
  * \brief Setup a primitive with the help of a shader
  *
- * This sets up a vao, array buffer, index buffer and enables vertex attributes if they
- * are found in the shader.
+ * This sets up a vao(only for GL or ES 3.2), array buffer, index buffer and indexes
+ * common vertex attributes if they are found in the shader.
  *
  * \param primitive Primitive to use
  * \param shader Shader to use
  */
 void dengine_primitive_setup(Primitive* primitive, const Shader* shader);
+
+/*!
+ * \brief Enable indexed vertex attributes
+ * \param primitive Primitive to use
+ * \param shader Shader to use
+ */
+void dengine_primitive_attributes_enable(const Primitive* primitive, const Shader* shader);
 
 /*!
  * \brief Release resources being used by a set up primitive

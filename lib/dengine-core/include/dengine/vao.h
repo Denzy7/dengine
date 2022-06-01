@@ -24,21 +24,21 @@ extern "C" {
 
 
 /*!
- * \brief Generate a VAO
+ * \brief Generate a VAO (only for GL or ES 3.2)
  * \param count Number of VAO's to generate
  * \param vaos Pointer to array of VAO's
  */
 void dengine_vao_gen(size_t count, VAO* vaos);
 
 /*!
- * \brief Release a VAO
+ * \brief Release a VAO (only for GL or ES 3.2)
  * \param count Number of VAOs
  * \param vaos VAOs
  */
 void dengine_vao_destroy(size_t count, VAO* vaos);
 
 /*!
- * \brief Bind a VAO
+ * \brief Bind a VAO (only for GL or ES 3.2)
  * \param vao VAO to bind
  */
 void dengine_vao_bind(const VAO* vao);

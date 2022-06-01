@@ -1,7 +1,7 @@
 #include "dengine/primitive.h"
 
 #include "dengine/loadgl.h" //gltypes
-
+#include "dengine/entrygl.h" //entrygl
 #include "dengine-utils/vtor.h"
 
 #include <string.h> //memset
@@ -10,9 +10,9 @@ void dengine_primitive_setup(Primitive* primitive, const Shader* shader)
 {
     VAO entry_vao;
     Buffer entry_ibo, entry_vbo;
-    glGetIntegerv(GL_VERTEX_ARRAY_BINDING, (int*) &entry_vao.vao);
-    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (int*) &entry_vbo.buffer_id);
-    glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, (int*) &entry_ibo.buffer_id);
+    dengine_entrygl_buffer(GL_ARRAY_BUFFER, &entry_vbo);
+    dengine_entrygl_buffer(GL_ELEMENT_ARRAY_BUFFER, &entry_ibo);
+    dengine_entrygl_vao(&entry_vao);
 
     dengine_vao_gen(1, &primitive->vao);
     dengine_vao_bind(&primitive->vao);
@@ -26,39 +26,10 @@ void dengine_primitive_setup(Primitive* primitive, const Shader* shader)
     dengine_buffer_data(GL_ELEMENT_ARRAY_BUFFER,&primitive->index);
 
     dengine_vertex_attribute_indexfromshader(shader, &primitive->aPos, "aPos");
-    if(primitive->aPos.index != -1)
-    {
-        dengine_vertex_attribute_setup(&primitive->aPos);
-        dengine_vertex_attribute_enable(&primitive->aPos);
-    }
-
     dengine_vertex_attribute_indexfromshader(shader, &primitive->aTexCoord, "aTexCoord");
-    if(primitive->aTexCoord.index != -1)
-    {
-        dengine_vertex_attribute_setup(&primitive->aTexCoord);
-        dengine_vertex_attribute_enable(&primitive->aTexCoord);
-    }
-
     dengine_vertex_attribute_indexfromshader(shader, &primitive->aNormal, "aNormal");
-    if(primitive->aNormal.index != -1)
-    {
-        dengine_vertex_attribute_setup(&primitive->aNormal);
-        dengine_vertex_attribute_enable(&primitive->aNormal);
-    }
-
     dengine_vertex_attribute_indexfromshader(shader, &primitive->aTangent, "aTangent");
-    if(primitive->aTangent.index != -1)
-    {
-        dengine_vertex_attribute_setup(&primitive->aTangent);
-        dengine_vertex_attribute_enable(&primitive->aTangent);
-    }
-
     dengine_vertex_attribute_indexfromshader(shader, &primitive->aBiTangent, "aBiTangent");
-    if(primitive->aBiTangent.index != -1)
-    {
-        dengine_vertex_attribute_setup(&primitive->aBiTangent);
-        dengine_vertex_attribute_enable(&primitive->aBiTangent);
-    }
 
     dengine_buffer_bind(GL_ELEMENT_ARRAY_BUFFER, &entry_ibo);
     dengine_buffer_bind(GL_ARRAY_BUFFER, &entry_vbo);
@@ -66,6 +37,39 @@ void dengine_primitive_setup(Primitive* primitive, const Shader* shader)
     dengine_vao_bind(&entry_vao);
 
     primitive->offset = NULL;
+}
+
+void dengine_primitive_attributes_enable(const Primitive* primitive, const Shader* shader)
+{
+    if(primitive->aPos.index != -1)
+    {
+        dengine_vertex_attribute_setup(&primitive->aPos);
+        dengine_vertex_attribute_enable(&primitive->aPos);
+    }
+
+    if(primitive->aTexCoord.index != -1)
+    {
+        dengine_vertex_attribute_setup(&primitive->aTexCoord);
+        dengine_vertex_attribute_enable(&primitive->aTexCoord);
+    }
+
+    if(primitive->aNormal.index != -1)
+    {
+        dengine_vertex_attribute_setup(&primitive->aNormal);
+        dengine_vertex_attribute_enable(&primitive->aNormal);
+    }
+
+    if(primitive->aTangent.index != -1)
+    {
+        dengine_vertex_attribute_setup(&primitive->aTangent);
+        dengine_vertex_attribute_enable(&primitive->aTangent);
+    }
+
+    if(primitive->aBiTangent.index != -1)
+    {
+        dengine_vertex_attribute_setup(&primitive->aBiTangent);
+        dengine_vertex_attribute_enable(&primitive->aBiTangent);
+    }
 }
 
 void dengine_primitive_destroy(Primitive* primitive)

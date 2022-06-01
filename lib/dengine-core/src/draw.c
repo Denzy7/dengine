@@ -21,6 +21,7 @@ void dengine_draw_primitive(const Primitive* primitive, const Shader* shader)
 
     dengine_buffer_bind(GL_ARRAY_BUFFER, &primitive->array);
     dengine_buffer_bind(GL_ELEMENT_ARRAY_BUFFER, &primitive->index);
+    dengine_primitive_attributes_enable(primitive, shader);
 
     dengine_shader_use(shader);
 
