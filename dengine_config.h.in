@@ -120,8 +120,6 @@
 #cmakedefine DENGINE_FONT_EMBED_OPENSANS_REGULAR
 //"Embed OpenSans Italic into dengine-gui"
 #cmakedefine DENGINE_FONT_EMBED_OPENSANS_ITALIC
-//"Embed OpenSans Light into dengine-gui"
-#cmakedefine DENGINE_FONT_EMBED_OPENSANS_LIGHT
 
 //"Embed Source Sans Pro Regular into dengine-gui"
 #cmakedefine DENGINE_FONT_EMBED_SOURCESANSPRO_REGULAR

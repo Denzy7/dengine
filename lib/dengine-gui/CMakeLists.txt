@@ -23,10 +23,6 @@ if(DENGINE_FONT_EMBED_OPENSANS_ITALIC)
     list(APPEND dengine-gui-embfonts-src src/embfonts/opensans/opensans_italic.c)
 endif()
 
-if(DENGINE_FONT_EMBED_OPENSANS_LIGHT)
-    list(APPEND dengine-gui-embfonts-src src/embfonts/opensans/opensans_light.c)
-endif()
-
 #SOURCE SANS PRO
 if(DENGINE_FONT_EMBED_SOURCESANSPRO_REGULAR)
     list(APPEND dengine-gui-embfonts-src src/embfonts/sourcesanspro/sourcesanspro_regular.c)
