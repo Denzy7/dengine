@@ -433,7 +433,101 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     ret->running = 1;
     ret->width = width;
     ret->height = height;
+    if(share)
+        ret->win32_ctx_shr = share->win32_ctx;
+
     ShowWindow(ret->win32_hwnd, SW_NORMAL);
+
+    //setup wgl
+    PIXELFORMATDESCRIPTOR pfd =
+    {
+        sizeof(PIXELFORMATDESCRIPTOR),    // size of this pfd
+        1,                                // version number
+        PFD_DRAW_TO_WINDOW |              // support window
+        PFD_SUPPORT_OPENGL |              // support OpenGL
+        PFD_DOUBLEBUFFER,                 // double buffered
+        PFD_TYPE_RGBA,                    // RGBA type
+        32,                               // 32-bit color depth
+        0, 0, 0, 0, 0, 0,                 // color bits ignored
+        0,                                // no alpha buffer
+        0,                                // shift bit ignored
+        0,                                // no accumulation buffer
+        0, 0, 0, 0,                       // accum bits ignored
+        24,                               // 24-bit z-buffer
+        8,                                // no stencil buffer
+        0,                                // no auxiliary buffer
+        PFD_MAIN_PLANE,                   // main layer
+        0,                                // reserved
+        0, 0, 0
+    };
+
+    HDC hdc = GetDC(ret->win32_hwnd);
+    int pix = ChoosePixelFormat(hdc, &pfd);
+    SetPixelFormat(hdc, pix, &pfd);
+    HGLRC dummy = wglCreateContext(hdc);
+    if(!dummy)
+    {
+        MessageBox(ret->win32_hwnd, "Cannot wglContext", "Error", MB_OK | MB_ICONEXCLAMATION);
+    }else
+    {
+        if(!wglMakeCurrent(hdc, dummy))
+            MessageBox(ret->win32_hwnd, "Cannot wglMakeCurrent dummy", "Error", MB_OK | MB_ICONEXCLAMATION);
+
+        wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) wglGetProcAddress("wglCreateContextAttribsARB");
+        wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC) wglGetProcAddress("wglChoosePixelFormatARB");
+        if(!wglChoosePixelFormatARB)
+            MessageBox(ret->win32_hwnd, "wglChoosePixelFormatARB NOT found", "Error", MB_OK | MB_ICONEXCLAMATION);
+        if(!wglCreateContextAttribsARB)
+            MessageBox(ret->win32_hwnd, "wglCreateContextAttribsARB NOT found", "Error", MB_OK | MB_ICONEXCLAMATION);
+    }
+
+    if(wglChoosePixelFormatARB)
+    {
+        wglDeleteContext(dummy);
+        const int pix_attrs[] =
+        {
+            WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+            WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+            WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
+            WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
+            WGL_COLOR_BITS_ARB, 32,
+            WGL_DEPTH_BITS_ARB, _win_depth,
+            //WGL_STENCIL_BITS_ARB, 8,
+            0, // End
+        };
+
+        int pixelFormat;
+        UINT numFormats;
+        if(wglChoosePixelFormatARB(hdc, pix_attrs, NULL, 1, &pixelFormat, &numFormats) == FALSE)
+        {
+            MessageBox(ret->win32_hwnd, "wglChoosePixelFormatARB failed", "Error", MB_OK | MB_ICONEXCLAMATION);
+        }
+
+        int ctx_attrs[]=
+        {
+            WGL_CONTEXT_MAJOR_VERSION_ARB, _gl_max,
+            WGL_CONTEXT_MINOR_VERSION_ARB, _gl_min,
+            0
+        };
+
+        ret->win32_ctx = wglCreateContextAttribsARB(hdc, ret->win32_ctx_shr, ctx_attrs);
+        if(!ret->win32_ctx)
+        {
+            MessageBox(ret->win32_hwnd, "wglCreateContextAttribsARB failed", "Error", MB_OK | MB_ICONEXCLAMATION);
+        }else
+        {
+            wglMakeCurrent(hdc, ret->win32_ctx);
+            //get wglEXTS
+            wglSwapIntervalEXT = wglGetProcAddress("wglSwapIntervalEXT");
+            wglMakeCurrent(hdc, NULL);
+        }
+    }else
+    {
+        ret->win32_ctx = dummy;
+        dengineutils_logging_log("WARNING::Using dummy wglCreateContext Context");
+    }
+    ReleaseDC(ret->win32_hwnd, hdc);
+
     return ret;
 #elif defined(DENGINE_ANDROID)
     DengineWindow window;
@@ -943,99 +1037,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             window->running = 0;
             return 0;
 //        }
-    }
-
-    case WM_CREATE:{
-        PIXELFORMATDESCRIPTOR pfd =
-        {
-            sizeof(PIXELFORMATDESCRIPTOR),    // size of this pfd
-            1,                                // version number
-            PFD_DRAW_TO_WINDOW |              // support window
-            PFD_SUPPORT_OPENGL |              // support OpenGL
-            PFD_DOUBLEBUFFER,                 // double buffered
-            PFD_TYPE_RGBA,                    // RGBA type
-            32,                               // 32-bit color depth
-            0, 0, 0, 0, 0, 0,                 // color bits ignored
-            0,                                // no alpha buffer
-            0,                                // shift bit ignored
-            0,                                // no accumulation buffer
-            0, 0, 0, 0,                       // accum bits ignored
-            24,                               // 24-bit z-buffer
-            8,                                // no stencil buffer
-            0,                                // no auxiliary buffer
-            PFD_MAIN_PLANE,                   // main layer
-            0,                                // reserved
-            0, 0, 0
-        };
-
-        HDC hdc = GetDC(hwnd);
-        int pix = ChoosePixelFormat(hdc, &pfd);
-        SetPixelFormat(hdc, pix, &pfd);
-        HGLRC dummy = wglCreateContext(hdc);
-        if(!dummy)
-        {
-            MessageBox(hwnd, "Cannot wglContext", "Error", MB_OK | MB_ICONEXCLAMATION);
-        }else
-        {
-            if(!wglMakeCurrent(hdc, dummy))
-                MessageBox(hwnd, "Cannot wglMakeCurrent dummy", "Error", MB_OK | MB_ICONEXCLAMATION);
-
-            wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) wglGetProcAddress("wglCreateContextAttribsARB");
-            wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC) wglGetProcAddress("wglChoosePixelFormatARB");
-            if(!wglChoosePixelFormatARB)
-                MessageBox(hwnd, "wglChoosePixelFormatARB NOT found", "Error", MB_OK | MB_ICONEXCLAMATION);
-            if(!wglCreateContextAttribsARB)
-                MessageBox(hwnd, "wglCreateContextAttribsARB NOT found", "Error", MB_OK | MB_ICONEXCLAMATION);
-        }
-
-        if(wglChoosePixelFormatARB)
-        {
-            wglDeleteContext(dummy);
-            const int pix_attrs[] =
-            {
-                WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
-                WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
-                WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
-                WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
-                WGL_COLOR_BITS_ARB, 32,
-                WGL_DEPTH_BITS_ARB, _win_depth,
-                //WGL_STENCIL_BITS_ARB, 8,
-                0, // End
-            };
-
-            int pixelFormat;
-            UINT numFormats;
-            if(wglChoosePixelFormatARB(hdc, pix_attrs, NULL, 1, &pixelFormat, &numFormats) == FALSE)
-            {
-                MessageBox(hwnd, "wglChoosePixelFormatARB failed", "Error", MB_OK | MB_ICONEXCLAMATION);
-            }
-
-            int ctx_attrs[]=
-            {
-                WGL_CONTEXT_MAJOR_VERSION_ARB, _gl_max,
-                WGL_CONTEXT_MINOR_VERSION_ARB, _gl_min,
-                0
-            };
-
-            window->win32_ctx = wglCreateContextAttribsARB(hdc, window->win32_ctx_shr, ctx_attrs);
-            if(!window->win32_ctx)
-            {
-                MessageBox(hwnd, "wglCreateContextAttribsARB failed", "Error", MB_OK | MB_ICONEXCLAMATION);
-            }else
-            {
-                wglMakeCurrent(hdc, window->win32_ctx);
-                //get wglEXTS
-                wglSwapIntervalEXT = wglGetProcAddress("wglSwapIntervalEXT");
-                wglMakeCurrent(hdc, NULL);
-            }
-        }else
-        {
-            window->win32_ctx = dummy;
-            dengineutils_logging_log("WARNING::Using dummy wglCreateContext Context");
-        }
-        ReleaseDC(hwnd, hdc);
-
-        return 0;
     }
 
     case WM_LBUTTONDOWN:
