@@ -74,6 +74,11 @@ set(shaderres
 # output after compile
 set(outres)
 
+# check for cross compile
+if(CMAKE_CROSSCOMPILING)
+    find_package(DengineRC)
+endif()
+
 # compile
 foreach(res ${shaderres})
     set(inresname ${dengine_SOURCE_DIR}/assets/shaders/${res})
