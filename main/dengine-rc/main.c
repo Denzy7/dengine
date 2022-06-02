@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     char* varname_sanitized;
     size_t varnameln = strlen(varname);
 
-    if(varname[0] >= 48 && varname[0] <= 57)
+    if(varname[0] >= '0' && varname[0] <= '9')
     {
         varname_sanitized = calloc(varnameln + 2, 1);
         varname_sanitized[0] = '_';
@@ -59,9 +59,9 @@ int main(int argc, char** argv)
     {
         int goodchar = 0;
         if(
-                (varname_sanitized[i] >= 65 && varname_sanitized[i] <= 90) ||
-                (varname_sanitized[i] >= 97 && varname_sanitized[i] <= 122) ||
-                (varname_sanitized[i] >= 48 && varname_sanitized[i] <= 57))
+                (varname_sanitized[i] >= 'A' && varname_sanitized[i] <= 'Z') ||
+                (varname_sanitized[i] >= 'a' && varname_sanitized[i] <= 'z') ||
+                (varname_sanitized[i] >= '0' && varname_sanitized[i] <= '9'))
         {
             goodchar = 1;
         }
