@@ -42,24 +42,32 @@ int main(int argc, char** argv)
     else
         varname = in;
 
-    char* varname_sanitized = strdup(varname);
+    char* varname_sanitized;
     size_t varnameln = strlen(varname);
 
-    static const char badchars[]  =
+    if(varname[0] >= 48 && varname[0] <= 57)
     {
-      '.', '-',
-    };
-    static const char goodchar = '_';
-
-    int badchars_cnt = sizeof(badchars) / sizeof(badchars[0]);
+        varname_sanitized = calloc(varnameln + 2, 1);
+        varname_sanitized[0] = '_';
+        strncpy(varname_sanitized + 1, varname, varnameln);
+    }else
+    {
+        varname_sanitized = strdup(varname);
+    }
 
     for(size_t i = 0; i < varnameln; i++)
     {
-        for(int j = 0; j < badchars_cnt; j++)
+        int goodchar = 0;
+        if(
+                (varname_sanitized[i] >= 65 && varname_sanitized[i] <= 90) ||
+                (varname_sanitized[i] >= 97 && varname_sanitized[i] <= 122) ||
+                (varname_sanitized[i] >= 48 && varname_sanitized[i] <= 57))
         {
-            if(varname_sanitized[i] == badchars[j])
-               varname_sanitized[i] = goodchar;
+            goodchar = 1;
         }
+
+        if(!goodchar)
+            varname_sanitized[i] = '_';
     }
 
     fseeko(f_in, 0, SEEK_END);
@@ -67,18 +75,27 @@ int main(int argc, char** argv)
     rewind(f_in);
 
     //write ln
-    fprintf(f_out, "unsigned int %s_ln = %u;\n", varname_sanitized,  (uint32_t)ln);
-    fprintf(f_out, "unsigned char %s[] = {\n", varname_sanitized);
+    fprintf(f_out, "unsigned int %s_ln = %u;\n\n", varname_sanitized,  (uint32_t)ln);
+    fprintf(f_out, "unsigned char %s[] = {\n\n\t", varname_sanitized);
 
     while(ln > 0)
     {
         uint8_t byte = fgetc(f_in);
+
         fprintf(f_out, "0x%x", byte);
+
         if(ln != 1)
-            fprintf(f_out, ",");
+            fprintf(f_out, ", ");
+
+        if(byte <= 0xa)
+            fprintf(f_out, " ");
+
+        if(ln % 8 == 0)
+            fprintf(f_out,"\n\t");
+
         ln--;
     }
-    fprintf(f_out, "};\n");
+    fprintf(f_out, "\n\n};\n");
     fclose(f_in);
     fclose(f_out);
     free(varname_sanitized);
