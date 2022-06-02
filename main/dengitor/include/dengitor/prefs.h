@@ -2,12 +2,22 @@
 #define DENGITOR_PREFS_H
 
 #include <gtk/gtk.h>
+
+typedef struct
+{
+    char* css;
+    uint32_t length;
+}PrefsTheme;
+
 typedef struct
 {
     GtkBuilder* builder;
     GtkWidget* prefs;
 
     GtkComboBox* theme;
+    PrefsTheme* themes;
+    uint32_t themes_count;
+
     GtkCssProvider* provider;
 
     GtkFontChooser* font;

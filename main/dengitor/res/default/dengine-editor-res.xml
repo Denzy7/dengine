@@ -3,7 +3,5 @@
   <gresource prefix="/com/denzygames/Dengitor">
     <file preprocess="xml-stripblanks" >dengine-editor-ui.glade</file>
     <file preprocess="xml-stripblanks" >dengine-editor-prefs.glade</file>
-    <file>breeze/dark.css</file>
-    <file>breeze/light.css</file>
   </gresource>
 </gresources>

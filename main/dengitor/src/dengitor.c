@@ -2,6 +2,9 @@
 #include "dengitor/scenetree.h"
 #include "dengitor/w2v.h"
 
+extern unsigned char breeze_zip[];
+extern unsigned int breeze_zip_ln;
+
 static Dengitor* dengitor = NULL;
 static const int prtbf_sz = 1024;
 static char prtbf[1024];
@@ -420,6 +423,22 @@ void dengitor_glarea_onrealize(GtkGLArea* area)
              (char*)glGetString(GL_VERSION),
              (char*)glGetString(GL_RENDERER));;
     gtk_window_set_title( GTK_WINDOW(dengitor->main), prtbf);
+
+    snprintf(prtbf, prtbf_sz, "%s/breeze.zip", dengineutils_filesys_get_filesdir_dengine());
+    FILE* f = fopen(prtbf, "rb");
+    if(!f)
+    {
+        f = fopen(prtbf, "wb");
+        fwrite(breeze_zip, 1, breeze_zip_ln, f);
+        fclose(f);
+
+        Stream* breeze_stream = dengineutils_stream_new(prtbf, DENGINEUTILS_STREAM_TYPE_FILE, DENGINEUTILS_STREAM_MODE_READ);
+        ZipRead breeze_zipread;
+        dengineutils_zipread_load(breeze_stream, &breeze_zipread);
+        snprintf(prtbf, prtbf_sz, "%s/themes/breeze", dengineutils_filesys_get_filesdir_dengine());
+        dengineutils_zipread_decompress_zip(breeze_stream, &breeze_zipread, prtbf);
+        dengineutils_zipread_free(&breeze_zipread);
+    }
 
     //logcallback to logging widget
     dengineutils_logging_addcallback(_dengitor_logcallback);

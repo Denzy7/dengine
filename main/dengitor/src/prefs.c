@@ -1,4 +1,5 @@
 #include "dengitor/prefs.h"
+#include "dengine-utils/filesys.h"
 
 void _dengitor_prefs_ok(gpointer ptr, Prefs* prefs)
 {
@@ -26,9 +27,10 @@ void _dengitor_prefs_theme(GtkComboBox* combo, Prefs* prefs)
     if(style)
     {
         char prtbf[1024];
-        g_snprintf(prtbf, sizeof(prtbf), "/com/denzygames/Dengitor/%s", style);
+        g_snprintf(prtbf, sizeof(prtbf), "%s/themes/%s", dengineutils_filesys_get_filesdir_dengine(), style);
 
-        gtk_css_provider_load_from_resource(prefs->provider, prtbf);
+        GFile* f = g_file_new_for_path(prtbf);
+        gtk_css_provider_load_from_file(prefs->provider, f, NULL);
 
         gtk_style_context_add_provider_for_screen(screen,
                                                   GTK_STYLE_PROVIDER(prefs->provider),

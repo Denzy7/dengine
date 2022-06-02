@@ -1,4 +1,19 @@
 if(GTK3_LIBRARIES)
+    # check for cross compile
+    if(CMAKE_CROSSCOMPILING)
+        find_package(DengineRC)
+    endif()
+
+    set(res res/default/breeze.zip)
+    set(inresname ${CMAKE_CURRENT_SOURCE_DIR}/${res})
+    get_filename_component(barename ${res} NAME)
+    set(outresname ${CMAKE_CURRENT_BINARY_DIR}/${barename}-res.c)
+    add_custom_command(
+        OUTPUT ${outresname}
+        COMMAND dengine-rc ${inresname} ${outresname}
+        DEPENDS ${inresname}
+        VERBATIM
+    )
 
     configure_file(dengitor.rc.in dengitor.rc)
     set(dengitor-hdr
@@ -31,7 +46,7 @@ if(GTK3_LIBRARIES)
         VERBATIM
     )
 
-    add_executable(dengitor ${dengitor-hdr} ${dengitor-src} dengine-editor-res.c)
+    add_executable(dengitor ${dengitor-hdr} ${dengitor-src} dengine-editor-res.c ${outresname})
     target_include_directories(dengitor PRIVATE include)
     target_link_libraries(dengitor ${dengine} ${GTK3_LIBRARIES})
     #export all. useful for connecting g_signal
