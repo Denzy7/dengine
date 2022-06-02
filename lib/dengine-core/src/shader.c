@@ -20,17 +20,41 @@ static GLenum binfmt = 0;
 
 static int shadercache = 1;
 
-static const char *stdshaderssrcfiles[][3]=
+//dengine-rc output
+extern char standard_vert_glsl[];
+extern char standard_frag_glsl[];
+
+extern char default_vert_glsl[];
+extern char default_frag_glsl[];
+
+extern char shadow2d_vert_glsl[];
+extern char shadow2d_frag_glsl[];
+
+extern char shadow3d_vert_glsl[];
+extern char shadow3d_frag_glsl[];
+extern char shadow3d_geom_glsl[];
+
+extern char gui_vert_glsl[];
+extern char gui_frag_glsl[];
+
+extern char debug_normals_vert_glsl[];
+extern char debug_normals_frag_glsl[];
+
+extern char skybox_vert_glsl[];
+extern char skyboxcube_frag_glsl[];
+extern char skybox2d_frag_glsl[];
+
+static const char *stdshaderssrcfiles[][4]=
 {
-    //vertex_shader, fragment_shader, geometry_shader
-    {"standard.vert.glsl", "standard.frag.glsl"},
-    {"default.vert.glsl", "default.frag.glsl"},
-    {"shadow2d.vert.glsl", "shadow2d.frag.glsl"},
-    {"shadow3d.vert.glsl", "shadow3d.frag.glsl", "shadow3d.geom.glsl"},
-    {"gui.vert.glsl", "gui.frag.glsl"},
-    {"debug-normals.vert.glsl", "debug-normals.frag.glsl"},
-    {"skybox.vert.glsl", "skyboxcube.frag.glsl"},
-    {"skybox.vert.glsl", "skybox2d.frag.glsl"},
+    //name(for program binary), vertex_shader, fragment_shader, geometry_shader
+    {"standard", standard_vert_glsl, standard_frag_glsl},
+    {"default", default_vert_glsl ,default_frag_glsl},
+    {"shadow2d", shadow2d_vert_glsl, shadow2d_frag_glsl},
+    {"shadow3d", shadow3d_vert_glsl, shadow3d_frag_glsl, shadow3d_geom_glsl},
+    {"gui", gui_vert_glsl, gui_frag_glsl},
+    {"debug-normals", debug_normals_vert_glsl, debug_normals_frag_glsl},
+    {"skyboxcube", skybox_vert_glsl, skyboxcube_frag_glsl},
+    {"skybox2d", skybox_vert_glsl, skybox2d_frag_glsl},
 };
 
 void _dengine_shader_set_binfmt();
@@ -347,11 +371,8 @@ int dengine_shader_make_standard(StandardShader stdshader, Shader* stdshdr)
     const int prtbuf_sz=2048;
     char* prtbuf = malloc(prtbuf_sz);
 
-    //get cache name from fragment shader
-    const char* fragfile = strchr(stdshaderssrcfiles[stdshader][1], '.');
-    const size_t n = strlen(stdshaderssrcfiles[stdshader][1]) - strlen(fragfile);
-    char* cached = dengineutils_str_ndup(stdshaderssrcfiles[stdshader][1],
-            n);
+    //get cache name
+    char* cached = strdup(stdshaderssrcfiles[stdshader][0]);
     stdshdr->cached_name = cached;
 
     if(dengineutils_filesys_isinit() && shadercache)
@@ -380,29 +401,16 @@ int dengine_shader_make_standard(StandardShader stdshader, Shader* stdshdr)
       NULL, NULL, NULL //Is this necessary?
     };
 
-    File2Mem f2m;
     for (int i = 0; i < 3; i++) {
-        const char* stdshdrsrcfile = stdshaderssrcfiles[stdshader][i];
+        //+1 to skip name
+        const char* stdshdrsrcfile = stdshaderssrcfiles[stdshader][i + 1];
         if(stdshdrsrcfile)
-        {
-            snprintf(prtbuf, prtbuf_sz, "%s/shaders/%s", dengineutils_filesys_get_assetsdir(), stdshdrsrcfile);
-#ifdef DENGINE_ANDROID
-            char* assetsshaders = strstr(prtbuf + 1, "shaders");
-            f2m.file = assetsshaders;
-            dengineutils_android_asset2file2mem(&f2m);
-#else
-            f2m.file = prtbuf;
-            dengineutils_filesys_file2mem_load(&f2m);
-#endif
-            stdshdrsrc[i] = strdup(f2m.mem);
-            dengineutils_filesys_file2mem_free(&f2m);
-        }
+            stdshdrsrc[i] = strdup(stdshdrsrcfile);
     }
 
     stdshdr->vertex_code = stdshdrsrc[0];
     stdshdr->fragment_code = stdshdrsrc[1];
     stdshdr->geometry_code = stdshdrsrc[2];
-
 
     int setup = dengine_shader_setup(stdshdr);
 

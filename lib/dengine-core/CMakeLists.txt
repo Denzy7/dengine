@@ -51,7 +51,44 @@ include/dengine/entrygl.h
 include/dengine/dgl.h
 )
 
-add_library(dengine-core ${dengine-core-hdr} ${dengine-core-src})
+# resource list
+set(shaderres
+    debug-normals.frag.glsl
+    debug-normals.vert.glsl
+    default.frag.glsl
+    default.vert.glsl
+    gui.frag.glsl
+    gui.vert.glsl
+    shadow2d.vert.glsl
+    shadow2d.frag.glsl
+    shadow3d.vert.glsl
+    shadow3d.frag.glsl
+    shadow3d.geom.glsl
+    skybox.vert.glsl
+    skybox2d.frag.glsl
+    skyboxcube.frag.glsl
+    standard.frag.glsl
+    standard.vert.glsl
+)
+
+# output after compile
+set(outres)
+
+# compile
+foreach(res ${shaderres})
+    set(inresname ${dengine_SOURCE_DIR}/assets/shaders/${res})
+    set(outresname ${CMAKE_CURRENT_BINARY_DIR}/${res}-res.c)
+    add_custom_command(
+        OUTPUT ${outresname}
+        COMMAND dengine-rc ${inresname} ${outresname}
+        DEPENDS ${inresname}
+        VERBATIM
+    )
+# append
+    list(APPEND outres ${outresname})
+endforeach()
+
+add_library(dengine-core ${dengine-core-hdr} ${dengine-core-src} ${outres})
 set_target_properties(dengine-core PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
                       SOVERSION ${dengine_VERSION_MAJOR}
