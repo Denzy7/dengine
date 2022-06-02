@@ -24,7 +24,7 @@ The following helpers can be used:
 # cmake
 
 With that, run:  
-`cmake -S . -B build/desktop`
+`cmake -S . -B build/desktop -DDengineRC_DIR=<absolute_path_to_DengineRCConfig.cmake>`
 
 (Windows users pass) `-G "MinGW Makefiles"`
 
