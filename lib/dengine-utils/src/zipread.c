@@ -177,6 +177,79 @@ int dengineutils_zipread_decompress_zip(const Stream* stream, const ZipRead* zip
     return 1;
 }
 
+int dengineutils_zipread_decompress_cdfhr_mem(const Stream* stream, const CDFHR* cdfhr, void** dest, uint32_t* size)
+{
+    uint8_t lfh_mem[OFF_LFHR];
+    dengineutils_stream_seek(stream, cdfhr->off_lfh, SEEK_SET);
+
+    dengineutils_stream_read(lfh_mem, 1, OFF_LFHR, stream);
+
+    int ret = 0;
+
+    if(!memcmp(lfh_mem, LFH_MGC, 4))
+    {
+        //skip name + extra + empty 4 bytes
+        dengineutils_stream_seek(stream, cdfhr->sz_extra + cdfhr->sz_name + 4, SEEK_CUR);
+
+        uint8_t* data = malloc(cdfhr->sz_compressed);
+        *size = cdfhr->sz_uncompressed;
+        *dest = malloc(*size);
+        dengineutils_stream_read(data, 1, cdfhr->sz_compressed, stream);
+
+        if(cdfhr->compression == 0)
+        {
+            //store in dest
+            memcpy(*dest, data, *size);
+            ret = 1;
+        }else if(cdfhr->compression == 8)
+        {
+#ifdef DENGINE_HAS_LIBZ
+
+            z_stream zs;
+            memset(&zs, 0, sizeof(z_stream));
+
+            zs.next_in = data;
+            zs.avail_in = cdfhr->sz_compressed;
+
+            /*
+             * https://www.zlib.net/manual.html#Advanced
+             */
+            int res = inflateInit2(&zs, -15);
+            if(res != Z_OK)
+            {
+                dengineutils_logging_log("WARNING::inflateInit failed %s", zs.msg);
+            }
+
+            zs.next_out = *dest;
+            zs.avail_out = *size;
+
+            res = inflate(&zs, Z_FINISH);
+
+            if(res == Z_STREAM_END)
+            {
+                ret = 1;
+            }else
+            {
+                dengineutils_logging_log("WARNING::inflate failed with %d\n%s", res, zs.msg);
+                ret = 0;
+            }
+            inflateEnd(&zs);
+#else
+            dengineutils_logging_log("WARNING::libz not linked. Cannot inflate");
+            ret = 0;
+#endif
+        }else
+        {
+            dengineutils_logging_log("WARNING::Unsupported compression method");
+        }
+        free(data);
+    }else
+    {
+        dengineutils_logging_log("ERROR::Cannot find LFHR magic number");
+    }
+    return ret;
+}
+
 int dengineutils_zipread_decompress_cdfhr(const Stream* stream, const CDFHR* cdfhr, const char* dest)
 {
     uint8_t lfh_mem[OFF_LFHR];

@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include <dengine-utils/zipread.h>
 #include <dengine-utils/logging.h>
 int main(int argc, char *argv[])
@@ -54,6 +56,21 @@ int main(int argc, char *argv[])
     }
 
     dengineutils_logging_log("INFO::%u Central Directory Records Done!", zipread.eocdr->cd_records);
+
+    void* zip2mem;
+    uint32_t zip2mem_sz;
+    if(dengineutils_zipread_decompress_cdfhr_mem(zipstream, &zipread.cdfhrs[0], &zip2mem, &zip2mem_sz))
+    {
+        dengineutils_logging_log("Read cdfhr[0] [%s] to mem %u", zipread.cdfhrs[0].name, zip2mem_sz);
+        FILE* f = fopen("zip2mem", "wb");
+        if(f)
+        {
+            fwrite(zip2mem, 1, zip2mem_sz, f);
+            fclose(f);
+            dengineutils_logging_log("INFO::write zip2mem");
+            free(zip2mem);
+        }
+    }
 
     const char* zipout = "zipout";
     if(dengineutils_zipread_decompress_zip(zipstream, &zipread, zipout))
