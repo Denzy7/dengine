@@ -31,7 +31,8 @@ endif()
 #foreach(res ${myresources})
 ## inres and outres should be absolute paths for fair measure
 #    set(inresname ${CMAKE_CURRENT_SOURCE_DIR}/${res})
-#    set(outresname ${CMAKE_CURRENT_BINARY_DIR}/${res}-res.c)
+#    get_filename_component(barename ${res} NAME)
+#    set(outresname ${CMAKE_CURRENT_BINARY_DIR}/${barename}-res.c)
 #    add_custom_command(
 #        OUTPUT ${outresname}
 #        COMMAND dengine-rc ${inresname} ${outresname}

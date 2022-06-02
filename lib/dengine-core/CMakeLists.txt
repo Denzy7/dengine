@@ -52,23 +52,23 @@ include/dengine/dgl.h
 )
 
 # resource list
-set(shaderres
-    debug-normals.frag.glsl
-    debug-normals.vert.glsl
-    default.frag.glsl
-    default.vert.glsl
-    gui.frag.glsl
-    gui.vert.glsl
-    shadow2d.vert.glsl
-    shadow2d.frag.glsl
-    shadow3d.vert.glsl
-    shadow3d.frag.glsl
-    shadow3d.geom.glsl
-    skybox.vert.glsl
-    skybox2d.frag.glsl
-    skyboxcube.frag.glsl
-    standard.frag.glsl
-    standard.vert.glsl
+set(coreres
+    assets/shaders/debug-normals.frag.glsl
+    assets/shaders/debug-normals.vert.glsl
+    assets/shaders/default.frag.glsl
+    assets/shaders/default.vert.glsl
+    assets/shaders/gui.frag.glsl
+    assets/shaders/gui.vert.glsl
+    assets/shaders/shadow2d.vert.glsl
+    assets/shaders/shadow2d.frag.glsl
+    assets/shaders/shadow3d.vert.glsl
+    assets/shaders/shadow3d.frag.glsl
+    assets/shaders/shadow3d.geom.glsl
+    assets/shaders/skybox.vert.glsl
+    assets/shaders/skybox2d.frag.glsl
+    assets/shaders/skyboxcube.frag.glsl
+    assets/shaders/standard.frag.glsl
+    assets/shaders/standard.vert.glsl
 )
 
 # output after compile
@@ -80,9 +80,10 @@ if(CMAKE_CROSSCOMPILING)
 endif()
 
 # compile
-foreach(res ${shaderres})
-    set(inresname ${dengine_SOURCE_DIR}/assets/shaders/${res})
-    set(outresname ${CMAKE_CURRENT_BINARY_DIR}/${res}-res.c)
+foreach(res ${coreres})
+    set(inresname ${dengine_SOURCE_DIR}/${res})
+    get_filename_component(barename ${res} NAME)
+    set(outresname ${CMAKE_CURRENT_BINARY_DIR}/${barename}-res.c)
     add_custom_command(
         OUTPUT ${outresname}
         COMMAND dengine-rc ${inresname} ${outresname}
