@@ -9,26 +9,27 @@ else()
           "${CMAKE_BINARY_DIR}/DengineRCConfig.cmake")
 endif()
 
-#example
+## rc example
 
-# resource list
+## resource list
 #set(myresources
-#    myres/myfile1.zip
-#    myres/myfile2.png
-#    myres/myfile3.txt
-#    ...
+##    myres/myfile1.zip
+##    myres/myfile2.png
+##    myres/myfile3.txt
+##    ...
 #)
 
-# output after compile
+## output after compile
 #set(outres)
 
-# check for cross compile
+## check for cross compile
 #if(CMAKE_CROSSCOMPILING)
 #    find_package(DengineRC)
 #endif()
 
-# compile
+## compile
 #foreach(res ${myresources})
+## inres and outres should be absolute paths for fair measure
 #    set(inresname ${CMAKE_CURRENT_SOURCE_DIR}/${res})
 #    set(outresname ${CMAKE_CURRENT_BINARY_DIR}/${res}-res.c)
 #    add_custom_command(
@@ -38,11 +39,11 @@ endif()
 #        VERBATIM
 #    )
 
-# append
+## append
 #    list(APPEND outres ${outresname})
 #endforeach()
 
-# add to a target(library, exe, ...)
+## add to a target(library, exe, ...)
 #add_library(target ${outres})
 
 #then extern in code
