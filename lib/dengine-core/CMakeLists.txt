@@ -52,22 +52,22 @@ include/dengine/dgl.h
 
 # resource list
 set(coreres
-    assets/shaders/debug-normals.frag.glsl
-    assets/shaders/debug-normals.vert.glsl
-    assets/shaders/default.frag.glsl
-    assets/shaders/default.vert.glsl
-    assets/shaders/gui.frag.glsl
-    assets/shaders/gui.vert.glsl
-    assets/shaders/shadow2d.vert.glsl
-    assets/shaders/shadow2d.frag.glsl
-    assets/shaders/shadow3d.vert.glsl
-    assets/shaders/shadow3d.frag.glsl
-    assets/shaders/shadow3d.geom.glsl
-    assets/shaders/skybox.vert.glsl
-    assets/shaders/skybox2d.frag.glsl
-    assets/shaders/skyboxcube.frag.glsl
-    assets/shaders/standard.frag.glsl
-    assets/shaders/standard.vert.glsl
+    lib/dengine-core/src/shaders/debug-normals.frag.glsl
+    lib/dengine-core/src/shaders/debug-normals.vert.glsl
+    lib/dengine-core/src/shaders/default.frag.glsl
+    lib/dengine-core/src/shaders/default.vert.glsl
+    lib/dengine-core/src/shaders/gui.frag.glsl
+    lib/dengine-core/src/shaders/gui.vert.glsl
+    lib/dengine-core/src/shaders/shadow2d.vert.glsl
+    lib/dengine-core/src/shaders/shadow2d.frag.glsl
+    lib/dengine-core/src/shaders/shadow3d.vert.glsl
+    lib/dengine-core/src/shaders/shadow3d.frag.glsl
+    lib/dengine-core/src/shaders/shadow3d.geom.glsl
+    lib/dengine-core/src/shaders/skybox.vert.glsl
+    lib/dengine-core/src/shaders/skybox2d.frag.glsl
+    lib/dengine-core/src/shaders/skyboxcube.frag.glsl
+    lib/dengine-core/src/shaders/standard.frag.glsl
+    lib/dengine-core/src/shaders/standard.vert.glsl
     LICENSE.md
 )
 
