@@ -14,46 +14,68 @@ include/dengine-gui/embfonts.h
 
 set(dengine-gui-embfonts-src)
 
-#OPEN SANS
+# OPEN SANS
 if(DENGINE_FONT_EMBED_OPENSANS_REGULAR)
-    list(APPEND dengine-gui-embfonts-src src/embfonts/opensans/opensans_regular.c)
+    list(APPEND dengine-gui-embfonts-src src/embfonts/opensans/OpenSans-Regular.ttf)
 endif()
-
 if(DENGINE_FONT_EMBED_OPENSANS_ITALIC)
-    list(APPEND dengine-gui-embfonts-src src/embfonts/opensans/opensans_italic.c)
+    list(APPEND dengine-gui-embfonts-src src/embfonts/opensans/OpenSans-Italic.ttf)
 endif()
-
-list(APPEND dengine-gui-embfonts-src src/embfonts/opensans/opensans_light.c)
+list(APPEND dengine-gui-embfonts-src src/embfonts/opensans/OpenSans-Light.ttf)
 
 #SOURCE SANS PRO
 if(DENGINE_FONT_EMBED_SOURCESANSPRO_REGULAR)
-    list(APPEND dengine-gui-embfonts-src src/embfonts/sourcesanspro/sourcesanspro_regular.c)
+    list(APPEND dengine-gui-embfonts-src src/embfonts/sourcesanspro/SourceSansPro-Regular.ttf)
 endif()
 
 if(DENGINE_FONT_EMBED_SOURCESANSPRO_ITALIC)
-    list(APPEND dengine-gui-embfonts-src src/embfonts/sourcesanspro/sourcesanspro_italic.c)
+    list(APPEND dengine-gui-embfonts-src src/embfonts/sourcesanspro/SourceSansPro-Italic.ttf)
 endif()
 
 if(DENGINE_FONT_EMBED_SOURCESANSPRO_LIGHT)
-    list(APPEND dengine-gui-embfonts-src src/embfonts/sourcesanspro/sourcesanspro_light.c)
+    list(APPEND dengine-gui-embfonts-src src/embfonts/sourcesanspro/SourceSansPro-Light.ttf)
 endif()
 
 # ROBOTO
 if(DENGINE_FONT_EMBED_ROBOTO_REGULAR)
-    list(APPEND dengine-gui-embfonts-src src/embfonts/roboto/roboto_regular.c)
+    list(APPEND dengine-gui-embfonts-src src/embfonts/roboto/Roboto-Regular.ttf)
 endif()
 
 if(DENGINE_FONT_EMBED_ROBOTO_ITALIC)
-    list(APPEND dengine-gui-embfonts-src src/embfonts/roboto/roboto_italic.c)
+    list(APPEND dengine-gui-embfonts-src src/embfonts/roboto/Roboto-Italic.ttf)
 endif()
 
 if(DENGINE_FONT_EMBED_ROBOTO_LIGHT)
-    list(APPEND dengine-gui-embfonts-src src/embfonts/roboto/roboto_light.c)
+    list(APPEND dengine-gui-embfonts-src src/embfonts/roboto/Roboto-Light.ttf)
 endif()
 
+# output after compile
+set(outres)
+
+# check for cross compile
+if(CMAKE_CROSSCOMPILING)
+    find_package(DengineRC)
+endif()
+
+# compile
+foreach(res ${dengine-gui-embfonts-src})
+# inres and outres should be absolute paths for fair measure
+    set(inresname ${CMAKE_CURRENT_SOURCE_DIR}/${res})
+    get_filename_component(barename ${res} NAME)
+    set(outresname ${CMAKE_CURRENT_BINARY_DIR}/${barename}-res.c)
+    add_custom_command(
+        OUTPUT ${outresname}
+        COMMAND dengine-rc ${inresname} ${outresname}
+        DEPENDS ${inresname}
+        VERBATIM
+    )
+
+# append
+    list(APPEND outres ${outresname})
+endforeach()
+
 add_library(dengine-gui
-    ${dengine-gui-hdr} ${dengine-gui-src}
-    ${dengine-gui-embfonts-hdr} ${dengine-gui-embfonts-src})
+    ${dengine-gui-hdr} ${dengine-gui-src} ${outres})
 set_target_properties(dengine-gui PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
                       SOVERSION ${dengine_VERSION_MAJOR}
