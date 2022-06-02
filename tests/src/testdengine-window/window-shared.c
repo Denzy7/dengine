@@ -3,7 +3,6 @@
 #include <dengine/window.h>
 #include <dengine/loadgl.h>
 
-#include <dengine-utils/filesys.h>
 #include <dengine-utils/logging.h>
 
 #include <dengine-gui/gui.h>
@@ -12,7 +11,6 @@
 int main(int argc, char *argv[])
 {
     dengine_window_init();
-    dengineutils_filesys_init();
 
     DengineWindow* shared = dengine_window_create(320, 180, "Shared", NULL);
     DengineWindow* win1 = dengine_window_create(320, 180, "win1", shared);
@@ -56,7 +54,6 @@ int main(int argc, char *argv[])
     dengine_window_destroy(win2);
 
     dengine_window_terminate();
-    dengineutils_filesys_terminate();
 
     return 0;
 }
