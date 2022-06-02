@@ -25,6 +25,7 @@
 #include <dengine-utils/rng.h>
 #include <dengine-utils/timer.h>
 #include <dengine-utils/confserialize.h>
+#include <dengine-utils/zipread.h>
 #ifdef DENGINE_ANDROID
 #include <dengine-utils/platform/android.h>
 #endif
@@ -338,8 +339,11 @@ DENGINE_INLINE void dengine_terminate()
     if(DENGINE_INIT_OPTS.enable_logthread)
         dengineutils_logging_terminate();
 
-    dengine_window_destroy(DENGINE_INIT_OPTS.window);
-    dengine_window_terminate();
+    if(DENGINE_INIT_OPTS.window_createnative)
+    {
+        dengine_window_destroy(DENGINE_INIT_OPTS.window);
+        dengine_window_terminate();
+    }
 }
 
 DENGINE_INLINE int dengine_update()
