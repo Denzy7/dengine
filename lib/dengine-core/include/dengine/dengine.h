@@ -66,8 +66,12 @@ typedef struct
 static DengineInitOpts DENGINE_INIT_OPTS;
 static int DENGINE_HAS_GOT_INIT_OPTS = 0;
 
-extern char DENGINE_LICENSE[];
-extern unsigned int DENGINE_LICENSE_LEN;
+extern char LICENSE_md[];
+
+DENGINE_INLINE const char* dengine_get_license()
+{
+    return LICENSE_md;
+}
 
 DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
 {

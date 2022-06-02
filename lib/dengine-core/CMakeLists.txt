@@ -24,7 +24,6 @@ ${CMAKE_CURRENT_BINARY_DIR}/src/dengine-core.rc
 ${PROJECT_SOURCE_DIR}/deps/glad/src/glad.c
 #src/dgl.c
 src/entrygl.c
-${PROJECT_SOURCE_DIR}/LICENSE.c
 )
 
 set(dengine-core-hdr
@@ -69,6 +68,7 @@ set(coreres
     assets/shaders/skyboxcube.frag.glsl
     assets/shaders/standard.frag.glsl
     assets/shaders/standard.vert.glsl
+    LICENSE.md
 )
 
 # output after compile
