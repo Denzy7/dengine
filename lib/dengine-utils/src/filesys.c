@@ -102,13 +102,10 @@ const char* dengineutils_filesys_get_srcdir()
 
 const char* _dengineutils_filesys_get_assetsdir_resolve(const char* dir)
 {
-    //look for default vert shader. expand this to check sth cool like an md5 hash or file list
-    const char* dftshdrvert="shaders/default.vert.glsl";
+    //check direxists. expand this to check sth cool like an md5 hash or file list
 
-    snprintf(assetdir, dirbuflen, "%s/assets/%s", dir,dftshdrvert);
-    if (fopen(assetdir, "rb")) {
-        snprintf(assetdir, dirbuflen, "%s/assets", dir);
-
+    snprintf(assetdir, dirbuflen, "%s/assets", dir);
+    if (dengineutils_os_direxist(assetdir)) {
         if(!hasloggedassetdir)
         {
             dengineutils_logging_log("INFO::using asset dir %s", assetdir);
