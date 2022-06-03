@@ -13,11 +13,12 @@ void dengine_draw_primitive(const Primitive* primitive, const Shader* shader)
     // get entry stuff
     dengine_entrygl_buffer(GL_ARRAY_BUFFER, &entry_vbo);
     dengine_entrygl_buffer(GL_ELEMENT_ARRAY_BUFFER, &entry_ibo );
-    dengine_entrygl_vao(&entry_vao );
+    if(GLAD_GL_VERSION_3_2 || GLAD_GL_ES_VERSION_3_2)
+    {
+        dengine_entrygl_vao(&entry_vao );
+        dengine_vao_bind(&primitive->vao);
+    }
     dengine_entrygl_shader(&entry_shader );
-
-    //Don't draw if we have an ERROR. Prevent's infinite spawn of dialogs
-    dengine_vao_bind(&primitive->vao);
 
     dengine_buffer_bind(GL_ARRAY_BUFFER, &primitive->array);
     dengine_buffer_bind(GL_ELEMENT_ARRAY_BUFFER, &primitive->index);
@@ -25,6 +26,7 @@ void dengine_draw_primitive(const Primitive* primitive, const Shader* shader)
 
     dengine_shader_use(shader);
 
+    //Don't draw if we have an ERROR. Prevent's infinite spawn of dialogs
     glDrawElements(primitive->draw_mode, primitive->index_count, primitive->draw_type, primitive->offset);
     DENGINE_CHECKGL;
 
@@ -33,5 +35,8 @@ void dengine_draw_primitive(const Primitive* primitive, const Shader* shader)
 
     dengine_shader_use(&entry_shader);
 
-    dengine_vao_bind(&entry_vao);
+    if(GLAD_GL_VERSION_3_2 || GLAD_GL_ES_VERSION_3_2)
+    {
+        dengine_vao_bind(&entry_vao);
+    }
 }
