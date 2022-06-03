@@ -74,149 +74,23 @@ int main(int argc, char** argv)
     denginegui_init();
     denginegui_set_font(NULL, fontsz, 512);
 
-    char* assets_dir = NULL;
+    const char* assets_dir = dengineutils_filesys_get_assetsdir();
     char prtbuf[2048];
 
-    File2Mem f2m;
     //STDSHADER
-    Shader stdshader;
-
-    char *stdshadersrcfile[2]=
-    {
-        "shaders/standard.vert.glsl",
-        "shaders/standard.frag.glsl"
-    };
-
-    //Check for assets from compile dir
-    snprintf(prtbuf, sizeof (prtbuf), "%s/assets/%s", dengineutils_filesys_get_srcdir(), stdshadersrcfile[0]);
-    FILE* f = fopen(prtbuf, "rb");
-    if (f) {
-        snprintf(prtbuf, sizeof (prtbuf), "%s/assets", dengineutils_filesys_get_srcdir());
-        assets_dir = strdup(prtbuf);
-        dengineutils_logging_log("INFO::using asset dir %s", assets_dir);
-    }
-
-    if (!assets_dir) {
-        const char* cwd = dengineutils_os_get_cwd();
-        snprintf(prtbuf, sizeof (prtbuf), "%s/assets/%s", cwd, stdshadersrcfile[0]);
-        FILE* f = fopen(prtbuf, "rb");
-        if (f) {
-            snprintf(prtbuf, sizeof (prtbuf), "%s/assets", cwd);
-            assets_dir = strdup(prtbuf);
-            dengineutils_logging_log("INFO::using asset dir %s", assets_dir);
-        }
-    }
-
-    if (!assets_dir)
-    {
-        dengineutils_logging_log("ERROR::Could not find asset directory. Try moving it next to the executable");
-        return 1;
-    }
-
-
-    char *stdshadersrc[2];
-
-    for (int i = 0; i < 2; i++) {
-        snprintf(prtbuf, sizeof (prtbuf), "%s/%s", assets_dir, stdshadersrcfile[i]);
-        f2m.file = prtbuf;
-        dengineutils_filesys_file2mem_load(&f2m);
-        stdshadersrc[i] = strdup(f2m.mem);
-        dengineutils_filesys_file2mem_free(&f2m);
-    }
-
-    stdshader.vertex_code = stdshadersrc[0];
-    stdshader.fragment_code = stdshadersrc[1];
-
-    dengine_shader_create(&stdshader);
-    dengine_shader_setup(&stdshader);
-
-    for (int i = 0; i < 2; i++) {
-        free(stdshadersrc[i]);
-    }
+    Shader stdshader, shadow2d, shadow3d, dftshader;
+    dengine_shader_make_standard(DENGINE_SHADER_STANDARD, &stdshader);
 
     //SHADOW2D
-    Shader shadow2d;
-    char *shadow2dsrcfile[2]=
-    {
-        "shaders/shadow2d.vert.glsl",
-        "shaders/shadow2d.frag.glsl"
-    };
-    char *shadow2dsrc[2];
-    for (int i = 0; i < 2; i++) {
-        snprintf(prtbuf, sizeof (prtbuf), "%s/%s", assets_dir, shadow2dsrcfile[i]);
-        f2m.file = prtbuf;
-        dengineutils_filesys_file2mem_load(&f2m);
-        shadow2dsrc[i] = strdup(f2m.mem);
-        dengineutils_filesys_file2mem_free(&f2m);
-    }
-
-    shadow2d.vertex_code = shadow2dsrc[0];
-    shadow2d.fragment_code = shadow2dsrc[1];
-
-    dengine_shader_create(&shadow2d);
-    dengine_shader_setup(&shadow2d);
-
-    for (int i = 0; i < 2; i++) {
-        free(shadow2dsrc[i]);
-    }
+    dengine_shader_make_standard(DENGINE_SHADER_SHADOW2D, &shadow2d);
 
     //SHADOW3D
-    Shader shadow3d;
-    dengine_shader_create(&shadow3d);
-    char *shadow3dsrcfile[3]=
-    {
-        "shaders/shadow3d.vert.glsl",
-        "shaders/shadow3d.frag.glsl",
-        "shaders/shadow3d.geom.glsl"
-    };
-    char *shadow3dsrc[3];
-    for (int i = 0; i < 3; i++) {
-        snprintf(prtbuf, sizeof (prtbuf), "%s/%s", assets_dir, shadow3dsrcfile[i]);
-        f2m.file = prtbuf;
-        dengineutils_filesys_file2mem_load(&f2m);
-        shadow3dsrc[i] = strdup(f2m.mem);
-        dengineutils_filesys_file2mem_free(&f2m);
-    }
+    dengine_shader_make_standard(DENGINE_SHADER_SHADOW3D, &shadow3d);
 
-    shadow3d.vertex_code = shadow3dsrc[0];
-    shadow3d.fragment_code = shadow3dsrc[1];
-    shadow3d.geometry_code = shadow3dsrc[2];
-
-
-    dengine_shader_setup(&shadow3d);
-
-    for (int i = 0; i < 3; i++) {
-        free(shadow3dsrc[i]);
-    }
-
-    Shader dftshader;
-    dengine_shader_create(&dftshader);
-    char *dftsrcfile[3]=
-    {
-        "shaders/default.vert.glsl",
-        "shaders/default.frag.glsl",
-    };
-    char *dftsrc[2];
-    for (int i = 0; i < 2; i++) {
-        snprintf(prtbuf, sizeof (prtbuf), "%s/%s", assets_dir, dftsrcfile[i]);
-        f2m.file = prtbuf;
-        dengineutils_filesys_file2mem_load(&f2m);
-        dftsrc[i] = strdup(f2m.mem);
-        dengineutils_filesys_file2mem_free(&f2m);
-    }
-
-    dftshader.vertex_code = dftsrc[0];
-    dftshader.fragment_code = dftsrc[1];
-
-    dengine_shader_setup(&dftshader);
-
-    for (int i = 0; i < 2; i++) {
-        free(dftsrc[i]);
-    }
+    //DEFAULT
+    dengine_shader_make_standard(DENGINE_SHADER_DEFAULT, &dftshader);
 
     int w, h;
-
-
     Camera camera;
     dengine_camera_setup(&camera);
 
@@ -533,7 +407,6 @@ int main(int argc, char** argv)
     dengine_window_destroy(window);
     denginegui_terminate();
 
-    free(assets_dir);
     dengine_material_destroy(&cube_mat);
     dengine_material_destroy(&plane_mat);
 
