@@ -12,4 +12,4 @@ void main()
     else
        a = vec4( texture2D(tex, TexCoord).rgb + col.rgb, col.a);
     gl_FragColor = a;
-}
+}//dont remove this comment

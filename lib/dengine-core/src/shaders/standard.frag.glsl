@@ -12,6 +12,7 @@ struct LightOp
 
     float strength;
 };
+
 struct ShadowOp
 {
     int enable;
@@ -24,6 +25,7 @@ struct ShadowOp
 
     float far_shadow, near_shadow;
 };
+
 struct DirLight
 {
     vec3 position;
@@ -32,6 +34,7 @@ struct DirLight
     LightOp light;
     ShadowOp shadow;
 };
+
 struct PointLight
 {
     vec3 position;
@@ -41,6 +44,7 @@ struct PointLight
 
     float constant, linear, quadratic;
 };
+
 struct SpotLight
 {
     vec3 direction;
@@ -266,4 +270,4 @@ float shadowCalcCube(samplerCube cube, vec3 pos, float shadowfar)
     close*=shadowfar;
     shadow = current - shadow_bias > close ? 1.0 : 0.0;
     return shadow;
-}
+}//dont remove this comment
