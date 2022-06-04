@@ -1,9 +1,7 @@
 #version 100
 #define MAX_POINT_LIGHT 4
 #define MAX_SPOT_LIGHT 4
-
 precision mediump float;
-
 struct LightOp
 {
     int enable;
@@ -14,7 +12,6 @@ struct LightOp
 
     float strength;
 };
-
 struct ShadowOp
 {
     int enable;
@@ -27,7 +24,6 @@ struct ShadowOp
 
     float far_shadow, near_shadow;
 };
-
 struct DirLight
 {
     vec3 position;
@@ -36,7 +32,6 @@ struct DirLight
     LightOp light;
     ShadowOp shadow;
 };
-
 struct PointLight
 {
     vec3 position;
@@ -46,7 +41,6 @@ struct PointLight
 
     float constant, linear, quadratic;
 };
-
 struct SpotLight
 {
     vec3 direction;
