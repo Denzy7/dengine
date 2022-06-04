@@ -82,13 +82,15 @@ int main(int argc, char** argv)
     {
         uint8_t byte = fgetc(f_in);
 
-        fprintf(f_out, "0x%x", byte);
+        fprintf(f_out, "0x");
+
+        if(byte <= 0xa)
+            fprintf(f_out, "0");
+
+        fprintf(f_out, "%x", byte);
 
         if(ln != 1)
             fprintf(f_out, ", ");
-
-        if(byte <= 0xa)
-            fprintf(f_out, " ");
 
         if(ln % 8 == 0)
             fprintf(f_out,"\n\t");
