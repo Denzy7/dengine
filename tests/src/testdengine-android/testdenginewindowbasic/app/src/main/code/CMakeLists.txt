@@ -8,7 +8,7 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_o
 set(DENGINE_BUILD "dengine-build")
 #relative to this file
 set(DENGINE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../../..")
-
+set(DengineRC_DIR ${DENGINE_DIR}/build/dengine-rc)
 add_subdirectory(
 ${DENGINE_DIR}  ${DENGINE_BUILD}
 )

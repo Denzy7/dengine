@@ -5,12 +5,10 @@ project(DengineAndroid VERSION 0.1)
 #export on create to prevent trimming by linker
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -Wall ")
-
 set(DENGINE_BUILD "dengine-build")
 #relative to this file
 set(DENGINE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../../..")
-
+set(DengineRC_DIR ${DENGINE_DIR}/build/dengine-rc)
 add_subdirectory(
 ${DENGINE_DIR}  ${DENGINE_BUILD}
 )

@@ -3,19 +3,14 @@
 
 #include <dengine-utils/timer.h>
 #include <dengine-utils/logging.h>
-#include <dengine-utils/filesys.h>
 #include <dengine-utils/platform/android.h>
 
 #include <dengine-gui/gui.h>
-
-double elapsed;
 
 static void init(struct android_app* app)
 {
     if(dengine_window_init())
     {
-        dengineutils_filesys_init();
-
         dengineutils_logging_log("init window success");
 
         dengineutils_logging_log("GL : %s", glGetString(GL_VERSION));
@@ -27,7 +22,7 @@ static void init(struct android_app* app)
     }
 }
 
-static void term(struct  android_app* app)
+static void term(struct android_app* app)
 {
     dengine_window_terminate();
 }
@@ -65,6 +60,7 @@ void android_main(struct android_app* app)
 
         dengineutils_timer_update();
 
+        static double elapsed;
         //print every 1secs
         elapsed += dengineutils_timer_get_delta();
         if(elapsed > 1000.0)
@@ -76,6 +72,5 @@ void android_main(struct android_app* app)
         {
             draw();
         }
-
     }
 }
