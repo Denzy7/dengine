@@ -128,33 +128,33 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
         dengineutils_confserialize_load(conf, 1);
 
         // WINDOW
-        char* window_width = dengineutils_confserialize_get("window_width", conf);
+        char* window_width = dengineutils_confserialize_get_value("window_width", conf);
         if(window_width)
             sscanf(window_width, "%d", &DENGINE_INIT_OPTS.window_width);
 
-        char* window_height = dengineutils_confserialize_get("window_height", conf);
+        char* window_height = dengineutils_confserialize_get_value("window_height", conf);
         if(window_height)
             sscanf(window_height, "%d", &DENGINE_INIT_OPTS.window_height);
 
-        char* window_msaa = dengineutils_confserialize_get("window_msaa", conf);
+        char* window_msaa = dengineutils_confserialize_get_value("window_msaa", conf);
         if(window_msaa)
             sscanf(window_msaa, "%d", &DENGINE_INIT_OPTS.window_msaa);
 
         // FONT
-        char* font_size = dengineutils_confserialize_get("font_size", conf);
+        char* font_size = dengineutils_confserialize_get_value("font_size", conf);
         if(font_size)
             sscanf(font_size, "%f", &DENGINE_INIT_OPTS.font_size);
 
-        char* font_bitmapsize = dengineutils_confserialize_get("font_bitmapsize", conf);
+        char* font_bitmapsize = dengineutils_confserialize_get_value("font_bitmapsize", conf);
         if(font_bitmapsize)
             sscanf(font_bitmapsize, "%d", &DENGINE_INIT_OPTS.font_bitmapsize);
 
         //CACHING
-        char* cache_textures = dengineutils_confserialize_get("cache_textures", conf);
+        char* cache_textures = dengineutils_confserialize_get_value("cache_textures", conf);
         if(cache_textures)
             sscanf(cache_textures, "%d", &DENGINE_INIT_OPTS.cache_textures);
 
-        char* cache_shaders = dengineutils_confserialize_get("cache_shaders", conf);
+        char* cache_shaders = dengineutils_confserialize_get_value("cache_shaders", conf);
         if(cache_shaders)
             sscanf(cache_shaders, "%d", &DENGINE_INIT_OPTS.cache_shaders);
     }else

@@ -2,7 +2,6 @@
 #define CONFSERIALIZE_H
 
 #include <stddef.h> //size_t
-#include "dengine-utils/vtor.h" //vtor for kv's
 
 /*
  * Serialize ASCII text to create a sort of configuration file
@@ -26,19 +25,7 @@
  * # this comment line starts with a '#' and is ignored
  */
 
-typedef struct
-{
-    char* key;
-    char* value;
-}ConfKV;
-
-typedef struct
-{
-    char* file;
-    char separator;
-
-    vtor keys_values;
-}Conf;
+typedef struct Conf Conf;
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,7 +43,9 @@ void dengineutils_confserialize_put_comment(const char* comment, Conf* conf);
 
 void dengineutils_confserialize_put_block(const char* name, Conf* conf);
 
-char* dengineutils_confserialize_get(const char* key, Conf* conf);
+char* dengineutils_confserialize_get_value(const char* key, Conf* conf);
+
+size_t dengineutils_confserialize_get_keycount(const Conf* conf);
 
 size_t dengineutils_confserialize_write(Conf* conf);
 

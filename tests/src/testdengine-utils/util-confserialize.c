@@ -14,11 +14,12 @@ int main(int argc, char** argv)
 
        if(dengineutils_confserialize_load(conf, 1))
        {
-           dengineutils_logging_log("INFO::keys : %u", (unsigned int) conf->keys_values.count);
+           unsigned int kc = dengineutils_confserialize_get_keycount(conf);
+           dengineutils_logging_log("INFO::keys : %u", kc);
            char* asset = NULL;
 
            if(argv[2])
-               asset = dengineutils_confserialize_get(argv[2], conf);
+               asset = dengineutils_confserialize_get_value(argv[2], conf);
 
            if(asset)
                dengineutils_logging_log("INFO::%s -> %s", argv[2], asset);
@@ -50,7 +51,7 @@ int main(int argc, char** argv)
 
         //write
         size_t write = dengineutils_confserialize_write(conf);
-        dengineutils_logging_log("INFO::write %zu bytes to %s", write, conf->file);
+        dengineutils_logging_log("INFO::write %zu bytes to test.ini", write);
 
         dengineutils_confserialize_free(conf);
     }

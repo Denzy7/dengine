@@ -2,7 +2,22 @@
 #include <stdio.h>  //fopen
 #include <string.h> //strdup
 #include <stdlib.h> //malloc
+
 #include "dengine-utils/logging.h" //log
+#include "dengine-utils/vtor.h" //vtor for kv's
+typedef struct
+{
+    char* key;
+    char* value;
+}ConfKV;
+
+struct Conf
+{
+    char* file;
+    char separator;
+
+    vtor keys_values;
+};
 
 Conf* dengineutils_confserialize_new(const char* destfile, const char seperator)
 {
@@ -112,7 +127,7 @@ void dengineutils_confserialize_put_block(const char* name, Conf* conf)
     free(blk);
 }
 
-char* dengineutils_confserialize_get(const char* key, Conf* conf)
+char* dengineutils_confserialize_get_value(const char* key, Conf* conf)
 {
     ConfKV* kv = conf->keys_values.data;
     for(size_t i = 0; i < conf->keys_values.count; i++)
@@ -170,4 +185,9 @@ void dengineutils_confserialize_free(Conf* conf)
 
     free(conf->file);
     free(conf);
+}
+
+size_t dengineutils_confserialize_get_keycount(const Conf* conf)
+{
+    return conf->keys_values.count;
 }
