@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
-project(dengine-rc VERSION 0.0.0)
+project(dengine-rc VERSION 1.0.0)
 
 if(CMAKE_CROSSCOMPILING)
-    find_package(DengineRC)
+    message(FATAL_ERROR "Dont build dengine-rc when cross compiling!
+        Build it on host machine then pass its build directory to cmake with
+        -DDengineRC_DIR")
 else()
     add_executable(dengine-rc main.c)
     export(TARGETS dengine-rc FILE
@@ -10,6 +12,9 @@ else()
 endif()
 
 ## rc example
+
+## remember to pass -DDengineRC_DIR=<dengine-rc-build-directory> to cmake
+# find_package(DengineRC)
 
 ## resource list
 #set(myresources
@@ -21,11 +26,6 @@ endif()
 
 ## output after compile
 #set(outres)
-
-## check for cross compile
-#if(CMAKE_CROSSCOMPILING)
-#    find_package(DengineRC)
-#endif()
 
 ## compile
 #foreach(res ${myresources})

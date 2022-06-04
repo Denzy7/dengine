@@ -74,11 +74,6 @@ set(coreres
 # output after compile
 set(outres)
 
-# check for cross compile
-if(CMAKE_CROSSCOMPILING)
-    find_package(DengineRC)
-endif()
-
 # compile
 foreach(res ${coreres})
     set(inresname ${dengine_SOURCE_DIR}/${res})

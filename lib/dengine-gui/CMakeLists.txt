@@ -52,11 +52,6 @@ endif()
 # output after compile
 set(outres)
 
-# check for cross compile
-if(CMAKE_CROSSCOMPILING)
-    find_package(DengineRC)
-endif()
-
 # compile
 foreach(res ${dengine-gui-embfonts-src})
 # inres and outres should be absolute paths for fair measure
