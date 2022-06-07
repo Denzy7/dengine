@@ -9,17 +9,18 @@ If this is too much for you or takes an insanely long time, follow Linux users t
 
 On Linux and its derivatives, refer to [deps/README.md](deps/README.md) to install all needed dependencies:
 
+Change dir to repo:  
+`cd dengine`
+
 # building
-- **DengineRC**: Build `dengine-rc` for build/host system if cross compiling:  
+- **DengineRC**: Build `dengine-rc` into source dir for build/host system if cross compiling:  
 	`cmake -S main/dengine-rc -B build/dengine-rc`  
-	`cmake --build build/dengine-rc`
-	
-	Remember to add `-DDengineRC_DIR=<absolute_path_to_DengineRCConfig.cmake>` to cmake configuration
+        `cmake --build build/dengine-rc`
 		 
 - **Desktop** (Linux, Windows) : Build with CMake. For Windows, MinGW is highly recommended. *Haven't tested on MSVC with C99* 
 
 	- Configure cmake:
-	`cmake -S . -B build/desktop -DDengineRC_DIR=<absolute_path_to_DengineRCConfig.cmake>`
+        `cmake -S . -B build/desktop`
 
 	**MinGW Note:**
 	See [tools/mingw/README.md](tools/mingw/README.md)
@@ -27,14 +28,17 @@ On Linux and its derivatives, refer to [deps/README.md](deps/README.md) to insta
 	- Build the tree:
         `cmake --build build/desktop`
 
-- **Android** : Clone the repo as a Linux user.
+- **Android** :
+	- With Android Studio:
+		- Simply open the test build.gradle with Android Studio
+	- Without Android studio (terminal):  
+		- Ensure OpenJDK is installed. Preferrably from Android Studio. Locate JRE from it. For Android Studio, its in `<ANDROID_STUDIO_DIR/jre>`. Call this `JAVA_HOME`
+		- Run `JAVA_HOME=<jre_dir> ./gradlew build` (Linux) or `gradlew.bat build` (Windows, having set JAVA_HOME environment variable). 
+		- The following gradle options may speed up build by skipping certain unneeded tasks for Native Activity: `-x lintVitalAnalyzeRelease -x lintAnalyzeDebug -x lintDebug`	
+		- By default, this builds an APK which you can run on a Physical Device or Emulator in build/output
 
-	- Run `./gradlew` (Linux) or `gradlew.bat` (Windows). Install a JDK if don't have one
-
-	- By default, this builds an APK which you can run on a Physical Device or Emulator.
-
-	- To build the tests, run regular cmake. Use the toolchain in the NDK
-	`cmake -S . -B build/android -DCMAKE_TOOLCHAIN_FILE='<NDK_DIR>/build/cmake/android.toolchain.cmake' -DANDROID_API=24 -DDengineRC_DIR=<absolute_path_to_DengineRCConfig.cmake>`
+	- To build the tests, run regular cmake. Use the toolchain in the NDK  
+        `cmake -S . -B build/android -DCMAKE_TOOLCHAIN_FILE='<NDK_DIR>/build/cmake/android.toolchain.cmake' -DANDROID_API=24`
 
 	See other options at [Android docs](https://developer.android.com/studio/projects/configure-cmake#call-cmake-cli)
 
