@@ -12,7 +12,10 @@
  *
  *  VAO's are needed for core GL (3.2+). But older GL can do without
  */
-typedef struct VAO VAO;
+typedef struct VAO
+{
+    uint32_t vao;
+}VAO;
 
 #ifdef __cplusplus
 extern "C" {

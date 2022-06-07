@@ -2,11 +2,6 @@
 
 #include "dengine/loadgl.h"
 
-struct VAO
-{
-    uint32_t vao;
-};
-
 void dengine_vao_gen(size_t count, VAO* vaos)
 {
     for(size_t i = 0; i < count; i++)
