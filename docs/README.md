@@ -5,9 +5,9 @@
 - Uses at least OpenGL 2.1 and OpenGL ES 2.0
 - Some features need GL 3.2 or ES 3.2 but will be disabled with not avaliable
 - It's possible to use GL 2.1 provided the following generic extensions are available:
-	- `GL_*_vertex_array_object`
 	- `GL_*_framebuffer_object`
 	- `GL_*_depth_texture`
+	- `GL_*_program_binary`
 - 3D graphics is the main focus
 
 # modules/libs
@@ -18,6 +18,8 @@
 	- window.h – Creates context
 	- loadgl.h – Function loader for OpenGL
 	- checkgl.h – Check for any OpenGL errors
+	- entrygl.h - Check currently bound OpenGL object (used for function entry)
+	- dgl.h - Very basic (practically incomplete) OpenGL function loader
 	- buffer.h – Creates general buffers (array, index, unifrom etc.)
 	- vertex.h – Vertex attributes and arrays for OpenGL
 	- shader.h – Shader compilation and linking
@@ -35,7 +37,8 @@
 
 	**DEPENDS**  
 	- GLX,WGL – Context for Desktop GL
-	- XInput, X -  Input for Desktop GL
+	- XInput -  Input for Windows
+	- X11 - Window and Input for Linux
 	- CGLM – Math for OpenGL
 	- GLAD – Function and extension loader for OpenGL
 	- EGL – Context creation for GLES
@@ -43,6 +46,7 @@
       
 2. **dengine-utils** – Various misc. utilities  
 	**HEADERS**  
+	- stream.h - File streaming abstraction (like stdio.h but can be used for Android assets). Replaces filesys.h File2Mem
 	- filesys.h – File functions like read to a memory block
 	- os.h – OS specifics like mkdir, dialogs
 	- logging.h – Logging functions
@@ -52,21 +56,25 @@
 	- timer.h – Time interface for delta and current
 	- debug.h - Debugging and tracing
 	- str.h - String utils
+	- zipread.h - Read and extract zip files (very basic and unstable. works only with infozip zip files)
+	- thread.h - Basic threads abstraction
+	- dynlib.h - Dynamic library loading
 
 	**DEPENDS**  
 	- GTK3 – For dialogs on Linux
+	- ZLIB - For zipread.h inflate
                    
 3. **dengine-model** – Loads various model formats (*Wavefront OBJ’s*)  
 	**HEADERS**  
 	- model.h – Loads model formats
                       
-4. **dengine-scene** – Scene creation. Serializes JSON  
+4. **dengine-scene** – Scene creation. *[1]Serializes JSON  
 	**HEADERS**  
-	- scene.h – Construct scenes and add entities. Parse scenes to and fro JSON
+	- scene.h – Construct scenes and add entities. *[1] Parse scenes to and fro JSON
 	- ecs.h - Entity component system definitions
 
 	**DEPENDS**  
-	- Any JSON library can do. Use JSON-C
+	- Any JSON library can do. Use JSON-C *[1] - Subject to change. Still in development
       
 5. **dengine-script** – Scripting using Python 3  
 	**HEADERS**  
@@ -86,9 +94,10 @@
 	- STB – stb_truetype.h to read TrueType fonts
 	- `<various-fonts>` - .ttf fonts to embed
 
-# programs (work in progress)
-1. **dengitor** – GTK 3 scene editor and project manager
-2. **dengibld** – Compile and package a project to a platform  
+# programs
+1. **DengineRC** - Build time executable to compile resources to C arrays. Must be built first
+2. **dengitor** (work in progress) – GTK 3 scene editor and project manager
+3. **dengibld** (work in progress) – Compile and package a project to a platform  
 	**DEPENDS**  
 	- A fast compression algo like LZ4
 	- Working C compiler. 
