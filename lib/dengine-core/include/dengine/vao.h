@@ -10,13 +10,9 @@
 
 /*! \struct VAO defines how data is dispatched to GL
  *
- *  VAO's are needed for core GL. But older GL can do without
- *
+ *  VAO's are needed for core GL (3.2+). But older GL can do without
  */
-typedef struct VAO
-{
-    uint32_t vao; /*!< VAO id. DON'T change this */
-}VAO;
+typedef struct VAO VAO;
 
 #ifdef __cplusplus
 extern "C" {
