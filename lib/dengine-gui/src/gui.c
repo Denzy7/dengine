@@ -141,12 +141,8 @@ int denginegui_set_font(const void* ttf, const float fontsize, const uint32_t bi
         FILE* f = fopen(file, "rb");
         if (!f) {
             dengineutils_logging_log("WARNING::cannot read default font %s", file);
-#ifdef DENGINE_FONT_EMBED_OPENSANS_LIGHT
             mem = OpenSans_Light_ttf;
             dengineutils_logging_log("WARNING::Load embfont OpenSans_Light");
-#else
-            return 0;
-#endif
         }else
         {
             fseek(f, 0, SEEK_END);
