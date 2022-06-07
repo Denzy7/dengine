@@ -35,7 +35,6 @@ void dengine_vao_destroy(size_t count, VAO* vaos)
 {
     for(size_t i = 0; i < count; i++)
     {
-        //Check for possible PFNs
         if(glad_glDeleteVertexArrays)
             glDeleteVertexArrays(1, &vaos[i].vao);
 
