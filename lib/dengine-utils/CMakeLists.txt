@@ -44,18 +44,24 @@ if(ANDROID)
 endif()
 
 add_library(dengine-utils ${dengine-utils-hdr} ${dengine-utils-src})
+set(dengine-utils-link)
 set_target_properties(dengine-utils PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
                       SOVERSION ${dengine_VERSION_MAJOR}
-                      POSITION_INDEPENDENT_CODE ON)
+                      POSITION_INDEPENDENT_CODE ON
+                      C_STANDARD 99)
+#remove lib prefix
+if(WIN32)
+  set_target_properties(dengine-utils PROPERTIES PREFIX "")
+endif()
 
 if(GTK3_LIBRARIES AND UNIX)
-    target_link_libraries(dengine-utils ${GTK3_LIBRARIES})
+    list(APPEND dengine-utils-link ${GTK3_LIBRARIES})
 endif()
 
 if(NOT WIN32)
     #dlsym, dlopen
-    target_link_libraries(dengine-utils dl)
+    list(APPEND dengine-utils-link dl)
 endif()
 
 #native app glue
@@ -71,20 +77,15 @@ endif()
 
 #android and logcat
 if(ANDROID)
-    target_link_libraries(dengine-utils android log)
+    list(APPEND dengine-utils-link android log)
 endif()
 
 # zlib deflate
 if(DENGINE_HAS_LIBZ)
-    target_link_libraries(dengine-utils ${DENGINE_HAS_LIBZ})
+    list(APPEND dengine-utils-link ${DENGINE_HAS_LIBZ})
 endif()
 
-set_property(TARGET dengine-utils PROPERTY C_STANDARD 99)
-
-#remove lib prefix
-if(WIN32)
-    set_target_properties(dengine-utils PROPERTIES PREFIX "")
-endif()
+target_link_libraries(dengine-utils PRIVATE ${dengine-utils-link})
 
 install(TARGETS dengine-utils DESTINATION lib)
 install(FILES ${dengine-utils-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-utils)

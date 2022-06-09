@@ -26,26 +26,25 @@ if(DENGINE_SCRIPTING_PYTHON)
 endif()
 
 add_library(dengine-script ${dengine-script-hdr} ${dengine-script-src})
+set(dengine-script-link)
 set_target_properties(dengine-script PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
                       SOVERSION ${dengine_VERSION_MAJOR}
-                      POSITION_INDEPENDENT_CODE ON)
-
-target_link_libraries(dengine-script dengine-core dengine-utils)
-set_property(TARGET dengine-script PROPERTY C_STANDARD 99)
+                      POSITION_INDEPENDENT_CODE ON
+                      C_STANDARD 99)
+#remove lib prefix
+if(WIN32)
+  set_target_properties(dengine-script PROPERTIES PREFIX "")
+endif()
 
 if(DENGINE_SCRIPTING_PYTHON)
-target_link_libraries(dengine-script ${python3_LIBRARIES})
     if(NOT ANDROID)
+        list(APPEND dengine-script-link ${python3_LIBRARIES})
         #add python modules (shared libraries)
         add_subdirectory(src/py_modules "modules-build")
     endif()
 endif()
-
-#remove lib prefix
-if(WIN32)
-    set_target_properties(dengine-script PROPERTIES PREFIX "")
-endif()
+target_link_libraries(dengine-script PRIVATE dengine-core dengine-utils ${dengine-script-link})
 
 if(DENGINE_HAS_BULLET)
     add_library(nsl-bulletphysics SHARED

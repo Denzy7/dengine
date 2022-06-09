@@ -71,22 +71,21 @@ endforeach()
 
 add_library(dengine-gui
     ${dengine-gui-hdr} ${dengine-gui-src} ${outres})
+set(dengine-gui-link)
 set_target_properties(dengine-gui PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
                       SOVERSION ${dengine_VERSION_MAJOR}
-                      POSITION_INDEPENDENT_CODE ON)
-
-target_link_libraries(dengine-gui dengine-core)
-set_property(TARGET dengine-gui PROPERTY C_STANDARD 99)
-
-if(fontconfig_LIBRARIES AND UNIX)
-target_link_libraries(dengine-gui ${fontconfig_LIBRARIES})
-endif()
-
+                      POSITION_INDEPENDENT_CODE ON
+                      C_STANDARD 99)
 #remove lib prefix
 if(WIN32)
-    set_target_properties(dengine-gui PROPERTIES PREFIX "")
+  set_target_properties(dengine-gui PROPERTIES PREFIX "")
 endif()
+
+if(fontconfig_LIBRARIES AND UNIX)
+    list(APPEND dengine-gui-link ${fontconfig_LIBRARIES})
+endif()
+target_link_libraries(dengine-gui PRIVATE dengine-core dengine-utils ${dengine-gui-link})
 
 install(TARGETS dengine-gui DESTINATION lib)
 install(FILES ${dengine-gui-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-gui)

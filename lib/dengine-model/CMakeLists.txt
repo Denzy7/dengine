@@ -15,10 +15,10 @@ add_library(dengine-model ${dengine-model-hdr} ${dengine-model-src})
 set_target_properties(dengine-model PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
                       SOVERSION ${dengine_VERSION_MAJOR}
-                      POSITION_INDEPENDENT_CODE ON)
+                      POSITION_INDEPENDENT_CODE ON
+                      C_STANDARD 99)
 
-target_link_libraries(dengine-model dengine-core dengine-utils)
-set_property(TARGET dengine-model PROPERTY C_STANDARD 99)
+target_link_libraries(dengine-model PRIVATE dengine-core dengine-utils)
 
 #remove lib prefix
 if(WIN32)

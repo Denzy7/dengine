@@ -90,40 +90,39 @@ foreach(res ${coreres})
 endforeach()
 
 add_library(dengine-core ${dengine-core-hdr} ${dengine-core-src} ${outres})
+set(dengine-core-link)
 set_target_properties(dengine-core PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
                       SOVERSION ${dengine_VERSION_MAJOR}
-                      POSITION_INDEPENDENT_CODE ON)
-
-#link everything here to avoid cmake link errors
-target_link_libraries(dengine-core dengine-utils)
-
-if(DENGINE_HAS_X11)
-    target_link_libraries(dengine-core ${x11_LIBRARIES})
-endif()
-
-if(DENGINE_HAS_EGL)
-    target_link_libraries(dengine-core ${DENGINE_HAS_EGL})
-endif()
-
-IF(DENGINE_HAS_GLX)
-    target_link_libraries(dengine-core ${glx_LIBRARIES})
-endif()
-if(UNIX)
-    target_link_libraries(dengine-core m)
-endif()
-
-# xinput = basic vibration, opengl32 = wgl
-if(WIN32)
-    target_link_libraries(dengine-core xinput opengl32)
-endif()
-
-set_property(TARGET dengine-core PROPERTY C_STANDARD 99)
-
+                      POSITION_INDEPENDENT_CODE ON
+                      C_STANDARD 99)
 #remove lib prefix
 if(WIN32)
     set_target_properties(dengine-core PROPERTIES PREFIX "")
 endif()
+
+if(DENGINE_HAS_X11)
+    list(APPEND dengine-core-link ${x11_LIBRARIES})
+endif()
+
+if(DENGINE_HAS_EGL)
+    list(APPEND dengine-core-link ${DENGINE_HAS_EGL})
+endif()
+
+IF(DENGINE_HAS_GLX)
+    list(APPEND dengine-core-link ${glx_LIBRARIES})
+endif()
+
+if(UNIX)
+    list(APPEND dengine-core-link m)
+endif()
+
+# xinput = basic vibration, opengl32 = wgl
+if(WIN32)
+    list(APPEND dengine-core-link xinput opengl32)
+endif()
+
+target_link_libraries(dengine-core PRIVATE dengine-utils ${dengine-core-link})
 
 install(TARGETS dengine-core DESTINATION lib)
 install(FILES ${dengine-core-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine)
