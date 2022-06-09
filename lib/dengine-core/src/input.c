@@ -153,7 +153,7 @@ float dengine_input_gamepad_get_axis(GamepadID pad, GamepadAxis axis)
 
 int dengine_input_gamepad_get_isconnected(GamepadID pad)
 {
-    dengine_input_gamepad_poll();
+    //dengine_input_gamepad_poll();
     return _gamepads[pad].connected;
 }
 

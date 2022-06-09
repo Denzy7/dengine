@@ -83,23 +83,23 @@ double dengine_input_get_mousepos_x();
 
 double dengine_input_get_mousepos_y();
 
-const char* dengine_input_gamepad_get_name(GamepadID pad);
+/* GAMEPAD. WORK IN PROGRESS... */
 
-/* GAMEPAD */
+//int dengine_input_gamepad_poll();
 
-int dengine_input_gamepad_poll();
+//const char* dengine_input_gamepad_get_name(GamepadID pad);
 
-int dengine_input_gamepad_get_isconnected(GamepadID pad);
+//int dengine_input_gamepad_get_isconnected(GamepadID pad);
 
-int dengine_input_gamepad_get_btn(GamepadID pad, GamepadButton btn);
+//int dengine_input_gamepad_get_btn(GamepadID pad, GamepadButton btn);
 
-int dengine_input_gamepad_get_btn_once(GamepadID pad, GamepadButton btn);
+//int dengine_input_gamepad_get_btn_once(GamepadID pad, GamepadButton btn);
 
-float dengine_input_gamepad_get_axis(GamepadID pad, GamepadAxis axis);
+//float dengine_input_gamepad_get_axis(GamepadID pad, GamepadAxis axis);
 
-int dengine_input_gamepad_vibration_set_basic(GamepadID pad, float leftmotor, float rightmotor);
+//int dengine_input_gamepad_vibration_set_basic(GamepadID pad, float leftmotor, float rightmotor);
 
-const char* dengine_input_gamepad_vibration_get_error();
+//const char* dengine_input_gamepad_vibration_get_error();
 
 #ifdef __cplusplus
 }
