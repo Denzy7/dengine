@@ -23,7 +23,7 @@ typedef enum
 typedef struct
 {
     char key;
-    char state;
+    int state;
 }KeyInfo;
 
 typedef struct
