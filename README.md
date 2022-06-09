@@ -13,7 +13,7 @@ Change dir to repo:
 `cd dengine`
 
 # building
-- **DengineRC**: Build `dengine-rc` into source dir for build/host system if cross compiling:  
+- **DengineRC**: Build `dengine-rc` into source dir:  
 	`cmake -S main/dengine-rc -B build/dengine-rc`  
         `cmake --build build/dengine-rc`
 		 
@@ -30,15 +30,15 @@ Change dir to repo:
 
 - **Android** :
 	- With Android Studio:
-		- Simply open the test build.gradle with Android Studio
+		- Simply open the apk test build.gradle with Android Studio
 	- Without Android studio (terminal):  
 		- Ensure [OpenJDK 11 is installed](https://openjdk.java.net/install/). Locate JRE from it. Call this `JAVA_HOME`. Ensure `JAVA_HOME/bin` has java executable.
 		- Set environment variable to point to JAVA_HOME. Test with `java --version if its actually openjdk 11.*`
 		- Run `./gradlew build` (Linux) or `gradlew.bat build` (Windows)
 		- The following gradle options may speed up build by skipping certain unneeded tasks for Native Activity: `-x lintVitalAnalyzeRelease -x lintAnalyzeDebug -x lintDebug`	
-		- By default, this builds an APK which you can run on a Physical Device or Emulator in app/build/output
+		- By default, this builds an APK which you can run on any Physical Device or Emulator in app/build/output
 
-	- To build the tests, run regular cmake. Use the toolchain in the NDK  
+	- To build the executable tests, run regular cmake. Use the toolchain in the NDK  
         `cmake -S . -B build/android -DCMAKE_TOOLCHAIN_FILE='<NDK_DIR>/build/cmake/android.toolchain.cmake' -DANDROID_API=24`
 
 	See other options at [Android docs](https://developer.android.com/studio/projects/configure-cmake#call-cmake-cli)
