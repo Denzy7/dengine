@@ -38,12 +38,9 @@ if(WIN32)
 endif()
 
 if(DENGINE_SCRIPTING_PYTHON)
-    if(NOT ANDROID)
-        list(APPEND dengine-script-link ${python3_LIBRARIES})
-        #add python modules (shared libraries)
-        add_subdirectory(src/py_modules "modules-build")
-    endif()
+    list(APPEND dengine-script-link ${python3_LIBRARIES})
 endif()
+
 target_link_libraries(dengine-script PRIVATE dengine-core dengine-utils ${dengine-script-link})
 
 if(DENGINE_HAS_BULLET)
