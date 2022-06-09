@@ -6,6 +6,12 @@
 #include "dengine-utils/logging.h"
 #include "dengine-utils/str.h" //strndup
 #include "dengine-utils/os.h" //mkdir,direxist
+#include "dengine-utils/macros.h"
+
+#include "dengine_config.h"
+#ifdef DENGINE_HAS_LIBZ
+#include <zlib.h>
+#endif
 
 // magic numbers for various zip sections
 static const uint8_t LFH_MGC[] = {0x50, 0x4b, 0x03, 0x04};

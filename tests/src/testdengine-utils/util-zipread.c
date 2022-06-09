@@ -2,6 +2,8 @@
 
 #include <dengine-utils/zipread.h>
 #include <dengine-utils/logging.h>
+#include <dengine-utils/macros.h>
+
 int main(int argc, char *argv[])
 {
     const char* zip = argv[1];

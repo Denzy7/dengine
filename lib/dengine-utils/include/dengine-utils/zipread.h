@@ -15,13 +15,6 @@
 #include <stdint.h> //uint16,32
 #include "dengine-utils/stream.h" //stream seek, read
 
-#include "dengine-utils/macros.h"
-
-#include "dengine_config.h"
-#ifdef DENGINE_HAS_LIBZ
-#include <zlib.h>
-#endif
-
 typedef struct
 {
     uint32_t eoc; /*!< End of central directory magic number */
