@@ -33,7 +33,7 @@ Change dir to repo:
 		- Simply open the apk test build.gradle with Android Studio
 	- Without Android studio (terminal):  
 		- Ensure [OpenJDK 11 is installed](https://openjdk.java.net/install/). Locate JRE from it. Call this `JAVA_HOME`. Ensure `JAVA_HOME/bin` has java executable.
-		- Set environment variable to point to JAVA_HOME. Test with `java --version if its actually openjdk 11.*`
+		- Set environment variable to point to JAVA_HOME. Test with `java --version` if its actually openjdk 11.*
 		- Run `./gradlew build` (Linux) or `gradlew.bat build` (Windows)
 		- The following gradle options may speed up build by skipping certain unneeded tasks for Native Activity: `-x lintVitalAnalyzeRelease -x lintAnalyzeDebug -x lintDebug`	
 		- By default, this builds an APK which you can run on any Physical Device or Emulator in app/build/output
