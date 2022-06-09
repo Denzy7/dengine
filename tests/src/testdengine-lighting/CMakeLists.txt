@@ -44,4 +44,7 @@ target_link_libraries(testdengine-lighting-normalmap
         ${dengine})
 set_property(TARGET testdengine-lighting-normalmap PROPERTY C_STANDARD 99)
 
-
+if(UNIX)
+    target_link_libraries(testdengine-lighting-standard m)
+    target_link_libraries(testdengine-lighting-spotlight m)
+endif()

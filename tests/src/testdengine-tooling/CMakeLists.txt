@@ -18,3 +18,6 @@ add_executable(testdengine-tooling-fbpick
 target_link_libraries(testdengine-tooling-fbpick
         dengine-core dengine-utils dengine-gui)
 set_property(TARGET testdengine-tooling-fbpick PROPERTY C_STANDARD 99)
+if(UNIX)
+    target_link_libraries(testdengine-tooling-fbpick m)
+endif()
