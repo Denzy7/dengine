@@ -25,7 +25,7 @@ if(DENGINE_SCRIPTING_PYTHON)
     list(APPEND dengine-script-src ${dengine-script-py_modules})
 endif()
 
-add_library(dengine-script ${dengine-script-hdr} ${dengine-script-src})
+add_library(dengine-script STATIC ${dengine-script-hdr} ${dengine-script-src})
 set(dengine-script-link)
 set_target_properties(dengine-script PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}

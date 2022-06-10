@@ -13,7 +13,7 @@ include/dengine-scene/ecs.h
 include/dengine-scene/scene.h
 )
 
-add_library(dengine-scene ${dengine-scene-hdr} ${dengine-scene-src})
+add_library(dengine-scene STATIC ${dengine-scene-hdr} ${dengine-scene-src})
 set_target_properties(dengine-scene PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
                       SOVERSION ${dengine_VERSION_MAJOR}
