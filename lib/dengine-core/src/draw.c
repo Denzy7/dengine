@@ -9,11 +9,13 @@ void dengine_draw_primitive(const Primitive* primitive, const Shader* shader)
     Buffer entry_vbo, entry_ibo;
     VAO entry_vao;
     Shader entry_shader;
+    int prof;
+    glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &prof);
 
     // get entry stuff
     dengine_entrygl_buffer(GL_ARRAY_BUFFER, &entry_vbo);
     dengine_entrygl_buffer(GL_ELEMENT_ARRAY_BUFFER, &entry_ibo );
-    if(GLAD_GL_VERSION_3_2 || GLAD_GL_ES_VERSION_3_2)
+    if(prof == GL_CONTEXT_CORE_PROFILE_BIT)
     {
         dengine_entrygl_vao(&entry_vao );
         dengine_vao_bind(&primitive->vao);
@@ -35,7 +37,7 @@ void dengine_draw_primitive(const Primitive* primitive, const Shader* shader)
 
     dengine_shader_use(&entry_shader);
 
-    if(GLAD_GL_VERSION_3_2 || GLAD_GL_ES_VERSION_3_2)
+    if(prof == GL_CONTEXT_CORE_PROFILE_BIT)
     {
         dengine_vao_bind(&entry_vao);
     }
