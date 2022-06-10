@@ -14,6 +14,7 @@ include/dengine-scene/scene.h
 )
 
 add_library(dengine-scene STATIC ${dengine-scene-hdr} ${dengine-scene-src})
+set(dengine-scene-link)
 set_target_properties(dengine-scene PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
                       SOVERSION ${dengine_VERSION_MAJOR}
@@ -23,8 +24,11 @@ set_target_properties(dengine-scene PROPERTIES
 if(WIN32)
   set_target_properties(dengine-scene PROPERTIES PREFIX "")
 endif()
+if(UNIX)
+    list(APPEND dengine-scene-link m)
+endif()
 
-target_link_libraries(dengine-scene PRIVATE dengine-core dengine-script dengine-utils)
+target_link_libraries(dengine-scene PRIVATE dengine-core dengine-script dengine-utils ${dengine-scene-link})
 
 install(TARGETS dengine-scene DESTINATION lib)
 install(FILES ${dengine-scene-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-scene)
