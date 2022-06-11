@@ -1,3 +1,11 @@
+#logging
+add_executable(testdengine-util-logging
+        util-logging.c
+    )
+target_link_libraries(testdengine-util-logging
+        dengine-utils)
+set_property(TARGET testdengine-util-logging PROPERTY C_STANDARD 99)
+
 #confserialize
 add_executable(testdengine-util-confserialize
         util-confserialize.c

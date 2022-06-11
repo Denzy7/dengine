@@ -14,61 +14,83 @@
 #include <time.h> //ctime
 
 #ifdef DENGINE_LINUX
-#include <unistd.h> //pipe2
-//ANSI COLORS
-#define ANSI_Red "\033[0;31m"
-#define ANSI_Green "\033[0;32m"
-#define ANSI_Yellow "\033[0;33m"
-#define ANSI_Blue "\033[0;34m"
-#define ANSI_Magenta "\033[0;35m"
-#define ANSI_Cyan "\033[0;36m"
-#define ANSI_White "\033[0;37m"
-#define ANSI_Reset "\033[0m"
-#elif defined(DENGINE_WIN32)
-#include <windows.h>
-//WIN32 COLORS
-#define WIN32_Blue 9
-#define WIN32_Green 10
-#define WIN32_Cyan 11
-#define WIN32_Red 12
-#define WIN32_Magenta 13
-#define WIN32_Yellow 14
-#define WIN32_White 15
+#include <unistd.h>
 #endif
-
-//android logcat
+#ifdef DENGINE_WIN32
+#include <windows.h>
+#endif
 #ifdef DENGINE_ANDROID
+//android logcat
 #include <android/log.h>
 #define ANDROID_LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, DENGINE_ANDROID_LOG_TAG, __VA_ARGS__))
 #define ANDROID_LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, DENGINE_ANDROID_LOG_TAG, __VA_ARGS__))
 #define ANDROID_LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, DENGINE_ANDROID_LOG_TAG, __VA_ARGS__))
+#endif
+
+#ifdef DENGINE_WIN32
+//WIN32 COLORS
+#define Col_Red "\x0c"
+#define Col_Green "\x0a"
+#define Col_Blue "\x09"
+
+#define Col_Cyan "\x0b"
+#define Col_Yellow "\x0e"
+#define Col_Magenta "\x0d"
+
+#define Col_White "\x0f"
+#define Col_Reset Col_White
+#else
+//ANSI COLORS
+#define Col_Red "\033[0;31m"
+#define Col_Green "\033[0;32m"
+#define Col_Blue "\033[0;34m"
+
+#define Col_Cyan "\033[0;36m"
+#define Col_Yellow "\033[0;33m"
+#define Col_Magenta "\033[0;35m"
+
+#define Col_White "\033[0;37m"
+#define Col_Reset "\033[0m"
+#endif
+
+#ifdef DENGINE_ANDROID
 void _dengineutils_logging_androidcb(const char* log, const char* trip);
 #endif
 
+static char* colors[]=
+{
+    Col_Red,
+    Col_Green,
+    Col_Blue,
+
+    Col_Cyan,
+    Col_Yellow,
+    Col_Magenta,
+
+    Col_White,
+    Col_Reset,
+};
+
+typedef struct
+{
+    const char* triggerstr;
+    ConsoleColor color;
+}_LogPair;
+
+static const _LogPair logpairs[]=
+{
+    {"INFO::", DENGINE_LOGGING_COLOR_GREEN},
+    {"ERROR::", DENGINE_LOGGING_COLOR_RED},
+    {"WARNING::", DENGINE_LOGGING_COLOR_YELLOW},
+    {"TODO::", DENGINE_LOGGING_COLOR_CYAN},
+    {"GL::", DENGINE_LOGGING_COLOR_MAGENTA},
+};
 //PLAFORM SPECIFIC GLOBAL VARS
 #ifdef DENGINE_LINUX
-//logging pair linux
-static const char* logcolorpairsANSI[][2]=
-{
-    {"I", ANSI_Green},
-    {"E", ANSI_Red},
-    {"W", ANSI_Yellow},
-    {"T", ANSI_Cyan},
-    {"G", ANSI_Magenta},
-};
-//pipes for logging thread
 int logfd[2];
 #elif defined(DENGINE_WIN32)
-//logging pair win32
-static const char logcolorpairsWIN32[][2]=
-{
-    {'I', WIN32_Green},
-    {'E', WIN32_Red},
-    {'W', WIN32_Yellow},
-    {'T', WIN32_Cyan},
-    {'G', WIN32_Magenta},
-};
 HANDLE hLogPipe;
+WORD stdoutInitAttrs = 0;
 #endif
 
 typedef struct
@@ -88,25 +110,8 @@ static char LOGFILE[2048];
 //Disable file log by default to avoid crash on Android
 int log2file = 0;
 
-//messagebox on error
-int msgboxerr=1;
-
-static const char* offsetneedles[]=
-{
-    "INFO::",
-    "ERROR::",
-    "WARNING::",
-    "TODO::",
-    "GL::",
-};
-
-#ifdef DENGINE_ANDROID
-void _dengineutils_logging_androidcb(const char* log, const char* trip)
-{
-    //write stdout and stderr to logcat
-    ANDROID_LOGI("std: %s", trip);
-}
-#endif
+//messagebox on error disabled (potential gtk memory leaks after gtk_init!!!)
+int msgboxerr = 0;
 
 int dengineutils_logging_init()
 {
@@ -140,44 +145,26 @@ void dengineutils_logging_set_filelogging(int value)
     }
 }
 
-void dengineutils_logging_set_consolecolor(char head)
+void dengineutils_logging_set_consolecolor(ConsoleColor colour)
 {
+    const char* colstr = colors[colour];
 #if defined(DENGINE_LINUX)
-
-    if(!head)
-    {
-        printf(ANSI_Reset);
-    }else
-    {
-        //Color ansi output
-        for(int i = 0; i < DENGINE_ARY_SZ(logcolorpairsANSI); i++)
-        {
-            if(logcolorpairsANSI[i][0][0] == head)
-            {
-                printf("%s", logcolorpairsANSI[i][1]);
-            }
-        }
-    }
+    printf("%s", colstr);
 #elif defined(DENGINE_WIN32)
     //Win32 set console
-    //TODO : Get current color instead of overriding user color
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-    if(!head)
+    if(stdoutInitAttrs == 0)
     {
-        SetConsoleTextAttribute(hConsole, WIN32_White);
-    }else
-    {
-        for(int i = 0; i < DENGINE_ARY_SZ(logcolorpairsWIN32); i++)
-        {
-            if(logcolorpairsWIN32[i][0] == head)
-            {
-                SetConsoleTextAttribute(hConsole, logcolorpairsWIN32[i][1]);
-            }
-        }
+        CONSOLE_SCREEN_BUFFER_INFO Info;
+        GetConsoleScreenBufferInfo(hConsole, &Info);
+        stdoutInitAttrs = Info.wAttributes;
     }
-#endif
 
+    if(colour == DENGINE_LOGGING_COLOR_RESET && stdoutInitAttrs != 0)
+        SetConsoleTextAttribute(hConsole, stdoutInitAttrs);
+    else
+        SetConsoleTextAttribute(hConsole, colstr[0]);
+#endif
 }
 
 void dengineutils_logging_log(const char* message, ...)
@@ -203,11 +190,16 @@ void dengineutils_logging_log(const char* message, ...)
         }
     }
 
+    const _LogPair* pair = NULL;
+
     const char* delim = "";
-    for(int i = 0; i < DENGINE_ARY_SZ(offsetneedles); i++)
+    for(int i = 0; i < DENGINE_ARY_SZ(logpairs); i++)
     {
-        if(strstr(LOG_BUFFER, offsetneedles[i]))
-            delim =  offsetneedles[i];
+        if(strstr(LOG_BUFFER, logpairs[i].triggerstr))
+        {
+            delim =  logpairs[i].triggerstr;
+            pair = &logpairs[i];
+        }
     }
 #ifdef DENGINE_ANDROID
     //use logcat. any stdout writes will be sent to callback
@@ -217,9 +209,11 @@ void dengineutils_logging_log(const char* message, ...)
         ANDROID_LOGI("%s",LOG_BUFFER + strlen(delim));
 #else
     printf("\n");
-    dengineutils_logging_set_consolecolor(LOG_BUFFER[0]);
+    if(pair != NULL)
+        dengineutils_logging_set_consolecolor(pair->color);
     printf("%s", LOG_BUFFER + strlen(delim));
-    dengineutils_logging_set_consolecolor(0);
+    if(pair != NULL)
+        dengineutils_logging_set_consolecolor(DENGINE_LOGGING_COLOR_RESET);
     printf("\n");
     if(iserr && msgboxerr)
         dengineutils_os_dialog_messagebox("Critical Error!", LOG_BUFFER + strlen(delim), 1);
@@ -299,3 +293,11 @@ const char* dengineutils_logging_get_logfile()
         return DENGINE_LOG_FILE;
     }
 }
+
+#ifdef DENGINE_ANDROID
+void _dengineutils_logging_androidcb(const char* log, const char* trip)
+{
+    //write stdout and stderr to logcat
+    ANDROID_LOGI("std: %s", trip);
+}
+#endif
