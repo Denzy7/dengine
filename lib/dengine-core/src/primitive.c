@@ -37,13 +37,15 @@ void dengine_primitive_setup(Primitive* primitive, const Shader* shader)
     dengine_vertex_attribute_indexfromshader(shader, &primitive->aTangent, "aTangent");
     dengine_vertex_attribute_indexfromshader(shader, &primitive->aBiTangent, "aBiTangent");
 
-    dengine_buffer_bind(GL_ELEMENT_ARRAY_BUFFER, &entry_ibo);
-    dengine_buffer_bind(GL_ARRAY_BUFFER, &entry_vbo);
-
     if(prof == GL_CONTEXT_CORE_PROFILE_BIT)
     {
+        //core saves enabled attribs to vao
+        dengine_primitive_attributes_enable(primitive, shader);
         dengine_vao_bind(&entry_vao);
     }
+
+    dengine_buffer_bind(GL_ELEMENT_ARRAY_BUFFER, &entry_ibo);
+    dengine_buffer_bind(GL_ARRAY_BUFFER, &entry_vbo);
 
     primitive->offset = NULL;
 }
