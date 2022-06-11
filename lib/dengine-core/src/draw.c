@@ -32,7 +32,7 @@ void dengine_draw_primitive(const Primitive* primitive, const Shader* shader)
     dengine_entrygl_shader(&entry_shader );
     dengine_shader_use(shader);
 
-    //Don't draw if we have an ERROR. Prevent's infinite spawn of dialogs
+    //Don't draw if we have an ERROR. Prevent's infinite thrashing of stdout
     glDrawElements(primitive->draw_mode, primitive->index_count, primitive->draw_type, primitive->offset);
     DENGINE_CHECKGL;
 

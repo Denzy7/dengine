@@ -18,19 +18,21 @@
 //ANSI COLORS
 #define ANSI_Red "\033[0;31m"
 #define ANSI_Green "\033[0;32m"
-#define ANSI_Blue "\033[0;34m"
 #define ANSI_Yellow "\033[0;33m"
+#define ANSI_Blue "\033[0;34m"
+#define ANSI_Magenta "\033[0;35m"
 #define ANSI_Cyan "\033[0;36m"
 #define ANSI_White "\033[0;37m"
 #define ANSI_Reset "\033[0m"
 #elif defined(DENGINE_WIN32)
 #include <windows.h>
 //WIN32 COLORS
-#define WIN32_Red 12
-#define WIN32_Green 10
 #define WIN32_Blue 9
-#define WIN32_Yellow 14
+#define WIN32_Green 10
 #define WIN32_Cyan 11
+#define WIN32_Red 12
+#define WIN32_Magenta 13
+#define WIN32_Yellow 14
 #define WIN32_White 15
 #endif
 
@@ -52,6 +54,7 @@ static const char* logcolorpairsANSI[][2]=
     {"E", ANSI_Red},
     {"W", ANSI_Yellow},
     {"T", ANSI_Cyan},
+    {"G", ANSI_Magenta},
 };
 //pipes for logging thread
 int logfd[2];
@@ -63,6 +66,7 @@ static const char logcolorpairsWIN32[][2]=
     {'E', WIN32_Red},
     {'W', WIN32_Yellow},
     {'T', WIN32_Cyan},
+    {'G', WIN32_Magenta},
 };
 HANDLE hLogPipe;
 #endif
@@ -93,6 +97,7 @@ static const char* offsetneedles[]=
     "ERROR::",
     "WARNING::",
     "TODO::",
+    "GL::",
 };
 
 #ifdef DENGINE_ANDROID

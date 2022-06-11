@@ -23,7 +23,7 @@ int dengine_checkgl(const char* file, const int line)
             type_str = "GL_STACK_OVERFLOW\nAn attempt has been made to perform an operation that would cause an internal stack to overflow.";
 
         const char* hiddendirfile = strstr(file, "dengine");
-        dengineutils_logging_log("ERROR::GL::FILE::%s::LINE::%d\n%s", hiddendirfile, line, type_str);
+        dengineutils_logging_log("GL::FILE::%s::LINE::%d\n%s", hiddendirfile, line, type_str);
     }
     return error;
 }
