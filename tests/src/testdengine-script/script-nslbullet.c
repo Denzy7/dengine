@@ -1,4 +1,10 @@
 #include <dengine/dengine.h>
+typedef struct
+{
+    const char* str;
+    float* val;
+}ShadowProp;
+
 int main(int argc, char *argv[])
 {
     DengineInitOpts* opts = dengine_init_get_opts();
@@ -65,8 +71,9 @@ int main(int argc, char *argv[])
     cam_ent->transform.rotation[1] = 225.0f;
     denginescene_add_entity(scene, cam_ent);
 
-    Shader stdshdr;
+    Shader stdshdr, shadow2d;
     dengine_shader_make_standard(DENGINE_SHADER_STANDARD, &stdshdr);
+    dengine_shader_make_standard(DENGINE_SHADER_SHADOW2D, &shadow2d);
 
     Primitive cube, plane;
     dengine_primitive_gen_cube(&cube, &stdshdr);
@@ -75,6 +82,7 @@ int main(int argc, char *argv[])
     Material plane_mat;
     dengine_material_setup(&plane_mat);
     dengine_material_set_shader_color(&stdshdr, &plane_mat);
+    dengine_material_set_shader_shadow(&shadow2d, &plane_mat);
     static const char* texs_plane[][2]=
     {
         {"textures/2d/plane_diff.png", "diffuseTex"},
@@ -107,6 +115,7 @@ int main(int argc, char *argv[])
     Material cube2_mat;
     dengine_material_setup(&cube2_mat);
     dengine_material_set_shader_color(&stdshdr, &cube2_mat);
+    dengine_material_set_shader_shadow(&shadow2d, &cube2_mat);
 
     static const char* texs_cube[][2]=
     {
@@ -169,6 +178,7 @@ int main(int argc, char *argv[])
             Material cube_mat;
             dengine_material_setup(&cube_mat);
             dengine_material_set_shader_color(&stdshdr, &cube_mat);
+            dengine_material_set_shader_shadow(&shadow2d, &cube_mat);
 
             int pick = dengineutils_rng_int(DENGINE_ARY_SZ(cube_tex_pool));
             Texture* coltex = &cube_tex_pool[pick];
@@ -196,6 +206,7 @@ int main(int argc, char *argv[])
     dengine_lighting_light_setup(DENGINE_LIGHT_POINT, &pl);
     pl.light.strength = 3.0f;
     pl.quadratic = 0.010;
+    pl.light.diffuse[0] = 0;
     Entity* pl_ent = denginescene_ecs_new_entity();
     LightComponent* dl_ent_lightcomp = denginescene_ecs_new_lightcomponent(
                 DENGINE_LIGHT_POINT, &pl);
@@ -207,17 +218,51 @@ int main(int argc, char *argv[])
     Texture pl_ent_gizmo;
     dengine_texture_make_color(8, 8, pl.light.diffuse, 3, &pl_ent_gizmo);
 
+    DirLight dl;
+    memset(&dl, 0, sizeof(DirLight));
+    dl.shadow.enable = 1;
+    dl.shadow.shadow_map_size = 512;
+    dengine_lighting_light_setup(DENGINE_LIGHT_DIR, &dl);
+    dl.shadow.far_shadow = 30.0f;
+    dl.shadow.max_bias = 0.008f;
+    dl.shadow_ortho = 22.5f;
+    Entity* dl_ent = denginescene_ecs_new_entity();
+    dl_ent->transform.position[0] = -6.0f;
+    dl_ent->transform.position[1] = 12.0f;
+    dl_ent->transform.position[2] = 6.0f;
+    dl_ent->light_component = denginescene_ecs_new_lightcomponent(DENGINE_LIGHT_DIR, &dl);
+    denginescene_add_entity(scene, dl_ent);
+    DirLight* dl_ent_dl= dl_ent->light_component->light;
+
     while (dengine_update()) {
+
+        if(dengine_input_get_key('1'))
+            dl_ent_dl->shadow.max_bias -= 0.001;
+        if(dengine_input_get_key('2'))
+            dl_ent_dl->shadow.max_bias += 0.001;
+
+        if(dengine_input_get_key('3'))
+            dl_ent_dl->shadow_ortho -= 0.1;
+        if(dengine_input_get_key('4'))
+            dl_ent_dl->shadow_ortho += 0.1;
+
+        if(dengine_input_get_key('5'))
+            dl_ent_dl->shadow.far_shadow -= 0.1;
+        if(dengine_input_get_key('6'))
+            dl_ent_dl->shadow.far_shadow += 0.1;
+
+        if(dengine_input_get_key_once('G'))
+            dl_ent_dl->shadow.enable = !dl_ent_dl->shadow.enable;
+
         //stepSimulation
         denginescript_call(&basic_world, DENGINE_SCRIPT_FUNC_UPDATE, &world);
 
         denginescene_update(scene);
 
-        vec4 black = {0.0f, 0.0f, 0.0f, 1.0f};
         int w, h;
         dengine_viewport_get(NULL, NULL, &w, &h);
 
-        denginegui_panel(0, 0, w, h, cam_ent->camera_component->camera->framebuffer.color, NULL, black);
+        denginegui_panel(0, 0, w, h, cam_ent->camera_component->camera->framebuffer.color, NULL, GLM_VEC4_BLACK);
         float fontsz = denginegui_get_fontsz();
         static const char* staticmessageslist[] =
         {
@@ -229,11 +274,30 @@ int main(int argc, char *argv[])
             "Q to apply +ve forward torque",
             "E to apply -ve forward torque",
             "R to reset position",
+            "",
+            "+++ SHADOWS +++",
+            "G to toggle shadows",
+            "Shadow properties:",
+        };
+
+        ShadowProp shadowprops[] =
+        {
+            {"Max Bias +/-0.001 (use 1 or 2)", &dl_ent_dl->shadow.max_bias},
+            {"Orthosize +/-0.1 (use 3 or 4)", &dl_ent_dl->shadow_ortho},
+            {"Far +/-0.1 (use 5 or 6)", &dl_ent_dl->shadow.far_shadow},
         };
 
         for(int i = 0; i < DENGINE_ARY_SZ(staticmessageslist); i++)
         {
             denginegui_text(fontsz / 4, h - fontsz - i * fontsz, staticmessageslist[i], NULL);
+        }
+
+        static vec4 orange = {1.0f, 0.5f, 0.3f, 1.0f};
+        for(int i = 0; i < DENGINE_ARY_SZ(shadowprops); i++)
+        {
+            char msg[1024];
+            snprintf(msg, sizeof(msg), "%s : %.3f", shadowprops[i].str, *shadowprops[i].val);
+            denginegui_text(fontsz / 4, h - fontsz - i * fontsz - DENGINE_ARY_SZ(staticmessageslist) * fontsz,  msg, orange);
         }
         vec2 pos2d_light;
         dengine_camera_world2screen(cam_ent->camera_component->camera, pl_ent->transform.position, pos2d_light);
@@ -249,8 +313,10 @@ int main(int argc, char *argv[])
             snprintf(fpstr, sizeof (fpstr), "%s :: FPS : %.1f(%.2fms)", (char*)glGetString(GL_VERSION), 1 / (delta / 1000.0), delta);
             elapsed = 0.0;
         }
+
         denginegui_text(fontsz, fontsz, fpstr, yellow);
 
+        denginegui_panel(1024, 464, 256, 256, &dl.shadow.shadow_map.depth, NULL, GLM_VEC4_BLACK);
     }
     //destroy world
     denginescript_call(&basic_world, DENGINE_SCRIPT_FUNC_TERMINATE, NULL);
