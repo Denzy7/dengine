@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     char* prtbf = malloc(prtbf_sz);
 
     Shader sky, dft;
-    dengine_shader_make_standard(DENGINE_SHADER_SKYBOXCUBE, &sky);
+    dengine_shader_make_standard(DENGINE_SHADER_SKYBOX2D, &sky);
     dengine_shader_make_standard(DENGINE_SHADER_DEFAULT, &dft);
 
     Primitive cube, axis;
