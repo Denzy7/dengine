@@ -13,10 +13,7 @@ void dengine_primitive_setup(Primitive* primitive, const Shader* shader)
     dengine_entrygl_buffer(GL_ARRAY_BUFFER, &entry_vbo);
     dengine_entrygl_buffer(GL_ELEMENT_ARRAY_BUFFER, &entry_ibo);
 
-    int prof;
-    glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &prof);
-
-    if(prof == GL_CONTEXT_CORE_PROFILE_BIT)
+    if(GLAD_GL_VERSION_3_2 || GLAD_GL_ES_VERSION_3_2)
     {
         dengine_entrygl_vao(&entry_vao);
         dengine_vao_gen(1, &primitive->vao);
@@ -37,7 +34,7 @@ void dengine_primitive_setup(Primitive* primitive, const Shader* shader)
     dengine_vertex_attribute_indexfromshader(shader, &primitive->aTangent, "aTangent");
     dengine_vertex_attribute_indexfromshader(shader, &primitive->aBiTangent, "aBiTangent");
 
-    if(prof == GL_CONTEXT_CORE_PROFILE_BIT)
+    if(GLAD_GL_VERSION_3_2 || GLAD_GL_ES_VERSION_3_2)
     {
         //core saves enabled attribs to vao
         dengine_primitive_attributes_enable(primitive, shader);
@@ -85,9 +82,7 @@ void dengine_primitive_attributes_enable(const Primitive* primitive, const Shade
 
 void dengine_primitive_destroy(Primitive* primitive)
 {
-    int prof;
-    glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &prof);
-    if(prof == GL_CONTEXT_CORE_PROFILE_BIT)
+    if(GLAD_GL_VERSION_3_2 || GLAD_GL_ES_VERSION_3_2)
     {
         dengine_vao_destroy(1, &primitive->vao);
     }

@@ -2,12 +2,15 @@
 
 #include "dengine/loadgl.h"
 
+#include "dengine-utils/logging.h"
 void dengine_vao_gen(size_t count, VAO* vaos)
 {
     for(size_t i = 0; i < count; i++)
     {
         if(glad_glGenVertexArrays)
             glGenVertexArrays(1, &vaos[i].vao);
+        else
+            dengineutils_logging_log("WARNING::glad_glGenVertexArrays not found!");
         DENGINE_CHECKGL;
     }
 }
@@ -21,6 +24,8 @@ void dengine_vao_bind(const VAO* vao)
 
     if(glad_glBindVertexArray)
         glBindVertexArray(_vao);
+    else
+        dengineutils_logging_log("WARNING::glad_glGenVertexArrays not found!");
 
     DENGINE_CHECKGL;
 
@@ -32,6 +37,8 @@ void dengine_vao_destroy(size_t count, VAO* vaos)
     {
         if(glad_glDeleteVertexArrays)
             glDeleteVertexArrays(1, &vaos[i].vao);
+        else
+            dengineutils_logging_log("WARNING::glad_glGenVertexArrays not found!");
 
         DENGINE_CHECKGL;
     }
