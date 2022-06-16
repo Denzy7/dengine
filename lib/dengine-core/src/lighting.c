@@ -213,6 +213,7 @@ void dengine_lighting_setup_dirlight(DirLight* dirLight)
 
     dirLight->shadow.pcf = 0;
     dirLight->shadow.pcf_samples = 4;
+    dirLight->shadow_ortho = 10.0f;
 
     dirLight->light.strength = 0.55;
 }
@@ -234,7 +235,7 @@ void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, const Shader* sha
 
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &dirLight->shadow.shadow_map);
 
-    float ortho_size = 10.0f;
+    const float ortho_size = dirLight->shadow_ortho;
     mat4 proj, view;
     mat4 projview;
 

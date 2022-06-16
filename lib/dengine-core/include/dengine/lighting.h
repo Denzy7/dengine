@@ -44,6 +44,7 @@ typedef struct DirLight
 {
     float position[4];
     float shadow_projview[16];
+    float shadow_ortho;
 
     LightOp light;
     ShadowOp shadow;
