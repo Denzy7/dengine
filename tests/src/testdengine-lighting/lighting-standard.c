@@ -404,13 +404,14 @@ int main(int argc, char** argv)
         dengine_window_poll(window);
     }
 
-    dengine_window_destroy(window);
     denginegui_terminate();
 
     dengine_material_destroy(&cube_mat);
     dengine_material_destroy(&plane_mat);
 
     dengineutils_debug_terminate();
+
+    dengine_window_destroy(window);
     dengine_window_terminate();
 
     return 0;
