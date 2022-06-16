@@ -463,7 +463,7 @@ int dengine_texture_issupprorted(uint32_t target, uint32_t type, uint32_t intern
 {
     int supported = 1;
     uint32_t tex;
-    int width = 8, height = 8;
+    static const int width = 8, height = 8;
 
     //clear errors
     glGetError();
