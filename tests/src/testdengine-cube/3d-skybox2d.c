@@ -39,14 +39,21 @@ int main(int argc, char *argv[])
 
     Texture equireq;
     memset(&equireq, 0, sizeof(Texture));
-    equireq.interface = DENGINE_TEXTURE_INTERFACE_FLOAT;
+    /* if unsupported fallback to 8-BIT (less precision looks pretty bad after conversion 😢 ) */
+    if(dengine_texture_issupprorted(GL_TEXTURE_2D, GL_FLOAT, GL_RGB, GL_RGB))
+    {
+        equireq.interface = DENGINE_TEXTURE_INTERFACE_FLOAT;
+        equireq.type = GL_FLOAT;
+    }else
+    {
+        equireq.interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
+        equireq.type = GL_UNSIGNED_BYTE;
+    }
     snprintf(prtbf, prtbf_sz,
              "%s/textures/hdri/sunset.hdr",
              dengineutils_filesys_get_assetsdir());
     dengine_texture_load_file(prtbf, 1, &equireq);
-    //TODO: if unsupported fallback to 8-BIT
-    //(less precision looks pretty bad after conversion 😢 )
-    equireq.type = GL_FLOAT;
+
     equireq.filter_min = GL_LINEAR;
     equireq.format = GL_RGB;
     equireq.internal_format = GL_RGB;
