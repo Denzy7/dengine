@@ -224,7 +224,6 @@ int main(int argc, char *argv[])
     dl.shadow.shadow_map_size = 512;
     dengine_lighting_light_setup(DENGINE_LIGHT_DIR, &dl);
     dl.shadow.far_shadow = 30.0f;
-    dl.shadow.max_bias = 0.008f;
     dl.shadow_ortho = 22.5f;
     Entity* dl_ent = denginescene_ecs_new_entity();
     dl_ent->transform.position[0] = -6.0f;

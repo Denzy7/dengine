@@ -278,12 +278,18 @@ void _denginescene_ecs_do_light_draw_shadow_mesh(Entity* light, Entity* mesh)
         dengine_material_set_texture(&sl->pointLight.shadow.shadow_map.depth, "sLightsShadow0", mesh->mesh_component->material);
     }
 
+    int entry_cullface;
+    glGetIntegerv(GL_CULL_FACE_MODE, &entry_cullface);
+    glCullFace(GL_FRONT);
+
     dengine_lighting_light_shadow_draw(light->light_component->type,
                                        light->light_component->light,
                                        shader,
                                        mesh->mesh_component->mesh,
                                        mesh->transform.world_model[0]
                                        );
+
+    glCullFace(entry_cullface);
 }
 
 void _denginescene_ecs_do_light_apply(Entity* light, Entity* mesh)
