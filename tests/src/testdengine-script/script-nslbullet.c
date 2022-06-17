@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
         if(dengine_input_get_key('6'))
             dl_ent_dl->shadow.far_shadow += 0.1;
 
-        if(dengine_input_get_key_once('G'))
+        if(dengine_input_get_key_once('V'))
             dl_ent_dl->shadow.enable = !dl_ent_dl->shadow.enable;
 
         //stepSimulation
@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
             "R to reset position",
             "",
             "+++ SHADOWS +++",
-            "G to toggle shadows",
+            "V to toggle shadows",
             "Shadow properties:",
         };
 
