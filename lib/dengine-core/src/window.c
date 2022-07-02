@@ -179,6 +179,7 @@ int dengine_window_init()
     wc.lpszClassName = wc_class;
     wc.lpfnWndProc = WndProc;
     wc.style = CS_OWNDC;
+    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     if(RegisterClassW(&wc))
     {
         init = 1;
