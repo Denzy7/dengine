@@ -451,25 +451,33 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     int pix = ChoosePixelFormat(hdc, &pfd);
     SetPixelFormat(hdc, pix, &pfd);
     HGLRC dummy = wglCreateContext(hdc);
-    if(!dummy)
+    if(dummy == NULL)
     {
-        MessageBox(window.win32_hwnd, "Cannot wglContext", "Error", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(window.win32_hwnd, "Cannot wglContext dummy. OpenGL probably not supported", "Error", MB_OK | MB_ICONEXCLAMATION);
+        goto RelDCRetNULL;
     }else
     {
         if(!wglMakeCurrent(hdc, dummy))
-            MessageBox(window.win32_hwnd, "Cannot wglMakeCurrent dummy", "Error", MB_OK | MB_ICONEXCLAMATION);
+        {
+            MessageBox(window.win32_hwnd, "Cannot wglMakeCurrent dummy. OpenGL is really not supported", "Error", MB_OK | MB_ICONEXCLAMATION);
+            goto RelDCRetNULL;
+        }
 
         wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) wglGetProcAddress("wglCreateContextAttribsARB");
         wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC) wglGetProcAddress("wglChoosePixelFormatARB");
         if(!wglChoosePixelFormatARB)
-            MessageBox(window.win32_hwnd, "wglChoosePixelFormatARB NOT found", "Error", MB_OK | MB_ICONEXCLAMATION);
-        if(!wglCreateContextAttribsARB)
-            MessageBox(window.win32_hwnd, "wglCreateContextAttribsARB NOT found", "Error", MB_OK | MB_ICONEXCLAMATION);
+        {
+            dengineutils_logging_log("WARNING::wglChoosePixelFormatARB NOT found. Cannot probably create \"modern\" contexts");
+        }
+        if(!wglCreateContextAttribsARB){
+            dengineutils_logging_log("WARNING::wglCreateContextAttribsARB NOT found. Cannot really create \"modern\" contexts");
+        }
     }
 
     if(wglChoosePixelFormatARB)
     {
         wglDeleteContext(dummy);
+        dummy = NULL;
         const int pix_attrs[] =
         {
             WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
@@ -487,6 +495,7 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         if(wglChoosePixelFormatARB(hdc, pix_attrs, NULL, 1, &pixelFormat, &numFormats) == FALSE)
         {
             MessageBox(window.win32_hwnd, "wglChoosePixelFormatARB failed", "Error", MB_OK | MB_ICONEXCLAMATION);
+            goto RelDCRetNULL;
         }
 
         int ctx_attrs[]=
@@ -497,9 +506,10 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         };
 
         window.win32_ctx = wglCreateContextAttribsARB(hdc, window.win32_ctx_shr, ctx_attrs);
-        if(!window.win32_ctx)
+        if(window.win32_ctx == NULL)
         {
-            MessageBox(window.win32_hwnd, "wglCreateContextAttribsARB failed", "Error", MB_OK | MB_ICONEXCLAMATION);
+            dengineutils_logging_log("WARNING::wglCreateContextAttribsARB failed");
+            goto RelDCRetNULL;
         }else
         {
             wglMakeCurrent(hdc, window.win32_ctx);
@@ -507,11 +517,14 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
             wglSwapIntervalEXT = wglGetProcAddress("wglSwapIntervalEXT");
             wglMakeCurrent(hdc, NULL);
         }
-    }else
+    }
+
+    if(window.win32_ctx == NULL && dummy != NULL)
     {
         window.win32_ctx = dummy;
         dengineutils_logging_log("WARNING::Using dummy wglCreateContext Context");
     }
+
     ReleaseDC(window.win32_hwnd, hdc);
 #elif defined(DENGINE_ANDROID)
     window.and_win = dengineutils_android_get_window();
@@ -534,6 +547,12 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     dengineutils_thread_create(_dengine_window_pollinf, ret, &input_thr);
 
     return ret;
+
+#ifdef DENGINE_WIN32
+    RelDCRetNULL:
+        ReleaseDC(window.win32_hwnd, hdc);
+        return NULL;
+#endif
 }
 
 void dengine_window_destroy(DengineWindow* window)
