@@ -304,10 +304,10 @@ void dengine_window_request_defaultall()
 
 DengineWindow* dengine_window_create(int width, int height, const char* title, const DengineWindow* share)
 {
-#ifdef DENGINE_WIN_X11
     DengineWindow window;
     memset(&window, 0, sizeof (DengineWindow));
 
+#ifdef DENGINE_WIN_X11
     Window root = DefaultRootWindow(x_dpy);
     window.x_swa.event_mask =
             ExposureMask |
@@ -400,23 +400,11 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     XSetWMProtocols(x_dpy, window.x_win, &wm_delete, 1);
     XMapWindow(x_dpy, window.x_win);
     XStoreName(x_dpy, window.x_win, title);
-
-    DengineWindow* ret = malloc(sizeof(DengineWindow));
-    memcpy(ret, &window, sizeof(DengineWindow));
-    ret->running = 1;
-    ret->width = width;
-    ret->height = height;
-
-    Thread input_thr;
-    dengineutils_thread_create(_dengine_window_pollinf, ret, &input_thr);
-
-    return ret;
 #elif defined(DENGINE_WIN32)
     wchar_t title_wcs[256];
 
     mbstowcs(title_wcs, title, sizeof(title_wcs));
-    DengineWindow* ret = calloc(1, sizeof(DengineWindow));
-    ret->win32_hwnd = CreateWindowExW(0,
+    window.win32_hwnd = CreateWindowExW(0,
                              wc_class,
                              title_wcs,
                              WS_OVERLAPPEDWINDOW,
@@ -424,19 +412,17 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
                              NULL,
                              NULL,
                              wc.hInstance,
-                             ret);
-    if(ret->win32_hwnd == NULL)
+                             NULL);
+    if(window.win32_hwnd == NULL)
     {
-        free(ret);
         return NULL;
     }
-    ret->running = 1;
-    ret->width = width;
-    ret->height = height;
+    window.width = width;
+    window.height = height;
     if(share)
-        ret->win32_ctx_shr = share->win32_ctx;
+        window.win32_ctx_shr = share->win32_ctx;
 
-    ShowWindow(ret->win32_hwnd, SW_NORMAL);
+    ShowWindow(window.win32_hwnd, SW_NORMAL);
 
     //setup wgl
     PIXELFORMATDESCRIPTOR pfd =
@@ -461,24 +447,24 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         0, 0, 0
     };
 
-    HDC hdc = GetDC(ret->win32_hwnd);
+    HDC hdc = GetDC(window.win32_hwnd);
     int pix = ChoosePixelFormat(hdc, &pfd);
     SetPixelFormat(hdc, pix, &pfd);
     HGLRC dummy = wglCreateContext(hdc);
     if(!dummy)
     {
-        MessageBox(ret->win32_hwnd, "Cannot wglContext", "Error", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(window.win32_hwnd, "Cannot wglContext", "Error", MB_OK | MB_ICONEXCLAMATION);
     }else
     {
         if(!wglMakeCurrent(hdc, dummy))
-            MessageBox(ret->win32_hwnd, "Cannot wglMakeCurrent dummy", "Error", MB_OK | MB_ICONEXCLAMATION);
+            MessageBox(window.win32_hwnd, "Cannot wglMakeCurrent dummy", "Error", MB_OK | MB_ICONEXCLAMATION);
 
         wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) wglGetProcAddress("wglCreateContextAttribsARB");
         wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC) wglGetProcAddress("wglChoosePixelFormatARB");
         if(!wglChoosePixelFormatARB)
-            MessageBox(ret->win32_hwnd, "wglChoosePixelFormatARB NOT found", "Error", MB_OK | MB_ICONEXCLAMATION);
+            MessageBox(window.win32_hwnd, "wglChoosePixelFormatARB NOT found", "Error", MB_OK | MB_ICONEXCLAMATION);
         if(!wglCreateContextAttribsARB)
-            MessageBox(ret->win32_hwnd, "wglCreateContextAttribsARB NOT found", "Error", MB_OK | MB_ICONEXCLAMATION);
+            MessageBox(window.win32_hwnd, "wglCreateContextAttribsARB NOT found", "Error", MB_OK | MB_ICONEXCLAMATION);
     }
 
     if(wglChoosePixelFormatARB)
@@ -500,7 +486,7 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         UINT numFormats;
         if(wglChoosePixelFormatARB(hdc, pix_attrs, NULL, 1, &pixelFormat, &numFormats) == FALSE)
         {
-            MessageBox(ret->win32_hwnd, "wglChoosePixelFormatARB failed", "Error", MB_OK | MB_ICONEXCLAMATION);
+            MessageBox(window.win32_hwnd, "wglChoosePixelFormatARB failed", "Error", MB_OK | MB_ICONEXCLAMATION);
         }
 
         int ctx_attrs[]=
@@ -510,28 +496,24 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
             0
         };
 
-        ret->win32_ctx = wglCreateContextAttribsARB(hdc, ret->win32_ctx_shr, ctx_attrs);
-        if(!ret->win32_ctx)
+        window.win32_ctx = wglCreateContextAttribsARB(hdc, window.win32_ctx_shr, ctx_attrs);
+        if(!window.win32_ctx)
         {
-            MessageBox(ret->win32_hwnd, "wglCreateContextAttribsARB failed", "Error", MB_OK | MB_ICONEXCLAMATION);
+            MessageBox(window.win32_hwnd, "wglCreateContextAttribsARB failed", "Error", MB_OK | MB_ICONEXCLAMATION);
         }else
         {
-            wglMakeCurrent(hdc, ret->win32_ctx);
+            wglMakeCurrent(hdc, window.win32_ctx);
             //get wglEXTS
             wglSwapIntervalEXT = wglGetProcAddress("wglSwapIntervalEXT");
             wglMakeCurrent(hdc, NULL);
         }
     }else
     {
-        ret->win32_ctx = dummy;
+        window.win32_ctx = dummy;
         dengineutils_logging_log("WARNING::Using dummy wglCreateContext Context");
     }
-    ReleaseDC(ret->win32_hwnd, hdc);
-
-    return ret;
+    ReleaseDC(window.win32_hwnd, hdc);
 #elif defined(DENGINE_ANDROID)
-    DengineWindow window;
-    memset(&window, 0, sizeof(DengineWindow));
     window.and_win = dengineutils_android_get_window();
     window.egl_dpy = egl_dpy;
     if(!_dengine_window_egl_createctx(window.egl_dpy, &window.egl_sfc, &window.egl_ctx, NULL, window.and_win))
@@ -539,11 +521,19 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         dengineutils_logging_log("ERROR::WINDOW::Cannot create EGLContext");
         return NULL;
     }
-
+#endif
     DengineWindow* ret = malloc(sizeof(DengineWindow));
     memcpy(ret, &window, sizeof(DengineWindow));
-    return ret;
+    ret->running = 1;
+#ifdef DENGINE_WIN32
+    //set lpParam
+    SetWindowLongPtr(ret->win32_hwnd, GWLP_USERDATA, (LONG_PTR)ret);
 #endif
+
+    Thread input_thr;
+    dengineutils_thread_create(_dengine_window_pollinf, ret, &input_thr);
+
+    return ret;
 }
 
 void dengine_window_destroy(DengineWindow* window)
