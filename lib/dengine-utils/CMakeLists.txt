@@ -36,7 +36,7 @@ include/dengine-utils/macros.h
 include/dengine-utils/dynlib.h
 )
 
-if(ANDROID)
+if(ANDROID_NDK)
     list(APPEND dengine-utils-hdr include/dengine-utils/platform/android.h)
     list(APPEND dengine-utils-src src/platform/android.c )
     #glue
@@ -65,7 +65,7 @@ if(NOT WIN32)
 endif()
 
 #native app glue
-if(ANDROID)
+if(ANDROID_NDK)
     target_include_directories(dengine-utils PUBLIC
             #FOR debugging without Android studio
             #"/home/denzy/Android/Sdk/ndk/23.1.7779620/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include"
@@ -76,7 +76,7 @@ if(ANDROID)
 endif()
 
 #android and logcat
-if(ANDROID)
+if(ANDROID_NDK)
     list(APPEND dengine-utils-link android log)
 endif()
 
