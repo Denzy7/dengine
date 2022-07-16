@@ -26,11 +26,17 @@
 #endif
     #cmakedefine DENGINE_PYTHON_DENGINE_SCRIPT_VER @DENGINE_PYTHON_DENGINE_SCRIPT_VER@
 #elif defined(__ANDROID__)
-    #define DENGINE_ANDROID
-    #define DENGINE_CONTEXT_EGL
+    #cmakedefine DENGINE_ANDROID_TERMUX
+    #ifdef DENGINE_ANDROID_TERMUX
+        #define DENGINE_WIN_X11
+        #define DENGINE_CONTEXT_GLX
+    #else
+        #define DENGINE_ANDROID
+        #define DENGINE_CONTEXT_EGL
+        #define DENGINE_ANDROID_LOG_TAG "Dengine-Android"
+    #endif
     //Android is Linux
     #define DENGINE_LINUX
-    #define DENGINE_ANDROID_LOG_TAG "Dengine-Android"
     #define DENGINE_FONT_DEFAULT "/system/fonts/DroidSansMono.ttf"
 #elif defined(__linux__)
     #define DENGINE_LINUX
