@@ -3,7 +3,7 @@ add_subdirectory(src/testdengine-utils "utils-build")
 add_subdirectory(src/testdengine-nogui "nogui-build")
 
 #executables for desktop
-if(NOT ANDROID)    
+if(NOT ANDROID_NDK)
 add_subdirectory(src/testdengine-camera "camera-build")
 add_subdirectory(src/testdengine-cube "cube-build")
 add_subdirectory(src/testdengine-dengine "dengine-build")
