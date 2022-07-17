@@ -28,10 +28,10 @@
 #elif defined(__ANDROID__)
     #cmakedefine DENGINE_ANDROID_TERMUX
     #ifdef DENGINE_ANDROID_TERMUX
-        #define DENGINE_WIN_X11
+        #define DENGINE_WIN_X11 //termux x11 + glx
         #define DENGINE_CONTEXT_GLX
     #else
-        #define DENGINE_ANDROID
+        #define DENGINE_ANDROID //this means we're using Android ndk. not termux x11
         #define DENGINE_CONTEXT_EGL
         #define DENGINE_ANDROID_LOG_TAG "Dengine-Android"
     #endif
