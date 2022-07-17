@@ -331,18 +331,21 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         return NULL;
     }
 
-    XVisualInfo* vi = glXChooseVisual(x_dpy, 0, conf_vi_attr);
-    if(!vi)
-    {
-        dengineutils_logging_log("ERROR::Cannot choose a valid XVisual");
-        return NULL;
-    }
+//    XVisualInfo* vi = glXChooseVisual(x_dpy, 0, conf_vi_attr);
+//    if(!vi)
+//    {
+//        dengineutils_logging_log("ERROR::Cannot choose a valid XVisual");
+//        return NULL;
+//    }
 
-    window.x_swa.colormap = XCreateColormap(x_dpy, root, vi->visual, AllocNone);
+//    window.x_swa.colormap = XCreateColormap(x_dpy, root, vi->visual, AllocNone);
+//    window.x_win = XCreateWindow(x_dpy, root, 0, 0, width, height, 0,
+//                           vi->depth, InputOutput, vi->visual,
+//                           CWColormap | CWEventMask, &window.x_swa);
+
     window.x_win = XCreateWindow(x_dpy, root, 0, 0, width, height, 0,
-                           vi->depth, InputOutput, vi->visual,
-                           CWColormap | CWEventMask, &window.x_swa);
-
+                           CopyFromParent, InputOutput, CopyFromParent,
+                           CWEventMask, &window.x_swa);
     if(!window.x_win)
     {
         dengineutils_logging_log("ERROR::Cannot XCreateWindow");
@@ -374,7 +377,7 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         return NULL;
     }
 
-    XFree(vi);
+//    XFree(vi);
     XFree(conf);
 #elif defined(DENGINE_CONTEXT_EGL)
     window.x_win = XCreateWindow(x_dpy, root, 0, 0, width, height, 0,
@@ -560,7 +563,7 @@ void dengine_window_destroy(DengineWindow* window)
 {
 #ifdef DENGINE_CONTEXT_GLX
     glXDestroyContext(x_dpy, window->glx_ctx);
-    XFreeColormap(x_dpy, window->x_swa.colormap);
+//    XFreeColormap(x_dpy, window->x_swa.colormap);
 #endif
 
 #ifdef DENGINE_CONTEXT_EGL
