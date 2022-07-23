@@ -37,6 +37,9 @@ Change dir to repo:
 		- Run `./gradlew build` (Linux) or `gradlew.bat build` (Windows)
 		- The following gradle options may speed up build by skipping certain unneeded tasks for Native Activity: `-x lintVitalAnalyzeRelease -x lintAnalyzeDebug -x lintDebug`	
 		- By default, this builds an APK which you can run on any Physical Device or Emulator in app/build/output
+                
+        - Termux X11:
+                - Configure cmake with option -DDENGINE_TERMUX_X11. Builds a regular executable as Desktop
 
 	- To build the executable tests, run regular cmake. Use the toolchain in the NDK  
         `cmake -S . -B build/android -DCMAKE_TOOLCHAIN_FILE='<NDK_DIR>/build/cmake/android.toolchain.cmake' -DANDROID_API=24`
