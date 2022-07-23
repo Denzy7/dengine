@@ -763,17 +763,7 @@ void* _dengine_window_pollinf(void* arg)
     DengineWindow* window = arg;
     while(window->running)
     {
-#ifdef DENGINE_WIN_X11
-        XEvent closeev;
-        XPeekEvent(x_dpy, &closeev);
-        if(closeev.type == ClientMessage)
-        {
-            if(closeev.xclient.data.l[0] == wm_delete)
-            {
-                window->running = 0;
-            }
-        }
-#endif
+
     }
     return NULL;
 }
@@ -789,9 +779,15 @@ int dengine_window_poll(DengineWindow* window)
 
     if(XPending(x_dpy))
     {
-        polled = XCheckWindowEvent(x_dpy, window->x_win,
-                  window->x_swa.event_mask,
-                  &window->ev);
+        //cannot read client messages 😑
+//        polled = XCheckWindowEvent(x_dpy, window->x_win,
+//                  window->x_swa.event_mask,
+//                  &window->ev);
+        polled = XNextEvent(x_dpy, &window->ev);
+        if(window->ev.type == ClientMessage && window->ev.xclient.data.l[0] == wm_delete)
+        {
+            window->running = 0;
+        }
 
         if(window->ev.type == Expose && window->gl_load)
         {
