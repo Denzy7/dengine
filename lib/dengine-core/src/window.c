@@ -89,6 +89,7 @@ struct DengineWindow
     int gl_load;
     DynLib gl_lib;
     WindowInput input;
+    Thread input_thr;
 };
 #define DFT_GL_MAX 2
 #define DFT_GL_MIN 0
@@ -415,7 +416,7 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     if(share)
         window.win32_ctx_shr = share->win32_ctx;
 
-    ShowWindow(window.win32_hwnd, SW_NORMAL);
+    ShowWindow(window.win32_hwnd , SW_NORMAL);
 
     //setup wgl
     PIXELFORMATDESCRIPTOR pfd =
@@ -517,7 +518,6 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         window.win32_ctx = dummy;
         dengineutils_logging_log("WARNING::Using dummy wglCreateContext Context");
     }
-
     ReleaseDC(window.win32_hwnd, hdc);
 #elif defined(DENGINE_ANDROID)
     window.and_win = dengineutils_android_get_window();
@@ -536,9 +536,7 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     SetWindowLongPtr(ret->win32_hwnd, GWLP_USERDATA, (LONG_PTR)ret);
 #endif
 
-    Thread input_thr;
-    dengineutils_thread_create(_dengine_window_pollinf, ret, &input_thr);
-
+    dengineutils_thread_create(_dengine_window_pollinf, ret, &ret->input_thr);
     return ret;
 
 #ifdef DENGINE_WIN32
@@ -572,6 +570,8 @@ void dengine_window_destroy(DengineWindow* window)
 
    if(window->gl_lib)
         dengineutils_dynlib_close(window->gl_lib);
+
+   dengineutils_thread_wait(&window->input_thr);
 
    free(window);
 }
@@ -760,11 +760,11 @@ int dengine_window_set_swapinterval(DengineWindow* window, int interval)
 
 void* _dengine_window_pollinf(void* arg)
 {
-    DengineWindow* window = arg;
-    while(window->running)
-    {
+//    DengineWindow* window = arg;
+//    while(window->running)
+//    {
 
-    }
+//    }
     return NULL;
 }
 
