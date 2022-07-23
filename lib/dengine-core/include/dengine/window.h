@@ -34,7 +34,7 @@ typedef struct
     double mse_x, mse_y;
 }WindowInput;
 
-typedef struct _DengineWindow DengineWindow;
+typedef struct DengineWindow DengineWindow;
 
 #ifdef __cplusplus
 extern "C" {

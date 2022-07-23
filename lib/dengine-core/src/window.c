@@ -58,7 +58,7 @@ void* _dengine_window_pollinf(void* arg);
 #ifdef DENGINE_CONTEXT_EGL
 int _dengine_window_egl_createctx(EGLDisplay dpy, EGLSurface* egl_sfc, EGLContext* egl_ctx, EGLContext share, EGLNativeWindowType win);
 #endif
-struct _DengineWindow
+struct DengineWindow
 {
     ContextType type;
     int running;
@@ -86,7 +86,8 @@ struct _DengineWindow
 #ifdef DENGINE_ANDROID
     ANativeWindow* and_win;
 #endif
-
+    int gl_load;
+    DynLib gl_lib;
     WindowInput input;
 };
 #define DFT_GL_MAX 2
@@ -95,8 +96,6 @@ struct _DengineWindow
 #define DFT_WIN_DEPTH 24
 static int _gl_max = DFT_GL_MAX, _gl_min = DFT_GL_MIN; /*_gl_core = 0 , */
 static int _win_msaa = DFT_WIN_MSAA, _win_depth = DFT_WIN_DEPTH;
-//static int _win_ctx = 0;
-static int _gl_load = 0;
 
 
 #ifdef DENGINE_WIN_X11
@@ -125,15 +124,6 @@ DynLib gl = NULL;
 
 int dengine_window_init()
 {
-    gl = dengineutils_dynlib_open(GL);
-    if(!gl)
-    {
-        dengineutils_logging_log("WARNING::Could not find GL library [%s]. Some missing OpenGL functions may cause a crash", GL);
-    }else
-    {
-        dengineutils_logging_log("INFO::Using GL library: %s", GL);
-    }
-
     int init = 0;
 #ifdef DENGINE_WIN_X11
     XInitThreads();
@@ -219,7 +209,6 @@ int dengine_window_init()
 
 void dengine_window_terminate()
 {
-    dengineutils_dynlib_close(gl);
 #ifdef DENGINE_CONTEXT_GLX
     glXMakeCurrent(x_dpy, None, NULL);
 #endif
@@ -581,7 +570,10 @@ void dengine_window_destroy(DengineWindow* window)
    DestroyWindow(window->win32_hwnd);
 #endif
 
-    free(window);
+   if(window->gl_lib)
+        dengineutils_dynlib_close(window->gl_lib);
+
+   free(window);
 }
 
 void dengine_window_get_dim(DengineWindow* window, int* width, int* height)
@@ -663,10 +655,20 @@ void* dengine_window_get_proc(const char* name)
 
 int dengine_window_loadgl(DengineWindow* window)
 {
+    window->gl_lib = dengineutils_dynlib_open(GL);
+    if(!window->gl_lib)
+    {
+        dengineutils_logging_log("WARNING::Could not find GL library [%s]. Some missing OpenGL functions may cause a crash", GL);
+        return 0;
+    }else
+    {
+        dengineutils_logging_log("INFO::Using GL library: %s", GL);
+    }
+    gl = window->gl_lib;
 #ifdef DENGINE_ANDROID
-    _gl_load = gladLoadGLES2Loader((GLADloadproc)eglGetProcAddress);
+    window->gl_load = gladLoadGLES2Loader((GLADloadproc)eglGetProcAddress);
 #else
-    _gl_load = gladLoadGLLoader((GLADloadproc)dengine_window_get_proc);
+    window->gl_load = gladLoadGLLoader((GLADloadproc)dengine_window_get_proc);
 #endif
 
     //one for all
@@ -685,7 +687,7 @@ int dengine_window_loadgl(DengineWindow* window)
 //    _gl_load = gladLoadGLLoader((GLADloadproc)dengine_window_get_proc);
 //#endif
 
-    return _gl_load;
+    return window->gl_load ;
 }
 
 int dengine_window_makecurrent(DengineWindow* window)
@@ -791,7 +793,7 @@ int dengine_window_poll(DengineWindow* window)
                   window->x_swa.event_mask,
                   &window->ev);
 
-        if(window->ev.type == Expose && _gl_load)
+        if(window->ev.type == Expose && window->gl_load)
         {
             int w,h;
             dengine_window_get_dim(window, &w, &h);
@@ -1030,7 +1032,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_SIZE:{
         int width = LOWORD(lParam);
         int height = HIWORD(lParam);
-        if(_gl_load)
+        if(window->gl_load)
             dengine_viewport_set(0, 0, width, height);
         return 0;
     }
