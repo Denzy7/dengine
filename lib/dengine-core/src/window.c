@@ -1028,7 +1028,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_SIZE:{
         int width = LOWORD(lParam);
         int height = HIWORD(lParam);
-        if(window->gl_load)
+        if(window && window->gl_load)
             dengine_viewport_set(0, 0, width, height);
         return 0;
     }
