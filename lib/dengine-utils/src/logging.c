@@ -116,12 +116,10 @@ int msgboxerr = 0;
 int dengineutils_logging_init()
 {
     Thread logthr;
-    if(dengineutils_thread_create(_dengineutils_logging_logthr, NULL, &logthr))
-        logthrstarted = 1;
-
+    dengineutils_thread_create(_dengineutils_logging_logthr, NULL, &logthr);
     vtor_create(&logcallbacks, sizeof(LoggingCallbackVtor));
 
-    // android stdout stderr callback
+    // android stdout callback
 #ifdef DENGINE_ANDROID
     dengineutils_logging_addcallback(_dengineutils_logging_androidcb);
 #endif
@@ -131,6 +129,7 @@ int dengineutils_logging_init()
 
 void dengineutils_logging_terminate()
 {
+    logthrstarted = 0;
     vtor_free(&logcallbacks);
 }
 
@@ -215,6 +214,9 @@ void dengineutils_logging_log(const char* message, ...)
     if(pair != NULL)
         dengineutils_logging_set_consolecolor(DENGINE_LOGGING_COLOR_RESET);
     printf("\n");
+
+    fflush(stdout);
+
     if(iserr && msgboxerr)
         dengineutils_os_dialog_messagebox("Critical Error!", LOG_BUFFER + strlen(delim), 1);
 #endif
@@ -232,39 +234,46 @@ int dengineutils_logging_get_msgboxerror()
 
 void* _dengineutils_logging_logthr(void* arg)
 {
-#ifdef DENGINE_LINUX
-    ssize_t sz;
-    //read pipe here with a trip buffer
-    char trip[BUFSIZ];
-
-    dengineutils_logging_log("WARNING::Log thread about to start. stdout and stderr will be redirected to callbacks");
-
-    setvbuf(stdout, NULL, _IOLBF, 0); // make stdout line-buffered
-    setvbuf(stderr, NULL, _IONBF, 0); // make stderr unbuffered
-
-    //pipe and dup2 stdout and stderr
-    pipe(logfd);
-    dup2(logfd[1], STDOUT_FILENO);
-    dup2(logfd[1], STDERR_FILENO);
-
-    while((sz = read(logfd[0], trip, sizeof trip - 1)) > 0)
+    if(logthrstarted != 0)
     {
-        if(trip[sz - 1] == '\n') {
-            --sz;
-        }
-        trip[sz] = 0;  // add null-terminator
-        //call callbacks
-        LoggingCallbackVtor* cbs = logcallbacks.data;
-        for(size_t i = 0; i < logcallbacks.count; i++)
+        dengineutils_logging_log("ERROR::log thread already started!");
+        return NULL;
+    }
+
+    dengineutils_logging_log("WARNING::Log thread about start. stdout will be redirected to callback. \n"
+                             "fprintf(stderr, \"...<format>...\",...); is still usable (stderr)");
+
+    const char* files = dengineutils_filesys_get_filesdir_dengine();
+    char newstdoutname[2048];
+    snprintf(newstdoutname, sizeof(newstdoutname), "%s/%s", files, "stdout.log");
+    FILE* redir_stdout = freopen(newstdoutname, "w", stdout);
+    if(redir_stdout == NULL)
+    {
+        dengineutils_logging_log("ERROR::Failed to redirect stdout");
+        return NULL;
+    }
+    off_t off_current = 0, off_last = 0;
+
+    logthrstarted = 1;
+
+    while(logthrstarted)
+    {
+        off_current = ftello(redir_stdout);
+        if(off_current != off_last)
         {
-            if(cbs)
+            off_last = off_current;
+            LoggingCallbackVtor* cbs = logcallbacks.data;
+            for(size_t i = 0; i < logcallbacks.count; i++)
             {
-                LoggingCallback cb = cbs[i].cb;
-                cb(LOG_BUFFER, trip);
+                if(cbs)
+                {
+                    LoggingCallback cb = cbs[i].cb;
+                    cb(LOG_BUFFER, NULL);
+                }
             }
         }
     }
-#endif
+
     return NULL;
 }
 
