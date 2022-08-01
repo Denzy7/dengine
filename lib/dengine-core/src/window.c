@@ -95,7 +95,7 @@ struct DengineWindow
 #define DFT_GL_MIN 0
 #define DFT_WIN_MSAA 0
 #define DFT_WIN_DEPTH 24
-static int _gl_max = DFT_GL_MAX, _gl_min = DFT_GL_MIN; /*_gl_core = 0 , */
+static int _gl_max = DFT_GL_MAX, _gl_min = DFT_GL_MIN, _gl_core = 0;
 static int _win_msaa = DFT_WIN_MSAA, _win_depth = DFT_WIN_DEPTH;
 
 
@@ -278,6 +278,7 @@ void dengine_window_request_GL(int gl_major, int gl_minor, int gl_core)
 {
     _gl_max = gl_major;
     _gl_min = gl_minor;
+    _gl_core = gl_core;
 }
 
 void dengine_window_request_MSAA(int samples)
@@ -291,13 +292,14 @@ void dengine_window_request_defaultall()
     _gl_min = DFT_GL_MIN;
     _win_msaa = DFT_WIN_MSAA;
     _win_depth = DFT_WIN_DEPTH;
+    _gl_core = 0;
 }
 
 DengineWindow* dengine_window_create(int width, int height, const char* title, const DengineWindow* share)
 {
     DengineWindow window;
     memset(&window, 0, sizeof (DengineWindow));
-
+    uint32_t prof = 0;
 #ifdef DENGINE_WIN_X11
     Window root = DefaultRootWindow(x_dpy);
     window.x_swa.event_mask =
@@ -348,10 +350,14 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         return NULL;
     }
 
+    prof = GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
+    if(_gl_core)
+        prof = GLX_CONTEXT_CORE_PROFILE_BIT_ARB;
     int ctxattr[]=
     {
         GLX_CONTEXT_MAJOR_VERSION_ARB, _gl_max,
         GLX_CONTEXT_MINOR_VERSION_ARB, _gl_min,
+        GLX_CONTEXT_PROFILE_MASK_ARB, prof,
         None
     };
 
@@ -492,10 +498,14 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
             goto RelDCRetNULL;
         }
 
+        prof = WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
+        if(_gl_core)
+            prof = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
         int ctx_attrs[]=
         {
             WGL_CONTEXT_MAJOR_VERSION_ARB, _gl_max,
             WGL_CONTEXT_MINOR_VERSION_ARB, _gl_min,
+            WGL_CONTEXT_PROFILE_MASK_ARB, prof,
             0
         };
 
