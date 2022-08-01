@@ -250,6 +250,8 @@ DENGINE_INLINE int dengine_init()
              return 0;
          }
 #endif
+         dengine_window_set_swapinterval(DENGINE_INIT_OPTS.window,
+                                         DENGINE_INIT_OPTS.window_swapinterval);
 
     }
 
@@ -271,9 +273,6 @@ DENGINE_INLINE int dengine_init()
             return 0;
         }
     }
-
-    dengine_window_set_swapinterval(DENGINE_INIT_OPTS.window,
-                                    DENGINE_INIT_OPTS.window_swapinterval);
 
     //caching
     dengine_texture_set_texturecache(DENGINE_INIT_OPTS.cache_textures);
