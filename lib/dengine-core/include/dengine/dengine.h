@@ -46,6 +46,7 @@ typedef struct
     const char* window_title;
     int window_msaa;
     int window_createnative;
+    int window_swapinterval;
 
     int gl_max;
     int gl_min;
@@ -92,6 +93,7 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
     DENGINE_INIT_OPTS.window_title = "Dengine!";
     DENGINE_INIT_OPTS.window_msaa = 4;
     DENGINE_INIT_OPTS.window_createnative = 1;
+    DENGINE_INIT_OPTS.window_swapinterval = 1;
 
     DENGINE_INIT_OPTS.font_size = 18.0f;
     DENGINE_INIT_OPTS.font_bitmapsize = 512;
@@ -269,6 +271,9 @@ DENGINE_INLINE int dengine_init()
             return 0;
         }
     }
+
+    dengine_window_set_swapinterval(DENGINE_INIT_OPTS.window,
+                                    DENGINE_INIT_OPTS.window_swapinterval);
 
     //caching
     dengine_texture_set_texturecache(DENGINE_INIT_OPTS.cache_textures);
