@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     Script simple;
     denginescript_nsl_get_script("simple", &simple, pa);
 
-    if(denginescript_call(&simple, DENGINE_SCRIPT_FUNC_START, NULL) != 0)
+    if(denginescript_call(&simple, DENGINE_SCRIPT_FUNC_START, argv[1]) != 0)
     {
         dengineutils_logging_log("ERROR::Cannot init pulseaudio simple script");
         return 1;

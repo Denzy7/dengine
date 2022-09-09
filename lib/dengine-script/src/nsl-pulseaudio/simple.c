@@ -16,6 +16,8 @@ extern unsigned char nocturne_chopin_ogg[];
 
 Texture progress, progress_bg;
 
+char now[512];
+
 int simple_start(void* args)
 {
     //pulse
@@ -23,8 +25,48 @@ int simple_start(void* args)
 
 
     dengineutils_logging_log("INFO::decoding audio...");
-    samples_total = stb_vorbis_decode_memory(nocturne_chopin_ogg, nocturne_chopin_ogg_ln,
+
+    uint8_t* mem = NULL;
+    int mem_sz = 0;
+    int custom = 0;
+    Stream* f = NULL;
+
+    const char* playing = "Now playing: ";
+
+    if(args)
+    {
+        f = dengineutils_stream_new(args,
+                                    DENGINEUTILS_STREAM_TYPE_FILE,
+                                    DENGINEUTILS_STREAM_MODE_READ);
+        if(f == NULL)
+        {
+            dengineutils_logging_log("cannot open : %s", args);
+            return 1;
+        }
+        mem_sz = f->size;
+        mem = malloc(mem_sz);
+        dengineutils_stream_read(mem, 1, f->size, f);
+        custom = 1;
+        snprintf(now, sizeof(now), "%s %s",
+                 playing,
+                 (char*)args);
+    }else
+    {
+        mem = nocturne_chopin_ogg;
+        mem_sz = nocturne_chopin_ogg_ln;
+        snprintf(now, sizeof(now), "%s %s",
+                 playing,
+                 "Nocturne - Chopin (play custom .ogg using argv[1]!)");
+    }
+
+    samples_total = stb_vorbis_decode_memory(mem, mem_sz,
                                  &channels, &rate, &data);
+
+    if(custom)
+    {
+        free(mem);
+        dengineutils_stream_destroy(f);
+    }
 
     if(samples_total < 0)
     {
@@ -70,7 +112,7 @@ int simple_update(void* args)
     t2 =  samples_total / rate;
 
     int sample_sz = sizeof(short) * channels * rate;
-    if(t1 < t2)
+    if(t1 <= t2)
     {
         //write 1 second sample
         pa_simple_write(server, data + (channels * rate * samples_read), sample_sz, &err);
@@ -109,7 +151,8 @@ int simple_update(void* args)
                      ((float)wid * ((float)t1 / (float)t2)) - (2 * progress_offset),
                      fontsz - (2 * progress_offset),
                      &progress, NULL, GLM_VEC4_BLACK);
-    denginegui_text(fontsz, (fontsz * 3) + (2 * progress_offset) , "Now playing: Nocturne - Chopin", NULL);
+    denginegui_text(fontsz, (fontsz * 3) + (2 * progress_offset) ,
+                    now, NULL);
 
     return 0;
 }
