@@ -55,6 +55,39 @@ if(DENGINE_HAS_BULLET)
     target_link_libraries(nsl-bulletphysics ${dengine} ${bullet_LIBRARIES})
 endif()
 
+if(DENGINE_HAS_LIBPULSE_SIMPLE)
+    set(nsl-pulseaudio-ogg
+        src/nsl-pulseaudio/nocturne-chopin.ogg)
+
+    # output after compile
+    set(outres)
+
+    # compile
+    foreach(res ${nsl-pulseaudio-ogg})
+    # inres and outres should be absolute paths for fair measure
+        set(inresname ${CMAKE_CURRENT_SOURCE_DIR}/${res})
+        get_filename_component(barename ${res} NAME)
+        set(outresname ${CMAKE_CURRENT_BINARY_DIR}/${barename}-res.c)
+        add_custom_command(
+            OUTPUT ${outresname}
+            COMMAND dengine-rc ${inresname} ${outresname}
+            DEPENDS ${inresname}
+            VERBATIM
+        )
+    # append
+        list(APPEND outres ${outresname})
+    endforeach()
+
+    add_library(nsl-pulseaudio src/nsl-pulseaudio/simple.c ${outres})
+
+    set_target_properties(nsl-pulseaudio PROPERTIES
+        PREFIX ""
+        SUFFIX ".nsl"
+        LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests-build/bin"
+    )
+    target_link_libraries(nsl-pulseaudio ${dengine} ${libpulse_simple_LIBRARIES})
+endif()
+
 add_library(nsl-test SHARED
     src/nsl-test/printmouse.c
     src/nsl-test/constantrotation.c
