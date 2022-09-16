@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
     {
         dengine_update();
     }
+    denginescript_call(&simple, DENGINE_SCRIPT_FUNC_TERMINATE, NULL);
     dengine_terminate();
 
     return 0;
