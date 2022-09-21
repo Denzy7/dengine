@@ -7,6 +7,7 @@
 #include "dengine-utils/dynlib.h" //getsym
 #include "dengine-utils/thread.h"
 #include "dengine-utils/macros.h" //ARY_SZ
+#include "dengine-utils/timer.h"
 
 #include <stdio.h>  //printf
 #include <stdlib.h> //malloc
@@ -89,8 +90,17 @@ struct DengineWindow
     int gl_load;
     DynLib gl_lib;
     WindowInput input;
-    Thread input_thr;
 };
+
+typedef struct
+{
+    int width;
+    int height;
+    const char* title;
+    const DengineWindow* share;
+    DengineWindow* ret;
+}CreateWindowAttrs;
+
 #define DFT_GL_MAX 2
 #define DFT_GL_MIN 0
 #define DFT_WIN_MSAA 0
@@ -295,8 +305,14 @@ void dengine_window_request_defaultall()
     _gl_core = 0;
 }
 
-DengineWindow* dengine_window_create(int width, int height, const char* title, const DengineWindow* share)
+void* _dengine_window_createandpoll(void* args)
 {
+    CreateWindowAttrs* attrs = args;
+    int width = attrs->width;
+    int height = attrs->height;
+    const char* title = attrs->title;
+    const DengineWindow* share = attrs->share;
+
     DengineWindow window;
     memset(&window, 0, sizeof (DengineWindow));
     uint32_t prof = 0;
@@ -538,7 +554,7 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
         return NULL;
     }
 #endif
-    DengineWindow* ret = malloc(sizeof(DengineWindow));
+    DengineWindow* ret = calloc(1, sizeof(DengineWindow));
     memcpy(ret, &window, sizeof(DengineWindow));
     ret->running = 1;
 #ifdef DENGINE_WIN32
@@ -546,14 +562,44 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     SetWindowLongPtr(ret->win32_hwnd, GWLP_USERDATA, (LONG_PTR)ret);
 #endif
 
-    dengineutils_thread_create(_dengine_window_pollinf, ret, &ret->input_thr);
-    return ret;
+    attrs->ret = ret;
+    while (ret->running) {
+        _dengine_window_pollinf(ret);
+    }
+    return NULL;
 
 #ifdef DENGINE_WIN32
     RelDCRetNULL:
         ReleaseDC(window.win32_hwnd, hdc);
         return NULL;
 #endif
+}
+
+DengineWindow* dengine_window_create(int width, int height, const char* title, const DengineWindow* share)
+{
+    CreateWindowAttrs attrs;
+    memset(&attrs, 0, sizeof(CreateWindowAttrs));
+
+    attrs.width = width;
+    attrs.height = height;
+    attrs.title = title;
+    attrs.share = share;
+
+    Thread windowthr;
+    dengineutils_thread_create(_dengine_window_createandpoll, &attrs, &windowthr);
+
+    /* timeout WORKS for now since win32 dont want empty while loop */
+    double t = 0;
+    while (attrs.ret == NULL) {
+        t += dengineutils_timer_get_delta();
+        if(t >= DENGINE_WINDOW_CREATE_TIMEOUT)
+        {
+            dengineutils_logging_log("WARNING::Timed out waiting for window creation!");
+            break;
+        }
+    }
+
+    return attrs.ret;
 }
 
 void dengine_window_destroy(DengineWindow* window)
@@ -580,8 +626,6 @@ void dengine_window_destroy(DengineWindow* window)
 
    if(window->gl_lib)
         dengineutils_dynlib_close(window->gl_lib);
-
-   dengineutils_thread_wait(&window->input_thr);
 
    free(window);
 }
@@ -770,18 +814,8 @@ int dengine_window_set_swapinterval(DengineWindow* window, int interval)
 
 void* _dengine_window_pollinf(void* arg)
 {
-//    DengineWindow* window = arg;
-//    while(window->running)
-//    {
-
-//    }
-    return NULL;
-}
-
-int dengine_window_poll(DengineWindow* window)
-{
-    int polled = 0;
-#ifdef DENGINE_WIN_X11
+    DengineWindow* window = arg;
+    #ifdef DENGINE_WIN_X11
     int h;
     dengine_window_get_dim(window, NULL, &h);
     char key;
@@ -793,7 +827,7 @@ int dengine_window_poll(DengineWindow* window)
 //        polled = XCheckWindowEvent(x_dpy, window->x_win,
 //                  window->x_swa.event_mask,
 //                  &window->ev);
-        polled = XNextEvent(x_dpy, &window->ev);
+        XNextEvent(x_dpy, &window->ev);
         if(window->ev.type == ClientMessage && window->ev.xclient.data.l[0] == wm_delete)
         {
             window->running = 0;
@@ -867,12 +901,11 @@ int dengine_window_poll(DengineWindow* window)
             window->input.mse_y = h - y;
         }
     }
-
-#elif defined(DENGINE_WIN32)
-    PeekMessageW(&window->win32_msg, window->win32_hwnd, 0, 0, PM_REMOVE);
+    #elif defined(DENGINE_WIN32)
+    GetMessageW(&window->win32_msg, window->win32_hwnd, 0, 0);
     TranslateMessage(&window->win32_msg);
-    polled = DispatchMessageW(&window->win32_msg);
-#elif defined(DENGINE_ANDROID)
+    DispatchMessageW(&window->win32_msg);
+    #elif defined(DENGINE_ANDROID)
     dengineutils_android_pollevents();
     if(window && dengineutils_android_iswindowrunning())
     {
@@ -893,7 +926,13 @@ int dengine_window_poll(DengineWindow* window)
             window->input.mse_y = 0.0;
         }
     }
-#endif
+    #endif
+    return NULL;
+}
+
+int dengine_window_poll(DengineWindow* window)
+{
+    int polled = 0;
 
 #ifdef DENGINE_HAS_GTK3
    gtk_main_iteration_do(0);
@@ -1036,6 +1075,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     switch (uMsg) {
 
     case WM_SIZE:{
+//        dengineutils_logging_log("WM_SIZE : %u", uMsg);
         int width = LOWORD(lParam);
         int height = HIWORD(lParam);
         if(window && window->gl_load)
@@ -1044,6 +1084,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     }
 
     case WM_PAINT:{
+//        dengineutils_logging_log("WM_PAINT : %u", uMsg);
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hwnd, &ps);
         FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
@@ -1053,6 +1094,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_CLOSE:
     {
+//        dengineutils_logging_log("WM_CLOSE : %u", uMsg);
 //        if(MessageBoxW(hwnd, L"Do you want to quit?", L"Dengine", MB_OKCANCEL) == IDOK)
 //        {
             window->running = 0;
