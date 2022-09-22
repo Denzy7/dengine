@@ -1,5 +1,6 @@
 #include <pulse/simple.h>
 
+#include <time.h>
 #include <dengine/dengine.h>
 #include <stb_vorbis.c>
 
