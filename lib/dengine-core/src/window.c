@@ -906,7 +906,6 @@ void* _dengine_window_pollinf(void* arg)
     TranslateMessage(&window->win32_msg);
     DispatchMessageW(&window->win32_msg);
     #elif defined(DENGINE_ANDROID)
-    dengineutils_android_pollevents();
     if(window && dengineutils_android_iswindowrunning())
     {
         int h;
@@ -933,6 +932,10 @@ void* _dengine_window_pollinf(void* arg)
 int dengine_window_poll(DengineWindow* window)
 {
     int polled = 0;
+
+#ifdef DENGINE_ANDROID
+    dengineutils_android_pollevents();
+#endif
 
 #ifdef DENGINE_HAS_GTK3
    gtk_main_iteration_do(0);
