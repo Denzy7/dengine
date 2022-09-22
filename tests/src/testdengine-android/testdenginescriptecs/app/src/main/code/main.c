@@ -14,6 +14,8 @@ typedef struct
     char prtbf[2048];
 }dt_script;
 
+static float* ptr_float[3];
+
 static dt_script ds;
 
 static void init(struct android_app* app)
@@ -240,6 +242,7 @@ static void init(struct android_app* app)
 
         p[0]=4.0f,p[1]=2.0f,p[2]=1.0f;
         memcpy(ent3->transform.position,p,sizeof (vec3));
+        ptr_float[0] = &ent3->transform.position[2];
 
         p[0]=10.0f,p[1]=10.0f,p[2]=10.0f;
         memcpy(ent14->transform.scale,p,sizeof (vec3));
@@ -351,14 +354,14 @@ static void draw()
     float fontsz = denginegui_get_fontsz();
     float offset = fontsz / 4;
 
-    if (denginegui_button(offset, (float)h - 11 * fontsz, wid, 2 * fontsz, "FWD", NULL))
+    if (denginegui_button(offset, (float)h - 11 * fontsz, wid, 2 * fontsz, "Z+", NULL))
     {
-        //ptr[2] -=.01f * delta;
+        *ptr_float[0] -=.01f * delta;
     }
 
-    if (denginegui_button(offset + wid, (float)h - 11 * fontsz, wid, 2 * fontsz, "BAK", NULL))
+    if (denginegui_button(offset + wid, (float)h - 11 * fontsz, wid, 2 * fontsz, "Z-", NULL))
     {
-        //ptr[2] +=.01f * delta;
+        *ptr_float[0] +=.01f * delta;
     }
 
 
