@@ -16,7 +16,7 @@ int iswindowrunning = 0;
 AndroidInput input;
 
 void _dengineutils_android_terminate(struct android_app* app);
-
+int dengineutils_android_set_immersivemode();
 int dengineutils_android_asset2file2mem(File2Mem* f2m)
 {
     AAssetManager* asset_mgr = _app->activity->assetManager;
@@ -85,6 +85,7 @@ static void cmd_handle(struct android_app* app, int32_t cmd)
             ANativeWindow_acquire(_app->window);
             if(initfunc)
                 initfunc(app);
+
             //Buggy fullscreen
             //ANativeActivity_setWindowFlags(app->activity, AWINDOW_FLAG_FULLSCREEN, 0);
             break;
@@ -135,6 +136,7 @@ void dengineutils_android_set_app(struct android_app* app)
     _app = app;
     _app->onAppCmd = cmd_handle;
     _app->onInputEvent = input_event;
+    dengineutils_android_set_immersivemode();
 }
 
 void dengineutils_android_set_filesdir()
@@ -223,4 +225,77 @@ int dengineutils_android_iswindowrunning()
 AndroidInput* dengineutils_android_get_input()
 {
     return &input;
+}
+
+int dengineutils_android_set_immersivemode(){
+    int success = 1;
+    JNIEnv* env;
+    JavaVM* vm = _app->activity->vm;
+    jint attached = (*vm)->AttachCurrentThread(vm, &env, NULL);
+    if(attached < 0)
+    {
+        dengineutils_logging_log("ERROR::FAILED TO ATTACH VM");
+        return 0;
+    }
+
+    jclass activityClass = (*env)->FindClass(env, "android/app/NativeActivity");
+    jclass windowClass = (*env)->FindClass(env, "android/view/Window");
+    jclass viewClass = (*env)->FindClass(env, "android/view/View");
+    jmethodID getWindow = (*env)->GetMethodID(env, activityClass, "getWindow", "()Landroid/view/Window;");
+    jmethodID getDecorView = (*env)->GetMethodID(env, windowClass, "getDecorView", "()Landroid/view/View;");
+    jmethodID setSystemUiVisibility = (*env)->GetMethodID(env, viewClass, "setSystemUiVisibility", "(I)V");
+
+    jobject windowObj = (*env)->CallObjectMethod(env, _app->activity->clazz, getWindow);
+    jobject decorViewObj = (*env)->CallObjectMethod(env, windowObj, getDecorView);
+
+    // Get flag ids
+    jfieldID id_SYSTEM_UI_FLAG_LAYOUT_STABLE = (*env)->GetStaticFieldID(env, viewClass, "SYSTEM_UI_FLAG_LAYOUT_STABLE", "I");
+    jfieldID id_SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = (*env)->GetStaticFieldID(env, viewClass, "SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION", "I");
+    jfieldID id_SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = (*env)->GetStaticFieldID(env, viewClass, "SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN", "I");
+    jfieldID id_SYSTEM_UI_FLAG_HIDE_NAVIGATION = (*env)->GetStaticFieldID(env, viewClass, "SYSTEM_UI_FLAG_HIDE_NAVIGATION", "I");
+    jfieldID id_SYSTEM_UI_FLAG_FULLSCREEN = (*env)->GetStaticFieldID(env, viewClass, "SYSTEM_UI_FLAG_FULLSCREEN", "I");
+    jfieldID id_SYSTEM_UI_FLAG_IMMERSIVE_STICKY = (*env)->GetStaticFieldID(env, viewClass, "SYSTEM_UI_FLAG_IMMERSIVE_STICKY", "I");
+
+    // Get flags
+    const int flag_SYSTEM_UI_FLAG_LAYOUT_STABLE = (*env)->GetStaticIntField(env, viewClass, id_SYSTEM_UI_FLAG_LAYOUT_STABLE);
+    const int flag_SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = (*env)->GetStaticIntField(env, viewClass, id_SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+    const int flag_SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = (*env)->GetStaticIntField(env, viewClass, id_SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    const int flag_SYSTEM_UI_FLAG_HIDE_NAVIGATION = (*env)->GetStaticIntField(env, viewClass, id_SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+    const int flag_SYSTEM_UI_FLAG_FULLSCREEN = (*env)->GetStaticIntField(env, viewClass, id_SYSTEM_UI_FLAG_FULLSCREEN);
+    const int flag_SYSTEM_UI_FLAG_IMMERSIVE_STICKY = (*env)->GetStaticIntField(env, viewClass, id_SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
+    const int flag =
+        flag_SYSTEM_UI_FLAG_LAYOUT_STABLE |
+        flag_SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+        flag_SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+        flag_SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+        flag_SYSTEM_UI_FLAG_FULLSCREEN |
+        flag_SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+    (*env)->CallVoidMethod(env, decorViewObj, setSystemUiVisibility, flag);
+    if((*env)->ExceptionOccurred(env))
+    {
+        (*env)->ExceptionDescribe(env);
+        jthrowable e = (*env)->ExceptionOccurred(env);
+        (*env)->ExceptionClear(env); // clears the exception; e seems to remain valid
+        jclass clazz = (*env)->GetObjectClass(env, e);
+        jmethodID getMessage = (*env)->GetMethodID(env, clazz, "getMessage", "()Ljava/lang/String;");
+        jstring message = (jstring)(*env)->CallObjectMethod(env, e, getMessage);
+        const char *mstr = (*env)->GetStringUTFChars(env, message, NULL);
+        (*env)->ReleaseStringUTFChars(env, message, mstr);
+        (*env)->DeleteLocalRef(env, message);
+        (*env)->DeleteLocalRef(env, clazz);
+        (*env)->DeleteLocalRef(env, e);
+        dengineutils_logging_log("set_immersive exception [%s]", mstr);
+        success = 0;
+    }else
+    {
+        dengineutils_logging_log("set_immersive success");
+    }
+
+    (*env)->DeleteLocalRef(env, windowObj);
+    (*env)->DeleteLocalRef(env, decorViewObj);
+
+    (*vm)->DetachCurrentThread(vm);
+
+    return success;
 }
