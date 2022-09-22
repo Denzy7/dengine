@@ -58,10 +58,18 @@ static int32_t input_event(struct android_app* app, AInputEvent* event)
     switch (type) {
         case AINPUT_EVENT_TYPE_MOTION:
         {
-            input.pointer0.state = 0;
+            uint32_t action = AMotionEvent_getAction(event);
+
+            if(action ==  AMOTION_EVENT_ACTION_UP)
+            {
+                input.pointer0.state = 1;
+            }else
+            {
+                input.pointer0.state = 0;
+            }
+
             input.pointer0.x = AMotionEvent_getX(event, 0);
             input.pointer0.y = AMotionEvent_getY(event, 0);
-
             break;
         }
 

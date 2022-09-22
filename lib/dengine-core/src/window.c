@@ -915,7 +915,6 @@ void* _dengine_window_pollinf(void* arg)
         {
             window->input.mse_x = andr_input->pointer0.x;
             window->input.mse_y = (float)h - andr_input->pointer0.y;
-            andr_input->pointer0.state = -1;
             if(window->input.msebtn[0] != -1)
                 window->input.msebtn[0] = 1;
         }else
