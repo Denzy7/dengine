@@ -4,7 +4,8 @@
 #include <dengine/loadgl.h>
 
 #include <dengine/input.h>
-//int padhint;
+
+int padhint;
 int main()
 {
     if(!dengine_window_init())
@@ -42,12 +43,12 @@ int main()
 
     while(dengine_window_isrunning(window))
     {
-//        if(dengine_input_gamepad_get_isconnected(0) && !padhint)
-//        {
-//            printf("connected : %s\n", dengine_input_gamepad_get_name(0));
-//            printf("hold left trigger and right trigger to print their values and control vibration\n");
-//            padhint = 1;
-//        }
+        if(dengine_input_gamepad_get_isconnected(DENGINE_INPUT_PAD0) && !padhint)
+        {
+            printf("connected : %s\n", dengine_input_gamepad_get_name(DENGINE_INPUT_PAD0));
+            printf("hold left trigger and right trigger to print their values and control vibration\n");
+            padhint = 1;
+        }
 
         //most important function
         dengine_window_poll(window);
@@ -75,30 +76,33 @@ int main()
         if(scrolly)
             printf("scrolling y %f\n", scrolly);
 
-        if(dengine_input_get_mousebtn(0))
+        if(dengine_input_get_mousebtn(DENGINE_INPUT_MSEBTN_PRIMARY))
             printf("pressing lmb\n");
 
-        if(dengine_input_get_mousebtn_once(1))
+        if(dengine_input_get_mousebtn_once(DENGINE_INPUT_MSEBTN_SECONDARY))
             printf("pressing rmb once\n");
 
-//        if(dengine_input_gamepad_get_isconnected(0))
-//        {
-//            if(dengine_input_gamepad_get_btn(0, 0))
-//            {
-//                printf("pressing btn 0 (A)\n");
-//            }
+        if(dengine_input_gamepad_get_isconnected(DENGINE_INPUT_PAD0))
+        {
+            if(dengine_input_gamepad_get_btn(DENGINE_INPUT_PAD0, DENGINE_INPUT_PAD_BUTTON_A))
+            {
+                printf("pressing gamepad btn (A)\n");
+            }
 
-//            //4 = lt, 5 = rt
-//            float lt = dengine_input_gamepad_get_axis(0, 4);
-//            float rt = dengine_input_gamepad_get_axis(0, 5);
-//            if(lt > 0.0f || rt > 0.0f)
-//            {
-//                printf("LT : %f, RT : %f\n", lt, rt);
-//                dengine_input_gamepad_vibration_set_basic(0, lt, rt);
-//            }else{
-//                dengine_input_gamepad_vibration_set_basic(0, 0.0f, 0.0f);
-//            }
-//        }
+            if(dengine_input_gamepad_get_btn_once(DENGINE_INPUT_PAD0, DENGINE_INPUT_PAD_BUTTON_B))
+                printf("pressing B once\n");
+
+            //4 = lt, 5 = rt
+            float lt = dengine_input_gamepad_get_axis(DENGINE_INPUT_PAD0, DENGINE_INPUT_PAD_AXIS_LT);
+            float rt = dengine_input_gamepad_get_axis(DENGINE_INPUT_PAD0, DENGINE_INPUT_PAD_AXIS_RT);
+            if(lt > 0.0f || rt > 0.0f)
+            {
+                printf("LT : %f, RT : %f\n", lt, rt);
+                dengine_input_gamepad_vibration_set_basic(DENGINE_INPUT_PAD0, lt, rt);
+            }else{
+                dengine_input_gamepad_vibration_set_basic(DENGINE_INPUT_PAD0, 0.0f, 0.0f);
+            }
+        }
     }
 
     dengine_window_terminate();

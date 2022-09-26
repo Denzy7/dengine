@@ -27,7 +27,7 @@ typedef enum
     DENGINE_INPUT_PAD2,
     DENGINE_INPUT_PAD3,
 
-    /* INTERNAL. DO NOT USE */
+    /* INTERNAL */
     DENGINE_INPUT_PAD_COUNT,
 }GamepadID;
 
@@ -48,7 +48,7 @@ typedef enum
     DENGINE_INPUT_PAD_BUTTON_X,
     DENGINE_INPUT_PAD_BUTTON_Y,
 
-    /* INTERNAL. DO NOT USE */
+    /* INTERNAL */
     DENGINE_INPUT_PAD_BUTTON_COUNT,
 }GamepadButton;
 
@@ -61,7 +61,7 @@ typedef enum
     DENGINE_INPUT_PAD_AXIS_RX,
     DENGINE_INPUT_PAD_AXIS_RY,
 
-    /* INTERNAL. DO NOT USE */
+    /* INTERNAL */
     DENGINE_INPUT_PAD_AXIS_COUNT
 }GamepadAxis;
 
@@ -85,21 +85,19 @@ double dengine_input_get_mousepos_y();
 
 /* GAMEPAD. WORK IN PROGRESS... */
 
-//int dengine_input_gamepad_poll();
+char* dengine_input_gamepad_get_name(GamepadID pad);
 
-//const char* dengine_input_gamepad_get_name(GamepadID pad);
+int dengine_input_gamepad_get_isconnected(GamepadID pad);
 
-//int dengine_input_gamepad_get_isconnected(GamepadID pad);
+int dengine_input_gamepad_get_btn(GamepadID pad, GamepadButton btn);
 
-//int dengine_input_gamepad_get_btn(GamepadID pad, GamepadButton btn);
+int dengine_input_gamepad_get_btn_once(GamepadID pad, GamepadButton btn);
 
-//int dengine_input_gamepad_get_btn_once(GamepadID pad, GamepadButton btn);
+float dengine_input_gamepad_get_axis(GamepadID pad, GamepadAxis axis);
 
-//float dengine_input_gamepad_get_axis(GamepadID pad, GamepadAxis axis);
+int dengine_input_gamepad_vibration_set_basic(GamepadID pad, float leftmotor, float rightmotor);
 
-//int dengine_input_gamepad_vibration_set_basic(GamepadID pad, float leftmotor, float rightmotor);
-
-//const char* dengine_input_gamepad_vibration_get_error();
+const char* dengine_input_gamepad_vibration_get_error();
 
 #ifdef __cplusplus
 }

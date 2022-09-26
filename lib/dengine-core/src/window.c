@@ -1,5 +1,7 @@
 #include "dengine/window.h"
 
+#include "dengine-core_internal.h" /* gamepad_poll,input_terminate/init */
+
 #include "dengine/viewport.h" //set_view
 #include "dengine/loadgl.h" //glad
 #include "dengine/input.h" //setwindow
@@ -215,6 +217,7 @@ int dengine_window_init()
     dengine_window_makecurrent(_andr);
     dengine_window_loadgl(_andr);
 #endif
+    _dengine_input_init();
     return init;
 }
 
@@ -239,6 +242,7 @@ void dengine_window_terminate()
     UnregisterClassW(wc_class, wc.hInstance);
 #endif
 
+    _dengine_input_terminate();
 }
 
 void _dengine_window_processkey(WindowInput* input, char key, int isrelease)
@@ -564,6 +568,7 @@ void* _dengine_window_createandpoll(void* args)
 
     attrs->ret = ret;
     while (ret->running) {
+        _dengine_input_gamepad_poll();
         _dengine_window_pollinf(ret);
     }
     return NULL;
@@ -588,9 +593,13 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     Thread windowthr;
     dengineutils_thread_create(_dengine_window_createandpoll, &attrs, &windowthr);
 
+    /* initial update */
+    dengineutils_timer_update();
+
     /* timeout WORKS for now since win32 dont want empty while loop */
     double t = 0;
     while (attrs.ret == NULL) {
+        dengineutils_timer_update();
         t += dengineutils_timer_get_delta();
         if(t >= DENGINE_WINDOW_CREATE_TIMEOUT)
         {
@@ -902,7 +911,7 @@ void* _dengine_window_pollinf(void* arg)
         }
     }
     #elif defined(DENGINE_WIN32)
-    GetMessageW(&window->win32_msg, window->win32_hwnd, 0, 0);
+    PeekMessageW(&window->win32_msg, window->win32_hwnd, 0, 0, PM_REMOVE);
     TranslateMessage(&window->win32_msg);
     DispatchMessageW(&window->win32_msg);
     #elif defined(DENGINE_ANDROID)
