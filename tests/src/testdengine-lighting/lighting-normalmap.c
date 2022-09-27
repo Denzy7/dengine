@@ -96,22 +96,22 @@ int main(int argc, char *argv[])
 
         dengine_lighting_apply_pointlight(&pLight, &stdshdr);
 
-        if(dengine_input_get_key('W'))
+        if(dengine_input_get_key('W') || dengine_input_gamepad_get_btn(DENGINE_INPUT_PAD0, DENGINE_INPUT_PAD_BUTTON_DPAD_UP))
             pLight.position[2] -= delta * speed;
 
-        if(dengine_input_get_key('S'))
+        if(dengine_input_get_key('S') || dengine_input_gamepad_get_btn(DENGINE_INPUT_PAD0, DENGINE_INPUT_PAD_BUTTON_DPAD_DOWN))
             pLight.position[2] += delta * speed;
 
-        if(dengine_input_get_key('A'))
+        if(dengine_input_get_key('A') || dengine_input_gamepad_get_btn(DENGINE_INPUT_PAD0, DENGINE_INPUT_PAD_BUTTON_DPAD_LEFT))
             pLight.position[0] -= delta * speed;
 
-        if(dengine_input_get_key('D'))
+        if(dengine_input_get_key('D') || dengine_input_gamepad_get_btn(DENGINE_INPUT_PAD0, DENGINE_INPUT_PAD_BUTTON_DPAD_RIGHT))
             pLight.position[0] += delta * speed;
 
-        if(dengine_input_get_key('E'))
+        if(dengine_input_get_key('E') || dengine_input_gamepad_get_btn(DENGINE_INPUT_PAD0, DENGINE_INPUT_PAD_BUTTON_A))
             pLight.position[1] += delta * speed;
 
-        if(dengine_input_get_key('C'))
+        if(dengine_input_get_key('C') || dengine_input_gamepad_get_btn(DENGINE_INPUT_PAD0, DENGINE_INPUT_PAD_BUTTON_X))
             pLight.position[1] -= delta * speed;
 
         glm_mat4_identity(model);
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 
         denginegui_text(10, 10 + fontsz, fps, yellow);
 
-        denginegui_text(10, 10 + 3 * fontsz, "WASD = MOVE LIGHT, EC = UP/DOWN", NULL);
+        denginegui_text(10, 10 + 3 * fontsz, "WASD(DPAD) = MOVE LIGHT, EC(A,X) = UP/DOWN", NULL);
     }
     free(prtbuf);
     dengine_material_destroy(&plane_mat);

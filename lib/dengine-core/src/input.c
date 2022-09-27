@@ -19,6 +19,7 @@
 #include <sys/stat.h> //* fstatat */
 #include <unistd.h> //O_RDWR
 #include <fcntl.h> //write, open
+#include <stdlib.h> /* abs */
 //Test a char array bit
 #define isBitSet(bit, arr) (arr[(bit) / 8] & (1 << ((bit) % 8)))
 #endif
@@ -431,6 +432,26 @@ int _dengine_input_gamepad_poll()
                         if( _gamepads[i].axes[j].min < 0.0f)
                             val *= 2.0f;
                         _gamepads[i].axes[j].value = val;
+                    }
+                }
+
+                static const int32_t dpadcodes[8]=
+                {
+                    ABS_HAT0Y, -1,
+                    ABS_HAT0Y, 1,
+                    ABS_HAT0X, -1,
+                    ABS_HAT0X, 1,
+                };
+
+                for(int j = 0; j < 4; j++)
+                {
+                    if(dpadcodes[(2 * j) + 1] == ev.value && dpadcodes[2 * j] == ev.code)
+                    {
+                        if(_gamepads[i].buttons[j] != -1)
+                            _gamepads[i].buttons[j] = 1;
+                    }else
+                    {
+                        _gamepads[i].buttons[j] = 0;
                     }
                 }
                 /* TODO: check dpad */
