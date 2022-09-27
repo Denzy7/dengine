@@ -54,6 +54,9 @@
 #ifdef DENGINE_WIN32
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #endif
+#ifdef DENGINE_WIN_X11
+int _dengine_window_x11err(Display* dpy, XErrorEvent* err);
+#endif
 
 void _dengine_window_processkey(WindowInput* input, char key, int isrelease);
 void* _dengine_window_pollinf(void* arg);
@@ -144,6 +147,9 @@ int dengine_window_init()
     if(x_dpy)
     {
         wm_delete = XInternAtom(x_dpy, "WM_DELETE_WINDOW", False);
+        /* error callback to prevent unwarranted crashes */
+        XSetErrorHandler(_dengine_window_x11err);
+
         //disable annoying repeat
         int setdetect = XkbSetDetectableAutoRepeat(x_dpy, True, NULL);
         if(!setdetect)
@@ -1175,6 +1181,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     }
 }
 
+#endif
+
+#ifdef DENGINE_WIN_X11
+int _dengine_window_x11err(Display* dpy, XErrorEvent* err)
+{
+    return 1;
+}
 #endif
 
 WindowInput* dengine_window_get_input(DengineWindow* window)
