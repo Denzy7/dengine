@@ -3,11 +3,14 @@
 #include "dengine/loadgl.h" //gltypes
 #include "dengine/entrygl.h" //entrygl
 #include "dengine-utils/vtor.h"
+#include "dengine-utils/debug.h"
 
 #include <string.h> //memset
 
 void dengine_primitive_setup(Primitive* primitive, const Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     VAO entry_vao;
     Buffer entry_ibo, entry_vbo;
     dengine_entrygl_buffer(GL_ARRAY_BUFFER, &entry_vbo);
@@ -49,6 +52,8 @@ void dengine_primitive_setup(Primitive* primitive, const Shader* shader)
 
 void dengine_primitive_attributes_enable(const Primitive* primitive, const Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(primitive->aPos.index != -1)
     {
         dengine_vertex_attribute_setup(&primitive->aPos);
@@ -82,6 +87,8 @@ void dengine_primitive_attributes_enable(const Primitive* primitive, const Shade
 
 void dengine_primitive_destroy(Primitive* primitive)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(GLAD_GL_VERSION_3_2 || GLAD_GL_ES_VERSION_3_2)
     {
         dengine_vao_destroy(1, &primitive->vao);
@@ -92,6 +99,8 @@ void dengine_primitive_destroy(Primitive* primitive)
 
 void dengine_primitive_gen_quad(Primitive* primitive, const Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     memset(primitive,0,sizeof (Primitive));
 
     static float quad_array[]=
@@ -138,6 +147,8 @@ void dengine_primitive_gen_quad(Primitive* primitive, const Shader* shader)
 
 void dengine_primitive_gen_plane(Primitive* primitive, const Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     memset(primitive,0,sizeof (Primitive));
 
     vtor plane_array;
@@ -258,6 +269,8 @@ void dengine_primitive_gen_plane(Primitive* primitive, const Shader* shader)
 
 void dengine_primitive_gen_cube(Primitive* primitive, const Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     memset(primitive,0,sizeof (Primitive));
 
     vtor cube_array;
@@ -486,6 +499,8 @@ void dengine_primitive_gen_cube(Primitive* primitive, const Shader* shader)
 
 void dengine_primitive_gen_grid(const uint16_t slice, Primitive* primitive, const Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     memset(primitive,0,sizeof (Primitive));
 
     vtor grid_vertices, grid_indices;
@@ -559,6 +574,7 @@ void dengine_primitive_gen_grid(const uint16_t slice, Primitive* primitive, cons
 
 void dengine_primitive_gen_axis(Primitive* primitive, const Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
     memset(primitive,0,sizeof (Primitive));
     static float axis_vertices[]=
     {

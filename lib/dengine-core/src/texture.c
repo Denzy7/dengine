@@ -26,6 +26,8 @@ void dengine_texture_gen(const size_t count, Texture* textures)
 
 void dengine_texture_bind(const uint32_t target, const Texture* texture)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(texture)
         glBindTexture(target, texture->texture_id);
     else
@@ -424,6 +426,8 @@ void _dengine_texture_autoload(Texture* texture)
 
 int dengine_texture_writeout(const char* outfile, const int flip, Texture* texture)
 {
+    DENGINE_DEBUG_ENTER;
+
     stbi_flip_vertically_on_write(flip);
     int comp = 3;
     if(texture->format == GL_RGBA)
@@ -438,6 +442,8 @@ int dengine_texture_writeout(const char* outfile, const int flip, Texture* textu
 
 void dengine_texture_make_canreadback_color(const int width, const int height, Texture* texture)
 {
+    DENGINE_DEBUG_ENTER;
+
     memset(texture, 0, sizeof(Texture));
     texture->width = width;
     texture->height = height;
@@ -461,6 +467,8 @@ void dengine_texture_make_canreadback_color(const int width, const int height, T
 
 int dengine_texture_issupprorted(uint32_t target, uint32_t type, uint32_t internal_format, uint32_t format)
 {
+    DENGINE_DEBUG_ENTER;
+
     int supported = 1;
     uint32_t tex;
     static const int width = 8, height = 8;
@@ -502,6 +510,8 @@ int dengine_texture_issupprorted(uint32_t target, uint32_t type, uint32_t intern
 
 const char* dengine_texture_target2str(uint32_t target)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(target == GL_TEXTURE_2D)
         return "TEXTURE_2D";
     else if(target == GL_TEXTURE_CUBE_MAP)
@@ -512,5 +522,7 @@ const char* dengine_texture_target2str(uint32_t target)
 
 void dengine_texture_set_texturecache(int state)
 {
+    DENGINE_DEBUG_ENTER;
+
     texturecache = state;
 }

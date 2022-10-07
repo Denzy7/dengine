@@ -4,8 +4,11 @@
 #include "dengine/entrygl.h"
 #include "dengine/buffer.h" //bind
 
+#include "dengine-utils/debug.h"
 void dengine_draw_primitive(const Primitive* primitive, const Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     Buffer entry_vbo, entry_ibo;
     VAO entry_vao;
     Shader entry_shader;

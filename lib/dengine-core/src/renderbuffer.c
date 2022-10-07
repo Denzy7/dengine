@@ -1,8 +1,10 @@
 #include "dengine/renderbuffer.h"
 #include "dengine/loadgl.h" //GL
-
+#include "dengine-utils/debug.h"
 void dengine_renderbuffer_gen(const size_t count, Renderbuffer* renderbuffers)
 {
+    DENGINE_DEBUG_ENTER;
+
     for(size_t i = 0; i < count; i++)
     {
         if(glad_glGenRenderbuffers)
@@ -16,6 +18,8 @@ void dengine_renderbuffer_gen(const size_t count, Renderbuffer* renderbuffers)
 
 void dengine_renderbuffer_destroy(const size_t count, Renderbuffer* renderbuffers)
 {
+    DENGINE_DEBUG_ENTER;
+
     for(size_t i = 0; i < count; i++)
     {
         if(glad_glDeleteRenderbuffers)
@@ -29,6 +33,8 @@ void dengine_renderbuffer_destroy(const size_t count, Renderbuffer* renderbuffer
 
 void dengine_renderbuffer_bind(const Renderbuffer* renderbuffer)
 {
+    DENGINE_DEBUG_ENTER;
+
     uint32_t bind = 0;
     if(renderbuffer)
         bind = renderbuffer->renderbuffer_id;
@@ -42,6 +48,8 @@ void dengine_renderbuffer_bind(const Renderbuffer* renderbuffer)
 
 void dengine_renderbuffer_data(const Renderbuffer* renderbuffer)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(glad_glRenderbufferStorage)
     {
         glRenderbufferStorage(GL_RENDERBUFFER, renderbuffer->format,

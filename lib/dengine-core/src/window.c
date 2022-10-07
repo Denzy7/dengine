@@ -3,13 +3,14 @@
 #include "dengine-core_internal.h" /* gamepad_poll,input_terminate/init */
 
 #include "dengine/viewport.h" //set_view
-#include "dengine/loadgl.h" //glad
+#include "dengine/loadgl.h" //GLADloadproc
 #include "dengine/input.h" //setwindow
 #include "dengine-utils/logging.h"//log
 #include "dengine-utils/dynlib.h" //getsym
 #include "dengine-utils/thread.h"
 #include "dengine-utils/macros.h" //ARY_SZ
 #include "dengine-utils/timer.h"
+#include "dengine-utils/debug.h"
 
 #include <stdio.h>  //printf
 #include <stdlib.h> //malloc
@@ -19,6 +20,7 @@
 //WINDOW CREATION INCL.
 #ifdef DENGINE_WIN_X11
 #include <X11/Xlib.h> //Window
+#include <X11/Xutil.h> /* XLookupString */
 #include <X11/XKBlib.h>
 #elif defined (DENGINE_WIN32)
 #include <windows.h> //HWND
@@ -140,6 +142,8 @@ DynLib gl = NULL;
 
 int dengine_window_init()
 {
+    DENGINE_DEBUG_ENTER;
+
     int init = 0;
 #ifdef DENGINE_WIN_X11
     XInitThreads();
@@ -229,6 +233,8 @@ int dengine_window_init()
 
 void dengine_window_terminate()
 {
+    DENGINE_DEBUG_ENTER;
+
 #ifdef DENGINE_CONTEXT_GLX
     glXMakeCurrent(x_dpy, None, NULL);
 #endif
@@ -296,6 +302,8 @@ void _dengine_window_processkey(WindowInput* input, char key, int isrelease)
 
 void dengine_window_request_GL(int gl_major, int gl_minor, int gl_core)
 {
+    DENGINE_DEBUG_ENTER;
+
     _gl_max = gl_major;
     _gl_min = gl_minor;
     _gl_core = gl_core;
@@ -303,11 +311,15 @@ void dengine_window_request_GL(int gl_major, int gl_minor, int gl_core)
 
 void dengine_window_request_MSAA(int samples)
 {
+    DENGINE_DEBUG_ENTER;
+
     _win_msaa = samples;
 }
 
 void dengine_window_request_defaultall()
 {
+    DENGINE_DEBUG_ENTER;
+
     _gl_max = DFT_GL_MAX;
     _gl_min = DFT_GL_MIN;
     _win_msaa = DFT_WIN_MSAA;
@@ -588,6 +600,8 @@ void* _dengine_window_createandpoll(void* args)
 
 DengineWindow* dengine_window_create(int width, int height, const char* title, const DengineWindow* share)
 {
+    DENGINE_DEBUG_ENTER;
+
     CreateWindowAttrs attrs;
     memset(&attrs, 0, sizeof(CreateWindowAttrs));
 
@@ -619,6 +633,8 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
 
 void dengine_window_destroy(DengineWindow* window)
 {
+    DENGINE_DEBUG_ENTER;
+
 #ifdef DENGINE_CONTEXT_GLX
     glXDestroyContext(x_dpy, window->glx_ctx);
 //    XFreeColormap(x_dpy, window->x_swa.colormap);
@@ -647,6 +663,8 @@ void dengine_window_destroy(DengineWindow* window)
 
 void dengine_window_get_dim(DengineWindow* window, int* width, int* height)
 {
+    DENGINE_DEBUG_ENTER;
+
 #ifdef DENGINE_WIN_X11
     XWindowAttributes attribs;
     XGetWindowAttributes(x_dpy, window->x_win,&attribs);
@@ -673,6 +691,8 @@ void dengine_window_get_dim(DengineWindow* window, int* width, int* height)
 
 void dengine_window_swapbuffers(DengineWindow* window)
 {
+    DENGINE_DEBUG_ENTER;
+
 #ifdef DENGINE_CONTEXT_GLX
     GLXContext ctx = glXGetCurrentContext();
     if(ctx)
@@ -688,6 +708,8 @@ void dengine_window_swapbuffers(DengineWindow* window)
 
 int dengine_window_isrunning(DengineWindow* window)
 {
+    DENGINE_DEBUG_ENTER;
+
 #ifdef DENGINE_ANDROID
     return dengineutils_android_iswindowrunning();
 #else
@@ -697,6 +719,8 @@ int dengine_window_isrunning(DengineWindow* window)
 
 void* dengine_window_get_proc(const char* name)
 {
+    DENGINE_DEBUG_ENTER;
+
     void* sym = NULL;
 #ifdef DENGINE_CONTEXT_WGL
     sym = wglGetProcAddress(name);
@@ -724,6 +748,8 @@ void* dengine_window_get_proc(const char* name)
 
 int dengine_window_loadgl(DengineWindow* window)
 {
+    DENGINE_DEBUG_ENTER;
+
     window->gl_lib = dengineutils_dynlib_open(GL);
     if(!window->gl_lib)
     {
@@ -761,6 +787,8 @@ int dengine_window_loadgl(DengineWindow* window)
 
 int dengine_window_makecurrent(DengineWindow* window)
 {
+    DENGINE_DEBUG_ENTER;
+
     int make = 0;
 #ifdef DENGINE_CONTEXT_GLX
     make = glXMakeCurrent(x_dpy, window->x_win, window->glx_ctx);
@@ -789,6 +817,8 @@ int dengine_window_makecurrent(DengineWindow* window)
 
 DengineWindow* dengine_window_get_current()
 {
+    DENGINE_DEBUG_ENTER;
+
 #ifdef DENGINE_ANDROID
     if(dengineutils_android_iswindowrunning())
         return current;
@@ -801,6 +831,8 @@ DengineWindow* dengine_window_get_current()
 
 int dengine_window_set_swapinterval(DengineWindow* window, int interval)
 {
+    DENGINE_DEBUG_ENTER;
+
     int itv = 0;
 #ifdef DENGINE_CONTEXT_EGL
     itv = eglSwapInterval(window->egl_dpy, interval);
@@ -945,6 +977,8 @@ void* _dengine_window_pollinf(void* arg)
 
 int dengine_window_poll(DengineWindow* window)
 {
+    DENGINE_DEBUG_ENTER;
+
     int polled = 0;
 
 #ifdef DENGINE_ANDROID
@@ -971,6 +1005,8 @@ int dengine_window_resize(DengineWindow* window, int width, int height)
 
 void dengine_window_set_fullscreen(DengineWindow* window, int state)
 {
+    DENGINE_DEBUG_ENTER;
+
 #ifdef DENGINE_WIN_X11
     XWindowAttributes xwa;
     XGetWindowAttributes( x_dpy, window->x_win, &xwa );
@@ -1006,6 +1042,8 @@ void dengine_window_set_fullscreen(DengineWindow* window, int state)
 
 int dengine_window_set_position(DengineWindow* window, int x, int y)
 {
+    DENGINE_DEBUG_ENTER;
+
     int set = 0;
 #ifdef DENGINE_WIN_X11
     XWindowChanges changes;
@@ -1192,5 +1230,7 @@ int _dengine_window_x11err(Display* dpy, XErrorEvent* err)
 
 WindowInput* dengine_window_get_input(DengineWindow* window)
 {
+    DENGINE_DEBUG_ENTER;
+
     return &window->input;
 }

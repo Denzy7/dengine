@@ -1,10 +1,14 @@
 #include "dengine/viewport.h"
 #include "dengine/loadgl.h" //glGet, glViewport
 
+#include "dengine-utils/debug.h"
 void dengine_viewport_get(int* x, int* y, int* width, int* height)
 {
+    DENGINE_DEBUG_ENTER;
+
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
+    DENGINE_CHECKGL;
 
     if(x)
         *x = viewport[0];
@@ -19,5 +23,8 @@ void dengine_viewport_get(int* x, int* y, int* width, int* height)
 
 void dengine_viewport_set(int x, int y, int width, int height)
 {
+    DENGINE_DEBUG_ENTER;
+
     glViewport(x, y, width, height);
+    DENGINE_CHECKGL;
 }

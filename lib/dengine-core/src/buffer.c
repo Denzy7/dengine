@@ -31,6 +31,8 @@ void dengine_buffer_data(const uint32_t target, const Buffer* buffer)
 
 void dengine_buffer_destroy(const size_t count, Buffer* buffers)
 {
+    DENGINE_DEBUG_ENTER;
+
     for(size_t i = 0; i < count; i++)
     {glDeleteBuffers(1, &buffers[i].buffer_id); DENGINE_CHECKGL;}
 }

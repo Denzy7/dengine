@@ -47,6 +47,7 @@ void dengine_camera_setup(Camera* camera)
     memcpy(camera->clearcolor, _default_clearcol, sizeof (_default_clearcol));
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
+    DENGINE_CHECKGL;
     camera->render_height = viewport[3];
     camera->render_width = viewport[2];
 
@@ -176,10 +177,15 @@ void dengine_camera_use(const Camera* camera)
                 camera->clearcolor[1],
                 camera->clearcolor[2],
                 camera->clearcolor[3]);
+        DENGINE_CHECKGL;
+
         dengine_framebuffer_bind(GL_FRAMEBUFFER, &camera->framebuffer);
-        if(camera->clearonuse)
+        if(camera->clearonuse){
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            DENGINE_CHECKGL;
+        }
         glClearColor(r, g, b, a);
+        DENGINE_CHECKGL;
     }else
     {
         dengine_framebuffer_bind(GL_FRAMEBUFFER, NULL);
@@ -188,6 +194,8 @@ void dengine_camera_use(const Camera* camera)
 
 void dengine_camera_resize(Camera* camera, int width, int height)
 {
+    DENGINE_DEBUG_ENTER;
+
     Texture entry_tex;
     dengine_entrygl_texture(GL_TEXTURE_2D, &entry_tex);
 
@@ -220,6 +228,8 @@ void dengine_camera_resize(Camera* camera, int width, int height)
 
 void dengine_camera_world2screen(const Camera* camera, const float* world, float* screen)
 {
+    DENGINE_DEBUG_ENTER;
+
     vec4 clip_v, clip_p;
     mat4 proj, view;
     vec3 ndc;

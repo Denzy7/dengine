@@ -1,10 +1,12 @@
 #include "dengine-utils/logging.h"//log
-
+#include "dengine-utils/debug.h"
 #include "dengine/loadgl.h" //glGetError (incl. checkgl.h
 
 #include <string.h>
 int dengine_checkgl(const char* file, const int line)
 {
+    DENGINE_DEBUG_ENTER;
+
     GLenum error = glGetError();
     if(error)
     {

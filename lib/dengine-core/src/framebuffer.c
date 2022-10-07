@@ -113,12 +113,14 @@ void dengine_framebuffer_attach2D(FramebufferAttachmentType attachment, Texture*
 
 void dengine_framebuffer_attachRB(FramebufferAttachmentType attachment, Renderbuffer* renderbuffer, Framebuffer* framebuffer)
 {
+    DENGINE_DEBUG_ENTER;
+
     GLenum attach = GL_COLOR_ATTACHMENT0 + framebuffer->n_color;
     if(attachment == DENGINE_FRAMEBUFFER_DEPTH)
         attach = GL_DEPTH_ATTACHMENT;
     else if (attachment == DENGINE_FRAMEBUFFER_STENCIL)
         attach = GL_STENCIL_ATTACHMENT;
-    DENGINE_DEBUG_ENTER;
+
 #ifdef DENGINE_GL_GLAD
     if(glad_glFramebufferRenderbuffer)
     {
@@ -135,6 +137,8 @@ void dengine_framebuffer_attachRB(FramebufferAttachmentType attachment, Renderbu
 
 void dengine_framebuffer_readback(Texture* dest, const Framebuffer* framebuffer)
 {
+    DENGINE_DEBUG_ENTER;
+
     dengine_framebuffer_bind(GL_FRAMEBUFFER, framebuffer);
     glReadPixels(0, 0, dest->width, dest->height, dest->format, dest->type, dest->data);
     glFinish();
@@ -144,8 +148,11 @@ void dengine_framebuffer_readback(Texture* dest, const Framebuffer* framebuffer)
 
 void dengine_framebuffer_get_clearcolor(float* r, float* g, float* b, float* a)
 {
+    DENGINE_DEBUG_ENTER;
+
     float orig_clear[4];
     glGetFloatv(GL_COLOR_CLEAR_VALUE, orig_clear);
+    DENGINE_CHECKGL;
     if(r)
         *r = orig_clear[0];
     if(g)

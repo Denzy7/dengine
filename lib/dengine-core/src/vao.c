@@ -3,8 +3,11 @@
 #include "dengine/loadgl.h"
 
 #include "dengine-utils/logging.h"
+#include "dengine-utils/debug.h"
 void dengine_vao_gen(size_t count, VAO* vaos)
 {
+    DENGINE_DEBUG_ENTER;
+
     for(size_t i = 0; i < count; i++)
     {
         if(glad_glGenVertexArrays)
@@ -17,6 +20,7 @@ void dengine_vao_gen(size_t count, VAO* vaos)
 
 void dengine_vao_bind(const VAO* vao)
 {
+    DENGINE_DEBUG_ENTER;
 
     uint32_t _vao = 0;
     if(vao)
@@ -33,6 +37,8 @@ void dengine_vao_bind(const VAO* vao)
 
 void dengine_vao_destroy(size_t count, VAO* vaos)
 {
+    DENGINE_DEBUG_ENTER;
+
     for(size_t i = 0; i < count; i++)
     {
         if(glad_glDeleteVertexArrays)

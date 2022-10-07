@@ -7,6 +7,7 @@
 
 #include "dengine-utils/logging.h"
 #include "dengine-utils/macros.h" //arr_sz
+#include "dengine-utils/debug.h"
 
 #include <string.h> //memset
 Lighting lighting;
@@ -130,6 +131,8 @@ void _dengine_lighting_shadowop_setup(uint32_t shadowmap_target, ShadowOp* shado
 
 int dengine_lighting_init(const uint32_t n_PL, const uint32_t n_SL)
 {
+    DENGINE_DEBUG_ENTER;
+
     assert(n_PL > 0);
     assert(n_SL > 0);
 
@@ -146,11 +149,15 @@ int dengine_lighting_init(const uint32_t n_PL, const uint32_t n_SL)
 
 Lighting* dengine_lighting_get()
 {
+    DENGINE_DEBUG_ENTER;
+
     return &lighting;
 }
 
 void dengine_lighting_shadowop_clear(const ShadowOp* shadowop)
 {
+    DENGINE_DEBUG_ENTER;
+
     if (shadowop->shadow_map.depth.texture_id == 0)
         return;
 
@@ -160,6 +167,7 @@ void dengine_lighting_shadowop_clear(const ShadowOp* shadowop)
 
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &shadowop->shadow_map);
     glClear(GL_DEPTH_BUFFER_BIT); DENGINE_CHECKGL;
+    DENGINE_CHECKGL;
 
     //bind entry fb
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &entry_fb);
@@ -167,6 +175,8 @@ void dengine_lighting_shadowop_clear(const ShadowOp* shadowop)
 
 void dengine_lighting_shadowop_resize(uint32_t shadowmap_target, ShadowOp* shadowop, int size)
 {
+    DENGINE_DEBUG_ENTER;
+
     Texture entry_tex;
     dengine_entrygl_texture(shadowmap_target, &entry_tex);
 
@@ -195,6 +205,8 @@ void dengine_lighting_shadowop_resize(uint32_t shadowmap_target, ShadowOp* shado
 
 void dengine_lighting_setup_dirlight(DirLight* dirLight)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(dirLight->shadow.enable)
     {
         _dengine_lighting_shadowop_setup(GL_TEXTURE_2D, &dirLight->shadow);
@@ -220,6 +232,8 @@ void dengine_lighting_setup_dirlight(DirLight* dirLight)
 
 void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, const Shader* shader, const Primitive* primitive, const float* modelmtx)
 {
+    DENGINE_DEBUG_ENTER;
+
     //Guard for no shadow
     if(!dirLight->shadow.enable || !dirLight->shadow.shadow_map.depth.texture_id) {
         return;
@@ -227,6 +241,7 @@ void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, const Shader* sha
 
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
+    DENGINE_CHECKGL;
     int h = viewport[3], w = viewport[2];
 
     //we might not have entered with fb 0, save binding for later
@@ -253,10 +268,12 @@ void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, const Shader* sha
 
     //printf("%d %u\n", dirLight->shadow.shadow_map_size, dirLight->shadow.shadow_map.depth.texture_id);
     glViewport(0, 0, dirLight->shadow.shadow_map_size, dirLight->shadow.shadow_map_size);
+    DENGINE_CHECKGL;
 
     dengine_draw_primitive(primitive, shader);
 
     glViewport(0, 0, w, h);
+    DENGINE_CHECKGL;
 
     //bind entry fb
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &entryfb);
@@ -266,6 +283,8 @@ void dengine_lighting_shadow_dirlight_draw(DirLight* dirLight, const Shader* sha
 
 void dengine_lighting_apply_dirlight(const DirLight* dirLight, const Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     static const char* possible_pos[]=
     {
         "lightDir","dLight.position"
@@ -290,6 +309,8 @@ void dengine_lighting_apply_dirlight(const DirLight* dirLight, const Shader* sha
 
 void dengine_lighting_setup_pointlight(PointLight* pointLight)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(pointLight->shadow.enable)
     {
         _dengine_lighting_shadowop_setup(GL_TEXTURE_CUBE_MAP, &pointLight->shadow);
@@ -311,6 +332,8 @@ void dengine_lighting_setup_pointlight(PointLight* pointLight)
 
 void dengine_lighting_apply_pointlight(const PointLight* pointLight, const Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     size_t bufsz = sizeof (prtbuf);
     for (uint32_t i = 0; i < 1; i++) {
         snprintf(prtbuf, bufsz,"pLights[%u].position",i);
@@ -358,16 +381,19 @@ void dengine_lighting_apply_pointlight(const PointLight* pointLight, const Shade
 
 void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, const Shader* shader, const Primitive* primitive, const float* modelmtx)
 {
+    DENGINE_DEBUG_ENTER;
+
     //Guard for no shadow
     if (!pointLight->shadow.shadow_map.depth.texture_id|| !pointLight->shadow.enable)
         return;
 
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
+    DENGINE_CHECKGL;
     int h = viewport[3], w = viewport[2];
 
-    int bind;
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &bind); DENGINE_CHECKGL;
+    Framebuffer entry_fb;
+    dengine_entrygl_framebuffer(GL_FRAMEBUFFER, &entry_fb);
 
     dengine_framebuffer_bind(GL_FRAMEBUFFER, &pointLight->shadow.shadow_map);
 
@@ -403,17 +429,21 @@ void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, const Shade
     dengine_shader_set_float(shader, "far", far);
 
     glViewport(0, 0, shadow_map_size, shadow_map_size);
+    DENGINE_CHECKGL;
 
     dengine_draw_primitive(primitive, shader);
 
     glViewport(0, 0, w, h);
+    DENGINE_CHECKGL;
 
     //bind entry fb
-    glBindFramebuffer(GL_FRAMEBUFFER, bind); DENGINE_CHECKGL;
+    dengine_framebuffer_bind(GL_FRAMEBUFFER, &entry_fb);
 }
 
 void dengine_lighting_setup_spotlight(SpotLight* spotLight)
 {
+    DENGINE_DEBUG_ENTER;
+
     dengine_lighting_setup_pointlight(&spotLight->pointLight);
 
     spotLight->innerCutOff = 2.0f;
@@ -430,6 +460,8 @@ void dengine_lighting_setup_spotlight(SpotLight* spotLight)
 
 void dengine_lighting_apply_spotlight(const SpotLight* spotLight, const Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     float oCut_rad = glm_rad(45.0f - glm_clamp(spotLight->outerCutOff, 0.0f, 45.0f));
     float iCut_rad = glm_rad(45.0f - glm_clamp(spotLight->innerCutOff, 0.0f, spotLight->outerCutOff));
 
@@ -494,11 +526,15 @@ void dengine_lighting_apply_spotlight(const SpotLight* spotLight, const Shader* 
 
 void dengine_lighting_shadow_spotlight_draw(SpotLight* spotLight, const Shader* shader, const Primitive* primitive, const float* modelmtx)
 {
+    DENGINE_DEBUG_ENTER;
+
     dengine_lighting_shadow_pointlight_draw(&spotLight->pointLight, shader, primitive, modelmtx);
 }
 
 void dengine_lighting_terminate()
 {
+    DENGINE_DEBUG_ENTER;
+
     if(lighting.pLights)
         free(lighting.pLights);
 
@@ -508,6 +544,8 @@ void dengine_lighting_terminate()
 
 void dengine_lighting_light_setup(LightType type, const Light light)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(type == DENGINE_LIGHT_DIR)
         dengine_lighting_setup_dirlight(light);
     else if(type == DENGINE_LIGHT_POINT)
@@ -518,6 +556,8 @@ void dengine_lighting_light_setup(LightType type, const Light light)
 
 void dengine_lighting_light_apply(LightType type, const Light light, const Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(type == DENGINE_LIGHT_DIR)
         dengine_lighting_apply_dirlight(light, shader);
     else if(type == DENGINE_LIGHT_POINT)
@@ -528,6 +568,8 @@ void dengine_lighting_light_apply(LightType type, const Light light, const Shade
 
 void dengine_lighting_light_shadow_draw(LightType type, Light light, const Shader* shader, const Primitive* primitive, const float* modelmtx)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(type == DENGINE_LIGHT_DIR)
         dengine_lighting_shadow_dirlight_draw(light, shader, primitive, modelmtx);
     else if(type == DENGINE_LIGHT_POINT)

@@ -1,6 +1,8 @@
 #include "dengine/input.h"
 #include "dengine-core_internal.h"
 
+#include "dengine-utils/debug.h"
+
 #include <string.h> //memset
 #include <stdio.h> // snprintf
 
@@ -136,11 +138,15 @@ void _dengine_input_terminate()
 
 void dengine_input_set_window(DengineWindow* window)
 {
+    DENGINE_DEBUG_ENTER;
+
     _windowinp = dengine_window_get_input(window);
 }
 
 int dengine_input_get_key_once(char key)
 {
+    DENGINE_DEBUG_ENTER;
+
     for(int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
     {
         if(_windowinp->alpnum[i].key == key && _windowinp->alpnum[i].state != -1)
@@ -154,6 +160,8 @@ int dengine_input_get_key_once(char key)
 
 int dengine_input_get_key(char key)
 {
+    DENGINE_DEBUG_ENTER;
+
     for(int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
     {
         if(_windowinp->alpnum[i].key == key)
@@ -166,6 +174,8 @@ int dengine_input_get_key(char key)
 
 int dengine_input_get_mousebtn_once(MouseButton btn)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(_windowinp->msebtn[btn] == 1)
     {
         _windowinp->msebtn[btn] = -1;
@@ -176,6 +186,8 @@ int dengine_input_get_mousebtn_once(MouseButton btn)
 
 int dengine_input_get_mousebtn(MouseButton btn)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(_windowinp->msebtn[btn] == 1)
     {
         return 1;
@@ -193,6 +205,8 @@ int dengine_input_get_mousebtn(MouseButton btn)
 
 double dengine_input_get_mousescroll_y()
 {
+    DENGINE_DEBUG_ENTER;
+
     double temp = _windowinp->msesrl_y;
     _windowinp->msesrl_y = 0.0;
     return temp;
@@ -200,16 +214,22 @@ double dengine_input_get_mousescroll_y()
 
 double dengine_input_get_mousepos_x()
 {
+    DENGINE_DEBUG_ENTER;
+
     return _windowinp->mse_x;
 }
 
 double dengine_input_get_mousepos_y()
 {
+    DENGINE_DEBUG_ENTER;
+
     return _windowinp->mse_y;
 }
 
 int dengine_input_gamepad_get_btn(GamepadID pad, GamepadButton btn)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(_gamepads[pad].buttons[btn] == 1)
         return 1;
     else
@@ -218,6 +238,8 @@ int dengine_input_gamepad_get_btn(GamepadID pad, GamepadButton btn)
 
 int dengine_input_gamepad_get_btn_once(GamepadID pad, GamepadButton btn)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(_gamepads[pad].buttons[btn] == 1)
     {
         _gamepads[pad].buttons[btn] = -1;
@@ -230,22 +252,28 @@ int dengine_input_gamepad_get_btn_once(GamepadID pad, GamepadButton btn)
 
 float dengine_input_gamepad_get_axis(GamepadID pad, GamepadAxis axis)
 {
+    DENGINE_DEBUG_ENTER;
     return _gamepads[pad].axes[axis].value;
 }
 
 int dengine_input_gamepad_get_isconnected(GamepadID pad)
 {
+    DENGINE_DEBUG_ENTER;
     //dengine_input_gamepad_poll();
     return _gamepads[pad].connected;
 }
 
 char* dengine_input_gamepad_get_name(GamepadID pad)
 {
+    DENGINE_DEBUG_ENTER;
+
     return _gamepads[pad].name;
 }
 
 int dengine_input_gamepad_vibration_set_basic(GamepadID pad, float leftmotor, float rightmotor)
 {
+    DENGINE_DEBUG_ENTER;
+
     /* block 0.0f repeated writes */
     float tot = leftmotor + rightmotor;
     if(tot == 0.0f)

@@ -3,6 +3,7 @@
 
 #include "dengine-utils/logging.h"
 #include "dengine-utils/vtor.h"
+#include "dengine-utils/debug.h"
 
 #include <string.h> //memset
 #include <stdlib.h> //malloc
@@ -10,6 +11,8 @@
 
 void dengine_material_setup(Material* material)
 {
+    DENGINE_DEBUG_ENTER;
+
     memset(material, 0, sizeof(Material));
     static const float white[] = {1., 1., 1.};
     static const float normal[] = {0.5, 0.5, 1.};
@@ -19,13 +22,15 @@ void dengine_material_setup(Material* material)
 
 void dengine_material_set_shader_color(const Shader* shader, Material* material)
 {
+    DENGINE_DEBUG_ENTER;
+
     material->shader_color = *shader;
 
     int count, max_uniform_ln, size, max_units;
     uint32_t type;
     glGetProgramiv(shader->program_id, GL_ACTIVE_UNIFORMS, &count); DENGINE_CHECKGL;
     glGetProgramiv(shader->program_id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_uniform_ln); DENGINE_CHECKGL;
-    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_units);
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_units); DENGINE_CHECKGL;
     char* uniform_name = malloc(max_uniform_ln);
 
     memset(&material->textures, 0, sizeof(material->textures));
@@ -71,16 +76,22 @@ void dengine_material_set_shader_color(const Shader* shader, Material* material)
 
 void dengine_material_set_shader_shadow(const Shader* shader, Material* material)
 {
+    DENGINE_DEBUG_ENTER;
+
     material->shader_shadow = *shader;
 }
 
 void dengine_material_set_shader_shadow3d(const Shader* shader, Material* material)
 {
+    DENGINE_DEBUG_ENTER;
+
     material->shader_shadow3d = *shader;
 }
 
 int dengine_material_set_texture(const Texture* texture, const char* sampler, Material* material)
 {
+    DENGINE_DEBUG_ENTER;
+
     int ok = 0;
     for (size_t i = 0; i < material->textures_count; i++)
     {
@@ -94,6 +105,8 @@ int dengine_material_set_texture(const Texture* texture, const char* sampler, Ma
 
 void dengine_material_use(const Material* material)
 {
+    DENGINE_DEBUG_ENTER;
+
     if (material) {
         for (size_t i = 0; i < material->textures_count; i++) {
             glActiveTexture(GL_TEXTURE0 + i); DENGINE_CHECKGL;
@@ -113,12 +126,16 @@ void dengine_material_use(const Material* material)
 
 void dengine_material_destroy(Material* material)
 {
+    DENGINE_DEBUG_ENTER;
+
     dengine_texture_destroy(1, &material->white);
     dengine_texture_destroy(1, &material->normalmap);
 }
 
 const Texture* dengine_material_get_texture(const char* sampler, Material* material)
 {
+    DENGINE_DEBUG_ENTER;
+
     const Texture* find = NULL;
 
     for (size_t i = 0; i < material->textures_count; i++) {

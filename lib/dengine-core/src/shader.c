@@ -61,6 +61,8 @@ void _dengine_shader_set_binfmt();
 
 void dengine_shader_create(Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     shader->geometry_code= NULL;
     shader->cached_name = NULL;
 }
@@ -156,6 +158,7 @@ int dengine_shader_setup(Shader* shader)
     //Dont compile an unsupported version
     int maj = 0,min = 0, ver = 0, shadver = 0;
     const char* glslv = (char *) glGetString(GL_SHADING_LANGUAGE_VERSION);
+    DENGINE_CHECKGL;
 
     //We might get something like blah blah ES blah ES maj.min
     sscanf(strchr(glslv, '.') - 1,"%d.%d", &maj, &min);
@@ -185,6 +188,7 @@ int dengine_shader_setup(Shader* shader)
         int binload = 0;
 
         const char* GL = (const char*) glGetString(GL_VERSION);
+        DENGINE_CHECKGL;
         snprintf(prtbf, prtbf_sz, "%s/%s/%s/%s", dengineutils_filesys_get_cachedir(),
                  DENGINE_SHADER_CACHE_DIR, DENGINE_VERSION, GL);
 
@@ -282,6 +286,7 @@ int dengine_shader_link(Shader* shader)
             const size_t prtbf_sz = 4096;
             char* prtbf = malloc(prtbf_sz);
             const char* GL = (const char*) glGetString(GL_VERSION);
+            DENGINE_CHECKGL;
             snprintf(prtbf, prtbf_sz, "%s/%s/%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
                      DENGINE_SHADER_CACHE_DIR, DENGINE_VERSION, GL,
                      shader->cached_name, DENGINE_SHADER_CACHE_EXT);
@@ -317,6 +322,8 @@ int dengine_shader_link(Shader* shader)
 
 void dengine_shader_use(const Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(shader)
         glUseProgram(shader->program_id);
     else
@@ -327,6 +334,8 @@ void dengine_shader_use(const Shader* shader)
 
 void dengine_shader_set_int(const Shader* shader, const char* name, const int value)
 {
+    DENGINE_DEBUG_ENTER;
+
     dengine_shader_use(shader);
     int location = glGetUniformLocation(shader->program_id, name); DENGINE_CHECKGL;
     glUniform1i(location, value); DENGINE_CHECKGL;
@@ -334,6 +343,8 @@ void dengine_shader_set_int(const Shader* shader, const char* name, const int va
 
 void dengine_shader_set_mat4(const Shader* shader, const char* name, const float* value)
 {
+    DENGINE_DEBUG_ENTER;
+
     dengine_shader_use(shader);
     int location = glGetUniformLocation(shader->program_id, name); DENGINE_CHECKGL;
     glUniformMatrix4fv(location, 1, GL_FALSE, value); DENGINE_CHECKGL;
@@ -341,6 +352,8 @@ void dengine_shader_set_mat4(const Shader* shader, const char* name, const float
 
 void dengine_shader_set_vec3(const Shader* shader, const char* name, const float* value)
 {
+    DENGINE_DEBUG_ENTER;
+
     dengine_shader_use(shader);
     int location = glGetUniformLocation(shader->program_id, name); DENGINE_CHECKGL;
     glUniform3fv(location, 1, value); DENGINE_CHECKGL;
@@ -348,6 +361,8 @@ void dengine_shader_set_vec3(const Shader* shader, const char* name, const float
 
 void dengine_shader_set_vec4(const Shader* shader, const char* name, const float* value)
 {
+    DENGINE_DEBUG_ENTER;
+
     dengine_shader_use(shader);
     int location = glGetUniformLocation(shader->program_id, name); DENGINE_CHECKGL;
     glUniform4fv(location, 1, value); DENGINE_CHECKGL;
@@ -355,6 +370,8 @@ void dengine_shader_set_vec4(const Shader* shader, const char* name, const float
 
 void dengine_shader_set_float(const Shader* shader, const char* name, const float value)
 {
+    DENGINE_DEBUG_ENTER;
+
     dengine_shader_use(shader);
     int location = glGetUniformLocation(shader->program_id, name); DENGINE_CHECKGL;
     glUniform1f(location, value); DENGINE_CHECKGL;
@@ -379,6 +396,7 @@ int dengine_shader_make_standard(StandardShader stdshader, Shader* stdshdr)
     {
         int bin_success = 0;
         const char* GL = (const char*) glGetString(GL_VERSION);
+        DENGINE_CHECKGL;
         snprintf(prtbuf, prtbuf_sz, "%s/%s/%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
                  DENGINE_SHADER_CACHE_DIR, DENGINE_VERSION, GL,
                  stdshdr->cached_name, DENGINE_SHADER_CACHE_EXT);
@@ -434,6 +452,8 @@ int dengine_shader_make_standard(StandardShader stdshader, Shader* stdshdr)
 
 int dengine_shader_set_binary(Shader* shader, void* binary, int length)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(!binfmt)
         return 0;
 
@@ -453,6 +473,8 @@ int dengine_shader_set_binary(Shader* shader, void* binary, int length)
 
 void* dengine_shader_get_binary(Shader* shader, int* length)
 {
+    DENGINE_DEBUG_ENTER;
+
     void* bin = NULL;
 
     if(glad_glGetProgramBinary)
@@ -475,6 +497,8 @@ void* dengine_shader_get_binary(Shader* shader, int* length)
 
 void _dengine_shader_set_binfmt()
 {
+    DENGINE_DEBUG_ENTER;
+
     Shader* binfmtshdr = calloc(1, sizeof (Shader));
 
     binfmtshdr->vertex_code = "void main(){gl_Position = vec4(1.0);}";
@@ -494,11 +518,15 @@ void _dengine_shader_set_binfmt()
 
 void dengine_shader_set_shadercache(int state)
 {
-     shadercache = state;
+    DENGINE_DEBUG_ENTER;
+
+    shadercache = state;
 }
 
 const uint32_t dengine_shader_sampler2target(const uint32_t sampler)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(sampler == GL_SAMPLER_2D)
         return GL_TEXTURE_2D;
     else if(sampler == GL_SAMPLER_CUBE)
