@@ -16,6 +16,11 @@ extern "C" {
  * \return An integer with what violation occured
  */
 int dengine_checkgl(const char* file, const int line);
+/*!
+ * \brief Exit and dump trace if a OpenGL error occurs
+ * \param value 0 = No, else Yes
+ */
+void dengine_checkgl_set_exitonglerror(int value);
 
 #ifdef __cplusplus
 }

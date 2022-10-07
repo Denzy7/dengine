@@ -214,6 +214,9 @@ DENGINE_INLINE DengineInitOpts* dengine_init_get_opts()
 
 DENGINE_INLINE int dengine_init()
 {
+    //DEBUGGING, INCASE OF SIGSEGV OR SIGABRT
+    dengineutils_debug_init();
+
     if(!DENGINE_HAS_GOT_INIT_OPTS)
         DENGINE_INIT_OPTS = *dengine_init_get_opts();
 
@@ -301,9 +304,6 @@ DENGINE_INLINE int dengine_init()
 
     //set window to poll for input
     dengine_input_set_window(DENGINE_INIT_OPTS.window);
-
-    //DEBUGGING, INCASE OF SIGSEGV OR SIGABRT
-    dengineutils_debug_init();
 
     //GUI. SET FONT TOO
     if(!denginegui_init())

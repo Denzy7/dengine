@@ -3,6 +3,14 @@
 #include "dengine/loadgl.h" //glGetError (incl. checkgl.h
 
 #include <string.h>
+#include <stdlib.h> /* exit */
+int exitonglerror = 1;
+
+void dengine_checkgl_set_exitonglerror(int value)
+{
+    exitonglerror = value;
+}
+
 int dengine_checkgl(const char* file, const int line)
 {
     DENGINE_DEBUG_ENTER;
@@ -26,6 +34,12 @@ int dengine_checkgl(const char* file, const int line)
 
         const char* hiddendirfile = strstr(file, "dengine");
         dengineutils_logging_log("GL::FILE::%s::LINE::%d\n%s", hiddendirfile, line, type_str);
+
+        if(exitonglerror != 0)
+        {
+            dengineutils_debug_trace_dump();
+            exit(error);
+        }
     }
     return error;
 }

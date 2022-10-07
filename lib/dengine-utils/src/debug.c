@@ -90,6 +90,8 @@ void dengineutils_debug_trace_dump()
         time_t t = time(NULL);
         fprintf(f, "%s\n", ctime(&t));
         fclose(f);
+
+        dengineutils_logging_log("WARNING::Trace dumped to %s", tracefile);
     }
 }
 
