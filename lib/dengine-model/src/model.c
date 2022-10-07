@@ -1,8 +1,10 @@
 #include "dengine-model/model.h"
 #include "dengine-utils/vtor.h"
 #include "dengine/loadgl.h"
+
 #include "dengine-utils/logging.h"
 #include "dengine-utils/timer.h"
+#include "dengine-utils/debug.h"
 
 #include <stdio.h> //fopen
 #include <stddef.h> //size_t
@@ -15,6 +17,8 @@ Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* mesh
 
 Primitive* denginemodel_load_file(DengineModelFormat format, const char* file, size_t* meshes , const Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     FILE* f_model = fopen(file, "rb");
     if(!f_model)
     {
@@ -45,6 +49,8 @@ Primitive* denginemodel_load_file(DengineModelFormat format, const char* file, s
 
 Primitive* denginemodel_load_mem(DengineModelFormat format, const void* mem, const size_t sz, size_t* meshes, const Shader* shader)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(format == DENGINE_MODEL_FORMAT_OBJ)
         return _denginemodel_load_obj(mem, sz, meshes, shader);
     else

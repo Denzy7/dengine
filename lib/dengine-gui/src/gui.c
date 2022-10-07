@@ -7,8 +7,11 @@
 #include "dengine/shader.h"
 #include "dengine/draw.h"
 #include "dengine/input.h"
+#include "dengine/entrygl.h"
+#include "dengine/viewport.h"
 
 #include "dengine-utils/logging.h"
+#include "dengine-utils/debug.h"
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h> //stbtt
@@ -73,6 +76,8 @@ const char* _denginegui_get_defaultfont()
 
 int denginegui_init()
 {
+    DENGINE_DEBUG_ENTER;
+
     static float vertices[16];
 
     static uint16_t indices[]=
@@ -123,6 +128,8 @@ int denginegui_init()
 
 void denginegui_terminate()
 {
+    DENGINE_DEBUG_ENTER;
+
     dengine_texture_destroy(1, &fontmap);
     dengine_shader_destroy(&shader);
     dengine_primitive_destroy(&quad);
@@ -134,6 +141,8 @@ void denginegui_terminate()
 
 int denginegui_set_font(const void* ttf, const float fontsize, const uint32_t bitmap_size)
 {
+    DENGINE_DEBUG_ENTER;
+
     const void* mem = ttf;
     void* sysfontmem = NULL;
     if (!ttf) {
@@ -208,7 +217,7 @@ int denginegui_set_font(const void* ttf, const float fontsize, const uint32_t bi
     _bmp_sz = bitmap_size;
 
     Texture entry_tex;
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, (int*) &entry_tex.texture_id);
+    dengine_entrygl_texture(GL_TEXTURE_2D, &entry_tex);
 
     dengine_texture_bind(GL_TEXTURE_2D, &fontmap);
     dengine_texture_data(GL_TEXTURE_2D, &fontmap);
@@ -229,9 +238,9 @@ int denginegui_set_font(const void* ttf, const float fontsize, const uint32_t bi
 void _denginegui_projectquad()
 {
     mat4 projection;
-    int viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    glm_ortho(0.0, viewport[2], 0.0, viewport[3], -1.0f, 1.0f, projection);
+    int w, h;
+    dengine_viewport_get(NULL, NULL, &w, &h);
+    glm_ortho(0.0, w, 0.0, h, -1.0f, 1.0f, projection);
     dengine_shader_set_mat4(&shader, "projection", projection[0]);
 }
 
@@ -271,6 +280,8 @@ void _denginegui_drawquad()
 
 void denginegui_text(float x, float y, const char* text, float* rgba)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(!initgui || !initfont)
         return;
 
@@ -319,25 +330,27 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
 
             // get entry stuff
             Buffer entry_vbo;
-            glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (int*) &entry_vbo.buffer_id);
+            dengine_entrygl_buffer(GL_ARRAY_BUFFER, &entry_vbo);
 
             Texture entry_tex;
-            glGetIntegerv(GL_TEXTURE_BINDING_2D, (int*)&entry_tex.texture_id);
+            dengine_entrygl_texture(GL_TEXTURE_2D, &entry_tex);
 
             int entry_activetex;
-            glGetIntegerv(GL_ACTIVE_TEXTURE, &entry_activetex);
+            dengine_entrygl_texture_active(&entry_activetex);
 
             // draw our stuff
             dengine_buffer_bind(GL_ARRAY_BUFFER, &quad.array);
             dengine_buffer_data(GL_ARRAY_BUFFER, &quad.array);
 
             glActiveTexture(GL_TEXTURE0);
+            DENGINE_CHECKGL;
             dengine_texture_bind(GL_TEXTURE_2D, &fontmap);
             _denginegui_drawquad();
 
             // return entry stuff
             dengine_texture_bind(GL_TEXTURE_2D, &entry_tex);
             glActiveTexture(entry_activetex);
+            DENGINE_CHECKGL;
             dengine_buffer_bind(GL_ARRAY_BUFFER, &entry_vbo);
         }
     }
@@ -345,6 +358,8 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
 
 void denginegui_panel(float x, float y, float width, float height, Texture* texture, float* uv, float* rgba)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(!initgui)
         return;
 
@@ -363,13 +378,13 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
 
     // get entry stuff
     Buffer entry_vbo;
-    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (int*) &entry_vbo.buffer_id);
+    dengine_entrygl_buffer(GL_ARRAY_BUFFER, &entry_vbo);
 
     Texture entry_tex;
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, (int*)&entry_tex.texture_id);
+    dengine_entrygl_texture(GL_TEXTURE_2D, &entry_tex);
 
     int entry_activetex;
-    glGetIntegerv(GL_ACTIVE_TEXTURE, &entry_activetex);
+    dengine_entrygl_texture_active(&entry_activetex);
 
     dengine_buffer_bind(GL_ARRAY_BUFFER, &quad.array);
     dengine_buffer_data(GL_ARRAY_BUFFER, &quad.array);
@@ -384,6 +399,7 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
     dengine_shader_set_int(&shader, "istext", 0);
 
     glActiveTexture(GL_TEXTURE0);
+    DENGINE_CHECKGL;
     if(texture)
         dengine_texture_bind(GL_TEXTURE_2D, texture);
 
@@ -392,12 +408,15 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
     // return entry stuff
     dengine_texture_bind(GL_TEXTURE_2D, &entry_tex);
     glActiveTexture(entry_activetex);
+    DENGINE_CHECKGL;
     dengine_buffer_bind(GL_ARRAY_BUFFER, &entry_vbo);
 
 }
 
 int denginegui_button(float x,float y, float width, float height, const char* text, float* rgba)
 {
+    DENGINE_DEBUG_ENTER;
+
     int down = 0;
     double mx = dengine_input_get_mousepos_x();
     double my = dengine_input_get_mousepos_y();
@@ -443,11 +462,14 @@ int denginegui_button(float x,float y, float width, float height, const char* te
     }
 
     int scissor = glIsEnabled(GL_SCISSOR_TEST);
+    DENGINE_CHECKGL;
     if(!scissor)
     {
         glEnable(GL_SCISSOR_TEST);
+        DENGINE_CHECKGL;
     }
     glScissor(x, y, width, height);
+    DENGINE_CHECKGL;
 
     float txtoffst = (height / 2) - (_fontsz / 4);
     denginegui_text(x + (txtoffst / 2), y + txtoffst, text, NULL);
@@ -455,6 +477,7 @@ int denginegui_button(float x,float y, float width, float height, const char* te
     if(!scissor)
     {
         glDisable(GL_SCISSOR_TEST);
+        DENGINE_CHECKGL;
     }
 
     return down;

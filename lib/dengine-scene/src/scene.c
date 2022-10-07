@@ -3,6 +3,8 @@
 
 #include "dengine-scene/scene.h"
 #include "dengine-utils/logging.h"
+#include "dengine-utils/debug.h"
+
 #include "dengine/draw.h"
 #include "dengine/loadgl.h" //getFBO
 #include "dengine/entrygl.h"
@@ -21,6 +23,7 @@ void _denginescene_do_check_script(Entity* root, Scene* scene, ScriptFunc callfu
 
 Scene* denginescene_new()
 {
+    DENGINE_DEBUG_ENTER;
     Scene* newscn = malloc(sizeof (struct _Scene));
     memset(newscn, 0, sizeof (Scene));
 
@@ -37,6 +40,8 @@ Scene* denginescene_new()
 Skybox*
 denginescene_new_skybox(const Primitive* cube, const Material* material)
 {
+    DENGINE_DEBUG_ENTER;
+
     Skybox* sky = calloc(1, sizeof(Skybox));
     Primitive* c = calloc(1, sizeof(Primitive));
     Material* m = calloc(1, sizeof(Material));
@@ -52,6 +57,8 @@ denginescene_new_skybox(const Primitive* cube, const Material* material)
 
 void denginescene_destroy(Scene* scene)
 {
+    DENGINE_DEBUG_ENTER;
+
     EntityChild* ec = scene->entities.data;
     for (uint32_t i = 0; i < scene->entities.count; i++) {
         denginescene_ecs_destroy_entity(ec[i].child);
@@ -71,12 +78,16 @@ void denginescene_destroy(Scene* scene)
 
 void denginescene_add_entity(Scene* scene, Entity* entity)
 {
+    DENGINE_DEBUG_ENTER;
+
     EntityChild ec = { entity };
     vtor_pushback(&scene->entities, &ec);
 }
 
 void denginescene_update(Scene* scene)
 {
+    DENGINE_DEBUG_ENTER;
+
     EntityChild* ec = scene->entities.data;
     for (uint32_t i = 0; i < scene->entities.count; i++) {
         Entity* root = ec[i].child;
@@ -205,6 +216,8 @@ void _denginescene_do_check_script(Entity* root, Scene* scene, ScriptFunc callfu
 
 void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
 {
+    DENGINE_DEBUG_ENTER;
+
     Camera* cam = camera->camera_component->camera;
     //apply position
     //TODO : this is local position, use world pos
@@ -278,9 +291,12 @@ void _denginescene_ecs_do_light_draw_shadow_mesh(Entity* light, Entity* mesh)
         dengine_material_set_texture(&sl->pointLight.shadow.shadow_map.depth, "sLightsShadow0", mesh->mesh_component->material);
     }
 
+    /* TODO: Cull front faces for shadows. Make this optional */
     int entry_cullface;
     glGetIntegerv(GL_CULL_FACE_MODE, &entry_cullface);
+    DENGINE_CHECKGL;
     glCullFace(GL_FRONT);
+    DENGINE_CHECKGL;
 
     dengine_lighting_light_shadow_draw(light->light_component->type,
                                        light->light_component->light,
@@ -290,6 +306,7 @@ void _denginescene_ecs_do_light_draw_shadow_mesh(Entity* light, Entity* mesh)
                                        );
 
     glCullFace(entry_cullface);
+    DENGINE_CHECKGL;
 }
 
 void _denginescene_ecs_do_light_apply(Entity* light, Entity* mesh)
@@ -344,6 +361,8 @@ void _denginescene_ecs_rec_light_apply(Entity* light, Entity* root)
 
 void denginescene_ecs_do_light_scene(Entity* light, Scene* scene)
 {
+    DENGINE_DEBUG_ENTER;
+
     vec4 t;
     vec3 s;
     mat4 r;
@@ -383,18 +402,24 @@ void denginescene_ecs_do_light_scene(Entity* light, Scene* scene)
 
 void denginescene_ecs_do_skybox_scene(Scene* scene, Camera* camera)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(!scene->skybox)
         return;
 
     // draw as the last entity
     int entrydfunc;
     glGetIntegerv(GL_DEPTH_FUNC, &entrydfunc);
+    DENGINE_CHECKGL;
 
     int entrycullface;
     glGetIntegerv(GL_CULL_FACE_MODE, &entrycullface);
+    DENGINE_CHECKGL;
 
     glCullFace(GL_FRONT);
+    DENGINE_CHECKGL;
     glDepthFunc(GL_LEQUAL);
+    DENGINE_CHECKGL;
 
     dengine_camera_apply(&scene->skybox->material->shader_color, camera);
     dengine_material_use(scene->skybox->material);
@@ -404,11 +429,15 @@ void denginescene_ecs_do_skybox_scene(Scene* scene, Camera* camera)
     dengine_material_use(NULL);
 
     glDepthFunc(entrydfunc);
+    DENGINE_CHECKGL;
     glCullFace(entrycullface);
+    DENGINE_CHECKGL;
 }
 
 void denginescene_ecs_do_scripts_entity(Entity* entity, ScriptFunc func, void* args)
 {
+    DENGINE_DEBUG_ENTER;
+
     Script* scripts = entity->scripts.data;
     for(size_t i = 0; i < entity->scripts.count; i++)
     {
@@ -418,6 +447,8 @@ void denginescene_ecs_do_scripts_entity(Entity* entity, ScriptFunc func, void* a
 
 void denginescene_ecs_do_script_entity(Entity* entity, const Script* script, ScriptFunc func, void* args)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(script->type == DENGINE_SCRIPT_TYPE_PYTHON)
     {
         #ifdef DENGINE_SCRIPTING_PYTHON
@@ -434,6 +465,8 @@ void denginescene_ecs_do_script_entity(Entity* entity, const Script* script, Scr
 
 void denginescene_ecs_do_script_scene(Scene* scene, ScriptFunc func)
 {
+    DENGINE_DEBUG_ENTER;
+
     EntityChild* ec = scene->entities.data;
     for (uint32_t i = 0; i < scene->entities.count; i++) {
         Entity* root = ec[i].child;

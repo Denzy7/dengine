@@ -4,6 +4,7 @@
 #include "dengine-scene/ecs.h"
 
 #include "dengine-utils/logging.h"
+#include "dengine-utils/debug.h"
 #include "dengine_config.h"// DENGINE_ECS_MAXCHILDREN
 
 uint32_t entity_count = 0;
@@ -62,6 +63,8 @@ void _denginescene_ecs_new_entity_setup(Entity* ent)
 
 Entity* denginescene_ecs_new_entity()
 {
+    DENGINE_DEBUG_ENTER;
+
     Entity* ent = malloc(sizeof(struct _Entity));
 
     if(!ent)
@@ -91,6 +94,8 @@ void _denginescene_ecs_destroy_entity_children(Entity* root)
 
 void denginescene_ecs_destroy_entity(Entity* root)
 {
+    DENGINE_DEBUG_ENTER;
+
     _denginescene_ecs_destroy_entity_children(root);
     _denginescene_ecs_destroy_entity_components(root);
     //dengineutils_logging_log("destroy root %u", root->entity_id);
@@ -100,6 +105,8 @@ void denginescene_ecs_destroy_entity(Entity* root)
 
 void denginescene_ecs_parent(Entity* parent, Entity* child)
 {
+    DENGINE_DEBUG_ENTER;
+
     child->parent = parent;
 
     EntityChild ec = { child };
@@ -110,6 +117,8 @@ void denginescene_ecs_parent(Entity* parent, Entity* child)
 
 void denginescene_ecs_get_model_local(Entity* entity,mat4 mat4x4)
 {
+    DENGINE_DEBUG_ENTER;
+
     glm_mat4_identity(mat4x4);
     glm_translate(mat4x4,entity->transform.position);
 
@@ -128,11 +137,15 @@ void denginescene_ecs_get_model_local(Entity* entity,mat4 mat4x4)
 
 void denginescene_ecs_set_entity_name(Entity* entity, const char* name)
 {
+    DENGINE_DEBUG_ENTER;
+
     snprintf(entity->name, DENGINE_ECS_MAXNAME, "%s", name);
 }
 
 MeshComponent* denginescene_ecs_new_meshcomponent(const Primitive* mesh, const Material* material)
 {
+    DENGINE_DEBUG_ENTER;
+
     MeshComponent* mesh_comp = calloc(1, sizeof(MeshComponent));
 
     Primitive* prim = calloc(1, sizeof(Primitive));
@@ -150,6 +163,8 @@ MeshComponent* denginescene_ecs_new_meshcomponent(const Primitive* mesh, const M
 
 CameraComponent* denginescene_ecs_new_cameracomponent(const Camera* camera)
 {
+    DENGINE_DEBUG_ENTER;
+
     CameraComponent* cam_comp = calloc(1, sizeof(CameraComponent));
     Camera* cam = calloc(1, sizeof(Camera));
     memcpy(cam, camera, sizeof(Camera));
@@ -162,6 +177,8 @@ CameraComponent* denginescene_ecs_new_cameracomponent(const Camera* camera)
 
 LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light)
 {
+    DENGINE_DEBUG_ENTER;
+
     LightComponent* comp = calloc(1, sizeof(LightComponent));
 
     if(!comp)
@@ -186,6 +203,8 @@ LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light)
 
 PhysicsComponent* denginescene_ecs_new_physicscomponent(ECSPhysicsColShape type, const void* colshapeconfig, const float mass)
 {
+    DENGINE_DEBUG_ENTER;
+
     PhysicsComponent* comp = calloc(1, sizeof(PhysicsComponent));
     if(!comp)
         return NULL;
@@ -204,11 +223,15 @@ PhysicsComponent* denginescene_ecs_new_physicscomponent(ECSPhysicsColShape type,
 
 void denginescene_ecs_add_script(Entity* entity, const Script* script)
 {
+    DENGINE_DEBUG_ENTER;
+
     vtor_pushback(&entity->scripts, script);
 }
 
 void denginescene_ecs_transform_entity(Entity* entity)
 {
+    DENGINE_DEBUG_ENTER;
+
     if(!entity->parent)
         denginescene_ecs_get_model_local(entity, entity->transform.world_model);
 
@@ -233,6 +256,8 @@ void denginescene_ecs_transform_entity(Entity* entity)
 
 void denginescene_ecs_get_front(Entity* entity, vec3 front)
 {
+    DENGINE_DEBUG_ENTER;
+
     front[0] = cosf(glm_rad(entity->transform.rotation[1])) * cosf(glm_rad(entity->transform.rotation[0]));
     front[1] = sinf(glm_rad(entity->transform.rotation[0]));
     front[2] = sinf(glm_rad(entity->transform.rotation[1])) * cosf(glm_rad(entity->transform.rotation[0]));
@@ -241,6 +266,8 @@ void denginescene_ecs_get_front(Entity* entity, vec3 front)
 
 void denginescene_ecs_get_right(Entity* entity, vec3 right)
 {
+    DENGINE_DEBUG_ENTER;
+
     vec3 front;
     vec3 y = {0.0f, 1.0f, 0.0f};
     denginescene_ecs_get_front(entity, front);
@@ -249,6 +276,8 @@ void denginescene_ecs_get_right(Entity* entity, vec3 right)
 
 void denginescene_ecs_get_up(Entity* entity, vec3 up)
 {
+    DENGINE_DEBUG_ENTER;
+
     vec3 right, front;
     denginescene_ecs_get_right(entity, right);
     denginescene_ecs_get_front(entity, front);
