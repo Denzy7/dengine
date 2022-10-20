@@ -23,9 +23,9 @@ int main(int argc, char *argv[])
     dengitor->scene_axis_scale = 2.0f;
     dengitor->scene_axis_width = 3.5f;
     dengitor->scene_entity_current_axis_width = 1.5;
-
+    /* default flags keep changing. but 0 is default*/
     GtkApplication* app = gtk_application_new(
-                "com.denzygames.Dengitor", G_APPLICATION_DEFAULT_FLAGS);
+                "com.denzygames.Dengitor", 0);
     g_signal_connect(app, "activate", G_CALLBACK(dengitor_onactivate), NULL);
     int run = g_application_run( G_APPLICATION(app), argc, argv);
 
