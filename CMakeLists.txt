@@ -101,6 +101,9 @@ if(PkgConfig_FOUND AND NOT ANDROID_NDK)
         set(DENGINE_HAS_LIBGL 1)
     endif()
 
+    pkg_get_variable(wayland_scanner wayland-scanner wayland_scanner)
+    pkg_get_variable(wayland_protocols_pkgdatadir wayland-protocols pkgdatadir)
+
     pkg_check_modules(wayland_client wayland-client)
     if(wayland_client_LIBRARIES)
         include_directories(${wayland_client_INCLUDE_DIRS})

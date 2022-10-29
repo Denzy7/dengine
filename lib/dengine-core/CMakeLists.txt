@@ -89,7 +89,38 @@ foreach(res ${coreres})
     list(APPEND outres ${outresname})
 endforeach()
 
+if(DENGINE_HAS_WAYLAND_CLIENT)
+    #generate wl resources
+    set(wl-prots
+        stable/xdg-shell/xdg-shell.xml
+    )
+    foreach(prot ${wl-prots})
+        set(in ${wayland_protocols_pkgdatadir}/${prot})
+        get_filename_component(barename ${prot} NAME)
+        set(outsrc ${CMAKE_CURRENT_BINARY_DIR}/${barename}.c)
+        set(outhdr ${CMAKE_CURRENT_BINARY_DIR}/${barename}.h)
+        add_custom_command(
+            OUTPUT ${outsrc}
+            COMMAND ${wayland_scanner} public-code ${in} ${outsrc}
+            DEPENDS ${in}
+            VERBATIM
+        )
+        add_custom_command(
+            OUTPUT ${outhdr}
+            COMMAND ${wayland_scanner} client-header ${in} ${outhdr}
+            DEPENDS ${in}
+            VERBATIM
+        )
+        list(APPEND outres ${outsrc} ${outhdr})
+    endforeach()
+endif()
+
 add_library(dengine-core ${dengine-core-hdr} ${dengine-core-src} ${outres})
+
+if(DENGINE_HAS_WAYLAND_CLIENT)
+    #wl_protos.xml.h
+    target_include_directories(dengine-core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+endif()
 set(dengine-core-link)
 set_target_properties(dengine-core PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
@@ -115,6 +146,12 @@ endif()
 
 if(DENGINE_HAS_LIBGL)
     list(APPEND dengine-core-link ${gl_LIBRARIES})
+endif()
+
+if(DENGINE_HAS_WAYLAND_CLIENT)
+    list(APPEND dengine-core-link
+        ${wayland_client_LIBRARIES}
+        ${wayland_egl_LIBRARIES})
 endif()
 
 if(UNIX)
