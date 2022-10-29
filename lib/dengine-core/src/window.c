@@ -31,6 +31,7 @@
 #include <wayland-client.h>
 #include <wayland-egl.h>
 #include "xdg-shell.xml.h"
+#include <linux/input-event-codes.h> /* BTN_... */
 #else
 #error "No suitable Window creation framework found"
 #endif
@@ -68,11 +69,27 @@ static void registry_global(void* data, struct wl_registry* registry, uint32_t n
 static void registry_global_remove(void* data, struct wl_registry* registry, uint32_t name);
 
 static void wm_base_ping(void* data, struct xdg_wm_base* wm, uint32_t serial);
+
 static void xdg_surface_configure(void* data, struct xdg_surface* xdg_sfc, uint32_t serial);
+
 static void xdg_toplevel_configure(void* data, struct xdg_toplevel* toplvl, int w, int h, struct wl_array* states);
 static void xdg_toplevel_close(void* data, struct xdg_toplevel* toplvl);
 static void xdg_toplevel_configure_bounds(void *data,struct xdg_toplevel *xdg_toplevel, int32_t width, int32_t height);
 static void xdg_toplevel_wmcap(void *data, struct xdg_toplevel *xdg_toplevel, struct wl_array *capabilities);
+
+static void wl_seat_name(void *data, struct wl_seat *wl_seat, const char *name);
+static void wl_seat_caps(void* data, struct wl_seat* seat, uint32_t caps);
+
+static void wl_pointer_enter(void *data, struct wl_pointer *pointer, uint32_t serial, struct wl_surface *surface, wl_fixed_t x, wl_fixed_t y);
+static void wl_pointer_motion(void *data, struct wl_pointer *wl_pointer, uint32_t time, wl_fixed_t x, wl_fixed_t y);
+static void wl_pointer_frame(void* data, struct wl_pointer* pointer);
+static void wl_pointer_button(void *data, struct wl_pointer *wl_pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state);
+static void wl_pointer_leave(void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface);
+static void wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis, wl_fixed_t value);
+static void wl_pointer_axis_stop(void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis);
+static void wl_pointer_axis_source(void *data, struct wl_pointer *wl_pointer, uint32_t axis_source);
+static void wl_pointer_axis_discrete(void *data, struct wl_pointer *wl_pointer, uint32_t axis, int32_t discrete);
+
 #endif
 
 void _dengine_window_processkey(WindowInput* input, char key, int isrelease);
@@ -164,6 +181,25 @@ static const struct xdg_toplevel_listener xdg_toplevel_listener =
     .close = xdg_toplevel_close,
     .configure_bounds = xdg_toplevel_configure_bounds,
     .wm_capabilities = xdg_toplevel_wmcap
+};
+
+static const struct wl_seat_listener wl_seat_listener =
+{
+    .capabilities = wl_seat_caps,
+    .name = wl_seat_name
+};
+
+static const struct wl_pointer_listener wl_ptr_listener =
+{
+    .enter = wl_pointer_enter,
+    .motion = wl_pointer_motion,
+    .frame = wl_pointer_frame,
+    .leave = wl_pointer_leave,
+    .button = wl_pointer_button,
+    .axis = wl_pointer_axis,
+    .axis_source = wl_pointer_axis_source,
+    .axis_discrete = wl_pointer_axis_discrete,
+    .axis_stop = wl_pointer_axis_stop
 };
 
 #endif
@@ -722,6 +758,7 @@ void* _dengine_window_createandpoll(void* args)
 #ifdef DENGINE_WIN_WAYLAND
    /* set user datum (data plural?) */
     xdg_toplevel_set_user_data(ret->xdg_top, ret);
+    wl_surface_set_user_data(ret->wl_sfc, ret);
 #endif
 
     attrs->ret = ret;
@@ -1417,6 +1454,11 @@ static void registry_global(void* data, struct wl_registry* registry, uint32_t n
     {
         wl_out = wl_registry_bind(registry, name,
                                   &wl_output_interface, version);
+    }else if(strcmp(ifc, wl_seat_interface.name) == 0)
+    {
+        wl_seat = wl_registry_bind(registry, name,
+                                   &wl_seat_interface, version);
+        wl_seat_add_listener(wl_seat, &wl_seat_listener, NULL);
     }
 }
 
@@ -1465,6 +1507,97 @@ static void xdg_toplevel_configure_bounds(void *data,struct xdg_toplevel *xdg_to
 static void xdg_toplevel_wmcap(void *data, struct xdg_toplevel *xdg_toplevel, struct wl_array *capabilities)
 {
 //    dengineutils_logging_log("xdg_toplevel_wmcap");
+}
+
+static void wl_seat_name(void *data, struct wl_seat *wl_seat, const char *name)
+{
+
+}
+
+static void wl_seat_caps(void* data, struct wl_seat* seat, uint32_t caps)
+{
+    if(caps & WL_SEAT_CAPABILITY_POINTER)
+    {
+        wl_ptr = wl_seat_get_pointer(seat);
+        wl_pointer_add_listener(wl_ptr, &wl_ptr_listener, NULL);
+    }
+}
+/* currently focused window */
+DengineWindow* focused = NULL;
+static void wl_pointer_enter(void *data, struct wl_pointer *pointer, uint32_t serial, struct wl_surface *surface, wl_fixed_t x, wl_fixed_t y)
+{
+    focused = wl_surface_get_user_data(surface);
+}
+
+static void wl_pointer_motion(void *data, struct wl_pointer *wl_pointer, uint32_t time, wl_fixed_t x, wl_fixed_t y)
+{
+    focused->input.mse_x = wl_fixed_to_double(x);
+    focused->input.mse_y = focused->height - wl_fixed_to_double(y);
+}
+
+static void wl_pointer_frame(void* data, struct wl_pointer* pointer)
+{
+
+}
+static void wl_pointer_button(void *data, struct wl_pointer *wl_pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state)
+{
+    if(button == BTN_LEFT)
+    {
+        if(focused->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] != -1)
+        {
+            focused->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] = 1;
+        }
+        if(state == WL_POINTER_BUTTON_STATE_RELEASED)
+            focused->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] = 0;
+
+    }else if(button == BTN_RIGHT)
+    {
+        if(focused->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] != -1)
+        {
+            focused->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] = 1;
+        }
+        if(state == WL_POINTER_BUTTON_STATE_RELEASED)
+            focused->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] = 0;
+    }else if(button == BTN_MIDDLE)
+    {
+        if(focused->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] != -1)
+        {
+            focused->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] = 1;
+        }
+        if(state == WL_POINTER_BUTTON_STATE_RELEASED)
+            focused->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] = 0;
+    }
+//    dengineutils_logging_log("btn:%u", button);
+}
+static void wl_pointer_leave(void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface)
+{
+    focused = NULL;
+}
+
+static void wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis, wl_fixed_t value)
+{
+//    dengineutils_logging_log("axis:%u value:%f", axis, wl_fixed_to_double(value));
+    int value_int = wl_fixed_to_int(value);
+    int value_norm = value_int / abs(value_int);
+    if(axis == 0)
+    {
+        focused->input.msesrl_y = value_norm;
+    }
+}
+
+static void wl_pointer_axis_stop(void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis)
+{
+
+}
+
+static void wl_pointer_axis_source(void *data, struct wl_pointer *wl_pointer, uint32_t axis_source)
+{
+
+}
+
+static void wl_pointer_axis_discrete(void *data, struct wl_pointer *wl_pointer, uint32_t axis, int32_t discrete)
+{
+
 }
 
 #endif
