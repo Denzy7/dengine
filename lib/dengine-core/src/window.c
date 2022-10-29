@@ -27,6 +27,10 @@
 #include <windowsx.h> //GET_X_LPARAM
 #elif defined (DENGINE_ANDROID)
 #include <dengine-utils/platform/android.h> //ANativeWindow
+#elif defined(DENGINE_WIN_WAYLAND)
+#include <wayland-client.h>
+#include <wayland-egl.h>
+#include "xdg-shell.xml.h"
 #else
 #error "No suitable Window creation framework found"
 #endif
@@ -58,6 +62,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #endif
 #ifdef DENGINE_WIN_X11
 int _dengine_window_x11err(Display* dpy, XErrorEvent* err);
+#endif
+#ifdef DENGINE_WIN_WAYLAND
+static void registry_global(void* data, struct wl_registry* registry, uint32_t name, const char* ifc, uint32_t version);
+static void registry_global_remove(void* data, struct wl_registry* registry, uint32_t name);
+
+static void wm_base_ping(void* data, struct xdg_wm_base* wm, uint32_t serial);
+static void xdg_surface_configure(void* data, struct xdg_surface* xdg_sfc, uint32_t serial);
+static void xdg_toplevel_configure(void* data, struct xdg_toplevel* toplvl, int w, int h, struct wl_array* states);
+static void xdg_toplevel_close(void* data, struct xdg_toplevel* toplvl);
+static void xdg_toplevel_configure_bounds(void *data,struct xdg_toplevel *xdg_toplevel, int32_t width, int32_t height);
+static void xdg_toplevel_wmcap(void *data, struct xdg_toplevel *xdg_toplevel, struct wl_array *capabilities);
 #endif
 
 void _dengine_window_processkey(WindowInput* input, char key, int isrelease);
@@ -94,6 +109,12 @@ struct DengineWindow
 #ifdef DENGINE_ANDROID
     ANativeWindow* and_win;
 #endif
+#ifdef DENGINE_WIN_WAYLAND
+   struct wl_surface* wl_sfc;
+   struct xdg_surface* xdg_sfc;
+   struct xdg_toplevel* xdg_top;
+   struct wl_egl_window* wl_egl_win;
+#endif
     int gl_load;
     DynLib gl_lib;
     WindowInput input;
@@ -119,6 +140,41 @@ static int _win_msaa = DFT_WIN_MSAA, _win_depth = DFT_WIN_DEPTH;
 #ifdef DENGINE_WIN_X11
 Display* x_dpy;
 Atom wm_delete;
+#endif
+#ifdef DENGINE_WIN_WAYLAND
+static const struct wl_registry_listener registry_listener =
+{
+    .global = registry_global,
+    .global_remove = registry_global_remove
+};
+
+static const struct xdg_wm_base_listener wm_base_listener =
+{
+    .ping = wm_base_ping
+};
+
+static const struct xdg_surface_listener xdg_sfc_listener =
+{
+    .configure = xdg_surface_configure
+};
+
+static const struct xdg_toplevel_listener xdg_toplevel_listener =
+{
+    .configure = xdg_toplevel_configure,
+    .close = xdg_toplevel_close,
+    .configure_bounds = xdg_toplevel_configure_bounds,
+    .wm_capabilities = xdg_toplevel_wmcap
+};
+
+#endif
+#ifdef DENGINE_WIN_WAYLAND
+struct wl_compositor* wl_comp = NULL;
+struct wl_display* wl_dpy = NULL;
+struct xdg_wm_base* wm_base = NULL;
+struct wl_output* wl_out = NULL;
+struct wl_seat* wl_seat = NULL;
+struct wl_pointer* wl_ptr = NULL;
+struct wl_keyboard* wl_kbd = NULL;
 #endif
 #ifdef DENGINE_CONTEXT_EGL
 EGLDisplay egl_dpy;
@@ -201,6 +257,41 @@ int dengine_window_init()
         dengineutils_logging_log("ERROR::WINDOW::Cannot register Win32 Window Class!");
         init = 0;
     }
+#elif defined(DENGINE_WIN_WAYLAND)
+    wl_dpy = wl_display_connect(NULL);
+    if(wl_dpy == NULL)
+    {
+        dengineutils_logging_log("ERROR::WINDOW::Cannot open wl_display");
+    }else
+    {
+        egl_dpy = eglGetDisplay(wl_dpy);
+        if(egl_dpy == EGL_NO_DISPLAY){
+            dengineutils_logging_log("ERROR::WINDOW::Cannot eglGetDisplay wl_display");
+        }
+        else
+        {
+            init = 1;
+
+            struct wl_registry* registry = wl_display_get_registry(wl_dpy);
+            wl_registry_add_listener(registry, &registry_listener, NULL);
+
+            wl_display_dispatch(wl_dpy);
+            wl_display_roundtrip(wl_dpy);
+
+            if(wl_comp == NULL)
+            {
+                dengineutils_logging_log("ERROR::cannot find wl_compositor");
+                init = 0;
+            }
+
+            if(wm_base == NULL)
+            {
+                dengineutils_logging_log("ERROR::cannot find xdg_wm_base");
+                init = 0;
+            }
+        }
+
+    }
 #endif
 
     //at this point nothing works if not init display
@@ -252,6 +343,9 @@ void dengine_window_terminate()
 #endif
 #ifdef DENGINE_WIN32
     UnregisterClassW(wc_class, wc.hInstance);
+#endif
+#ifdef DENGINE_WIN_WAYLAND
+   wl_display_disconnect(wl_dpy);
 #endif
 
     _dengine_input_terminate();
@@ -575,6 +669,48 @@ void* _dengine_window_createandpoll(void* args)
         dengineutils_logging_log("ERROR::WINDOW::Cannot create EGLContext");
         return NULL;
     }
+#elif defined(DENGINE_WIN_WAYLAND)
+    window.wl_sfc = wl_compositor_create_surface(wl_comp);
+    if(window.wl_sfc == NULL)
+    {
+        dengineutils_logging_log("ERROR::cannot wl_compositor_create_surface");
+        return NULL;
+    }
+
+    window.xdg_sfc = xdg_wm_base_get_xdg_surface(wm_base, window.wl_sfc);
+    xdg_surface_add_listener(window.xdg_sfc, &xdg_sfc_listener, NULL);
+
+    window.xdg_top = xdg_surface_get_toplevel(window.xdg_sfc);
+    xdg_toplevel_set_title(window.xdg_top, title);
+    xdg_toplevel_add_listener(window.xdg_top, &xdg_toplevel_listener, NULL);
+
+    wl_surface_commit(window.wl_sfc);
+
+    struct wl_region* opaque = wl_compositor_create_region(wl_comp);
+    wl_region_add(opaque, 0, 0, width, height);
+    wl_surface_set_opaque_region(window.wl_sfc, opaque);
+    wl_region_destroy(opaque);
+
+    window.wl_egl_win = wl_egl_window_create(window.wl_sfc, width, height);
+    if(window.wl_egl_win == EGL_NO_SURFACE)
+    {
+        dengineutils_logging_log("ERROR::cannot wl_egl_window_create");
+        return NULL;
+    }
+
+    window.egl_dpy = egl_dpy;
+    EGLContext shr = EGL_NO_CONTEXT;
+    if(share)
+        shr = share->egl_ctx;
+
+    if(!_dengine_window_egl_createctx(window.egl_dpy, &window.egl_sfc, &window.egl_ctx, shr, window.wl_egl_win))
+    {
+        dengineutils_logging_log("ERROR::WINDOW::Cannot _dengine_window_egl_createctx");
+        return NULL;
+    }
+
+    window.width = width;
+    window.height = height;
 #endif
     DengineWindow* ret = calloc(1, sizeof(DengineWindow));
     memcpy(ret, &window, sizeof(DengineWindow));
@@ -582,6 +718,10 @@ void* _dengine_window_createandpoll(void* args)
 #ifdef DENGINE_WIN32
     //set lpParam
     SetWindowLongPtr(ret->win32_hwnd, GWLP_USERDATA, (LONG_PTR)ret);
+#endif
+#ifdef DENGINE_WIN_WAYLAND
+   /* set user datum (data plural?) */
+    xdg_toplevel_set_user_data(ret->xdg_top, ret);
 #endif
 
     attrs->ret = ret;
@@ -655,6 +795,13 @@ void dengine_window_destroy(DengineWindow* window)
    DestroyWindow(window->win32_hwnd);
 #endif
 
+#ifdef DENGINE_WIN_WAYLAND
+   wl_egl_window_destroy(window->wl_egl_win);
+   xdg_toplevel_destroy(window->xdg_top);
+   xdg_surface_destroy(window->xdg_sfc);
+   wl_surface_destroy(window->wl_sfc);
+#endif
+
    if(window->gl_lib)
         dengineutils_dynlib_close(window->gl_lib);
 
@@ -686,6 +833,11 @@ void dengine_window_get_dim(DengineWindow* window, int* width, int* height)
         if(height)
             *height = (int)ANativeWindow_getHeight(window->and_win);
     }
+#elif defined(DENGINE_WIN_WAYLAND)
+    if(width)
+        *width = window->width;
+    if(height)
+        *height = window->height;
 #endif
 }
 
@@ -971,6 +1123,8 @@ void* _dengine_window_pollinf(void* arg)
             window->input.mse_y = 0.0;
         }
     }
+    #elif defined(DENGINE_WIN_WAYLAND)
+    wl_display_dispatch_pending(wl_dpy);
     #endif
     return NULL;
 }
@@ -994,13 +1148,15 @@ int dengine_window_poll(DengineWindow* window)
 
 int dengine_window_resize(DengineWindow* window, int width, int height)
 {
+    int ret = 0;
 #ifdef DENGINE_WIN_X11
-    return XResizeWindow(x_dpy, window->x_win, width, height);
+    ret = XResizeWindow(x_dpy, window->x_win, width, height);
 #elif defined(DENGINE_WIN32)
-    return MoveWindow(window->win32_hwnd, 0, 0, width, height, TRUE);
-#else
-    return 0;
+    ret = MoveWindow(window->win32_hwnd, 0, 0, width, height, TRUE);
+#elif defined(DENGINE_WIN_WAYLAND)
+    wl_egl_window_resize(window->wl_egl_win, width, height, 0, 0);
 #endif
+    return ret;
 }
 
 void dengine_window_set_fullscreen(DengineWindow* window, int state)
@@ -1037,9 +1193,13 @@ void dengine_window_set_fullscreen(DengineWindow* window, int state)
 
     SetWindowLongPtr(window->win32_hwnd, GWL_STYLE, WS_VISIBLE | style);
     SetWindowPos(window->win32_hwnd, after, 0, 0, w, h, SWP_FRAMECHANGED);
+#elif defined (DENGINE_WIN_WAYLAND)
+    if(state)
+        xdg_toplevel_set_fullscreen(window->xdg_top, wl_out);
+    else
+        xdg_toplevel_unset_fullscreen(window->xdg_top);
 #endif
 }
-
 int dengine_window_set_position(DengineWindow* window, int x, int y)
 {
     DENGINE_DEBUG_ENTER;
@@ -1053,8 +1213,20 @@ int dengine_window_set_position(DengineWindow* window, int x, int y)
 #elif defined(DENGINE_WIN32)
     set = SetWindowPos(window->win32_hwnd, window->win32_after, x, y,
                  window->width, window->height, SWP_FRAMECHANGED);
+#elif defined(DENGINE_WIN_WAYLAND)
+    /* TODO: WAIT FOR A WINDOW POSTION PROTOCOL
+     * OR MESS WITH NASTY LIBWESTON
+     *
+     * THANKS ALOT WAYLAND! */
 #endif
     return set;
+}
+
+WindowInput* dengine_window_get_input(DengineWindow* window)
+{
+    DENGINE_DEBUG_ENTER;
+
+    return &window->input;
 }
 
 /* PLATFORM SPECIFICS */
@@ -1228,9 +1400,73 @@ int _dengine_window_x11err(Display* dpy, XErrorEvent* err)
 }
 #endif
 
-WindowInput* dengine_window_get_input(DengineWindow* window)
+#ifdef DENGINE_WIN_WAYLAND
+static void registry_global(void* data, struct wl_registry* registry, uint32_t name, const char* ifc, uint32_t version)
 {
-    DENGINE_DEBUG_ENTER;
-
-    return &window->input;
+//    dengineutils_logging_log("registry_global: ifc=%s, ver=%u", ifc, version);
+    if(strcmp(ifc, wl_compositor_interface.name) == 0)
+    {
+        wl_comp = wl_registry_bind(registry, name,
+                                   &wl_compositor_interface, version);
+    }else if(strcmp(ifc, xdg_wm_base_interface.name) == 0)
+    {
+        wm_base = wl_registry_bind(registry, name,
+                                 &xdg_wm_base_interface, version);
+        xdg_wm_base_add_listener(wm_base, &wm_base_listener, NULL);
+    }else if(strcmp(ifc, wl_output_interface.name) == 0)
+    {
+        wl_out = wl_registry_bind(registry, name,
+                                  &wl_output_interface, version);
+    }
 }
+
+static void registry_global_remove(void* data, struct wl_registry* registry, uint32_t name)
+{
+//    dengineutils_logging_log("registry_global_remove");
+}
+
+static void wm_base_ping(void* data, struct xdg_wm_base* wm, uint32_t serial)
+{
+//    dengineutils_logging_log("wm_base_ping: serial=%u", serial);
+    xdg_wm_base_pong(wm, serial);
+}
+
+static void xdg_surface_configure(void* data, struct xdg_surface* xdg_sfc, uint32_t serial)
+{
+//    dengineutils_logging_log("xdg_surface_ack_configure: serial=%u", serial);
+    xdg_surface_ack_configure(xdg_sfc, serial);
+}
+
+static void xdg_toplevel_configure(void* data, struct xdg_toplevel* toplvl, int w, int h, struct wl_array* states)
+{
+//    dengineutils_logging_log("xdg_toplevel_configure: w=%u, h=%u", w, h);
+    if(w == 0 && h == 0)
+        return;
+
+    DengineWindow* window = data;
+    wl_egl_window_resize(window->wl_egl_win, w, h, 0, 0);
+    window->width = w;
+    window->height = h;
+    wl_surface_commit(window->wl_sfc);
+}
+
+static void xdg_toplevel_close(void* data, struct xdg_toplevel* toplvl)
+{
+//    dengineutils_logging_log("xdg_toplevel_close");
+    DengineWindow* window = data;
+    window->running = 0;
+}
+
+static void xdg_toplevel_configure_bounds(void *data,struct xdg_toplevel *xdg_toplevel, int32_t width, int32_t height)
+{
+//    dengineutils_logging_log("xdg_toplevel_configure_bounds: w=%u, h=%u", width, height);
+}
+
+static void xdg_toplevel_wmcap(void *data, struct xdg_toplevel *xdg_toplevel, struct wl_array *capabilities)
+{
+//    dengineutils_logging_log("xdg_toplevel_wmcap");
+}
+
+#endif
+
+
