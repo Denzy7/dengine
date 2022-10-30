@@ -32,6 +32,9 @@
 #include <wayland-egl.h>
 #include "xdg-shell.xml.h"
 #include <linux/input-event-codes.h> /* BTN_... */
+#include <sys/mman.h> /* mmap */
+#include <unistd.h> /* close */
+#include <xkbcommon/xkbcommon.h>
 #else
 #error "No suitable Window creation framework found"
 #endif
@@ -90,6 +93,12 @@ static void wl_pointer_axis_stop(void *data, struct wl_pointer *wl_pointer, uint
 static void wl_pointer_axis_source(void *data, struct wl_pointer *wl_pointer, uint32_t axis_source);
 static void wl_pointer_axis_discrete(void *data, struct wl_pointer *wl_pointer, uint32_t axis, int32_t discrete);
 
+static void wl_keyboard_keymap(void *data, struct wl_keyboard *wl_keyboard, uint32_t format, int32_t fd, uint32_t size);
+static void wl_keyboard_enter(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface, struct wl_array *keys);
+static void wl_keyboard_leave(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface);
+static void wl_keyboard_mods(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group);
+static void wl_keyboard_key(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t time, uint32_t key, uint32_t state);
+static void wl_keyboard_repeatinfo (void *data, struct wl_keyboard *wl_keyboard, int32_t rate, int32_t delay);
 #endif
 
 void _dengine_window_processkey(WindowInput* input, char key, int isrelease);
@@ -202,16 +211,29 @@ static const struct wl_pointer_listener wl_ptr_listener =
     .axis_stop = wl_pointer_axis_stop
 };
 
-#endif
-#ifdef DENGINE_WIN_WAYLAND
+static const struct wl_keyboard_listener wl_kbd_listener =
+{
+    .keymap = wl_keyboard_keymap,
+    .enter = wl_keyboard_enter,
+    .leave = wl_keyboard_leave,
+    .modifiers = wl_keyboard_mods,
+    .key = wl_keyboard_key,
+    .repeat_info = wl_keyboard_repeatinfo
+};
+
 struct wl_compositor* wl_comp = NULL;
 struct wl_display* wl_dpy = NULL;
 struct xdg_wm_base* wm_base = NULL;
 struct wl_output* wl_out = NULL;
 struct wl_seat* wl_seat = NULL;
 struct wl_pointer* wl_ptr = NULL;
+
+struct xkb_context* xkb_ctx = NULL;
+struct xkb_keymap* xkb_keymap = NULL;
+struct xkb_state* xkb_state = NULL;
 struct wl_keyboard* wl_kbd = NULL;
 #endif
+
 #ifdef DENGINE_CONTEXT_EGL
 EGLDisplay egl_dpy;
 #endif
@@ -325,8 +347,14 @@ int dengine_window_init()
                 dengineutils_logging_log("ERROR::cannot find xdg_wm_base");
                 init = 0;
             }
-        }
 
+            xkb_ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+            if(xkb_ctx == NULL)
+            {
+                dengineutils_logging_log("ERROR::cannot xkb_context_new");
+                init = 0;
+            }
+        }
     }
 #endif
 
@@ -381,7 +409,10 @@ void dengine_window_terminate()
     UnregisterClassW(wc_class, wc.hInstance);
 #endif
 #ifdef DENGINE_WIN_WAYLAND
-   wl_display_disconnect(wl_dpy);
+    xkb_state_unref(xkb_state);
+    xkb_keymap_unref(xkb_keymap);
+    xkb_context_unref(xkb_ctx);
+    wl_display_disconnect(wl_dpy);
 #endif
 
     _dengine_input_terminate();
@@ -1521,18 +1552,24 @@ static void wl_seat_caps(void* data, struct wl_seat* seat, uint32_t caps)
         wl_ptr = wl_seat_get_pointer(seat);
         wl_pointer_add_listener(wl_ptr, &wl_ptr_listener, NULL);
     }
+    if(caps & WL_SEAT_CAPABILITY_KEYBOARD)
+    {
+        wl_kbd = wl_seat_get_keyboard(seat);
+        wl_keyboard_add_listener(wl_kbd, &wl_kbd_listener, NULL);
+    }
 }
 /* currently focused window */
-DengineWindow* focused = NULL;
+DengineWindow* focused_ptr = NULL;
+DengineWindow* focused_kbd = NULL;
 static void wl_pointer_enter(void *data, struct wl_pointer *pointer, uint32_t serial, struct wl_surface *surface, wl_fixed_t x, wl_fixed_t y)
 {
-    focused = wl_surface_get_user_data(surface);
+    focused_ptr = wl_surface_get_user_data(surface);
 }
 
 static void wl_pointer_motion(void *data, struct wl_pointer *wl_pointer, uint32_t time, wl_fixed_t x, wl_fixed_t y)
 {
-    focused->input.mse_x = wl_fixed_to_double(x);
-    focused->input.mse_y = focused->height - wl_fixed_to_double(y);
+    focused_ptr->input.mse_x = wl_fixed_to_double(x);
+    focused_ptr->input.mse_y = focused_ptr->height - wl_fixed_to_double(y);
 }
 
 static void wl_pointer_frame(void* data, struct wl_pointer* pointer)
@@ -1543,35 +1580,35 @@ static void wl_pointer_button(void *data, struct wl_pointer *wl_pointer, uint32_
 {
     if(button == BTN_LEFT)
     {
-        if(focused->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] != -1)
+        if(focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] != -1)
         {
-            focused->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] = 1;
+            focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] = 1;
         }
         if(state == WL_POINTER_BUTTON_STATE_RELEASED)
-            focused->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] = 0;
+            focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] = 0;
 
     }else if(button == BTN_RIGHT)
     {
-        if(focused->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] != -1)
+        if(focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] != -1)
         {
-            focused->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] = 1;
+            focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] = 1;
         }
         if(state == WL_POINTER_BUTTON_STATE_RELEASED)
-            focused->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] = 0;
+            focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] = 0;
     }else if(button == BTN_MIDDLE)
     {
-        if(focused->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] != -1)
+        if(focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] != -1)
         {
-            focused->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] = 1;
+            focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] = 1;
         }
         if(state == WL_POINTER_BUTTON_STATE_RELEASED)
-            focused->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] = 0;
+            focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] = 0;
     }
 //    dengineutils_logging_log("btn:%u", button);
 }
 static void wl_pointer_leave(void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface)
 {
-    focused = NULL;
+    focused_ptr = NULL;
 }
 
 static void wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis, wl_fixed_t value)
@@ -1581,7 +1618,7 @@ static void wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t 
     int value_norm = value_int / abs(value_int);
     if(axis == 0)
     {
-        focused->input.msesrl_y = value_norm;
+        focused_ptr->input.msesrl_y = value_norm;
     }
 }
 
@@ -1596,6 +1633,46 @@ static void wl_pointer_axis_source(void *data, struct wl_pointer *wl_pointer, ui
 }
 
 static void wl_pointer_axis_discrete(void *data, struct wl_pointer *wl_pointer, uint32_t axis, int32_t discrete)
+{
+
+}
+
+static void wl_keyboard_keymap(void *data, struct wl_keyboard *wl_keyboard, uint32_t format, int32_t fd, uint32_t size)
+{
+    xkb_state_unref(xkb_state);
+    xkb_keymap_unref(xkb_keymap);
+
+    char* charmap = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
+    xkb_keymap = xkb_keymap_new_from_string(xkb_ctx, charmap, XKB_KEYMAP_FORMAT_TEXT_V1, XKB_KEYMAP_COMPILE_NO_FLAGS);
+    munmap(charmap, size);
+    close(fd);
+
+    xkb_state = xkb_state_new(xkb_keymap);
+}
+static void wl_keyboard_enter(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface, struct wl_array *keys)
+{
+    focused_kbd = wl_surface_get_user_data(surface);
+}
+static void wl_keyboard_leave(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface)
+{
+    focused_kbd = NULL;
+}
+static void wl_keyboard_mods(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group)
+{
+    xkb_state_update_mask(xkb_state,
+                          mods_depressed, mods_latched, mods_locked,
+                          0, 0, group);
+}
+static void wl_keyboard_key(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t time, uint32_t key, uint32_t state)
+{
+    char kv[2];
+    xkb_state_key_get_utf8(xkb_state, key + 8, kv, sizeof(kv));
+    char up = toupper(kv[0]);
+    _dengine_window_processkey(&focused_kbd->input, up, !state);
+//    dengineutils_logging_log("wl_keyboard_key: kv=%c, state=%u", kv[0], state);
+}
+
+static void wl_keyboard_repeatinfo (void *data, struct wl_keyboard *wl_keyboard, int32_t rate, int32_t delay)
 {
 
 }

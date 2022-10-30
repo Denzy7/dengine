@@ -151,7 +151,9 @@ endif()
 if(DENGINE_HAS_WAYLAND_CLIENT)
     list(APPEND dengine-core-link
         ${wayland_client_LIBRARIES}
-        ${wayland_egl_LIBRARIES})
+        ${wayland_egl_LIBRARIES}
+        ${xkbcommon_LIBRARIES}
+    )
 endif()
 
 if(UNIX)
