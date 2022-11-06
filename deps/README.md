@@ -33,11 +33,13 @@ A general rule of thumb if you are using Linux, no need to build python. Just se
 # debian & ubuntu
 `# apt install libgtk-3-dev libpython3.9-dev `
 **If on Wayland ensure you have the following additional dependencies. Alternatively have XWayland installed and running**
-`# apt install libwayland-dev libxkbcommon-dev`
+`# apt install libwayland-dev libxkbcommon-dev wayland-protocols`
 # arch
 `# pacman -S gtk3 python`
 **If on Wayland ensure you have the following additional dependencies. Alternatively have XWayland installed and running**
-`# pacman -S wayland libxkbcommon`
+`# pacman -S wayland libxkbcommon wayland-protocols`
+
+**Please note wayland support is experimental and may be unstable or not even build! Ensure you are on the the latest version of wayland or a rolling distro like arch**
 
 # dengitor and gtk3
 Building GTK+ 3 is really complicated. However [some really smart people in the AUR](https://aur.archlinux.org/packages/mingw-w64-gtk3) have already figured it out.
