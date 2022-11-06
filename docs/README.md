@@ -39,6 +39,7 @@
 	- GLX,WGL – Context for Desktop GL
 	- XInput -  Input for Windows
 	- X11 - Window and Input for Linux
+	- Wayland & xkbcommon - Experimental wayland and input support for Linux
 	- CGLM – Math for OpenGL
 	- GLAD – Function and extension loader for OpenGL
 	- EGL – Context creation for GLES

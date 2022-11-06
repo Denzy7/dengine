@@ -19,6 +19,8 @@ Change dir to repo:
 		 
 - **Desktop** (Linux, Windows) : Build with CMake. For Windows, MinGW is highly recommended. *Haven't tested on MSVC with C99* 
 
+	- (optional) Mess around with dengine_config.h.in for certain compile time options
+	
 	- Configure cmake:
         `cmake -S . -B build/desktop`
 
