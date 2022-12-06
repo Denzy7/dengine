@@ -337,8 +337,6 @@ DENGINE_INLINE void dengine_terminate()
     denginegui_terminate();
     dengineutils_filesys_terminate();
 
-    dengineutils_debug_terminate();
-
     denginescript_terminate();
     if(DENGINE_INIT_OPTS.enable_logthread)
         dengineutils_logging_terminate();
@@ -348,6 +346,9 @@ DENGINE_INLINE void dengine_terminate()
         dengine_window_destroy(DENGINE_INIT_OPTS.window);
         dengine_window_terminate();
     }
+
+    /* last to term to ensure trace dumped */
+    dengineutils_debug_terminate();
 }
 
 DENGINE_INLINE int dengine_update()
