@@ -4,6 +4,7 @@
 #include "dengine_config.h"
 #ifdef DENGINE_WIN32
 #include <processthreadsapi.h>
+#include <synchapi.h> /* CONDITION_VARIABLE */
 #else
 #include <pthread.h>
 #endif
@@ -28,6 +29,17 @@ typedef struct
 #endif
 }Mutex;
 
+typedef struct
+{
+#ifdef DENGINE_WIN32
+    CRITICAL_SECTION critsec;
+    CONDITION_VARIABLE condvar;
+#else
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+#endif
+}Condition;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -45,6 +57,14 @@ int dengineutils_thread_mutex_destroy(Mutex* mutex);
 int dengineutils_thread_mutex_lock(Mutex* mutex);
 
 int dengineutils_thread_mutex_unlock(Mutex* mutex);
+
+int dengineutils_thread_condition_create(Condition* condition);
+
+int dengineutils_thread_condition_destroy(Condition* condition);
+
+int dengineutils_thread_condition_wait(Condition* condition, int* deref_and_set_to_one);
+
+int dengineutils_thread_condition_raise(Condition* condition);
 
 #ifdef __cplusplus
 }

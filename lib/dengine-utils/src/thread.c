@@ -1,5 +1,9 @@
 #include "dengine-utils/thread.h"
 #ifdef DENGINE_WIN32
+/*
+ * include here windows since it breaks everything if
+ * its in thread.h
+ */
 #include <windows.h>
 #endif
 int dengineutils_thread_create(threadstart start, void* arg, Thread* thread)
@@ -81,4 +85,73 @@ int dengineutils_thread_mutex_unlock(Mutex* mutex)
 #else
     return pthread_mutex_unlock(&mutex->mutex);
 #endif
+}
+
+int dengineutils_thread_condition_create(Condition* condition)
+{
+    int ret = 0;
+#ifdef DENGINE_WIN32
+    InitializeCriticalSection(&condition->critsec);
+    InitializeConditionVariable(&condition->condvar);
+#else
+    pthread_cond_init(&condition->cond, NULL);
+    pthread_mutex_init(&condition->mutex, NULL);
+#endif
+    return ret;
+}
+
+int dengineutils_thread_condition_destroy(Condition* condition)
+{
+    int ret = 0;
+#ifdef DENGINE_WIN32
+    DeleteCriticalSection(&condition->critsec);
+    ret = 1;
+#else
+    ret = pthread_cond_destroy(&condition->cond) &&
+            pthread_mutex_destroy(&condition->mutex);
+#endif
+    return ret;
+}
+
+int dengineutils_thread_condition_wait(Condition* condition, int* deref_and_set_to_one)
+{
+    /* LOCK MUTEX / ENTER CRITICAL SECTION */
+#ifdef DENGINE_WIN32
+    EnterCriticalSection(&condition->critsec);
+#else
+    pthread_mutex_lock(&condition->mutex);
+#endif
+    while(*deref_and_set_to_one == 0){
+
+        /* SLEEP / WAIT */
+#ifdef DENGINE_WIN32
+        SleepConditionVariableCS(&condition->condvar,
+                                &condition->critsec,
+                                INFINITE);
+#else
+        pthread_cond_wait(&condition->cond, &condition->mutex);
+#endif
+
+    }
+
+    /* UNLOCK MUTEX / LEAVE CS */
+#ifdef DENGINE_WIN32
+    LeaveCriticalSection(&condition->critsec);
+#else
+    pthread_mutex_unlock(&condition->mutex);
+#endif
+
+    return 1;
+}
+
+int dengineutils_thread_condition_raise(Condition* condition)
+{
+#ifdef DENGINE_WIN32
+    WakeAllConditionVariable(&condition->condvar);
+#else
+    pthread_mutex_lock(&condition->mutex);
+    pthread_cond_signal(&condition->cond);
+    pthread_mutex_unlock(&condition->mutex);
+#endif
+    return 1;
 }

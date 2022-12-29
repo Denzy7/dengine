@@ -120,9 +120,6 @@
 //Extension to save cached binary and attributes of texture in TEXTURE_CACHE_DIR
 #define DENGINE_TEXTURE_CACHE_EXT ".texture"
 
-/* Wait in ms to assume window creation failed! */
-#define DENGINE_WINDOW_CREATE_TIMEOUT 3000
-
 //Embedded fonts
 
 //"Embed OpenSans Regular into dengine-gui"

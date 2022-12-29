@@ -153,6 +153,8 @@ typedef struct
     const char* title;
     const DengineWindow* share;
     DengineWindow* ret;
+    Condition* ret_cond;
+    int* deref_and_set_to_one;
 }CreateWindowAttrs;
 
 #define DFT_GL_MAX 2
@@ -791,8 +793,12 @@ void* _dengine_window_createandpoll(void* args)
     xdg_toplevel_set_user_data(ret->xdg_top, ret);
     wl_surface_set_user_data(ret->wl_sfc, ret);
 #endif
-
     attrs->ret = ret;
+    *attrs->deref_and_set_to_one = 1;
+
+    /* raise our cond last so main thread
+     * gets hold of created window*/
+    dengineutils_thread_condition_raise(attrs->ret_cond);
     while (ret->running) {
         _dengine_input_gamepad_poll();
         _dengine_window_pollinf(ret);
@@ -817,24 +823,17 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     attrs.height = height;
     attrs.title = title;
     attrs.share = share;
+    Condition ret_cond;
+    dengineutils_thread_condition_create(&ret_cond);
+    attrs.ret_cond = &ret_cond;
+    int oned = 0;
+    attrs.deref_and_set_to_one = &oned;
 
     Thread windowthr;
     dengineutils_thread_create(_dengine_window_createandpoll, &attrs, &windowthr);
+    dengineutils_thread_condition_wait(&ret_cond, &oned);
 
-    /* initial update */
-    dengineutils_timer_update();
-
-    /* timeout WORKS for now since win32 dont want empty while loop */
-    double t = 0;
-    while (attrs.ret == NULL) {
-        dengineutils_timer_update();
-        t += dengineutils_timer_get_delta();
-        if(t >= DENGINE_WINDOW_CREATE_TIMEOUT)
-        {
-            dengineutils_logging_log("WARNING::Timed out waiting for window creation!");
-            break;
-        }
-    }
+    dengineutils_thread_condition_destroy(&ret_cond);
 
     return attrs.ret;
 }
