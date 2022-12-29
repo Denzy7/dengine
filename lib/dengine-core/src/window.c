@@ -144,6 +144,7 @@ struct DengineWindow
     int gl_load;
     DynLib gl_lib;
     WindowInput input;
+    Thread* windowthr;
 };
 
 typedef struct
@@ -829,11 +830,12 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     int oned = 0;
     attrs.deref_and_set_to_one = &oned;
 
-    Thread windowthr;
-    dengineutils_thread_create(_dengine_window_createandpoll, &attrs, &windowthr);
+    Thread* windowthr = calloc(1, sizeof(Thread));
+    dengineutils_thread_create(_dengine_window_createandpoll, &attrs, windowthr);
     dengineutils_thread_condition_wait(&ret_cond, &oned);
 
     dengineutils_thread_condition_destroy(&ret_cond);
+    attrs.ret->windowthr = windowthr;
 
     return attrs.ret;
 }
@@ -872,6 +874,8 @@ void dengine_window_destroy(DengineWindow* window)
    if(window->gl_lib)
         dengineutils_dynlib_close(window->gl_lib);
 
+   dengineutils_thread_wait(window->windowthr);
+   free(window->windowthr);
    free(window);
 }
 
