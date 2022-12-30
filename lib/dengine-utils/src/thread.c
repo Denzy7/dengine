@@ -1,4 +1,3 @@
-#include "dengine-utils/thread.h"
 #ifdef DENGINE_WIN32
 /*
  * include here windows since it breaks everything if
@@ -8,6 +7,7 @@
 #else
 #include <pthread.h>
 #endif
+#include "dengine-utils/thread.h"
 int dengineutils_thread_create(threadstart start, void* arg, Thread* thread)
 {
     int threadok = 0;
