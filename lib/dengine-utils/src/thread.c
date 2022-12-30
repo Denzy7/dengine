@@ -5,6 +5,8 @@
  * its in thread.h
  */
 #include <windows.h>
+#else
+#include <pthread.h>
 #endif
 int dengineutils_thread_create(threadstart start, void* arg, Thread* thread)
 {

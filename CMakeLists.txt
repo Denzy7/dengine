@@ -167,6 +167,8 @@ include(CheckIncludeFile)
 
 check_symbol_exists(clock_gettime "time.h" DENGINE_HAS_CLOCK_GETTIME)
 check_include_file(pthread.h DENGINE_HAS_PTHREAD_H)
+check_include_file(bits/pthreadtypes.h DENGINE_HAS_PTHREADTYPES_H)
+check_include_file(bits/pthread_types.h DENGINE_HAS_PTHREAD_TYPES_H)
 check_symbol_exists(pthread_cancel "pthread.h" DENGINE_HAS_PTHREAD_CANCEL)
 
 set(DENGINE_PYTHON_DENGINE_SCRIPT_VER 1)

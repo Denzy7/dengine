@@ -6,7 +6,15 @@
 #include <processthreadsapi.h>
 #include <synchapi.h> /* CONDITION_VARIABLE */
 #else
+
+#ifdef DENGINE_HAS_PTHREAD_TYPES_H
+#include <bits/pthread_types.h>
+#elif defined(DENGINE_HAS_PTHREADTYPES_H)
+#include <bits/pthreadtypes.h>
+#else /* pollutes namespace */
 #include <pthread.h>
+#endif
+
 #endif
 typedef void*(*threadstart)(void* arg);
 

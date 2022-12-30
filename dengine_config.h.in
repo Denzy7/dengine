@@ -5,6 +5,8 @@
 
 #cmakedefine DENGINE_MT
 #cmakedefine DENGINE_HAS_PTHREAD_H
+#cmakedefine DENGINE_HAS_PTHREAD_TYPES_H
+#cmakedefine DENGINE_HAS_PTHREADTYPES_H
 
 /*
  * Uncomment to hide compile dir since it has sensitive info like
