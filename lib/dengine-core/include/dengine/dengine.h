@@ -256,6 +256,8 @@ DENGINE_INLINE int dengine_init()
          dengine_window_set_swapinterval(DENGINE_INIT_OPTS.window,
                                          DENGINE_INIT_OPTS.window_swapinterval);
 
+         //set window to poll for input
+         dengine_input_set_window(DENGINE_INIT_OPTS.window);
     }
 
     if(DENGINE_INIT_OPTS.gl_loaddefault)
@@ -301,9 +303,6 @@ DENGINE_INLINE int dengine_init()
                              "VIEWPORT : %dx%d %s",
                              GL, GLSL, VENDOR, RENDERDER,
                              viewport[2], viewport[3], msaastr);
-
-    //set window to poll for input
-    dengine_input_set_window(DENGINE_INIT_OPTS.window);
 
     //GUI. SET FONT TOO
     if(!denginegui_init())

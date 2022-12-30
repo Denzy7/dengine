@@ -119,7 +119,7 @@ static const uint16_t btnbits[DENGINE_INPUT_PAD_BUTTON_COUNT]=
 
 Gamepad _gamepads[DENGINE_INPUT_PAD_COUNT];
 
-WindowInput* _windowinp;
+WindowInput* _windowinp = NULL;
 
 void _dengine_input_init()
 {
@@ -146,6 +146,8 @@ void dengine_input_set_window(DengineWindow* window)
 int dengine_input_get_key_once(char key)
 {
     DENGINE_DEBUG_ENTER;
+    if(_windowinp == NULL)
+        return 0;
 
     for(int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
     {
@@ -162,6 +164,9 @@ int dengine_input_get_key(char key)
 {
     DENGINE_DEBUG_ENTER;
 
+    if(_windowinp == NULL)
+        return 0;
+
     for(int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
     {
         if(_windowinp->alpnum[i].key == key)
@@ -176,6 +181,9 @@ int dengine_input_get_mousebtn_once(MouseButton btn)
 {
     DENGINE_DEBUG_ENTER;
 
+    if(_windowinp == NULL)
+        return 0;
+
     if(_windowinp->msebtn[btn] == 1)
     {
         _windowinp->msebtn[btn] = -1;
@@ -187,6 +195,9 @@ int dengine_input_get_mousebtn_once(MouseButton btn)
 int dengine_input_get_mousebtn(MouseButton btn)
 {
     DENGINE_DEBUG_ENTER;
+
+    if(_windowinp == NULL)
+        return 0;
 
     if(_windowinp->msebtn[btn] == 1)
     {
@@ -207,6 +218,12 @@ double dengine_input_get_mousescroll_y()
 {
     DENGINE_DEBUG_ENTER;
 
+    if(_windowinp == NULL)
+        return 0;
+
+    if(_windowinp == NULL)
+        return 0;
+
     double temp = _windowinp->msesrl_y;
     _windowinp->msesrl_y = 0.0;
     return temp;
@@ -216,12 +233,18 @@ double dengine_input_get_mousepos_x()
 {
     DENGINE_DEBUG_ENTER;
 
+    if(_windowinp == NULL)
+        return 0;
+
     return _windowinp->mse_x;
 }
 
 double dengine_input_get_mousepos_y()
 {
     DENGINE_DEBUG_ENTER;
+
+    if(_windowinp == NULL)
+        return 0;
 
     return _windowinp->mse_y;
 }
