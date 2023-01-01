@@ -1,3 +1,4 @@
+#include "dengine_config.h"
 #ifdef DENGINE_WIN32
 /*
  * include here windows since it breaks everything if
