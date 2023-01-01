@@ -145,6 +145,9 @@ struct DengineWindow
     DynLib gl_lib;
     WindowInput input;
     Thread* windowthr;
+
+    Condition pollcond;
+    int deref;
 };
 
 typedef struct
@@ -793,6 +796,10 @@ void* _dengine_window_createandpoll(void* args)
    /* set user datum (data plural?) */
     xdg_toplevel_set_user_data(ret->xdg_top, ret);
     wl_surface_set_user_data(ret->wl_sfc, ret);
+
+    /* needs this round trip before event loop to
+     * configure xdg_surface*/
+    wl_display_roundtrip(wl_dpy);
 #endif
     attrs->ret = ret;
     *attrs->deref_and_set_to_one = 1;
@@ -800,7 +807,15 @@ void* _dengine_window_createandpoll(void* args)
     /* raise our cond last so main thread
      * gets hold of created window*/
     dengineutils_thread_condition_raise(attrs->ret_cond);
+
+    /* from here control is handed to main thread, so
+     * dont use attrs again since its been popped from stack
+     */
+    dengineutils_thread_condition_create(&ret->pollcond);
     while (ret->running) {
+        dengineutils_thread_condition_wait(&ret->pollcond,
+                                           &ret->deref);
+        ret->deref = 0;
         _dengine_input_gamepad_poll();
         _dengine_window_pollinf(ret);
     }
@@ -875,6 +890,8 @@ void dengine_window_destroy(DengineWindow* window)
         dengineutils_dynlib_close(window->gl_lib);
 
    dengineutils_thread_wait(window->windowthr);
+   dengineutils_thread_condition_destroy(&window->pollcond);
+
    free(window->windowthr);
    free(window);
 }
@@ -1091,7 +1108,7 @@ void* _dengine_window_pollinf(void* arg)
     char key;
     KeySym keysym;
 
-    if(XPending(x_dpy))
+    while(XPending(x_dpy))
     {
         //cannot read client messages 😑
 //        polled = XCheckWindowEvent(x_dpy, window->x_win,
@@ -1172,9 +1189,11 @@ void* _dengine_window_pollinf(void* arg)
         }
     }
     #elif defined(DENGINE_WIN32)
-    PeekMessageW(&window->win32_msg, window->win32_hwnd, 0, 0, PM_REMOVE);
-    TranslateMessage(&window->win32_msg);
-    DispatchMessageW(&window->win32_msg);
+    while(window->running && GetMessageW(&window->win32_msg, window->win32_hwnd, 0, 0))
+    {
+        TranslateMessage(&window->win32_msg);
+        DispatchMessageW(&window->win32_msg);
+    }
     #elif defined(DENGINE_ANDROID)
     if(window && dengineutils_android_iswindowrunning())
     {
@@ -1209,6 +1228,10 @@ int dengine_window_poll(DengineWindow* window)
 #ifdef DENGINE_ANDROID
     dengineutils_android_pollevents();
 #endif
+    if(window->deref == 0){
+        window->deref = 1;
+        dengineutils_thread_condition_raise(&window->pollcond);
+    }
 
 #ifdef DENGINE_HAS_GTK3
    gtk_main_iteration_do(0);

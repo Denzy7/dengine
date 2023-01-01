@@ -355,10 +355,10 @@ DENGINE_INLINE int dengine_update()
     dengineutils_timer_update();
     dengine_window_swapbuffers(DENGINE_INIT_OPTS.window);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//#ifndef DENGINE_ANDROID
-//    //will bepolled in android_main while loop
-//    dengine_window_poll(DENGINE_INIT_OPTS.window);
-//#endif
+#ifndef DENGINE_ANDROID
+    //will bepolled in android_main while loop
+    dengine_window_poll(DENGINE_INIT_OPTS.window);
+#endif
     return dengine_window_isrunning(DENGINE_INIT_OPTS.window);
 }
 
