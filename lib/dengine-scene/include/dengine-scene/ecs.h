@@ -53,7 +53,6 @@ typedef struct
 
 typedef struct
 {
-    float timestep;
     float timestep_fixed;
     int substeps;
 }ECSPhysicsWorld;

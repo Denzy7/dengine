@@ -98,10 +98,12 @@ extern "C" int basic_update(Entity* entity)
     memcpy(&entity->transform.world_model[0][0], model_mtx, sizeof(model_mtx));
     return 1;
 }
-
+btScalar last = 0;
 extern "C" int basic_world_update(ECSPhysicsWorld* wld)
 {
-    world->stepSimulation(wld->timestep, wld->substeps, wld->timestep_fixed);
+    btScalar now = dengineutils_timer_get_current() / 1000.0;
+    world->stepSimulation(now - last, wld->substeps, wld->timestep_fixed);
+    last = now;
     return 1;
 }
 

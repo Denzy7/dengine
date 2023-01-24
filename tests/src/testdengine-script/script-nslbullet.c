@@ -30,8 +30,7 @@ int main(int argc, char *argv[])
     denginescript_nsl_get_script("basic_world", &basic_world, nsl);
 
     ECSPhysicsWorld world;
-    world.substeps = 10;
-    world.timestep = 1.f/40.f;
+    world.substeps = 1;
     world.timestep_fixed = 1.f/ 60.f;
 
     //manually call start to create world
