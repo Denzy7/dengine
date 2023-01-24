@@ -7,6 +7,8 @@
 #cmakedefine DENGINE_HAS_PTHREAD_H
 #cmakedefine DENGINE_HAS_PTHREAD_TYPES_H
 #cmakedefine DENGINE_HAS_PTHREADTYPES_H
+#cmakedefine DENGINE_WIN @DENGINE_WIN@
+#cmakedefine DENGINE_CONTEXT @DENGINE_CONTEXT@
 
 /*
  * Uncomment to hide compile dir since it has sensitive info like
@@ -42,8 +44,16 @@
     #define DENGINE_FONT_DEFAULT "/system/fonts/DroidSansMono.ttf"
 #elif defined(__linux__)
     #define DENGINE_LINUX
-    #define DENGINE_WIN_X11
-    #define DENGINE_CONTEXT_GLX
+    #ifdef DENGINE_WIN
+        #define DENGINE_WIN_@DENGINE_WIN@
+    #else
+        #define DENGINE_WIN_X11
+    #endif
+    #ifdef DENGINE_CONTEXT
+        #define DENGINE_CONTEXT_@DENGINE_CONTEXT@
+    #else
+        #define DENGINE_CTX_GLX
+    #endif
     #cmakedefine DENGINE_HAS_GTK3 @DENGINE_HAS_GTK3@
     #cmakedefine DENGINE_HAS_FONTCONFIG @DENGINE_HAS_FONTCONFIG@
     //Match pattern to pass to FcNameParse. run fc-match "<pattern>" in terminal

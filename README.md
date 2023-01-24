@@ -23,6 +23,10 @@ Change dir to repo:
 	
 	- Configure cmake:
         `cmake -S . -B build/desktop`
+        
+        - Optional options include:
+            - `-DDENGINE_WIN`: Force Window API (Linux), can be X11, WAYLAND
+            - `-DDENGINE_CONTEXT`: Force Context API (Linux), can be GLX(X11 only), EGL
 
 	**MinGW Note:**
 	See [tools/mingw/README.md](tools/mingw/README.md)

@@ -31,6 +31,8 @@ option(DENGINE_USE_SYSTEM_PYTHON "Use system python or build custom. Might cause
 if(ANDROID)
     option(DENGINE_ANDROID_TERMUX "Enable if building for X11 Termux")
 endif()
+set(DENGINE_WIN CACHE STRING "Force Window API. Possible Values: X11, WAYLAND")
+set(DENGINE_CONTEXT CACHE STRING "Force Context API. Possible Values: GLX, EGL")
 find_library(DENGINE_HAS_LIBZ z)
 find_library(DENGINE_HAS_EGL EGL)
 find_package(PkgConfig QUIET)
