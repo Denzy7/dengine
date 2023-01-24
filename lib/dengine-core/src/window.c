@@ -229,6 +229,7 @@ static const struct wl_keyboard_listener wl_kbd_listener =
 
 struct wl_compositor* wl_comp = NULL;
 struct wl_display* wl_dpy = NULL;
+struct wl_registry* wl_registry = NULL;
 struct xdg_wm_base* wm_base = NULL;
 struct wl_output* wl_out = NULL;
 struct wl_seat* wl_seat = NULL;
@@ -336,8 +337,8 @@ int dengine_window_init()
         {
             init = 1;
 
-            struct wl_registry* registry = wl_display_get_registry(wl_dpy);
-            wl_registry_add_listener(registry, &registry_listener, NULL);
+            wl_registry = wl_display_get_registry(wl_dpy);
+            wl_registry_add_listener(wl_registry, &registry_listener, NULL);
 
             wl_display_dispatch(wl_dpy);
             wl_display_roundtrip(wl_dpy);
@@ -418,6 +419,7 @@ void dengine_window_terminate()
     xkb_state_unref(xkb_state);
     xkb_keymap_unref(xkb_keymap);
     xkb_context_unref(xkb_ctx);
+    wl_registry_destroy(wl_registry);
     wl_display_disconnect(wl_dpy);
 #endif
 
