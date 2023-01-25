@@ -119,6 +119,10 @@ void dengineutils_debug_trace_dump()
 
 void dengineutils_debug_enter(const char* function,const char* file,const int line)
 {
+#ifndef DENGINE_DEBUG
+    return;
+#endif
+
     if(!trace)
         return;
 

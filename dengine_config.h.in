@@ -9,6 +9,8 @@
 #cmakedefine DENGINE_HAS_PTHREADTYPES_H
 #cmakedefine DENGINE_WIN @DENGINE_WIN@
 #cmakedefine DENGINE_CONTEXT @DENGINE_CONTEXT@
+#cmakedefine DENGINE_DEBUG
+
 
 /*
  * Uncomment to hide compile dir since it has sensitive info like

@@ -33,6 +33,8 @@ if(ANDROID)
 endif()
 set(DENGINE_WIN CACHE STRING "Force Window API. Possible Values: X11, WAYLAND")
 set(DENGINE_CONTEXT CACHE STRING "Force Context API. Possible Values: GLX, EGL")
+option(DENGINE_DEBUG "Enable debug facilities. Use only in Debug builds as it has alot of overhead" OFF)
+
 find_library(DENGINE_HAS_LIBZ z)
 find_library(DENGINE_HAS_EGL EGL)
 find_package(PkgConfig QUIET)
