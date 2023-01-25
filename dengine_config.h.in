@@ -10,6 +10,7 @@
 #cmakedefine DENGINE_WIN @DENGINE_WIN@
 #cmakedefine DENGINE_CONTEXT @DENGINE_CONTEXT@
 #cmakedefine DENGINE_DEBUG
+#cmakedefine DENGINE_DEBUG_GL
 
 
 /*

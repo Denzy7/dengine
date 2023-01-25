@@ -13,6 +13,10 @@ void dengine_checkgl_set_exitonglerror(int value)
 
 int dengine_checkgl(const char* file, const int line)
 {
+#ifndef DENGINE_DEBUG_GL
+    return 0;
+#endif
+
     DENGINE_DEBUG_ENTER;
 
     GLenum error = glGetError();
