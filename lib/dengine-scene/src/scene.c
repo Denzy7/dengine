@@ -162,7 +162,7 @@ void _denginescene_do_check_light(Entity* root, Scene* scene)
     EntityChild* ec = root->children.data;
     for (size_t i = 0; i < children_count; i++) {
         Entity* child = ec[i].child;
-        if(child->camera_component)
+        if(child->light_component)
         {
             denginescene_ecs_do_light_scene(child,scene);
         }
