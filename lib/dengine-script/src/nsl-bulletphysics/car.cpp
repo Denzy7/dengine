@@ -83,6 +83,7 @@ extern "C" int car_create_rb(Entity* entity)
 const btVector3 wheel_dir(0, -1, 0);
 const btVector3 wheel_axle(-1, 0, 0);
 const btScalar wheel_rest(0.6);
+btDefaultVehicleRaycaster* caster;
 btRaycastVehicle* vehicle;
 btRaycastVehicle::btVehicleTuning tuning;
 static int added = 0;
@@ -106,7 +107,6 @@ extern "C" int car_setup_wheel(Entity* entity)
 
 extern "C" int car_setup_chassis(Entity* entity)
 {
-    btDefaultVehicleRaycaster* caster;
     btRigidBody* carbody;
 
 
@@ -281,6 +281,8 @@ extern "C" int car_world_terminate(void* args)
        delete shape;
     }
 
+    delete vehicle;
+    delete caster;
 
     //delete dynamics world
     delete world;

@@ -325,8 +325,10 @@ int main(int argc, char *argv[])
 
     denginescene_destroy(scene);
     free(prtbf);
+    free(car_meshes);
     dengine_material_destroy(&plane_mat);
     dengine_material_destroy(&mat_car);
+    dengine_material_destroy(&cube_mat);
     denginescript_nsl_free(nsl);
 
     dengine_terminate();
