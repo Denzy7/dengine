@@ -34,6 +34,9 @@ extern "C" int car_create_rb(Entity* entity)
         {
             shape = new btBoxShape(btVector3(entity->transform.scale[0], entity->transform.scale[1], entity->transform.scale[2]));
         }
+    }else if(entity->physics_component->shape == DENGINE_ECS_PHYSICS_COLSHAPE_CAPSULE)
+    {
+        shape = new btCapsuleShape(entity->transform.scale[0], entity->transform.scale[1]);
     }
 
     if(shape)
@@ -90,7 +93,7 @@ extern "C" int car_setup_wheel(Entity* entity)
     btVector3 connection(entity->transform.position[0],
                          entity->transform.position[1] - 4.0,
                          entity->transform.position[2]);
-    btWheelInfo info = vehicle->addWheel(connection, wheel_dir, wheel_axle, wheel_rest, 1.5, tuning, added < 2);
+    btWheelInfo& info = vehicle->addWheel(connection, wheel_dir, wheel_axle, wheel_rest, 1.5, tuning, added < 2);
     info.m_suspensionStiffness = 20.0f;
     info.m_wheelsDampingRelaxation = 2.3f;
     info.m_wheelsDampingCompression = 4.4f;
@@ -244,6 +247,7 @@ extern "C" int car_speed(void* arg)
     dengine_viewport_get(&vp_x, &vp_y, NULL, NULL);
     float fontsz = denginegui_get_fontsz();
     denginegui_text(fontsz, fontsz * 2, speed, NULL);
+    return 1;
 }
 extern "C" int car_world_update(ECSPhysicsWorld* wld)
 {

@@ -36,7 +36,7 @@ if(DENGINE_HAS_BULLET)
     endforeach()
 
     add_executable(testdengine-script-nslbullet-car script-nslbullet-car.c ${outres})
-    target_link_libraries(testdengine-script-nslbullet-car ${dengine} glfw dengine-model)
+    target_link_libraries(testdengine-script-nslbullet-car ${dengine} dengine-model)
     set_property(TARGET testdengine-script-nslbullet-car PROPERTY C_STANDARD 99)
 
 endif()

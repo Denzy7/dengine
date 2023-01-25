@@ -111,9 +111,9 @@ int main(int argc, char *argv[])
             cube_ent->transform.scale[1] = 0.4;
             cube_ent->transform.scale[2] = 3.0;
             cube_ent->transform.position[0] = i + (i * 15);
-            cube_ent->transform.position[1] = 0.25;
+            cube_ent->transform.position[1] = abs((i * j)) / (float)gencoef;
             cube_ent->transform.position[2] = j + (j * 10);
-            cube_ent->physics_component = denginescene_ecs_new_physicscomponent(DENGINE_ECS_PHYSICS_COLSHAPE_BOX, NULL, 0.0);
+            cube_ent->physics_component = denginescene_ecs_new_physicscomponent(DENGINE_ECS_PHYSICS_COLSHAPE_CAPSULE, NULL, 0.0);
             car_create_rb(cube_ent);
             denginescene_add_entity(scene, cube_ent);
         }
@@ -229,6 +229,7 @@ int main(int argc, char *argv[])
     DirLight* dl_ent_dl= dl_ent->light_component->light;
 
     while (dengine_update()) {
+        double delta = dengineutils_timer_get_delta();
 
         if(dengine_input_get_key('1'))
             dl_ent_dl->shadow.max_bias -= 0.001;
@@ -253,14 +254,14 @@ int main(int argc, char *argv[])
 
         denginescene_update(scene);
 
-        memcpy(cam_ent->transform.position, chassis->transform.position, sizeof(vec3));
-        glm_vec3_adds(cam_ent->transform.position, 40.0, cam_ent->transform.position);
+        static float camdist = 40.0f;
+        if(dengine_input_get_key('E'))
+            camdist += 10.0 * (delta / 1000.0);
+        if(dengine_input_get_key('C'))
+            camdist -= 10.0 * (delta / 1000.0);
 
-        static float yaw = 0, pitch = 0;
-        if(dengine_input_get_key_once('I'))
-            cam_ent->transform.position[1]+= 1.0;
-        if(dengine_input_get_key_once('J'))
-            cam_ent->transform.position[1]-= 1.0;
+        memcpy(cam_ent->transform.position, chassis->transform.position, sizeof(vec3));
+        glm_vec3_adds(cam_ent->transform.position, camdist, cam_ent->transform.position);
 
         int w, h;
         dengine_viewport_get(NULL, NULL, &w, &h);
@@ -273,6 +274,7 @@ int main(int argc, char *argv[])
             "A/D to steer left/right",
             "X to brake",
             "R to reset position",
+            "E/C increase/decrease camera distance",
             "",
             "+++ SHADOWS +++",
             "V to toggle shadows",
@@ -305,7 +307,6 @@ int main(int argc, char *argv[])
         static char fpstr[100];
         static vec4 yellow = {1.0, 1.0, 0.0, 1.0};
 
-        double delta = dengineutils_timer_get_delta();
         static double elapsed = 0.0;
         elapsed += delta;
         if(elapsed > 1000.0){

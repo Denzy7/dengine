@@ -44,6 +44,7 @@ typedef struct
 typedef enum
 {
     DENGINE_ECS_PHYSICS_COLSHAPE_BOX,
+    DENGINE_ECS_PHYSICS_COLSHAPE_CAPSULE,
 }ECSPhysicsColShape;
 
 typedef struct
