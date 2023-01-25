@@ -803,17 +803,19 @@ void* _dengine_window_createandpoll(void* args)
      * configure xdg_surface*/
     wl_display_roundtrip(wl_dpy);
 #endif
-    attrs->ret = ret;
-    *attrs->deref_and_set_to_one = 1;
+
+    /* create out poll cond */
+    dengineutils_thread_condition_create(&ret->pollcond);
 
     /* raise our cond last so main thread
-     * gets hold of created window*/
+     * gets hold of created window
+     * from here control is handed to main thread, so
+     * dont use attrs again since its been popped from stack
+     * */
+    attrs->ret = ret;
+    *attrs->deref_and_set_to_one = 1;
     dengineutils_thread_condition_raise(attrs->ret_cond);
 
-    /* from here control is handed to main thread, so
-     * dont use attrs again since its been popped from stack
-     */
-    dengineutils_thread_condition_create(&ret->pollcond);
     while (ret->running) {
         dengineutils_thread_condition_wait(&ret->pollcond,
                                            &ret->deref);
@@ -1230,7 +1232,7 @@ int dengine_window_poll(DengineWindow* window)
 #ifdef DENGINE_ANDROID
     dengineutils_android_pollevents();
 #endif
-    if(window->deref == 0){
+    if(window != NULL && window->deref == 0){
         window->deref = 1;
         dengineutils_thread_condition_raise(&window->pollcond);
     }

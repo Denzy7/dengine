@@ -335,10 +335,9 @@ const char* dengine_input_gamepad_vibration_get_error()
 int _dengine_input_gamepad_poll()
 {
 #if defined(DENGINE_LINUX)
-    #ifdef DENGINE_ANDROID_TERMUX
     /* block since /dev is unreadable */
-    return 0;
-    #endif
+    if(dir == NULL)
+        return 0;
 
     struct dirent* entry;
     char path[PATH_MAX];
