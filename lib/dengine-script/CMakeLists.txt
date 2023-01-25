@@ -53,6 +53,16 @@ if(DENGINE_HAS_BULLET)
         LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests-build/bin"
     )
     target_link_libraries(nsl-bulletphysics ${dengine} ${bullet_LIBRARIES})
+
+    add_library(nsl-bulletphysics-car SHARED
+        src/nsl-bulletphysics/car.cpp
+    )
+    set_target_properties(nsl-bulletphysics-car PROPERTIES
+        PREFIX ""
+        SUFFIX ".nsl"
+        LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests-build/bin"
+    )
+    target_link_libraries(nsl-bulletphysics-car ${dengine} ${bullet_LIBRARIES})
 endif()
 
 if(DENGINE_HAS_LIBPULSE_SIMPLE)
