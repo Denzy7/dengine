@@ -55,7 +55,7 @@
     #ifdef DENGINE_CONTEXT
         #define DENGINE_CONTEXT_@DENGINE_CONTEXT@
     #else
-        #define DENGINE_CTX_GLX
+        #define DENGINE_CONTEXT_GLX
     #endif
     #cmakedefine DENGINE_HAS_GTK3 @DENGINE_HAS_GTK3@
     #cmakedefine DENGINE_HAS_FONTCONFIG @DENGINE_HAS_FONTCONFIG@
