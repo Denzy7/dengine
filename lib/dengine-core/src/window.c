@@ -1348,7 +1348,8 @@ int _dengine_window_egl_createctx(EGLDisplay dpy, EGLSurface* egl_sfc, EGLContex
                 EGL_BLUE_SIZE, 8,
                 EGL_ALPHA_SIZE, 8,
                 EGL_DEPTH_SIZE, _win_depth,
-                EGL_SAMPLES, _win_msaa,
+        /* more trouble than its worth on ES 2.0 */
+//                EGL_SAMPLES, _win_msaa,
                 EGL_NONE
     };
     //Get config count
