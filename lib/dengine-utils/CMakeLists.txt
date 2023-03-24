@@ -60,8 +60,8 @@ if(GTK3_LIBRARIES AND UNIX)
 endif()
 
 if(NOT WIN32)
-    #dlsym, dlopen
-    list(APPEND dengine-utils-link dl)
+    #dlsym, dlopen, pthread
+    list(APPEND dengine-utils-link dl pthread)
 endif()
 
 #native app glue
