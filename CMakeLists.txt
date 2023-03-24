@@ -99,13 +99,6 @@ if(PkgConfig_FOUND AND NOT ANDROID_NDK)
         set(DENGINE_HAS_GLX 1)
     endif()
 
-    pkg_check_modules(gl gl)
-    if(gl_LIBRARIES)
-        include_directories(${gl_INCLUDE_DIRS})
-        link_directories(${gl_LIBRARY_DIRS})
-        set(DENGINE_HAS_LIBGL 1)
-    endif()
-
     pkg_get_variable(wayland_scanner wayland-scanner wayland_scanner)
     pkg_get_variable(wayland_protocols_pkgdatadir wayland-protocols pkgdatadir)
 

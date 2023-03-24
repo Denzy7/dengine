@@ -144,10 +144,6 @@ IF(DENGINE_HAS_GLX)
     list(APPEND dengine-core-link ${glx_LIBRARIES})
 endif()
 
-if(DENGINE_HAS_LIBGL)
-    list(APPEND dengine-core-link ${gl_LIBRARIES})
-endif()
-
 if(DENGINE_HAS_WAYLAND_CLIENT)
     list(APPEND dengine-core-link
         ${wayland_client_LIBRARIES}
