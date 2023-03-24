@@ -76,10 +76,14 @@ static void wm_base_ping(void* data, struct xdg_wm_base* wm, uint32_t serial);
 static void xdg_surface_configure(void* data, struct xdg_surface* xdg_sfc, uint32_t serial);
 
 static void xdg_toplevel_configure(void* data, struct xdg_toplevel* toplvl, int w, int h, struct wl_array* states);
-static void xdg_toplevel_close(void* data, struct xdg_toplevel* toplvl);
-static void xdg_toplevel_configure_bounds(void *data,struct xdg_toplevel *xdg_toplevel, int32_t width, int32_t height);
-static void xdg_toplevel_wmcap(void *data, struct xdg_toplevel *xdg_toplevel, struct wl_array *capabilities);
 
+static void xdg_toplevel_close(void* data, struct xdg_toplevel* toplvl);
+#if XDG_TOPLEVEL_CONFIGURE_BOUNDS_SINCE_VERSION >= 4
+static void xdg_toplevel_configure_bounds(void *data,struct xdg_toplevel *xdg_toplevel, int32_t width, int32_t height);
+#endif
+#if XDG_TOPLEVEL_WM_CAPABILITIES_SINCE_VERSION >= 5
+static void xdg_toplevel_wmcap(void *data, struct xdg_toplevel *xdg_toplevel, struct wl_array *capabilities);
+#endif
 static void wl_seat_name(void *data, struct wl_seat *wl_seat, const char *name);
 static void wl_seat_caps(void* data, struct wl_seat* seat, uint32_t caps);
 
@@ -194,8 +198,12 @@ static const struct xdg_toplevel_listener xdg_toplevel_listener =
 {
     .configure = xdg_toplevel_configure,
     .close = xdg_toplevel_close,
+#if XDG_TOPLEVEL_CONFIGURE_BOUNDS_SINCE_VERSION >= 4
     .configure_bounds = xdg_toplevel_configure_bounds,
-    .wm_capabilities = xdg_toplevel_wmcap
+#endif
+#if XDG_TOPLEVEL_WM_CAPABILITIES_SINCE_VERSION >= 5
+    .wm_capabilities = xdg_toplevel_wmcap,
+#endif
 };
 
 static const struct wl_seat_listener wl_seat_listener =
@@ -1559,17 +1567,18 @@ static void xdg_toplevel_close(void* data, struct xdg_toplevel* toplvl)
     DengineWindow* window = data;
     window->running = 0;
 }
-
+#if XDG_TOPLEVEL_CONFIGURE_BOUNDS_SINCE_VERSION >= 4
 static void xdg_toplevel_configure_bounds(void *data,struct xdg_toplevel *xdg_toplevel, int32_t width, int32_t height)
 {
 //    dengineutils_logging_log("xdg_toplevel_configure_bounds: w=%u, h=%u", width, height);
 }
-
+#endif
+#if XDG_TOPLEVEL_WM_CAPABILITIES_SINCE_VERSION >= 5
 static void xdg_toplevel_wmcap(void *data, struct xdg_toplevel *xdg_toplevel, struct wl_array *capabilities)
 {
 //    dengineutils_logging_log("xdg_toplevel_wmcap");
 }
-
+#endif
 static void wl_seat_name(void *data, struct wl_seat *wl_seat, const char *name)
 {
 
