@@ -44,6 +44,7 @@ typedef struct _Stream
     char* path;
 #ifdef DENGINE_ANDROID
     AAsset* asset;
+    const void* buffer;
 #endif
     StreamType type;
     StreamMode mode;

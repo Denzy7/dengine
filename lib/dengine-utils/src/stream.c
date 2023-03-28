@@ -76,6 +76,7 @@ Stream* dengineutils_stream_new(const char* path, StreamType type, StreamMode mo
         stream->type = type;
         stream->mode = _mode;
         stream->size = AAsset_getLength(asset);
+        stream->buffer = AAsset_getBuffer(asset);
         return stream;
 #else
         dengineutils_logging_log(DENGINEUTILS_STREAM_MSG_TYPE4ANDROID);
