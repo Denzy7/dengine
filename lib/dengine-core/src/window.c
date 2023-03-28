@@ -1237,9 +1237,6 @@ int dengine_window_poll(DengineWindow* window)
 
     int polled = 0;
 
-#ifdef DENGINE_ANDROID
-    dengineutils_android_pollevents();
-#endif
     if(window != NULL && window->deref == 0){
         window->deref = 1;
         dengineutils_thread_condition_raise(&window->pollcond);
