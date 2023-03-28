@@ -1,6 +1,6 @@
 #define BT_EULER_DEFAULT_ZYX
-#include <bullet/btBulletCollisionCommon.h>
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
 #include <dengine/dengine.h>
 
