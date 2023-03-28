@@ -172,7 +172,9 @@ check_symbol_exists(pthread_cancel "pthread.h" DENGINE_HAS_PTHREAD_CANCEL)
 set(DENGINE_PYTHON_DENGINE_SCRIPT_VER 1)
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
-set(dengine dengine-utils dengine-core dengine-gui dengine-scene dengine-script)
+set(dengine 
+    dengine-utils dengine-core dengine-gui dengine-scene dengine-script
+    PARENT_SCOPE)
 
 if (NOT MSVC)
     add_compile_options(-Wall)
