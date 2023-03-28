@@ -174,7 +174,12 @@ set(DENGINE_PYTHON_DENGINE_SCRIPT_VER 1)
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
 set(dengine 
-    dengine-utils dengine-core dengine-gui dengine-scene dengine-script)
+    dengine-utils
+    dengine-core
+    dengine-gui
+    dengine-scene
+    dengine-script
+    dengine-model)
 
 if (NOT MSVC)
     add_compile_options(-Wall)
