@@ -39,8 +39,6 @@ include/dengine-utils/dynlib.h
 if(ANDROID_NDK)
     list(APPEND dengine-utils-hdr include/dengine-utils/platform/android.h)
     list(APPEND dengine-utils-src src/platform/android.c )
-    #glue
-    # list(APPEND dengine-utils-src "${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c")
 endif()
 
 add_library(dengine-utils ${dengine-utils-hdr} ${dengine-utils-src})
