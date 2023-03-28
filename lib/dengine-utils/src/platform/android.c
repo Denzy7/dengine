@@ -139,6 +139,11 @@ void dengineutils_android_set_terminatefunc(DengineAndroidAppFunc func)
     termfunc = func;
 }
 
+struct android_app* dengineutils_android_get_app()
+{
+    return _app;
+}
+
 void dengineutils_android_set_app(struct android_app* app)
 {
     _app = app;

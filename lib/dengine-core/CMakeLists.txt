@@ -161,6 +161,11 @@ if(WIN32)
     list(APPEND dengine-core-link xinput opengl32)
 endif()
 
+#ANativeWindow_
+if(ANDROID_NDK)
+    list(APPEND dengine-core-link android)
+endif()
+
 target_link_libraries(dengine-core PRIVATE dengine-utils ${dengine-core-link})
 
 install(TARGETS dengine-core DESTINATION lib)

@@ -40,7 +40,7 @@ if(ANDROID_NDK)
     list(APPEND dengine-utils-hdr include/dengine-utils/platform/android.h)
     list(APPEND dengine-utils-src src/platform/android.c )
     #glue
-    list(APPEND dengine-utils-src "${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c")
+    # list(APPEND dengine-utils-src "${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c")
 endif()
 
 add_library(dengine-utils ${dengine-utils-hdr} ${dengine-utils-src})
@@ -61,7 +61,11 @@ endif()
 
 if(NOT WIN32)
     #dlsym, dlopen, pthread
-    list(APPEND dengine-utils-link dl pthread)
+    find_library(libpthread pthread)
+    if(libpthread)
+        list(APPEND dengine-utils-link ${libpthread})
+    endif()
+    list(APPEND dengine-utils-link dl)
 endif()
 
 #native app glue

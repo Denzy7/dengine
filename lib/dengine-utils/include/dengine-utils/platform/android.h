@@ -26,6 +26,8 @@ typedef struct
 extern "C" {
 #endif
 
+struct android_app* dengineutils_android_get_app();
+
 void dengineutils_android_set_app(struct android_app* app);
 
 void dengineutils_android_set_initfunc(DengineAndroidAppFunc func);
