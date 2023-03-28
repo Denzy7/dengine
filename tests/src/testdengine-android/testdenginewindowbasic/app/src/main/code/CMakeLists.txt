@@ -16,6 +16,8 @@ ${DENGINE_DIR}  ${DENGINE_BUILD}
 # now build app's shared lib
 add_library(GFX SHARED
 	main.c
+	${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c
+
 )
 get_directory_property(dengine-incldirs DIRECTORY ${DENGINE_DIR} INCLUDE_DIRECTORIES)
 target_include_directories(GFX PUBLIC

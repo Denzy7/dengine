@@ -18,20 +18,14 @@ ${DENGINE_DIR}  ${DENGINE_BUILD}
 # now build app's shared lib
 add_library(GFX SHARED
 	main.c
+	${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c
+
 )
 
+get_directory_property(dengine-incldirs DIRECTORY ${DENGINE_DIR} INCLUDE_DIRECTORIES)
+
 target_include_directories(GFX PUBLIC
-		${ANDROID_NDK}/sources
-		"${PROJECT_BINARY_DIR}/${DENGINE_BUILD}/dengine_config"
-		${DENGINE_DIR}/lib/dengine-core/include
-		${DENGINE_DIR}/lib/dengine-utils/include
-		${DENGINE_DIR}/lib/dengine-gui/include
-		${DENGINE_DIR}/lib/dengine-scene/include
-		${DENGINE_DIR}/lib/dengine-script/include
-		${DENGINE_DIR}/lib/dengine-model/include
-		${DENGINE_DIR}/deps/cglm/include
-		${DENGINE_DIR}/deps/glad/include
-		${DENGINE_DIR}/deps/cpython/Include
+		${dengine-incldirs}
 		${DENGINE_DIR}/deps/cpython/Include
 		"${PROJECT_BINARY_DIR}/${DENGINE_BUILD}/deps/cpython-portable/config"
 		)

@@ -13,20 +13,16 @@ add_subdirectory(
 ${DENGINE_DIR}  ${DENGINE_BUILD}
 )
 
+#extract some important vars
+get_directory_property(dengine_incl DIRECTORY ${PROJECT_BINARY_DIR}/${DENGINE_BUILD} DEFINITION dengine_incl)
+get_directory_property(dengine DIRECTORY ${PROJECT_BINARY_DIR}/${DENGINE_BUILD} DEFINITION dengine)
+include_directories(${dengine_incl})
+
 # now build app's shared lib
 add_library(GFX SHARED
 	main.c
+	${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c
 )
-
-target_include_directories(GFX PUBLIC
-		${ANDROID_NDK}/sources/android/native_app_glue
-                "${PROJECT_BINARY_DIR}/${DENGINE_BUILD}/dengine_config"
-		${DENGINE_DIR}/lib/dengine-core/include
-		${DENGINE_DIR}/lib/dengine-utils/include
-		${DENGINE_DIR}/deps/cglm/include
-		${DENGINE_DIR}/deps/glad/include
-		)
-
 
 target_link_libraries(GFX PUBLIC dengine-core dengine-utils)
 
