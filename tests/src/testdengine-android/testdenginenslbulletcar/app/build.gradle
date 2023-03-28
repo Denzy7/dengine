@@ -1,0 +1,59 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.denzygames.testdengine_nsl_bulletcar'
+    compileSdk 32
+
+    defaultConfig {
+        applicationId "com.denzygames.testdengine_nsl_bulletcar"
+        minSdk 21
+        targetSdk 32
+        versionCode 1
+        versionName "1.0"
+
+        ndk {
+            // ...
+            abiFilters "armeabi-v7a"
+        }
+
+        externalNativeBuild
+        {
+            cmake
+            {
+                def localProperties = new Properties()
+                localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+                def bulletsrc = localProperties.getProperty("bullet.src")
+                assert bulletsrc != null : "bullet.src property not defined in local.properties." +
+                 "Set it to where bullet's CMakeLists.txt is located. Download/clone a source package from https://github.com/bulletphysics/bullet3"
+                arguments "-DDENGINE_SCRIPTING_PYTHON=OFF", "-DBUILD_SHARED_LIBS=ON", "-DBULLETSRC=" + bulletsrc,  "-DBUILD_CPU_DEMOS=OFF", "-DBUILD_BULLET2_DEMOS=OFF", "-DBUILD_OPENGL3_DEMOS=OFF", "-DBUILD_UNIT_TESTS=OFF", "-DBUILD_EXTRAS=OFF"
+
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    externalNativeBuild
+            {
+                cmake
+                        {
+                            version "3.22.1"
+                            path "src/main/code/CMakeLists.txt"
+                        }
+            }
+}
+
+dependencies {
+
+}

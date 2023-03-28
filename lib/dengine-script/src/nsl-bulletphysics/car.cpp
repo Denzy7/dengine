@@ -1,3 +1,5 @@
+#include "dengine-gui/gui.h"
+#include "dengine/viewport.h"
 #define BT_EULER_DEFAULT_ZYX
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
@@ -10,6 +12,10 @@ btCollisionDispatcher* dispatcher = NULL;
 btBroadphaseInterface* broadphase = NULL;
 btSequentialImpulseConstraintSolver* solver = NULL;
 btAlignedObjectArray<btCollisionShape*> shapes;
+
+#ifdef DENGINE_ANDROID
+#define SWBTNS
+#endif
 
 void applyForce(btRigidBody* body, const btVector3& force)
 {
@@ -88,6 +94,7 @@ btRaycastVehicle* vehicle;
 btRaycastVehicle::btVehicleTuning tuning;
 static int added = 0;
 Entity* wheels[4];
+static int dir_engine, dir_steer, dir_brake;
 
 extern "C" int car_setup_wheel(Entity* entity)
 {
@@ -176,25 +183,6 @@ extern "C" int car_update(Entity* entity)
     for(int j = 0; j < 3; j++){
         entity->transform.rotation[j] = glm_deg(entity->transform.rotation[j]);
     }
-    static int dir_engine, dir_steer, dir_brake;
-    if(dengine_input_get_key('W'))
-        dir_engine = 1;
-    else if(dengine_input_get_key('S'))
-        dir_engine = -1;
-    else
-        dir_engine = 0;
-
-    if(dengine_input_get_key('D'))
-        dir_steer = -1;
-    else if(dengine_input_get_key('A'))
-        dir_steer = 1;
-    else
-        dir_steer = 0;
-
-    if(dengine_input_get_key('X'))
-        dir_brake = 1;
-    else
-        dir_brake = 0;
 
     if(dengine_input_get_key_once('R'))
     {
@@ -243,10 +231,66 @@ extern "C" int car_speed(void* arg)
 {
     char speed[128];
     snprintf(speed, sizeof(speed), "Speed: %.1f Km/h", vehicle->getCurrentSpeedKmHour());
-    int vp_x, vp_y;
-    dengine_viewport_get(&vp_x, &vp_y, NULL, NULL);
+    int vp_x, vp_y, vp_w, vp_h;
+    dengine_viewport_get(&vp_x, &vp_y, &vp_w, &vp_h);
     float fontsz = denginegui_get_fontsz();
     denginegui_text(fontsz, fontsz * 2, speed, NULL);
+
+    #ifdef SWBTNS
+    float btnoffset = 30;
+    float btnwidth = 200;
+    float btnheight = 200;
+    float btnspace = 10;
+    denginegui_set_button_repeatable(1);
+    dir_steer = 0;
+    if(denginegui_button(btnoffset, (vp_h / 2.0) - (btnheight / 2.0), btnwidth, btnheight, "Left", NULL))
+    {
+        dir_steer = 1;
+    }
+    if(denginegui_button(vp_w - btnoffset - btnwidth, (vp_h / 2.0) - (btnheight / 2.0), btnwidth, btnheight, "Right", NULL))
+    {
+        dir_steer = -1;
+    }
+
+    dir_engine = 0;
+    if(denginegui_button(vp_w - btnoffset - btnwidth, btnoffset, btnwidth, btnheight, "Accel", NULL))
+    {
+        dir_engine = 1;
+    }
+    if(denginegui_button(vp_w - btnoffset - (2.0 * btnwidth) - (2.0 * btnspace), btnoffset, btnwidth, btnheight, "Rever", NULL))
+    {
+        dir_engine = -1;
+    }
+
+    if(denginegui_button(vp_w - btnoffset - (3.0 * btnwidth) - (3.0 * btnspace), btnoffset, btnwidth, btnheight, "Brake", NULL))
+    {
+        dir_brake = 1;
+    }else{
+        dir_brake = 0;
+    }
+    
+    #else
+    if(dengine_input_get_key('W'))
+        dir_engine = 1;
+    else if(dengine_input_get_key('S'))
+        dir_engine = -1;
+    else
+        dir_engine = 0;
+
+    if(dengine_input_get_key('D'))
+        dir_steer = -1;
+    else if(dengine_input_get_key('A'))
+        dir_steer = 1;
+    else
+        dir_steer = 0;
+
+    if(dengine_input_get_key('X'))
+        dir_brake = 1;
+    else
+        dir_brake = 0;
+    #endif
+
+
     return 1;
 }
 extern "C" int car_world_update(ECSPhysicsWorld* wld)
