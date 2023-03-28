@@ -133,19 +133,20 @@ else()
     message(WARNING ">>> Could not find pkg-config. Will compile From sources")
 endif()
 
-include_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/stb
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/cglm/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/glad/include
-        ${PROJECT_BINARY_DIR}/dengine_config #dengine_config.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine_state #dengine_state.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-core/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-utils/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-gui/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-model/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-scene/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-script/include
-        )
+# base includes to build 
+set(dengine_incl
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/stb
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/cglm/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/glad/include
+    ${PROJECT_BINARY_DIR}/dengine_config #dengine_config.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine_state #dengine_state.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-core/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-utils/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-gui/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-model/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-scene/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-script/include)
+include_directories(${dengine_incl})
 
 if(DENGINE_SCRIPTING_PYTHON)
     if(NOT python3_LIBRARIES)
@@ -173,8 +174,7 @@ set(DENGINE_PYTHON_DENGINE_SCRIPT_VER 1)
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
 set(dengine 
-    dengine-utils dengine-core dengine-gui dengine-scene dengine-script
-    PARENT_SCOPE)
+    dengine-utils dengine-core dengine-gui dengine-scene dengine-script)
 
 if (NOT MSVC)
     add_compile_options(-Wall)
