@@ -38,6 +38,7 @@ Texture fontmap;
 unsigned int _bmp_sz = 0;
 int initfont = 0;
 float _fontsz = 0.0f;
+int btnrepeatable = 0;
 
 //the standard gui quad
 Primitive quad;
@@ -233,6 +234,11 @@ int denginegui_set_font(const void* ttf, const float fontsize, const uint32_t bi
     free(baked_bmp_rgb);
 
     return 1;
+}
+
+void denginegui_set_button_repeatable(int state)
+{
+    btnrepeatable = state;
 }
 
 void _denginegui_projectquad()
@@ -454,8 +460,7 @@ int denginegui_button(float x,float y, float width, float height, const char* te
             denginegui_panel(x, y, width, height, NULL, NULL, hover);
         }
 
-        if(dengine_input_get_mousebtn_once(0))
-            down = 1;
+        down = btnrepeatable ? dengine_input_get_mousebtn(0) : dengine_input_get_mousebtn_once(0);
     }else
     {
         denginegui_panel(x, y, width, height, NULL, NULL, rgba);

@@ -13,6 +13,8 @@ void denginegui_terminate();
 
 int denginegui_set_font(const void* ttf, const float fontsize, const uint32_t bitmap_size);
 
+void denginegui_set_button_repeatable(int state);
+
 float denginegui_get_fontsz();
 
 void denginegui_text(float x,float y, const char* text, float* rgba);
