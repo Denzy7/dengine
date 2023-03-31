@@ -106,7 +106,7 @@ static void wl_keyboard_repeatinfo (void *data, struct wl_keyboard *wl_keyboard,
 #endif
 
 void _dengine_window_processkey(WindowInput* input, char key, int isrelease);
-void* _dengine_window_pollinf(void* arg);
+void _dengine_window_pollev(DengineWindow* window);
 
 #ifdef DENGINE_CONTEXT_EGL
 int _dengine_window_egl_createctx(EGLDisplay dpy, EGLSurface* egl_sfc, EGLContext* egl_ctx, EGLContext share, EGLNativeWindowType win);
@@ -507,14 +507,9 @@ void dengine_window_request_defaultall()
 void* _dengine_window_createandpoll(void* args)
 {
     CreateWindowAttrs* attrs = args;
-    int width = attrs->width;
-    int height = attrs->height;
-    const char* title = attrs->title;
-    const DengineWindow* share = attrs->share;
 
     DengineWindow window;
     memset(&window, 0, sizeof (DengineWindow));
-    uint32_t prof = 0;
 #ifdef DENGINE_WIN_X11
     Window root = DefaultRootWindow(x_dpy);
     window.x_swa.event_mask =
@@ -546,11 +541,11 @@ void* _dengine_window_createandpoll(void* args)
 //    }
 
 //    window.x_swa.colormap = XCreateColormap(x_dpy, root, vi->visual, AllocNone);
-//    window.x_win = XCreateWindow(x_dpy, root, 0, 0, width, height, 0,
+//    window.x_win = XCreateWindow(x_dpy, root, 0, 0, attrs->width, attrs->height, 0,
 //                           vi->depth, InputOutput, vi->visual,
 //                           CWColormap | CWEventMask, &window.x_swa);
 
-    window.x_win = XCreateWindow(x_dpy, root, 0, 0, width, height, 0,
+    window.x_win = XCreateWindow(x_dpy, root, 0, 0, attrs->width, attrs->height, 0,
                            CopyFromParent, InputOutput, CopyFromParent,
                            CWEventMask, &window.x_swa);
     if(!window.x_win)
@@ -565,20 +560,17 @@ void* _dengine_window_createandpoll(void* args)
         return NULL;
     }
 
-    prof = GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
-    if(_gl_core)
-        prof = GLX_CONTEXT_CORE_PROFILE_BIT_ARB;
     int ctxattr[]=
     {
         GLX_CONTEXT_MAJOR_VERSION_ARB, _gl_max,
         GLX_CONTEXT_MINOR_VERSION_ARB, _gl_min,
-        GLX_CONTEXT_PROFILE_MASK_ARB, prof,
+        GLX_CONTEXT_PROFILE_MASK_ARB, _gl_core ? GLX_CONTEXT_CORE_PROFILE_BIT_ARB : GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
         None
     };
 
     GLXContext ctx_shr = NULL;
-    if(share)
-        ctx_shr = share->glx_ctx;
+    if(attrs->share)
+        ctx_shr = attrs->share->glx_ctx;
 
     window.glx_ctx = glXCreateContextAttribsARB(x_dpy, conf[0], ctx_shr, True, ctxattr);
     //window.glx_ctx = glXCreateContext(x_dpy, vi, ctx_shr, GL_TRUE);
@@ -591,7 +583,7 @@ void* _dengine_window_createandpoll(void* args)
 //    XFree(vi);
     XFree(conf);
 #elif defined(DENGINE_CONTEXT_EGL)
-    window.x_win = XCreateWindow(x_dpy, root, 0, 0, width, height, 0,
+    window.x_win = XCreateWindow(x_dpy, root, 0, 0, attrs->width, attrs->height, 0,
                             CopyFromParent, InputOutput, CopyFromParent, CWEventMask,
                             &window.x_swa);
     if(!window.x_win )
@@ -614,16 +606,16 @@ void* _dengine_window_createandpoll(void* args)
     // x11 delete message. why on earth is there no simple exit event?
     XSetWMProtocols(x_dpy, window.x_win, &wm_delete, 1);
     XMapWindow(x_dpy, window.x_win);
-    XStoreName(x_dpy, window.x_win, title);
+    XStoreName(x_dpy, window.x_win, attrs->title);
 #elif defined(DENGINE_WIN32)
     wchar_t title_wcs[256];
 
-    mbstowcs(title_wcs, title, sizeof(title_wcs));
+    mbstowcs(title_wcs, attrs->title, sizeof(title_wcs));
     window.win32_hwnd = CreateWindowExW(0,
                              wc_class,
                              title_wcs,
                              WS_OVERLAPPEDWINDOW,
-                             0, 0, width, height,
+                             0, 0, attrs->width, attrs->height,
                              NULL,
                              NULL,
                              wc.hInstance,
@@ -632,10 +624,10 @@ void* _dengine_window_createandpoll(void* args)
     {
         return NULL;
     }
-    window.width = width;
-    window.height = height;
-    if(share)
-        window.win32_ctx_shr = share->win32_ctx;
+    window.width = attrs->width;
+    window.height = attrs->height;
+    if(attrs->share)
+        window.win32_ctx_shr = attrs->share->win32_ctx;
 
     ShowWindow(window.win32_hwnd , SW_NORMAL);
 
@@ -713,14 +705,11 @@ void* _dengine_window_createandpoll(void* args)
             goto RelDCRetNULL;
         }
 
-        prof = WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
-        if(_gl_core)
-            prof = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
         int ctx_attrs[]=
         {
             WGL_CONTEXT_MAJOR_VERSION_ARB, _gl_max,
             WGL_CONTEXT_MINOR_VERSION_ARB, _gl_min,
-            WGL_CONTEXT_PROFILE_MASK_ARB, prof,
+            WGL_CONTEXT_PROFILE_MASK_ARB, _gl_core ? WGL_CONTEXT_CORE_PROFILE_BIT_ARB : WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
             0
         };
 
@@ -764,17 +753,17 @@ void* _dengine_window_createandpoll(void* args)
     xdg_surface_add_listener(window.xdg_sfc, &xdg_sfc_listener, NULL);
 
     window.xdg_top = xdg_surface_get_toplevel(window.xdg_sfc);
-    xdg_toplevel_set_title(window.xdg_top, title);
+    xdg_toplevel_set_title(window.xdg_top, attrs->title);
     xdg_toplevel_add_listener(window.xdg_top, &xdg_toplevel_listener, NULL);
 
     wl_surface_commit(window.wl_sfc);
 
     struct wl_region* opaque = wl_compositor_create_region(wl_comp);
-    wl_region_add(opaque, 0, 0, width, height);
+    wl_region_add(opaque, 0, 0, attrs->width, attrs->height);
     wl_surface_set_opaque_region(window.wl_sfc, opaque);
     wl_region_destroy(opaque);
 
-    window.wl_egl_win = wl_egl_window_create(window.wl_sfc, width, height);
+    window.wl_egl_win = wl_egl_window_create(window.wl_sfc, attrs->width, attrs->height);
     if(window.wl_egl_win == EGL_NO_SURFACE)
     {
         dengineutils_logging_log("ERROR::cannot wl_egl_window_create");
@@ -783,8 +772,8 @@ void* _dengine_window_createandpoll(void* args)
 
     window.egl_dpy = egl_dpy;
     EGLContext shr = EGL_NO_CONTEXT;
-    if(share)
-        shr = share->egl_ctx;
+    if(attrs->share)
+        shr = attrs->share->egl_ctx;
 
     if(!_dengine_window_egl_createctx(window.egl_dpy, &window.egl_sfc, &window.egl_ctx, shr, window.wl_egl_win))
     {
@@ -792,8 +781,8 @@ void* _dengine_window_createandpoll(void* args)
         return NULL;
     }
 
-    window.width = width;
-    window.height = height;
+    window.width = attrs->width;
+    window.height = attrs->height;
 #endif
     DengineWindow* ret = calloc(1, sizeof(DengineWindow));
     memcpy(ret, &window, sizeof(DengineWindow));
@@ -829,7 +818,7 @@ void* _dengine_window_createandpoll(void* args)
                                            &ret->deref);
         ret->deref = 0;
         _dengine_input_gamepad_poll();
-        _dengine_window_pollinf(ret);
+        _dengine_window_pollev(ret);
     }
     return NULL;
 
@@ -1111,9 +1100,8 @@ int dengine_window_set_swapinterval(DengineWindow* window, int interval)
     return itv;
 }
 
-void* _dengine_window_pollinf(void* arg)
+void _dengine_window_pollev(DengineWindow* window)
 {
-    DengineWindow* window = arg;
     #ifdef DENGINE_WIN_X11
     int h;
     dengine_window_get_dim(window, NULL, &h);
@@ -1228,7 +1216,6 @@ void* _dengine_window_pollinf(void* arg)
     #elif defined(DENGINE_WIN_WAYLAND)
     wl_display_dispatch_pending(wl_dpy);
     #endif
-    return NULL;
 }
 
 int dengine_window_poll(DengineWindow* window)
