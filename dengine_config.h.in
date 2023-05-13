@@ -71,6 +71,9 @@
 // does pthread.h have pthread_cancel?
 #cmakedefine DENGINE_HAS_PTHREAD_CANCEL
 
+// does pthread.h have pthread_setname_np (needs -D_GNU_SOURCE)?
+#cmakedefine DENGINE_HAS_PTHREAD_SETNAME_NP
+
 // is python3 installed?
 #cmakedefine DENGINE_HAS_PYTHON3
 

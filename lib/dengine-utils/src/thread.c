@@ -6,9 +6,20 @@
  */
 #include <windows.h>
 #else
+#define _GNU_SOURCE
 #include <pthread.h>
 #endif
 #include "dengine-utils/thread.h"
+
+int dengineutils_thread_set_name(Thread* thread, const char* name)
+{
+    int ret = 0;
+#ifdef DENGINE_HAS_PTHREAD_SETNAME_NP
+    ret = pthread_setname_np(thread->thr, name);
+#endif
+    return ret;
+}
+
 int dengineutils_thread_create(threadstart start, void* arg, Thread* thread)
 {
     int threadok = 0;

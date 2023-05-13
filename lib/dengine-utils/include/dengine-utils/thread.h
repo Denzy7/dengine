@@ -54,6 +54,9 @@ extern "C" {
 
 int dengineutils_thread_create(threadstart start, void* arg, Thread* thread);
 
+/* only for pthread on unix! */
+int dengineutils_thread_set_name(Thread* thread, const char* name);
+
 int dengineutils_thread_wait(Thread* thread);
 
 void dengineutils_thread_exit(Thread* thread);
