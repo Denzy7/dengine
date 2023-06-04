@@ -46,6 +46,7 @@ Shader shader;
 
 int initgui = 0;
 #define PANEL_ALPHA 0.4f
+Texture dftpaneltex;
 
 const char* _denginegui_get_defaultfont()
 {
@@ -118,6 +119,8 @@ int denginegui_init()
     {
         dengine_shader_set_int(&shader, "tex", 0);
         dengine_primitive_setup(&quad, &shader);
+        static const float dftpaneltex_col[3] = {0.1, 0.2, 0.3};
+        dengine_texture_make_color(8, 8, dftpaneltex_col, 3, &dftpaneltex);
         initgui = 1;
         return 1;
     }else
@@ -250,15 +253,15 @@ void _denginegui_projectquad()
     dengine_shader_set_mat4(&shader, "projection", projection[0]);
 }
 
-void _denginegui_drawquad()
+int srcalpha, dstalpha, blnd, depthmask;
+/* setup up blending */
+void _denginegui_beginquad()
 {
-    dengine_shader_use(&shader);
-
     //return previous src, dst alpha and blend
-    int srcalpha, dstalpha;
+
     glGetIntegerv(GL_BLEND_SRC_ALPHA, &srcalpha); DENGINE_CHECKGL;
     glGetIntegerv(GL_BLEND_DST_ALPHA, &dstalpha); DENGINE_CHECKGL;
-    int blnd;
+
     glGetIntegerv(GL_BLEND, &blnd); DENGINE_CHECKGL;
 
     if(!blnd)
@@ -266,13 +269,13 @@ void _denginegui_drawquad()
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); DENGINE_CHECKGL;
 
-    int depthmask;
     glGetIntegerv(GL_DEPTH_WRITEMASK, &depthmask); DENGINE_CHECKGL;
     if (depthmask)
         glDepthMask(GL_FALSE);
+}
 
-    dengine_draw_primitive(&quad, &shader);
-
+void _denginegui_endquad()
+{
     glBlendFunc(srcalpha, dstalpha); DENGINE_CHECKGL;
 
     if(!blnd)
@@ -280,8 +283,6 @@ void _denginegui_drawquad()
 
     if (depthmask)
     {glDepthMask(GL_TRUE); DENGINE_CHECKGL;}
-
-    dengine_shader_use(NULL);
 }
 
 void denginegui_text(float x, float y, const char* text, float* rgba)
@@ -292,6 +293,32 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
         return;
 
     _denginegui_projectquad();
+
+    // get entry stuff
+    Texture entry_tex;
+    int entry_activetex = 0;
+    if(dengine_entrygl_get_enabled())
+    {
+        dengine_entrygl_texture(GL_TEXTURE_2D, &entry_tex);
+        dengine_entrygl_texture_active(&entry_activetex);
+    }
+
+    // set texture
+    glActiveTexture(GL_TEXTURE0);
+    dengine_texture_bind(GL_TEXTURE_2D, &fontmap);
+    DENGINE_CHECKGL;
+
+    // set color
+    float white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+    dengine_shader_use(&shader);
+    dengine_shader_current_set_int("istext", 1);
+    if(!rgba)
+        dengine_shader_current_set_vec4("col", white);
+    else
+        dengine_shader_current_set_vec4("col", rgba);
+
+    _denginegui_beginquad();
+    dengine_draw_sequence_start(&quad, &shader);
 
     for(size_t i = 0; i < strlen(text); i++)
     {
@@ -322,43 +349,25 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
                 q.x0 + w, q.y1 + h - y_off, q.s0 + ds, q.t0,
                 q.x0 + w, q.y1 - y_off, q.s0 + ds, q.t0 + dt
             };
-            float white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-
-            dengine_shader_set_int(&shader, "istext", 1);
-
-            if(!rgba)
-                dengine_shader_set_vec4(&shader, "col", white);
-            else
-                dengine_shader_set_vec4(&shader, "col", rgba);
-
 
             quad.array.data = vertices;
-
-            // get entry stuff
-            Buffer entry_vbo;
-            dengine_entrygl_buffer(GL_ARRAY_BUFFER, &entry_vbo);
-
-            Texture entry_tex;
-            dengine_entrygl_texture(GL_TEXTURE_2D, &entry_tex);
-
-            int entry_activetex;
-            dengine_entrygl_texture_active(&entry_activetex);
-
-            // draw our stuff
-            dengine_buffer_bind(GL_ARRAY_BUFFER, &quad.array);
+            // draw our stuff, update buffer
             dengine_buffer_data(GL_ARRAY_BUFFER, &quad.array);
-
-            glActiveTexture(GL_TEXTURE0);
-            DENGINE_CHECKGL;
-            dengine_texture_bind(GL_TEXTURE_2D, &fontmap);
-            _denginegui_drawquad();
-
-            // return entry stuff
-            dengine_texture_bind(GL_TEXTURE_2D, &entry_tex);
-            glActiveTexture(entry_activetex);
-            DENGINE_CHECKGL;
-            dengine_buffer_bind(GL_ARRAY_BUFFER, &entry_vbo);
+            /* for text, we need to sequence draw since
+             * everything is same quad, different data
+             */
+            dengine_draw_sequence_draw();
         }
+    }
+    dengine_draw_sequence_end();
+    _denginegui_endquad();
+
+    if(dengine_entrygl_get_enabled())
+    {
+        // return entry stuff
+        dengine_texture_bind(GL_TEXTURE_2D, &entry_tex);
+        glActiveTexture(entry_activetex);
+        DENGINE_CHECKGL;
     }
 }
 
@@ -371,52 +380,56 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
 
     _denginegui_projectquad();
 
-    float vertices[]=
-    {
-                         //Vert //TexCoord
-                x,           y, 0.0f, 0.0f,
-                x,  y + height, 0.0f, 1.0f,
-        x + width,  y + height, 1.0f, 1.0f,
-        x + width,           y, 1.0f, 0.0f,
-    };
-
-    quad.array.data = vertices;
-
     // get entry stuff
-    Buffer entry_vbo;
-    dengine_entrygl_buffer(GL_ARRAY_BUFFER, &entry_vbo);
-
     Texture entry_tex;
-    dengine_entrygl_texture(GL_TEXTURE_2D, &entry_tex);
+    int entry_activetex = 0;
+    if(dengine_entrygl_get_enabled())
+    {
+        dengine_entrygl_texture(GL_TEXTURE_2D, &entry_tex);
+        dengine_entrygl_texture_active(&entry_activetex);
+    }
 
-    int entry_activetex;
-    dengine_entrygl_texture_active(&entry_activetex);
-
-    dengine_buffer_bind(GL_ARRAY_BUFFER, &quad.array);
-    dengine_buffer_data(GL_ARRAY_BUFFER, &quad.array);
-
-    float white[4] = {0.0f, 0.0f, 0.0f, PANEL_ALPHA};
-
-    if(!rgba)
-        dengine_shader_set_vec4(&shader, "col", white);
-    else
-        dengine_shader_set_vec4(&shader, "col", rgba);
-
-    dengine_shader_set_int(&shader, "istext", 0);
-
+    //set texture
     glActiveTexture(GL_TEXTURE0);
     DENGINE_CHECKGL;
     if(texture)
         dengine_texture_bind(GL_TEXTURE_2D, texture);
+    else
+        dengine_texture_bind(GL_TEXTURE_2D, &dftpaneltex);
 
-    _denginegui_drawquad();
+    //set col
+    float white[4] = {0.0f, 0.0f, 0.0f, PANEL_ALPHA};
+    dengine_shader_use(&shader);
+    dengine_shader_current_set_int("istext", 0);
+    if(!rgba)
+        dengine_shader_current_set_vec4("col", white);
+    else
+        dengine_shader_current_set_vec4("col", rgba);
+
+    //start seq
+    _denginegui_beginquad();
+    dengine_draw_sequence_start(&quad, &shader);
+    float vertices[]=
+    {
+                      // Vert,   TexCoord
+                x,          y, 0.0f, 0.0f,
+                x, y + height, 0.0f, 1.0f,
+        x + width, y + height, 1.0f, 1.0f,
+        x + width,          y, 1.0f, 0.0f,
+    };
+    quad.array.data = vertices;
+    dengine_buffer_data(GL_ARRAY_BUFFER, &quad.array);
+    dengine_draw_sequence_draw();
+    dengine_draw_sequence_end();
+    _denginegui_endquad();
 
     // return entry stuff
-    dengine_texture_bind(GL_TEXTURE_2D, &entry_tex);
-    glActiveTexture(entry_activetex);
-    DENGINE_CHECKGL;
-    dengine_buffer_bind(GL_ARRAY_BUFFER, &entry_vbo);
-
+    if(dengine_entrygl_get_enabled())
+    {
+        glActiveTexture(entry_activetex);
+        dengine_texture_bind(GL_TEXTURE_2D, &entry_tex);
+        DENGINE_CHECKGL;
+    }
 }
 
 int denginegui_button(float x,float y, float width, float height, const char* text, float* rgba)
