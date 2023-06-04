@@ -74,6 +74,16 @@ void dengine_shader_set_float(const Shader* shader, const char* name, const floa
 
 void dengine_shader_set_int(const Shader* shader, const char* name, const int value);
 
+void dengine_shader_current_set_mat4(const char* name, const float* value);
+
+void dengine_shader_current_set_vec3(const char* name, const float* value);
+
+void dengine_shader_current_set_vec4(const char* name, const float* value);
+
+void dengine_shader_current_set_float(const char* name, const float value);
+
+void dengine_shader_current_set_int(const char* name, const int value);
+
 int dengine_shader_make_standard(StandardShader stdshader, Shader* shader);
 
 void dengine_shader_set_shadercache(int state);
