@@ -2,6 +2,21 @@
 #include "dengine/loadgl.h"
 #include "dengine-utils/logging.h"
 #include "dengine-utils/debug.h"
+
+/* entrygl want needs making of more (unecessary)
+ * calls to driver. use only when embedding */
+int entrygl;
+
+void dengine_entrygl_set_enabled(int state)
+{
+    entrygl = state;
+}
+
+int dengine_entrygl_get_enabled()
+{
+    return entrygl;
+}
+
 void dengine_entrygl_texture(uint32_t target, Texture* texture)
 {
     DENGINE_DEBUG_ENTER;
