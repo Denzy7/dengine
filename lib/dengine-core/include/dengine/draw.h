@@ -14,11 +14,28 @@ extern "C" {
 #endif
 
 /*!
- * \brief Execute glDrawElements on currently bound framebuffer
+ * \brief Execute dengine_draw_sequence_start,draw and end
  * \param primitive Primitive to draw
  * \param shader Shader to use
  */
 void dengine_draw_primitive(const Primitive* primitive, const Shader* shader);
+
+/*!
+ * \brief Start sequence
+ * \param primitive
+ * \param shader
+ */
+void dengine_draw_sequence_start(const Primitive* primitive, const Shader* shader);
+
+/*!
+ * \brief Draw already started sequence
+ */
+void dengine_draw_sequence_draw();
+
+/*!
+ * \brief End started sequence
+ */
+void dengine_draw_sequence_end();
 
 #ifdef __cplusplus
 }
