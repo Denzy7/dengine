@@ -82,7 +82,7 @@ int dengine_material_set_texture(const Texture* texture, const char* sampler, Ma
 
 /*!
  * \brief Use a material in a shader
- * \param material Material to use
+ * \param material Material to use. Careful when passing NULL as it unbinds everything!
  */
 void dengine_material_use(const Material* material);
 
