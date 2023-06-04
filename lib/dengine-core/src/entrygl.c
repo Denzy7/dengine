@@ -5,7 +5,7 @@
 
 /* entrygl want needs making of more (unecessary)
  * calls to driver. use only when embedding */
-int entrygl;
+int entrygl = 0;
 
 void dengine_entrygl_set_enabled(int state)
 {
