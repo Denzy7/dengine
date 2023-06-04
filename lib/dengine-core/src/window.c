@@ -594,8 +594,8 @@ void* _dengine_window_createandpoll(void* args)
 
     window.egl_dpy = egl_dpy;
     EGLContext shr = EGL_NO_CONTEXT;
-    if(share)
-        shr = share->egl_ctx;
+    if(attrs->share)
+        shr = attrs->share->egl_ctx;
 
     if(!_dengine_window_egl_createctx(window.egl_dpy, &window.egl_sfc, &window.egl_ctx, shr, window.x_win))
     {
