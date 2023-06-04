@@ -5,6 +5,7 @@
 
 #include "dengine-utils/debug.h"
 #include "dengine-utils/macros.h"
+#include "dengine/shader.h"
 
 #include <cglm/cglm.h> //glm_proj
 #include <string.h>    //memcpy
@@ -93,20 +94,21 @@ void dengine_camera_apply(const Shader* shader, const Camera* camera)
 {
     DENGINE_DEBUG_ENTER;
 
+    dengine_shader_use(shader);
     for (size_t i = 0; i < DENGINE_ARY_SZ(possible_projmat); i++) {
-        dengine_shader_set_mat4(shader, possible_projmat[i], camera->projection_mat);
+        dengine_shader_current_set_mat4(possible_projmat[i], camera->projection_mat);
     }
 
     for (size_t i = 0; i < DENGINE_ARY_SZ(possible_viewmat); i++) {
-        dengine_shader_set_mat4(shader, possible_viewmat[i], camera->view_mat);
+        dengine_shader_current_set_mat4(possible_viewmat[i], camera->view_mat);
     }
 
     for (size_t i = 0; i < DENGINE_ARY_SZ(possible_uviewmat); i++) {
-        dengine_shader_set_mat4(shader, possible_uviewmat[i], camera->uview_mat);
+        dengine_shader_current_set_mat4(possible_uviewmat[i], camera->uview_mat);
     }
 
     for (size_t i = 0; i < DENGINE_ARY_SZ(possible_campos); i++) {
-        dengine_shader_set_vec3(shader, possible_campos[i], camera->position);
+        dengine_shader_current_set_vec3(possible_campos[i], camera->position);
     }
 }
 
