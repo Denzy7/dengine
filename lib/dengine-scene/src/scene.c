@@ -110,7 +110,6 @@ void _denginescene_ecs_do_camera_draw_mesh(Entity* camera, Entity* mesh)
                             );
 
     dengine_draw_primitive(mesh->mesh_component->mesh,&mesh->mesh_component->material->shader_color);
-    dengine_material_use(NULL);
 }
 
 void _denginescene_ecs_do_camera_draw(Entity* camera,Entity* root)
@@ -425,8 +424,6 @@ void denginescene_ecs_do_skybox_scene(Scene* scene, Camera* camera)
     dengine_material_use(scene->skybox->material);
 
     dengine_draw_primitive(scene->skybox->cube, &scene->skybox->material->shader_color);
-
-    dengine_material_use(NULL);
 
     glDepthFunc(entrydfunc);
     DENGINE_CHECKGL;

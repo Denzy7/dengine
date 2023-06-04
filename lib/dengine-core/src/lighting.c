@@ -8,6 +8,7 @@
 #include "dengine-utils/logging.h"
 #include "dengine-utils/macros.h" //arr_sz
 #include "dengine-utils/debug.h"
+#include "dengine/shader.h"
 
 #include <string.h> //memset
 Lighting lighting;
@@ -290,20 +291,22 @@ void dengine_lighting_apply_dirlight(const DirLight* dirLight, const Shader* sha
         "lightDir","dLight.position"
     };
 
+    dengine_shader_use(shader);
+
     for (size_t i = 0; i < DENGINE_ARY_SZ(possible_pos); i++) {
-        dengine_shader_set_vec3(shader, possible_pos[i], dirLight->position);
+        dengine_shader_current_set_vec3(possible_pos[i], dirLight->position);
     }
 
-    dengine_shader_set_vec3(shader, "dLight.light.ambient", dirLight->light.ambient);
-    dengine_shader_set_vec3(shader, "dLight.light.diffuse", dirLight->light.diffuse);
-    dengine_shader_set_vec3(shader, "dLight.light.specular", dirLight->light.specular);
-    dengine_shader_set_float(shader, "dLight.light.strength", dirLight->light.strength);
-    dengine_shader_set_float(shader, "dLight.shadow.max_bias", dirLight->shadow.max_bias);
-    dengine_shader_set_int(shader, "dLight.shadow.enable", dirLight->shadow.enable);
-    dengine_shader_set_int(shader, "dLight.shadow.pcf", dirLight->shadow.pcf);
-    dengine_shader_set_int(shader, "dLight.shadow.pcf_samples", dirLight->shadow.pcf_samples);
-    dengine_shader_set_int(shader, "dLight.shadow.shadow_map_size", dirLight->shadow.shadow_map_size);
-    dengine_shader_set_mat4(shader, "dLight.shadow_projview", dirLight->shadow_projview);
+    dengine_shader_current_set_vec3("dLight.light.ambient", dirLight->light.ambient);
+    dengine_shader_current_set_vec3("dLight.light.diffuse", dirLight->light.diffuse);
+    dengine_shader_current_set_vec3("dLight.light.specular", dirLight->light.specular);
+    dengine_shader_current_set_float("dLight.light.strength", dirLight->light.strength);
+    dengine_shader_current_set_float("dLight.shadow.max_bias", dirLight->shadow.max_bias);
+    dengine_shader_current_set_int("dLight.shadow.enable", dirLight->shadow.enable);
+    dengine_shader_current_set_int("dLight.shadow.pcf", dirLight->shadow.pcf);
+    dengine_shader_current_set_int("dLight.shadow.pcf_samples", dirLight->shadow.pcf_samples);
+    dengine_shader_current_set_int("dLight.shadow.shadow_map_size", dirLight->shadow.shadow_map_size);
+    dengine_shader_current_set_mat4("dLight.shadow_projview", dirLight->shadow_projview);
 
 }
 
@@ -334,34 +337,36 @@ void dengine_lighting_apply_pointlight(const PointLight* pointLight, const Shade
 {
     DENGINE_DEBUG_ENTER;
 
+    dengine_shader_use(shader);
+
     size_t bufsz = sizeof (prtbuf);
     for (uint32_t i = 0; i < 1; i++) {
         snprintf(prtbuf, bufsz,"pLights[%u].position",i);
-        dengine_shader_set_vec3(shader, prtbuf, pointLight->position);
+        dengine_shader_current_set_vec3(prtbuf, pointLight->position);
 
         snprintf(prtbuf, bufsz,"pLights[%u].light.ambient",i);
-        dengine_shader_set_vec3(shader, prtbuf, pointLight->light.ambient);
+        dengine_shader_current_set_vec3(prtbuf, pointLight->light.ambient);
 
         snprintf(prtbuf, bufsz,"pLights[%u].light.diffuse",i);
-        dengine_shader_set_vec3(shader, prtbuf, pointLight->light.diffuse);
+        dengine_shader_current_set_vec3(prtbuf, pointLight->light.diffuse);
 
         snprintf(prtbuf, bufsz,"pLights[%u].light.specular",i);
-        dengine_shader_set_vec3(shader, prtbuf, pointLight->light.specular);
+        dengine_shader_current_set_vec3(prtbuf, pointLight->light.specular);
 
         snprintf(prtbuf, bufsz,"pLights[%u].constant",i);
-        dengine_shader_set_float(shader, prtbuf, pointLight->constant);
+        dengine_shader_current_set_float(prtbuf, pointLight->constant);
 
         snprintf(prtbuf, bufsz,"pLights[%u].linear",i);
-        dengine_shader_set_float(shader, prtbuf, pointLight->linear);
+        dengine_shader_current_set_float(prtbuf, pointLight->linear);
 
         snprintf(prtbuf, bufsz,"pLights[%u].quadratic",i);
-        dengine_shader_set_float(shader, prtbuf, pointLight->quadratic);
+        dengine_shader_current_set_float(prtbuf, pointLight->quadratic);
 
         snprintf(prtbuf, bufsz,"pLights[%u].shadow.far_shadow",i);
-        dengine_shader_set_float(shader, prtbuf, pointLight->shadow.far_shadow);
+        dengine_shader_current_set_float(prtbuf, pointLight->shadow.far_shadow);
 
         snprintf(prtbuf, bufsz,"pLights[%u].light.strength",i);
-        dengine_shader_set_float(shader, prtbuf, pointLight->light.strength);
+        dengine_shader_current_set_float(prtbuf, pointLight->light.strength);
     }
 
     //Compatibility until tests are upgraded
@@ -371,12 +376,12 @@ void dengine_lighting_apply_pointlight(const PointLight* pointLight, const Shade
     for(int j = 0; j < 3; j++)
         diffStrength[j]*=pointLight->light.strength;
 
-    dengine_shader_set_vec3(shader, "lightPos", pointLight->position);
-    dengine_shader_set_vec3(shader, "diffuseCol", diffStrength);
-    dengine_shader_set_float(shader, "constant", pointLight->constant);
-    dengine_shader_set_float(shader, "linear", pointLight->linear);
-    dengine_shader_set_float(shader, "quadratic", pointLight->quadratic);
-    dengine_shader_set_float(shader, "shadowfar", pointLight->shadow.far_shadow);
+    dengine_shader_current_set_vec3("lightPos", pointLight->position);
+    dengine_shader_current_set_vec3("diffuseCol", diffStrength);
+    dengine_shader_current_set_float("constant", pointLight->constant);
+    dengine_shader_current_set_float("linear", pointLight->linear);
+    dengine_shader_current_set_float("quadratic", pointLight->quadratic);
+    dengine_shader_current_set_float("shadowfar", pointLight->shadow.far_shadow);
 }
 
 void dengine_lighting_shadow_pointlight_draw(PointLight* pointLight, const Shader* shader, const Primitive* primitive, const float* modelmtx)
@@ -466,62 +471,63 @@ void dengine_lighting_apply_spotlight(const SpotLight* spotLight, const Shader* 
     float iCut_rad = glm_rad(45.0f - glm_clamp(spotLight->innerCutOff, 0.0f, spotLight->outerCutOff));
 
     size_t bufsz = sizeof (prtbuf);
+    dengine_shader_use(shader);
     for (uint32_t i = 0; i < 1; i++) {
         snprintf(prtbuf, bufsz,"sLights[%u].pointLight.position",i);
-        dengine_shader_set_vec3(shader, prtbuf, spotLight->pointLight.position);
+        dengine_shader_current_set_vec3(prtbuf, spotLight->pointLight.position);
 
         snprintf(prtbuf, bufsz,"sLights[%u].pointLight.light.ambient",i);
-        dengine_shader_set_vec3(shader, prtbuf, spotLight->pointLight.light.ambient);
+        dengine_shader_current_set_vec3(prtbuf, spotLight->pointLight.light.ambient);
 
         snprintf(prtbuf, bufsz,"sLights[%u].pointLight.light.diffuse",i);
-        dengine_shader_set_vec3(shader, prtbuf, spotLight->pointLight.light.diffuse);
+        dengine_shader_current_set_vec3(prtbuf, spotLight->pointLight.light.diffuse);
 
         snprintf(prtbuf, bufsz,"sLights[%u].pointLight.light.specular",i);
-        dengine_shader_set_vec3(shader, prtbuf, spotLight->pointLight.light.specular);
+        dengine_shader_current_set_vec3(prtbuf, spotLight->pointLight.light.specular);
 
         snprintf(prtbuf, bufsz,"sLights[%u].direction",i);
-        dengine_shader_set_vec3(shader, prtbuf, spotLight->direction);
+        dengine_shader_current_set_vec3(prtbuf, spotLight->direction);
 
         snprintf(prtbuf, bufsz,"sLights[%u].pointLight.constant",i);
-        dengine_shader_set_float(shader, prtbuf, spotLight->pointLight.constant);
+        dengine_shader_current_set_float(prtbuf, spotLight->pointLight.constant);
 
         snprintf(prtbuf, bufsz,"sLights[%u].pointLight.linear",i);
-        dengine_shader_set_float(shader, prtbuf, spotLight->pointLight.linear);
+        dengine_shader_current_set_float(prtbuf, spotLight->pointLight.linear);
 
         snprintf(prtbuf, bufsz,"sLights[%u].pointLight.quadratic",i);
-        dengine_shader_set_float(shader, prtbuf, spotLight->pointLight.quadratic);
+        dengine_shader_current_set_float(prtbuf, spotLight->pointLight.quadratic);
 
         snprintf(prtbuf, bufsz,"sLights[%u].pointLight.shadow.far_shadow",i);
-        dengine_shader_set_float(shader, prtbuf, spotLight->pointLight.shadow.far_shadow);
+        dengine_shader_current_set_float(prtbuf, spotLight->pointLight.shadow.far_shadow);
 
         snprintf(prtbuf, bufsz,"sLights[%u].pointLight.light.strength",i);
-        dengine_shader_set_float(shader, prtbuf, spotLight->pointLight.light.strength);
+        dengine_shader_current_set_float(prtbuf, spotLight->pointLight.light.strength);
 
         snprintf(prtbuf, bufsz,"sLights[%u].innerCutOff",i);
-        dengine_shader_set_float(shader, prtbuf, iCut_rad);
+        dengine_shader_current_set_float(prtbuf, iCut_rad);
 
         snprintf(prtbuf, bufsz,"sLights[%u].outerCutOff",i);
-        dengine_shader_set_float(shader, prtbuf, oCut_rad);
+        dengine_shader_current_set_float(prtbuf, oCut_rad);
     }
 
     //Compatibility until shaders are upgraded
 
-    dengine_shader_set_vec3(shader, "lightPos", spotLight->pointLight.position);
-    dengine_shader_set_vec3(shader, "lightDir", spotLight->direction);
+    dengine_shader_current_set_vec3("lightPos", spotLight->pointLight.position);
+    dengine_shader_current_set_vec3("lightDir", spotLight->direction);
     float diffStrength[3];
     memcpy(diffStrength, spotLight->pointLight.light.diffuse, sizeof(diffStrength));;
 
     for(int i = 0; i < 3; i++)
         diffStrength[i]*=spotLight->pointLight.light.strength;
 
-    dengine_shader_set_vec3(shader, "diffuseCol", diffStrength);
-    dengine_shader_set_float(shader, "constant", spotLight->pointLight.constant);
-    dengine_shader_set_float(shader, "linear", spotLight->pointLight.linear);
-    dengine_shader_set_float(shader, "quadratic", spotLight->pointLight.quadratic);
-    dengine_shader_set_float(shader, "shadowfar", spotLight->pointLight.shadow.far_shadow);
+    dengine_shader_current_set_vec3("diffuseCol", diffStrength);
+    dengine_shader_current_set_float("constant", spotLight->pointLight.constant);
+    dengine_shader_current_set_float("linear", spotLight->pointLight.linear);
+    dengine_shader_current_set_float("quadratic", spotLight->pointLight.quadratic);
+    dengine_shader_current_set_float("shadowfar", spotLight->pointLight.shadow.far_shadow);
 
-    dengine_shader_set_float(shader, "oCut", oCut_rad);
-    dengine_shader_set_float(shader, "iCut", iCut_rad);
+    dengine_shader_current_set_float("oCut", oCut_rad);
+    dengine_shader_current_set_float("iCut", iCut_rad);
 }
 
 void dengine_lighting_shadow_spotlight_draw(SpotLight* spotLight, const Shader* shader, const Primitive* primitive, const float* modelmtx)
