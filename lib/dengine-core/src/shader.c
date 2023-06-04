@@ -17,7 +17,7 @@
 static const float default_shader_col[3] = {1.0, 0.0, 0.0};
 
 static GLenum binfmt = 0;
-const Shader* current = NULL;
+const Shader* current_shader = NULL;
 
 static int shadercache = 1;
 
@@ -324,7 +324,7 @@ int dengine_shader_link(Shader* shader)
 void dengine_shader_use(const Shader* shader)
 {
     DENGINE_DEBUG_ENTER;
-    current = shader;
+    current_shader = shader;
     if(shader)
         glUseProgram(shader->program_id);
      else
@@ -371,35 +371,35 @@ void dengine_shader_set_float(const Shader* shader, const char* name, const floa
 void dengine_shader_current_set_mat4(const char* name, const float* value)
 {
     DENGINE_DEBUG_ENTER;
-    int location = glGetUniformLocation(current->program_id, name); DENGINE_CHECKGL;
+    int location = glGetUniformLocation(current_shader->program_id, name); DENGINE_CHECKGL;
     glUniformMatrix4fv(location, 1, GL_FALSE, value); DENGINE_CHECKGL;
 }
 
 void dengine_shader_current_set_vec3(const char* name, const float* value)
 {
     DENGINE_DEBUG_ENTER;
-    int location = glGetUniformLocation(current->program_id, name); DENGINE_CHECKGL;
+    int location = glGetUniformLocation(current_shader->program_id, name); DENGINE_CHECKGL;
     glUniform3fv(location, 1, value); DENGINE_CHECKGL;
 }
 
 void dengine_shader_current_set_vec4(const char* name, const float* value)
 {
     DENGINE_DEBUG_ENTER;
-    int location = glGetUniformLocation(current->program_id, name); DENGINE_CHECKGL;
+    int location = glGetUniformLocation(current_shader->program_id, name); DENGINE_CHECKGL;
     glUniform4fv(location, 1, value); DENGINE_CHECKGL;
 }
 
 void dengine_shader_current_set_float(const char* name, const float value)
 {
     DENGINE_DEBUG_ENTER;
-    int location = glGetUniformLocation(current->program_id, name); DENGINE_CHECKGL;
+    int location = glGetUniformLocation(current_shader->program_id, name); DENGINE_CHECKGL;
     glUniform1f(location, value); DENGINE_CHECKGL;
 }
 
 void dengine_shader_current_set_int(const char* name, const int value)
 {
     DENGINE_DEBUG_ENTER;
-    int location = glGetUniformLocation(current->program_id, name); DENGINE_CHECKGL;
+    int location = glGetUniformLocation(current_shader->program_id, name); DENGINE_CHECKGL;
     glUniform1i(location, value); DENGINE_CHECKGL;
 }
 
