@@ -269,6 +269,7 @@ static void term(struct  android_app* app)
 
 static void draw()
 {
+    dengine_update();
     double delta = dengineutils_timer_get_delta();
 
     if(dengine_input_get_key('1'))
@@ -359,7 +360,6 @@ static void draw()
     car_speed(NULL);
 
     // denginegui_panel(1024, 464, 256, 256, &dl.shadow.shadow_map.depth, NULL, GLM_VEC4_BLACK);
-    dengine_update();
 }
 
 void android_main(struct android_app* state)
