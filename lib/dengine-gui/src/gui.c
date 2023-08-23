@@ -250,7 +250,7 @@ void _denginegui_projectquad()
     int w, h;
     dengine_viewport_get(NULL, NULL, &w, &h);
     glm_ortho(0.0, w, 0.0, h, -1.0f, 1.0f, projection);
-    dengine_shader_set_mat4(&shader, "projection", projection[0]);
+    dengine_shader_current_set_mat4("projection", projection[0]);
 }
 
 int srcalpha, dstalpha, blnd, depthmask;
@@ -292,8 +292,6 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
     if(!initgui || !initfont)
         return;
 
-    _denginegui_projectquad();
-
     // get entry stuff
     Texture entry_tex;
     int entry_activetex = 0;
@@ -317,8 +315,11 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
     else
         dengine_shader_current_set_vec4("col", rgba);
 
+    _denginegui_projectquad();
     _denginegui_beginquad();
     dengine_draw_sequence_start(&quad, &shader);
+    //bind array buffer since we'll be changing it after getting packed quad
+    dengine_buffer_bind(GL_ARRAY_BUFFER, &quad.array);
 
     for(size_t i = 0; i < strlen(text); i++)
     {
@@ -378,7 +379,6 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
     if(!initgui)
         return;
 
-    _denginegui_projectquad();
 
     // get entry stuff
     Texture entry_tex;
@@ -406,6 +406,7 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
     else
         dengine_shader_current_set_vec4("col", rgba);
 
+    _denginegui_projectquad();
     //start seq
     _denginegui_beginquad();
     dengine_draw_sequence_start(&quad, &shader);
