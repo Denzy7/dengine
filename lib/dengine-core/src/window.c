@@ -94,6 +94,7 @@ static void wl_pointer_button(void *data, struct wl_pointer *wl_pointer, uint32_
 static void wl_pointer_leave(void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface);
 static void wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis, wl_fixed_t value);
 static void wl_pointer_axis_stop(void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis);
+static void wl_pointer_axis_value120(void *data, struct wl_pointer *wl_pointer, uint32_t axis, int32_t value120);
 static void wl_pointer_axis_source(void *data, struct wl_pointer *wl_pointer, uint32_t axis_source);
 static void wl_pointer_axis_discrete(void *data, struct wl_pointer *wl_pointer, uint32_t axis, int32_t discrete);
 
@@ -222,7 +223,8 @@ static const struct wl_pointer_listener wl_ptr_listener =
     .axis = wl_pointer_axis,
     .axis_source = wl_pointer_axis_source,
     .axis_discrete = wl_pointer_axis_discrete,
-    .axis_stop = wl_pointer_axis_stop
+    .axis_stop = wl_pointer_axis_stop,
+    .axis_value120 = wl_pointer_axis_value120
 };
 
 static const struct wl_keyboard_listener wl_kbd_listener =
@@ -1647,6 +1649,11 @@ static void wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t 
 }
 
 static void wl_pointer_axis_stop(void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis)
+{
+
+}
+
+static void wl_pointer_axis_value120(void *data, struct wl_pointer *wl_pointer, uint32_t axis, int32_t value120)
 {
 
 }
