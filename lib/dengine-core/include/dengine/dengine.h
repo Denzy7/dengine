@@ -354,6 +354,7 @@ DENGINE_INLINE int dengine_update()
 {
     dengineutils_timer_update();
     dengine_window_swapbuffers(DENGINE_INIT_OPTS.window);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     dengine_window_poll(DENGINE_INIT_OPTS.window);
     return dengine_window_isrunning(DENGINE_INIT_OPTS.window);
