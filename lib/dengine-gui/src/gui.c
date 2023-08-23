@@ -1,6 +1,7 @@
 #include "dengine-gui/gui.h"
 #include "dengine-gui/embfonts.h"
 
+#include "dengine/buffer.h"
 #include "dengine/texture.h"
 #include "dengine/loadgl.h"
 #include "dengine/primitive.h"
@@ -410,6 +411,9 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
     //start seq
     _denginegui_beginquad();
     dengine_draw_sequence_start(&quad, &shader);
+    //bind abuf since will change it below
+    dengine_buffer_bind(GL_ARRAY_BUFFER, &quad.array);
+
     float vertices[]=
     {
                       // Vert,   TexCoord
