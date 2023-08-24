@@ -173,10 +173,9 @@ int main(int argc, char *argv[])
 
     dengineutils_filesys_terminate();
 
-    dengineutils_debug_terminate();
     dengine_window_destroy(window);
     dengine_window_terminate();
-
+    dengineutils_debug_terminate();
 
     return 0;
 }

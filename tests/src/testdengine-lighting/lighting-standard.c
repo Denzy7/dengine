@@ -409,10 +409,10 @@ int main(int argc, char** argv)
     dengine_material_destroy(&cube_mat);
     dengine_material_destroy(&plane_mat);
 
-    dengineutils_debug_terminate();
 
     dengine_window_destroy(window);
     dengine_window_terminate();
 
+    dengineutils_debug_terminate();
     return 0;
 }
