@@ -6,6 +6,7 @@
 #include "dengine-utils/debug.h"
 #include "dengine-utils/macros.h"
 #include "dengine/shader.h"
+#include "dengine/texture.h"
 
 #include <cglm/cglm.h> //glm_proj
 #include <string.h>    //memcpy
@@ -149,6 +150,13 @@ void dengine_camera_set_rendermode(CameraRenderMode mode, Camera* camera)
         depth->width = camera->render_width;
         depth->height = camera->render_height;
         depth->type = GL_UNSIGNED_SHORT;
+        /*
+         * GL_OES_depth_texture allows  GL_UNSIGNED_INT or GL_UNSIGNED_SHORT. SHORT has 
+         * very poor precision esp. on new hardware. use highest precision 
+         * where possible
+         */
+        if(dengine_texture_issupprorted(GL_TEXTURE_2D, GL_UNSIGNED_INT, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT))
+            depth->type = GL_UNSIGNED_INT;
 
         dengine_texture_bind(GL_TEXTURE_2D, depth);
         dengine_texture_data(GL_TEXTURE_2D, depth);

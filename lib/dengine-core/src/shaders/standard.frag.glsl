@@ -260,12 +260,13 @@ float shadowCalcCube(samplerCube cube, vec3 pos, float shadowfar)
     float shadow = 0.0;
     vec3 distance = vec3(0.0);
     distance = FragPos - pos;
+    vec4 sample = textureCube(cube, distance);
 
-    if(length(textureCube(cube, distance).rgb) == 0.0)
+    if(length(sample.rgb) == 0.0)
        return 0.0;
 
     float current = length(distance);
-    float close = textureCube(cube, distance).r;
+    float close = sample.r;
     //return to depth
     close*=shadowfar;
     shadow = current - shadow_bias > close ? 1.0 : 0.0;
