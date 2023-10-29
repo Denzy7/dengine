@@ -5,17 +5,19 @@
 
 int main(int argc, char** argv)
 {
-    const char* in = argv[1];
-    const char* out = argv[2];
-    if(!in)
+    const char* in = argv[argc - 2];
+    const char* out = argv[argc - 1];
+    int enb = 0; /*end null byte, useful for string resource
+                 like shaders*/
+    for(int i = 0; i < argc; i++)
     {
-        printf("Pass the file to convert to C array in argv[1]\n");
-        return 1;
+        if(strcmp(argv[i], "-enb") == 0)
+            enb = 1;
     }
 
-    if(!out)
+    if(argc < 3)
     {
-        printf("Pass the destination name to argv[2]\n");
+        printf("Pass the file to convert to C array in argv[1] and destination file to argv[2]\n");
         return 1;
     }
 
@@ -72,6 +74,7 @@ int main(int argc, char** argv)
 
     fseeko(f_in, 0, SEEK_END);
     off_t ln = ftello(f_in);
+    size_t write = 0;
     rewind(f_in);
 
     //write ln
@@ -88,15 +91,16 @@ int main(int argc, char** argv)
             fprintf(f_out, "0");
 
         fprintf(f_out, "%x", byte);
+        fprintf(f_out, ", ");
+        write++;
 
-        if(ln != 1)
-            fprintf(f_out, ", ");
-
-        if(ln % 8 == 0)
+        if(write % 8 == 0 && write != 0)
             fprintf(f_out,"\n\t");
 
         ln--;
     }
+    if(enb)
+        fprintf(f_out, "\n\n\t0x0");
     fprintf(f_out, "\n\n};\n");
     fclose(f_in);
     fclose(f_out);

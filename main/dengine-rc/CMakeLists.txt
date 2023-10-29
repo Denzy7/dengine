@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(dengine-rc VERSION 1.0.0)
+project(dengine-rc VERSION 1.0.1)
 
 if(CMAKE_CROSSCOMPILING)
     message(FATAL_ERROR "Dont build dengine-rc when cross compiling!
