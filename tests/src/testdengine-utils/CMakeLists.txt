@@ -46,9 +46,6 @@ add_executable(testdengine-util-timer
     )
 target_link_libraries(testdengine-util-timer
         dengine-utils)
-if(UNIX)
-    target_link_libraries(testdengine-util-timer m)
-endif()
 set_property(TARGET testdengine-util-timer PROPERTY C_STANDARD 99)
 
 #str util
@@ -75,7 +72,4 @@ set_property(TARGET testdengine-util-zipread PROPERTY C_STANDARD 99)
 #threading util
 add_executable(testdengine-util-thread util-thread.c)
 target_link_libraries(testdengine-util-thread dengine-utils)
-if(UNIX)
-    target_link_libraries(testdengine-util-thread dengine-utils m )
-endif()
 set_property(TARGET testdengine-util-thread PROPERTY C_STANDARD 99)

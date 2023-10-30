@@ -12,6 +12,7 @@
 #include <dengine/draw.h>
 #include <dengine/lighting.h>
 #include <dengine/material.h>
+#include <dengine/viewport.h>
 
 #include <dengine-utils/logging.h>
 #include <dengine-utils/filesys.h>
@@ -19,6 +20,10 @@
 #include <dengine-utils/os.h>
 #include <dengine-utils/debug.h>
 #include <dengine-utils/macros.h>
+#ifdef DENGINE_ANDROID
+#define SWBTNS
+#include <dengine-utils/platform/android.h>
+#endif
 
 #include <dengine-gui/gui.h>
 
@@ -33,48 +38,27 @@ void draw_axis(Primitive* axis, Shader* shader)
     }
 }
 
-int main(int argc, char** argv)
+/* for this to be run with dengine glue like applications, we 
+ * need to set the window. this is better since we won't have 
+ * to rewrite it for android :)))
+ */
+DengineWindow* window;
+void testdengine_lighting_standard_setwindow(DengineWindow* some_window_created_elsewhere)
 {
-    dengineutils_debug_init();
+    window = some_window_created_elsewhere;
+}
 
-    dengine_window_init();
-    dengine_window_request_MSAA(4);
-
-    dengineutils_logging_set_filelogging(1);
-
-    dengine_window_request_GL(3,2,0);
-    DengineWindow* window = dengine_window_create(1280,720,"testdengine-lighting-standard", NULL);
-    if(!window)
-    {
-        //Use defaults then without shadows
-        dengine_window_request_defaultall();
-        window = dengine_window_create(1280, 720, "testdengine-lighting-standard(noshadow)", NULL);
-        if(!window)
-        {
-            dengineutils_logging_log("ERROR::cannot request an OpenGL 3.0 window!");
-            return 1;
-        }
-    }
-    dengine_window_makecurrent(window);
-
-    //Remove vsync (not recommended)
-    //dengine_window_set_swapinterval(0);
-    if (!dengine_window_loadgl(window)) {
-        dengineutils_logging_log("ERROR::cannot load gl");
-        return 1;
-    }
+int testdengine_lighting_standard(int argc, char** argv)
+{
+    float fontsz = denginegui_get_fontsz();
 
     dengineutils_logging_log("INFO::GL : %s", glGetString(GL_VERSION));
     dengineutils_logging_log("INFO::GLSL : %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-    //Init systems...
-    dengineutils_filesys_init();
-
-    float fontsz = 20.0f;
-    denginegui_init();
-    denginegui_set_font(NULL, fontsz, 512);
-
     const char* assets_dir = dengineutils_filesys_get_assetsdir();
+#ifdef DENGINE_ANDROID
+    File2Mem  f2m;
+#endif
     char prtbuf[2048];
 
     //STDSHADER
@@ -141,8 +125,15 @@ int main(int argc, char** argv)
         Texture* tex_plane = &planeTex[i];
         dengine_texture_bind(GL_TEXTURE_2D, tex_plane);
         tex_plane->interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
+#ifdef DENGINE_ANDROID
+        f2m.file = planeTextureFile[i];
+        dengineutils_android_asset2file2mem(&f2m);
+        dengine_texture_load_mem(f2m.mem, f2m.size, 1, tex_plane);
+        free(f2m.mem);
+#else
         snprintf(prtbuf, sizeof (prtbuf), "%s/%s", assets_dir, planeTextureFile[i]);
         dengine_texture_load_file(prtbuf, 1, tex_plane);
+#endif
         tex_plane->filter_min = GL_LINEAR;
         tex_plane->filter_mag = GL_LINEAR;
         uint32_t fmt = tex_plane->channels == 3 ? GL_RGB : GL_RGBA;
@@ -161,8 +152,15 @@ int main(int argc, char** argv)
         Texture* tex_cube = &cubeTex[i];
         dengine_texture_bind(GL_TEXTURE_2D, tex_cube);
         tex_cube->interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
+#ifdef DENGINE_ANDROID
+        f2m.file = cubeTextureFile[i];
+        dengineutils_android_asset2file2mem(&f2m);
+        dengine_texture_load_mem(f2m.mem, f2m.size, 1, tex_cube);
+        free(f2m.mem);
+#else
         snprintf(prtbuf, sizeof (prtbuf), "%s/%s", assets_dir, cubeTextureFile[i]);
         dengine_texture_load_file(prtbuf, 1, tex_cube);
+#endif
         tex_cube->filter_min = GL_LINEAR;
         tex_cube->filter_mag = GL_LINEAR;
         tex_cube->wrap = GL_CLAMP_TO_EDGE;
@@ -285,7 +283,7 @@ int main(int argc, char** argv)
         if (dengine_input_get_key('S'))
             ptr[2] +=.01 * delta;
 
-        dengine_window_get_dim(window, &w,&h);
+        dengine_viewport_get(0, 0, &w, &h);
 
         dengine_camera_lookat(NULL, &camera);
         dengine_camera_project_perspective((float)w / (float)h, &camera);
@@ -380,6 +378,28 @@ int main(int argc, char** argv)
         double offset = fontsz / 4;
         const int tex_widths = 128;
 
+#ifdef SWBTNS
+        static const char* swbtns_map[] = 
+        {
+            "A", "D", "E", "C", "W", "S"
+        };
+        static const float btnwid = 100.0f, pad = 5.0f;
+        denginegui_set_button_repeatable(1);
+        for(int i = 0; i < 6; i++)
+        {
+            if(denginegui_button(
+                        fontsz + (i * btnwid) + (i * pad), h / 2.0f ,
+                        btnwid, 100.0f, swbtns_map[i], NULL))
+            {
+                if(i % 2 != 0)
+                    ptr[i / 2] += .01f * delta;
+                else
+                    ptr[i / 2] -= .01f * delta;
+            }
+        }
+        denginegui_set_button_repeatable(0);
+#endif
+
         denginegui_text(offset,offset, (char*) glGetString(GL_VERSION), NULL);
         denginegui_panel(0, fontsz, tex_widths,tex_widths,&dLight.shadow.shadow_map.depth, NULL, NULL);
 
@@ -403,16 +423,59 @@ int main(int argc, char** argv)
         dengine_window_swapbuffers(window);
         dengine_window_poll(window);
     }
-
-    denginegui_terminate();
-
     dengine_material_destroy(&cube_mat);
     dengine_material_destroy(&plane_mat);
 
+    return 0;
+}
+#ifndef DENGINE_ANDROID
+int main(int argc, char** argv)
+{
+    dengineutils_debug_init();
 
+    dengine_window_init();
+    dengine_window_request_MSAA(4);
+
+    dengineutils_logging_set_filelogging(1);
+
+    dengine_window_request_GL(3,2,0);
+    DengineWindow* window_int_main = dengine_window_create(1280,720,"testdengine-lighting-standard", NULL);
+    if(!window_int_main)
+    {
+        //Use defaults then without shadows
+        dengine_window_request_defaultall();
+        window_int_main = dengine_window_create(1280, 720, "testdengine-lighting-standard(noshadow)", NULL);
+        if(!window_int_main)
+        {
+            dengineutils_logging_log("ERROR::cannot request an OpenGL 3.0 window!");
+            return 1;
+        }
+    }
+    dengine_window_makecurrent(window_int_main);
+
+    //Remove vsync (not recommended)
+    //dengine_window_set_swapinterval(0);
+    if (!dengine_window_loadgl(window_int_main)) {
+        dengineutils_logging_log("ERROR::cannot load gl");
+        return 1;
+    }
+
+    //Init systems...
+    dengineutils_filesys_init();
+
+    denginegui_init();
+    denginegui_set_font(NULL, 20.0f, 512);
+
+    testdengine_lighting_standard_setwindow(window_int_main);
+
+    /* main */
+    testdengine_lighting_standard(argc, argv);
+
+    denginegui_terminate();
     dengine_window_destroy(window);
     dengine_window_terminate();
 
     dengineutils_debug_terminate();
-    return 0;
+
 }
+#endif

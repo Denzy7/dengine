@@ -1,8 +1,8 @@
 #include <dengine-utils/thread.h>
 #include <dengine-utils/logging.h>
 #include <dengine-utils/timer.h>
+#include <stdint.h> 
 #include <stdio.h> //scanf
-#include <math.h> //fmod
 typedef struct
 {
     int a;
@@ -22,32 +22,35 @@ void* startthr(void* arg)
 
     dengineutils_timer_update();
 
-    double delta = 0;
+    /* we just need tame seconds precision, we'll have to 
+     * account for lost of precison by getting the last 
+     * time we interrupted so we dont interupt multiple times in a second*/
     static double elapsed = 0;
+    uint32_t lastint = 0;
     while(elapsed < 10000.0)
     {
         dengineutils_timer_update();
-        delta = dengineutils_timer_get_delta();
-        elapsed += delta;
-        if(fmod(elapsed, 1000.0) == 0)
-            dengineutils_logging_log("INFO::I WILL NOW INTERRUPT!");
+        elapsed += dengineutils_timer_get_delta();
+        if((uint32_t)elapsed % 1000 == 0 && lastint != (uint32_t)elapsed / 1000){
+            dengineutils_logging_log("INFO::I WILL NOW INTERRUPT! %u", (uint32_t)elapsed / 1000);
+            lastint = (uint32_t)elapsed / 1000;
+        }
     }
+    dengineutils_logging_log("WARNING::press enter to get your input!");
     run = 0;
     return NULL;
 }
 
 int main(int argc, char *argv[])
 {
-    dengineutils_logging_log("INFO::Enter some text. A thread will interrupt you every second!");
-    somedata data = {33, 33.3, '3'};
     Thread thr;
-    dengineutils_thread_create(startthr, &data, &thr);
+    somedata data = {33, 33.3, '3'};
     char buf[256];
-    while(run)
-    {
-        scanf("%256s", buf);
-        dengineutils_logging_log("TODO::You entered : %s", buf);
-    }
+    dengineutils_thread_create(startthr, &data, &thr);
+    dengineutils_logging_log("INFO::Enter some text. A thread will interrupt you every second!");
+    dengineutils_thread_wait(&thr);
+    scanf("%256s", buf);
+    dengineutils_logging_log("TODO::you entered: %s\n", buf);
 
     return 0;
 }

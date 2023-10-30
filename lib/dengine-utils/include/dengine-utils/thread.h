@@ -73,6 +73,28 @@ int dengineutils_thread_condition_create(Condition* condition);
 
 int dengineutils_thread_condition_destroy(Condition* condition);
 
+/* deref_and_set_to_one prevents spurious wake up from 
+ * the kernel to unexpectedly resume the thread.
+ * set it to one just after or before calling thread_condition_raise 
+ * to tell the thread to actually resume. you can think of it
+ * as deref is the actual variable the thread is waiting for :)
+ *
+ * Condition cond;
+ * int deref;
+ * void* thr(void* arg)
+ * {
+ * ...
+ *  condition_wait(&cond, &deref);
+ * ... continue thread normally
+ * }
+ * void func_with_data_needed_by_thread(){
+ * ...
+ * deref = 1;
+ * condition_raise(&cond);
+ * ...
+ * }
+ *
+ */
 int dengineutils_thread_condition_wait(Condition* condition, int* deref_and_set_to_one);
 
 int dengineutils_thread_condition_raise(Condition* condition);

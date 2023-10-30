@@ -9,4 +9,4 @@ void main()
     float distance = length(FragPos.xyz - pos);
     distance /= far;
     gl_FragDepth = distance;
-}//dont remove this comment
+}

@@ -271,4 +271,4 @@ float shadowCalcCube(samplerCube cube, vec3 pos, float shadowfar)
     close*=shadowfar;
     shadow = current - shadow_bias > close ? 1.0 : 0.0;
     return shadow;
-}//dont remove this comment
+}

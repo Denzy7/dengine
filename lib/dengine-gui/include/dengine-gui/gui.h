@@ -15,6 +15,10 @@ int denginegui_set_font(const void* ttf, const float fontsize, const uint32_t bi
 
 void denginegui_set_button_repeatable(int state);
 
+void denginegui_set_panel_discard(int state);
+
+void denginegui_set_panel_discard_threshold(float threshold);
+
 float denginegui_get_fontsz();
 
 void denginegui_text(float x,float y, const char* text, float* rgba);

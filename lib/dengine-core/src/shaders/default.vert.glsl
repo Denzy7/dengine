@@ -1,4 +1,3 @@
-//default general purpose debug shader
 #version 100
 
 struct Camera
@@ -16,4 +15,4 @@ uniform mat4 model;
 void main()
 {
     gl_Position = camera.projection * camera.view * model * vec4(aPos, 1.0);
-}//dont remove this comment
+}

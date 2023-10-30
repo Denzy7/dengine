@@ -17,10 +17,10 @@
  */
 typedef struct
 {
-    char* vertex_code;
-    char* fragment_code;
-    char* geometry_code;
-    char* cached_name;
+    const char* vertex_code;
+    const char* fragment_code;
+    const char* geometry_code;
+    const char* cached_name;
 
     uint32_t vertex_id;
     uint32_t fragment_id;
@@ -40,7 +40,9 @@ typedef enum
     DENGINE_SHADER_DEFAULT, /*!< 3D basic shader with a single color uniform */
     DENGINE_SHADER_SHADOW2D, /*!< 3D shader for 2D shadow mapping */
     DENGINE_SHADER_SHADOW3D, /*!< 3D shader for 3D shadow mapping. GL/ES 3.2+ only */
-    DENGINE_SHADER_GUI, /*!< 2D shader for GUI quad */
+    DENGINE_SHADER_GUI_TEXT, /*!< 2D shader for GUI quad, for rendering text */
+    DENGINE_SHADER_GUI_PANEL, /*!< 2D shader for GUI quad, for rendering panel */
+    DENGINE_SHADER_GUI_DISCARD, /*!< 2D shader for GUI quad, that discard fragment by threshold */
     DENGINE_SHADER_DEBUG_NORMALS, /*!< 3D shader that outputs normals as color */
     DENGINE_SHADER_SKYBOXCUBE, /*!< 3D shader when using a cubemap skybox */
     DENGINE_SHADER_SKYBOX2D, /*!< 3D shader when using a 2D skybox (hdri map) */

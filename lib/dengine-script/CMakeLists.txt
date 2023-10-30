@@ -44,6 +44,13 @@ endif()
 target_link_libraries(dengine-script PRIVATE dengine-core dengine-utils ${dengine-script-link})
 
 if(DENGINE_HAS_BULLET)
+    add_library(nsl-bulletphysics-common STATIC 
+        src/nsl-bulletphysics/denginebulletcommon.cpp)
+    target_link_libraries(nsl-bulletphysics-common PRIVATE
+         ${dengine} ${bullet_LIBRARIES})
+     set_target_properties(nsl-bulletphysics-common PROPERTIES
+         POSITION_INDEPENDENT_CODE ON)
+
     add_library(nsl-bulletphysics SHARED
         src/nsl-bulletphysics/basic.cpp
     )
@@ -52,17 +59,39 @@ if(DENGINE_HAS_BULLET)
         SUFFIX ".nsl"
         LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests-build/bin"
     )
-    target_link_libraries(nsl-bulletphysics ${dengine} ${bullet_LIBRARIES})
+    target_link_libraries(nsl-bulletphysics ${dengine} ${bullet_LIBRARIES} nsl-bulletphysics-common)
 
+    set(nslbullet-car-res
+       src/nsl-bulletphysics/rover.obj)
+
+    # output after compile
+    set(outres)
+
+    # compile
+    foreach(res ${nslbullet-car-res})
+    # inres and outres should be absolute paths for fair measure
+        set(inresname ${CMAKE_CURRENT_SOURCE_DIR}/${res})
+        get_filename_component(barename ${res} NAME)
+        set(outresname ${CMAKE_CURRENT_BINARY_DIR}/${barename}-res.c)
+        add_custom_command(
+            OUTPUT ${outresname}
+            COMMAND dengine-rc ${inresname} ${outresname}
+            DEPENDS ${inresname}
+            VERBATIM
+        )
+    # append
+        list(APPEND outres ${outresname})
+    endforeach()
     add_library(nsl-bulletphysics-car SHARED
         src/nsl-bulletphysics/car.cpp
+        ${outres}
     )
     set_target_properties(nsl-bulletphysics-car PROPERTIES
         PREFIX ""
         SUFFIX ".nsl"
         LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests-build/bin"
     )
-    target_link_libraries(nsl-bulletphysics-car ${dengine} ${bullet_LIBRARIES})
+    target_link_libraries(nsl-bulletphysics-car ${dengine} ${bullet_LIBRARIES} nsl-bulletphysics-common)
 endif()
 
 if(DENGINE_HAS_LIBPULSE_SIMPLE)

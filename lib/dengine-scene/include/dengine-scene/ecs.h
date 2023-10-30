@@ -19,6 +19,11 @@ typedef struct
     vec3 rotation;
     vec3 scale;
 
+    /* ecs wont write to world_model with this 
+     * set to 1. used for physics simulations etc.
+     */
+    int manualtransform;
+
     mat4 world_model;
 }TransformComponent;
 
@@ -41,31 +46,6 @@ typedef struct
     int last_cam;
 }CameraComponent;
 
-typedef enum
-{
-    DENGINE_ECS_PHYSICS_COLSHAPE_BOX,
-    DENGINE_ECS_PHYSICS_COLSHAPE_CAPSULE,
-}ECSPhysicsColShape;
-
-typedef struct
-{
-    vec3 extends;
-}ECSPhysicsColShapeConfigBox;
-
-typedef struct
-{
-    float timestep_fixed;
-    int substeps;
-}ECSPhysicsWorld;
-
-typedef struct
-{
-    ECSPhysicsColShape shape;
-    void* colshapeconfig;
-    float mass;
-    int bodyid; /* assuming you don't create up to 2147483647 rigidbodies (strangely enough, bullet uses signed int as internal counter for world? */
-}PhysicsComponent;
-
 typedef struct _Entity
 {
     uint32_t entity_id;
@@ -87,7 +67,7 @@ typedef struct _Entity
     LightComponent* light_component;
     CameraComponent* camera_component;
     /* Some simple data to pass to a physics engine i.e. Bullet (nsl) */
-    PhysicsComponent* physics_component;
+    //PhysicsComponent* physics_component;
 }Entity;
 
 typedef struct
@@ -133,6 +113,10 @@ void denginescene_ecs_get_right(Entity* entity, vec3 right);
 
 void denginescene_ecs_get_up(Entity* entity, vec3 up);
 
+/*!
+ * \brief Transform an entity position, rotation and scale to model matrix with parent entity then transform children entities
+ * \param entity entity to transform. can be a root entity or child entity 
+ */
 void denginescene_ecs_transform_entity(Entity* entity);
 
 MeshComponent* denginescene_ecs_new_meshcomponent(const Primitive* mesh, const Material* material);
@@ -141,7 +125,7 @@ CameraComponent* denginescene_ecs_new_cameracomponent(const Camera* camera);
 
 LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light);
 
-PhysicsComponent* denginescene_ecs_new_physicscomponent(ECSPhysicsColShape type, const void* colshapeconfig, const float mass);
+//PhysicsComponent* denginescene_ecs_new_physicscomponent(ECSPhysicsColShape type, const void* colshapeconfig, const float mass);
 
 void denginescene_ecs_add_script(Entity* entity, const Script* script);
 

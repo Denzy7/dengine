@@ -7,7 +7,6 @@
 #include "dengine-utils/logging.h"//log
 #include "dengine-utils/filesys.h"//assetdir
 #include "dengine-utils/debug.h"
-#include "dengine-utils/str.h" //str_ndup
 #include "dengine-utils/os.h" //mkdir
 #include "dengine_config.h" //cache_dir, ext, version
 #ifdef DENGINE_ANDROID
@@ -36,7 +35,10 @@ extern char shadow3d_frag_glsl[];
 extern char shadow3d_geom_glsl[];
 
 extern char gui_vert_glsl[];
-extern char gui_frag_glsl[];
+extern char gui_panel_frag_glsl[];
+extern char gui_text_frag_glsl[];
+
+extern char discard_frag_glsl[];
 
 extern char debug_normals_vert_glsl[];
 extern char debug_normals_frag_glsl[];
@@ -52,13 +54,59 @@ static const char *stdshaderssrcfiles[][4]=
     {"default", default_vert_glsl ,default_frag_glsl},
     {"shadow2d", shadow2d_vert_glsl, shadow2d_frag_glsl},
     {"shadow3d", shadow3d_vert_glsl, shadow3d_frag_glsl, shadow3d_geom_glsl},
-    {"gui", gui_vert_glsl, gui_frag_glsl},
+    {"gui_text", gui_vert_glsl, gui_text_frag_glsl},
+    {"gui_panel", gui_vert_glsl, gui_panel_frag_glsl},
+    {"gui_discard", gui_vert_glsl, discard_frag_glsl},
     {"debug-normals", debug_normals_vert_glsl, debug_normals_frag_glsl},
     {"skyboxcube", skybox_vert_glsl, skyboxcube_frag_glsl},
     {"skybox2d", skybox_vert_glsl, skybox2d_frag_glsl},
 };
 
 void _dengine_shader_set_binfmt();
+
+void _dengine_shader_build_cachedir(char* ret, const size_t retlen);
+void _dengine_shader_build_cachefile(char* ret, const size_t retlen, const char* cached_name);
+
+int _dengine_shader_incache(const char* file);
+
+/* filesys must be init! */
+void _dengine_shader_build_cachefile(char* ret, const size_t retlen, const char* cached_name)
+{
+    char dir[2048];
+    _dengine_shader_build_cachedir(dir, sizeof(dir));
+    snprintf(ret, retlen, "%s/%s%s", dir, 
+            cached_name,DENGINE_SHADER_CACHE_EXT);
+
+    /* implicitly mkdir */
+    if(!dengineutils_os_direxist(dir))
+        dengineutils_os_mkdir(dir);
+}
+
+/* filesys must be init! */
+void _dengine_shader_build_cachedir(char* ret, const size_t retlen)
+{
+    const char* GL = (const char*) glGetString(GL_VERSION);
+    DENGINE_CHECKGL;
+    snprintf(ret, retlen, "%s/%s/%s/%s", dengineutils_filesys_get_cachedir(),
+                 DENGINE_SHADER_CACHE_DIR, DENGINE_VERSION, GL);
+}
+
+int _dengine_shader_incache(const char* cached_name)
+{
+    char prtbf[2048];
+    FILE* test; 
+    int ret = 0;
+    if(dengineutils_filesys_isinit() && shadercache)
+    {
+        _dengine_shader_build_cachefile(prtbf, sizeof(prtbf), cached_name);
+        test = fopen(prtbf, "rb");
+        if(test){
+            ret = 1;
+            fclose(test);
+        }
+    }
+    return ret;
+}
 
 void dengine_shader_create(Shader* shader)
 {
@@ -156,6 +204,8 @@ int dengine_shader_setup(Shader* shader)
 {
     DENGINE_DEBUG_ENTER;
 
+    /* WE'LL JUST GET A LINKER ERROR ANYWAY! */
+/*
     //Dont compile an unsupported version
     int maj = 0,min = 0, ver = 0, shadver = 0;
     const char* glslv = (char *) glGetString(GL_SHADING_LANGUAGE_VERSION);
@@ -179,57 +229,44 @@ int dengine_shader_setup(Shader* shader)
             }
         }
     }
-
+*/
     shader->program_id = glCreateProgram(); DENGINE_CHECKGL;
 
-    if(dengineutils_filesys_isinit() && shadercache)
+    if(!binfmt)
+        _dengine_shader_set_binfmt();
+
+    /* try load from cache */
+    if(dengineutils_filesys_isinit() &&
+            shadercache &&
+            shader->cached_name &&
+            _dengine_shader_incache(shader->cached_name) &&
+            binfmt)
     {
-        const size_t prtbf_sz = 4096;
-        char* prtbf = malloc(prtbf_sz);
+        char prtbf[4096];
+        const size_t prtbf_sz = sizeof(prtbf);
         int binload = 0;
+        FILE* binfile;
 
-        const char* GL = (const char*) glGetString(GL_VERSION);
-        DENGINE_CHECKGL;
-        snprintf(prtbf, prtbf_sz, "%s/%s/%s/%s", dengineutils_filesys_get_cachedir(),
-                 DENGINE_SHADER_CACHE_DIR, DENGINE_VERSION, GL);
-
-        if(!dengineutils_os_direxist(prtbf))
-            dengineutils_os_mkdir(prtbf);
-
-
-        if(shader->cached_name)
+        _dengine_shader_build_cachefile(prtbf, prtbf_sz, shader->cached_name);
+        binfile = fopen(prtbf, "rb");
+        if(binfile && binfmt)
         {
-            snprintf(prtbf, prtbf_sz, "%s/%s/%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
-                     DENGINE_SHADER_CACHE_DIR, DENGINE_VERSION, GL,
-                     shader->cached_name, DENGINE_SHADER_CACHE_EXT);
-
-            if(fopen(prtbf, "rb"))
+            File2Mem f2m;
+            f2m.file = prtbf;
+            dengineutils_filesys_file2mem_load(&f2m);
+            if(dengine_shader_set_binary(shader, f2m.mem, (int)f2m.size))
             {
-                File2Mem f2m;
-                f2m.file = prtbf;
-
-                if(!binfmt)
-                    _dengine_shader_set_binfmt();
-
-                if(binfmt)
-                {
-                    dengineutils_filesys_file2mem_load(&f2m);
-                    if(dengine_shader_set_binary(shader, f2m.mem, (int)f2m.size))
-                    {
-                        binload = 1;
-                        dengineutils_logging_log("TODO::load binary %s, %d,%u", shader->cached_name, (int)f2m.size, binfmt);
-                    }
-                    dengineutils_filesys_file2mem_free(&f2m);
-                }
+                binload = 1;
+                dengineutils_logging_log("TODO::load binary %s, len:%d", shader->cached_name, (int)f2m.size);
             }
+            dengineutils_filesys_file2mem_free(&f2m);
         }
-
-        free(prtbf);
 
         if(binload)
             return 1;
     }
 
+    /*else compile source */
     shader->vertex_id = glCreateShader(GL_VERTEX_SHADER); DENGINE_CHECKGL;
     shader->fragment_id = glCreateShader(GL_FRAGMENT_SHADER); DENGINE_CHECKGL;
 
@@ -282,39 +319,28 @@ int dengine_shader_link(Shader* shader)
         free(info_log);
     }else
     {
-        if(dengineutils_filesys_isinit() && shadercache)
+        if(dengineutils_filesys_isinit() && shadercache && shader->cached_name)
         {
+            char prtbf[4096];
             const size_t prtbf_sz = 4096;
-            char* prtbf = malloc(prtbf_sz);
-            const char* GL = (const char*) glGetString(GL_VERSION);
-            DENGINE_CHECKGL;
-            snprintf(prtbf, prtbf_sz, "%s/%s/%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
-                     DENGINE_SHADER_CACHE_DIR, DENGINE_VERSION, GL,
-                     shader->cached_name, DENGINE_SHADER_CACHE_EXT);
-            if(!fopen(prtbf, "rb") && shader->cached_name)
+            FILE* binfile;
+            int len = 0;
+            void* bin;
+
+            bin = dengine_shader_get_binary(shader, &len);
+            _dengine_shader_build_cachefile(prtbf, prtbf_sz, shader->cached_name);
+            binfile = fopen(prtbf, "wb");
+
+            if(bin && binfile)
             {
-                //fopen and save binary here
-                if(!binfmt)
-                    _dengine_shader_set_binfmt();
-
-                if(binfmt)
-                {
-                    FILE* f_bin = fopen(prtbf, "wb");
-                    int len = 0;
-                    void* bin = dengine_shader_get_binary(shader, &len);
-                    if(f_bin)
-                    {
-                        fwrite(bin, len, 1, f_bin);
-                        fclose(f_bin);
-                        free(bin);
-                    }
-                }
-                dengineutils_logging_log("TODO::save binary %s", shader->cached_name);
+                fwrite(bin, len, 1, binfile);
+                fclose(binfile);
+                dengineutils_logging_log("TODO::save binary %s, len:%d", shader->cached_name, len);
+            }else {
+                dengineutils_logging_log("ERROR::save binary failed! %s");
+                perror(NULL);
             }
-
-            free(prtbf);
         }
-
     }
 
     return ok;
@@ -327,7 +353,7 @@ void dengine_shader_use(const Shader* shader)
     current_shader = shader;
     if(shader)
         glUseProgram(shader->program_id);
-     else
+    else
         glUseProgram(0);
 
     DENGINE_CHECKGL;
@@ -403,75 +429,39 @@ void dengine_shader_current_set_int(const char* name, const int value)
     glUniform1i(location, value); DENGINE_CHECKGL;
 }
 
-int dengine_shader_make_standard(StandardShader stdshader, Shader* stdshdr)
+int dengine_shader_make_standard(StandardShader type, Shader* shader)
 {
     DENGINE_DEBUG_ENTER;
 
-    memset(stdshdr,0,sizeof(Shader));
+    memset(shader,0,sizeof(Shader));
 
-    dengine_shader_create(stdshdr);
+    dengine_shader_create(shader);
+    shader->cached_name = stdshaderssrcfiles[type][0];
 
-    const int prtbuf_sz=2048;
-    char* prtbuf = malloc(prtbuf_sz);
-
-    //get cache name
-    char* cached = strdup(stdshaderssrcfiles[stdshader][0]);
-    stdshdr->cached_name = cached;
-
-    if(dengineutils_filesys_isinit() && shadercache)
+    const char *stdshdrsrc[3] =
     {
-        int bin_success = 0;
-        const char* GL = (const char*) glGetString(GL_VERSION);
-        DENGINE_CHECKGL;
-        snprintf(prtbuf, prtbuf_sz, "%s/%s/%s/%s/%s%s", dengineutils_filesys_get_cachedir(),
-                 DENGINE_SHADER_CACHE_DIR, DENGINE_VERSION, GL,
-                 stdshdr->cached_name, DENGINE_SHADER_CACHE_EXT);
-
-        if(fopen(prtbuf, "rb"))
-        {
-            bin_success = dengine_shader_setup(stdshdr);
-        }
-
-        if(bin_success)
-        {
-            free(cached);
-            free(prtbuf);
-            return 1;
-        }
-    }
-
-    char *stdshdrsrc[3] =
-    {
-      NULL, NULL, NULL //Is this necessary?
+        NULL, NULL, NULL //Is this necessary? YES!, its contents are undefined unless set explicitly
     };
 
+    /* set vert, frag, geom */
     for (int i = 0; i < 3; i++) {
         //+1 to skip name
-        const char* stdshdrsrcfile = stdshaderssrcfiles[stdshader][i + 1];
+        const char* stdshdrsrcfile = stdshaderssrcfiles[type][i + 1];
         if(stdshdrsrcfile)
-            stdshdrsrc[i] = strdup(stdshdrsrcfile);
+            stdshdrsrc[i] = stdshaderssrcfiles[type][i + 1];
     }
 
-    stdshdr->vertex_code = stdshdrsrc[0];
-    stdshdr->fragment_code = stdshdrsrc[1];
-    stdshdr->geometry_code = stdshdrsrc[2];
+    shader->vertex_code = stdshdrsrc[0];
+    shader->fragment_code = stdshdrsrc[1];
+    shader->geometry_code = stdshdrsrc[2];
 
-    int setup = dengine_shader_setup(stdshdr);
+    if(dengineutils_filesys_isinit() && shadercache && _dengine_shader_incache(shader->cached_name))
+        return dengine_shader_setup(shader);
 
-    for (int i = 0; i < 2; i++) {
-        char* stdshdrsrcdup = stdshdrsrc[i];
-        if(stdshdrsrcdup)
-        {
-            free(stdshdrsrcdup);
-        }
-    }
-    free(prtbuf);
-    free(cached);
+    int setup = dengine_shader_setup(shader);
 
-    if(stdshader == DENGINE_SHADER_DEFAULT)
-    {
-        dengine_shader_set_vec3(stdshdr,"color", default_shader_col);
-    }
+    if(type == DENGINE_SHADER_DEFAULT)
+        dengine_shader_set_vec3(shader,"color", default_shader_col);
 
     return setup;
 }
@@ -515,31 +505,35 @@ void* dengine_shader_get_binary(Shader* shader, int* length)
         glGetProgramBinaryOES(shader->program_id, *length, NULL, &binfmt, bin); DENGINE_CHECKGL;
     }else
     {
-        dengineutils_logging_log("WARNING::Could not find a binary format. Shader cache disabled");
+        dengineutils_logging_log("WARNING::Could not find a get binary format function!");
     }
+
+    if(bin != NULL)
+        _dengine_shader_set_binfmt();
 
     return bin;
 }
 
 void _dengine_shader_set_binfmt()
 {
-    DENGINE_DEBUG_ENTER;
+    if(!shadercache || !dengineutils_filesys_isinit())
+        return;
 
-    Shader* binfmtshdr = calloc(1, sizeof (Shader));
+    char fmtfile[2048], dir[1024];
+    _dengine_shader_build_cachedir(dir, sizeof(dir));
+    snprintf(fmtfile, sizeof(fmtfile),
+            "%s/shader_cache_format.bin", dir);
+    FILE* f = fopen(fmtfile, "rb");
+    if(f){
+        fread(&binfmt, 1, sizeof(binfmt), f);
+        fclose(f);
+    }
 
-    binfmtshdr->vertex_code = "void main(){gl_Position = vec4(1.0);}";
-    binfmtshdr->fragment_code = "void main(){gl_FragColor = vec4(1.0);}";
-
-    dengine_shader_setup(binfmtshdr);
-
-    int len = 0;
-    void* bin = dengine_shader_get_binary(binfmtshdr, &len);
-
-    dengine_shader_destroy(binfmtshdr);
-
-    if(bin)
-        free(bin);
-    free(binfmtshdr);
+    if(binfmt){
+        f = fopen(fmtfile, "wb");
+        fwrite(&binfmt, 1, sizeof(binfmt), f);
+        fclose(f);
+    }
 }
 
 void dengine_shader_set_shadercache(int state)

@@ -21,4 +21,4 @@ void main()
     gl_Position = camera.projection * camera.view * model * vec4(aPos, 1.0);
 
     Normal = aNormal;
-}//dont remove this comment
+}

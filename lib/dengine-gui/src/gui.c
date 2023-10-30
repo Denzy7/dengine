@@ -40,10 +40,15 @@ unsigned int _bmp_sz = 0;
 int initfont = 0;
 float _fontsz = 0.0f;
 int btnrepeatable = 0;
+int paneldiscard = 0;
+float discardthreshold = 0.1f;
 
 //the standard gui quad
 Primitive quad;
-Shader shader;
+
+Shader gui_text;
+Shader gui_panel;
+Shader gui_discard;
 
 int initgui = 0;
 #define PANEL_ALPHA 0.4f
@@ -110,7 +115,11 @@ int denginegui_init()
     quad.aTexCoord.type = GL_FLOAT;
     quad.aTexCoord.ptr = (void*)(2 * sizeof(float));
 
-    int setup = dengine_shader_make_standard(DENGINE_SHADER_GUI, &shader);
+    int setup = 
+        dengine_shader_make_standard(DENGINE_SHADER_GUI_TEXT, &gui_text) &&
+        dengine_shader_make_standard(DENGINE_SHADER_GUI_PANEL, &gui_panel) &&
+        dengine_shader_make_standard(DENGINE_SHADER_GUI_DISCARD, &gui_discard);
+        
 
     #ifdef DENGINE_HAS_FONTCONFIG
     fcfilestrbuf = calloc(fcfilestrbufsz, sizeof(char));
@@ -118,8 +127,14 @@ int denginegui_init()
 
     if(setup)
     {
-        dengine_shader_set_int(&shader, "tex", 0);
-        dengine_primitive_setup(&quad, &shader);
+        dengine_shader_set_int(&gui_text, "tex", 0);
+        dengine_shader_set_int(&gui_discard, "tex", 0);
+        dengine_shader_set_int(&gui_panel, "tex", 0);
+
+        /* all use the same vertex shader, so vertex
+         * attribs should be the same
+         */
+        dengine_primitive_setup(&quad, &gui_text);
         static const float dftpaneltex_col[3] = {0.1, 0.2, 0.3};
         dengine_texture_make_color(8, 8, dftpaneltex_col, 3, &dftpaneltex);
         initgui = 1;
@@ -136,7 +151,9 @@ void denginegui_terminate()
     DENGINE_DEBUG_ENTER;
 
     dengine_texture_destroy(1, &fontmap);
-    dengine_shader_destroy(&shader);
+    dengine_shader_destroy(&gui_text);
+    dengine_shader_destroy(&gui_panel);
+    dengine_shader_destroy(&gui_discard);
     dengine_primitive_destroy(&quad);
 
 #ifdef DENGINE_HAS_FONTCONFIG
@@ -309,8 +326,7 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
 
     // set color
     float white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-    dengine_shader_use(&shader);
-    dengine_shader_current_set_int("istext", 1);
+    dengine_shader_use(&gui_text);
     if(!rgba)
         dengine_shader_current_set_vec4("col", white);
     else
@@ -318,7 +334,7 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
 
     _denginegui_projectquad();
     _denginegui_beginquad();
-    dengine_draw_sequence_start(&quad, &shader);
+    dengine_draw_sequence_start(&quad, &gui_text);
     //bind array buffer since we'll be changing it after getting packed quad
     dengine_buffer_bind(GL_ARRAY_BUFFER, &quad.array);
 
@@ -380,7 +396,6 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
     if(!initgui)
         return;
 
-
     // get entry stuff
     Texture entry_tex;
     int entry_activetex = 0;
@@ -400,17 +415,23 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
 
     //set col
     float white[4] = {0.0f, 0.0f, 0.0f, PANEL_ALPHA};
-    dengine_shader_use(&shader);
-    dengine_shader_current_set_int("istext", 0);
+    Shader* shader = &gui_panel;
+    if(paneldiscard)
+        shader = &gui_discard;
+
+    dengine_shader_use(shader);
     if(!rgba)
         dengine_shader_current_set_vec4("col", white);
     else
         dengine_shader_current_set_vec4("col", rgba);
 
+    if(paneldiscard)
+        dengine_shader_set_float(shader, "threshold", discardthreshold);
+
     _denginegui_projectquad();
     //start seq
     _denginegui_beginquad();
-    dengine_draw_sequence_start(&quad, &shader);
+    dengine_draw_sequence_start(&quad, shader);
     //bind abuf since will change it below
     dengine_buffer_bind(GL_ARRAY_BUFFER, &quad.array);
 
@@ -509,4 +530,14 @@ int denginegui_button(float x,float y, float width, float height, const char* te
 float denginegui_get_fontsz()
 {
     return _fontsz;
+}
+
+void denginegui_set_panel_discard(int state)
+{
+    paneldiscard = state;
+}
+
+void denginegui_set_panel_discard_threshold(float threshold)
+{
+    discardthreshold = threshold;
 }

@@ -267,7 +267,6 @@ PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
 WNDCLASSW wc = { };
 static const wchar_t* wc_class = L"Dengine_Win32";
 #endif
-
 DengineWindow* current = NULL;
 DynLib gl = NULL;
 
@@ -393,8 +392,11 @@ int dengine_window_init()
 #ifdef DENGINE_ANDROID
     /*
      * directly create current (android only supports 1 window and display afaik)
-     * and make it current
+     * and make it current. make sure we already ANativeWindow_acquired by polling
      */
+    while(!dengineutils_android_iswindowrunning())
+        dengine_window_poll(NULL);
+
     DengineWindow* _andr = dengine_window_create(0, 0, NULL, NULL);
     dengine_window_makecurrent(_andr);
     dengine_window_loadgl(_andr);
@@ -736,6 +738,7 @@ void* _dengine_window_createandpoll(void* args)
     }
     ReleaseDC(window.win32_hwnd, hdc);
 #elif defined(DENGINE_ANDROID)
+    /* we should have ANativeWindow_acquired */
     window.and_win = dengineutils_android_get_window();
     window.egl_dpy = egl_dpy;
     if(!_dengine_window_egl_createctx(window.egl_dpy, &window.egl_sfc, &window.egl_ctx, NULL, window.and_win))
@@ -850,6 +853,7 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
 
     Thread* windowthr = calloc(1, sizeof(Thread));
     dengineutils_thread_create(_dengine_window_createandpoll, &attrs, windowthr);
+    dengineutils_thread_set_name(windowthr, "WindowThr");
     dengineutils_thread_condition_wait(&ret_cond, &oned);
 
     dengineutils_thread_condition_destroy(&ret_cond);
@@ -889,8 +893,15 @@ void dengine_window_destroy(DengineWindow* window)
    wl_surface_destroy(window->wl_sfc);
 #endif
 
+
+
    if(window->gl_lib)
         dengineutils_dynlib_close(window->gl_lib);
+
+   /* some ensure the window isnt running */
+   while (dengine_window_isrunning(window)) {
+       dengine_window_poll(window);
+   }
 
    dengineutils_thread_wait(window->windowthr);
    dengineutils_thread_condition_destroy(&window->pollcond);
@@ -1197,6 +1208,10 @@ void _dengine_window_pollev(DengineWindow* window)
         DispatchMessageW(&window->win32_msg);
     }
     #elif defined(DENGINE_ANDROID)
+    /* we should have received all input data from 
+     * dengineutils_android_pollevents()
+     */
+    window->running = dengineutils_android_iswindowrunning();
     if(window && dengineutils_android_iswindowrunning())
     {
         int h;
@@ -1225,6 +1240,14 @@ int dengine_window_poll(DengineWindow* window)
     DENGINE_DEBUG_ENTER;
 
     int polled = 0;
+
+#ifdef DENGINE_ANDROID
+    /* THIS MUST BE CALLED FROM MAIN THREAD SO THAT WE HAVE ACCESS TO 
+     * THE MAIN ALooper. YOU SERIOUSLY DON'T WANT TO DEAL WITH THE
+     * ALOOPER SHENANIGANS!!!
+     */
+    dengineutils_android_pollevents();
+#endif
 
     if(window != NULL && window->deref == 0){
         window->deref = 1;

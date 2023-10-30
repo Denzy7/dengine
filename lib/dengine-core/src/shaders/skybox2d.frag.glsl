@@ -19,4 +19,4 @@ void main()
     vec2 uv = SampleSphericalMap(normalize(TexCoord)); // make sure to normalize
     vec3 col = texture2D(eqireqMap,uv).rgb;
     gl_FragColor = vec4(col, 1.0);
-}//dont remove this comment
+}

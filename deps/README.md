@@ -13,17 +13,17 @@ On Windows : `mklink <dir> deps\`
 Proceed to build
 
 # default deps
-Initialize submodules
-`git submodule init`
-
-Get default deps
-`git submodule update deps/cglm deps/stb`
+Initialize and get default deps. Consider checking optional deps you might also want to include
+`git submodule update --init --depth 1 deps/cglm deps/stb`
 
 # optional deps
 **If you will be compiling for Windows or Android you might want to get all optional deps to avoid missing libraries and header files**  
-**If you want Python scripting, update deps/cpython (will take some time!)**  
 
-`git submodule update deps/cpython`
+**If you want Python scripting, update deps/cpython (will take some time!)**  
+`... deps/cpython deps/cpython-portable`  
+
+**bullet3 sources only, for cool physics tests (needed to build android apk):**:
+`... deps/bullet3_src`
 
 # python
 Depends if python is found on your system. And is compatible with the build system. If not this will result in a lenghty compile process. It might also result in an incompatible module set.

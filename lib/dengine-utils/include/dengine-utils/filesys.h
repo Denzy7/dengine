@@ -13,7 +13,7 @@
 //TODO : Implement chunking to load bigger files
 typedef struct File2Mem
 {
-    char* file;
+    const char* file;
     void* mem;
     size_t size;
 }File2Mem;

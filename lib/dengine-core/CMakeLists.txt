@@ -44,7 +44,6 @@ include/dengine/material.h
 include/dengine/lighting.h
 include/dengine/vao.h
 include/dengine/renderbuffer.h
-include/dengine/dengine.h
 include/dengine/viewport.h
 include/dengine/entrygl.h
 include/dengine/dgl.h
@@ -56,7 +55,8 @@ set(coreres
     lib/dengine-core/src/shaders/debug-normals.vert.glsl
     lib/dengine-core/src/shaders/default.frag.glsl
     lib/dengine-core/src/shaders/default.vert.glsl
-    lib/dengine-core/src/shaders/gui.frag.glsl
+    lib/dengine-core/src/shaders/gui_text.frag.glsl
+    lib/dengine-core/src/shaders/gui_panel.frag.glsl
     lib/dengine-core/src/shaders/gui.vert.glsl
     lib/dengine-core/src/shaders/shadow2d.vert.glsl
     lib/dengine-core/src/shaders/shadow2d.frag.glsl
@@ -68,6 +68,7 @@ set(coreres
     lib/dengine-core/src/shaders/skyboxcube.frag.glsl
     lib/dengine-core/src/shaders/standard.frag.glsl
     lib/dengine-core/src/shaders/standard.vert.glsl
+    lib/dengine-core/src/shaders/discard.frag.glsl
     LICENSE.md
 )
 
@@ -81,7 +82,7 @@ foreach(res ${coreres})
     set(outresname ${CMAKE_CURRENT_BINARY_DIR}/${barename}-res.c)
     add_custom_command(
         OUTPUT ${outresname}
-        COMMAND dengine-rc ${inresname} ${outresname}
+        COMMAND dengine-rc -enb ${inresname} ${outresname}
         DEPENDS ${inresname}
         VERBATIM
     )

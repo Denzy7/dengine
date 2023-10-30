@@ -85,7 +85,6 @@ PyObject* denginescript_pymod_scene_entity_new()
      *
      * Causes SEGV if you dont. Despite being readied in PyInit?
      */
-
     static const char* readyent=
             "import dengine.common as common\n"
             "import dengine.scene as scene\n"
@@ -95,6 +94,7 @@ PyObject* denginescript_pymod_scene_entity_new()
     denginescript_python_compile(readyent, "_dengine_internal/readyent.py", &ready);
     Py_DECREF(ready.bytecode);
     Py_DECREF(ready.module);
+
 
     return PyObject_CallObject((PyObject*) &EntityObject_Type, NULL);
 }

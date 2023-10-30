@@ -14,7 +14,7 @@
 int dengineutils_thread_set_name(Thread* thread, const char* name)
 {
     int ret = 0;
-#ifdef DENGINE_HAS_PTHREAD_SETNAME_NP
+#if defined (DENGINE_HAS_PTHREAD_SETNAME_NP) &&  defined (DENGINE_LINUX)
     ret = pthread_setname_np(thread->thr, name);
 #endif
     return ret;
@@ -136,16 +136,14 @@ int dengineutils_thread_condition_wait(Condition* condition, int* deref_and_set_
     pthread_mutex_lock(&condition->mutex);
 #endif
     while(*deref_and_set_to_one == 0){
-
         /* SLEEP / WAIT */
 #ifdef DENGINE_WIN32
         SleepConditionVariableCS(&condition->condvar,
-                                &condition->critsec,
-                                INFINITE);
+                &condition->critsec,
+                INFINITE);
 #else
         pthread_cond_wait(&condition->cond, &condition->mutex);
 #endif
-
     }
 
     /* UNLOCK MUTEX / LEAVE CS */

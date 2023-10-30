@@ -26,7 +26,7 @@ option(DENGINE_BUILD_TESTS "Build the test suite and examples" ON)
 
 option(DENGINE_MT "Build for multithreading using mutexes" ON)
 
-option(DENGINE_SCRIPTING_PYTHON "Enable support for Python scripts" ON)
+option(DENGINE_SCRIPTING_PYTHON "Enable support for experimental Python scripting. Disable if you get random segfault!" OFF)
 option(DENGINE_USE_SYSTEM_PYTHON "Use system python or build custom. Might cause some serious path issues if using system Python" ON)
 if(ANDROID)
     option(DENGINE_ANDROID_TERMUX "Enable if building for X11 Termux")
@@ -139,13 +139,14 @@ set(dengine_incl
     ${CMAKE_CURRENT_SOURCE_DIR}/deps/cglm/include
     ${CMAKE_CURRENT_SOURCE_DIR}/deps/glad/include
     ${PROJECT_BINARY_DIR}/dengine_config #dengine_config.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine_state #dengine_state.h
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-core/include
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-utils/include
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-gui/include
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-model/include
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-scene/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-script/include)
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-script/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/glue/include
+    )
 include_directories(${dengine_incl})
 
 if(DENGINE_SCRIPTING_PYTHON)
@@ -176,25 +177,30 @@ set(CMAKE_REQUIRED_FLAGS "")
 set(DENGINE_PYTHON_DENGINE_SCRIPT_VER 1)
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
+if (NOT MSVC)
+    add_compile_options(-Wall)
+endif()
+
 set(dengine 
     dengine-utils
     dengine-core
     dengine-gui
     dengine-scene
     dengine-script
-    dengine-model)
+    dengine-model
 
-if (NOT MSVC)
-    add_compile_options(-Wall)
-endif()
-
+    #using ${dengine} is using glue implicitly
+    dengine_glue_lib
+    )
 set(denginerc_loc "${dengine_SOURCE_DIR}/build/dengine-rc")
 set(DengineRC_DIR ${denginerc_loc})
 find_package(DengineRC)
 if(NOT DengineRC_FOUND)
     message(FATAL_ERROR "Could not find DengineRC. Ensure its been built in ${denginerc_loc}")
 endif()
+include(cmake/DengineRCHelper.cmake)
 
+add_subdirectory("glue" "glue-build")
 add_subdirectory(lib/dengine-utils "dengine-utils-build")
 add_subdirectory(lib/dengine-core "dengine-core-build")
 add_subdirectory(lib/dengine-gui "dengine-gui-build")
@@ -205,6 +211,8 @@ if(DENGINE_SCRIPTING_PYTHON AND NOT ANDROID)
     #add python modules (shared libraries)
     add_subdirectory(lib/dengine-script/src/py_modules "dengine-script-pymodules-build")
 endif()
+
+
 if(DENGINE_BUILD_TESTS)
     add_subdirectory(tests "tests-build")
 endif()
@@ -227,7 +235,6 @@ endforeach()
 configure_file(dengine.pc.in dengine.pc @ONLY)
 
 install(FILES ${PROJECT_BINARY_DIR}/dengine_config/dengine_config.h DESTINATION include/dengine-${DENGINE_VERSION}/dengine_config)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine_state/dengine_state.h DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine_state)
 install(DIRECTORY deps/glad/include/glad DESTINATION include/dengine-${DENGINE_VERSION}/deps/glad)
 install(DIRECTORY deps/glad/include/KHR DESTINATION include/dengine-${DENGINE_VERSION}/deps/glad)
 install(DIRECTORY deps/cglm/include/cglm DESTINATION include/dengine-${DENGINE_VERSION}/deps/cglm)

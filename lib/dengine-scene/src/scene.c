@@ -100,6 +100,9 @@ void denginescene_update(Scene* scene)
 
 void _denginescene_ecs_do_camera_draw_mesh(Entity* camera, Entity* mesh)
 {
+    if(mesh->mesh_component->draw == 0)
+        return;
+
     //dengineutils_logging_log("drw %u",mesh->entity_id);
     dengine_material_use(mesh->mesh_component->material);
     dengine_camera_apply(&mesh->mesh_component->material->shader_color,camera->camera_component->camera);
@@ -244,7 +247,7 @@ void denginescene_ecs_do_camera_scene(Entity* camera, Scene* scene)
     dengine_camera_project_perspective((float)cam->render_width / (float)cam->render_height,
                                        camera->camera_component->camera);
     dengine_camera_use(cam);
-
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // TODO : strange case of camera with mesh comp??
 //    if(camera->mesh_component)
 //    {

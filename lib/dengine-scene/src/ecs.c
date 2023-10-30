@@ -1,9 +1,6 @@
 #include <stdlib.h> //malloc
 #include <string.h> //memset
-#include "dengine/draw.h"
 #include "dengine-scene/ecs.h"
-
-#include "dengine-utils/logging.h"
 #include "dengine-utils/debug.h"
 #include "dengine_config.h"// DENGINE_ECS_MAXCHILDREN
 
@@ -36,12 +33,6 @@ void _denginescene_ecs_destroy_entity_components(Entity* root)
     {
         free(root->light_component->light);
         free(root->light_component);
-    }
-    if(root->physics_component)
-    {
-        if(root->physics_component->colshapeconfig)
-            free(root->physics_component->colshapeconfig);
-        free(root->physics_component);
     }
 
     vtor_free(&root->scripts);
@@ -201,26 +192,6 @@ LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light)
     return comp;
 }
 
-PhysicsComponent* denginescene_ecs_new_physicscomponent(ECSPhysicsColShape type, const void* colshapeconfig, const float mass)
-{
-    DENGINE_DEBUG_ENTER;
-
-    PhysicsComponent* comp = calloc(1, sizeof(PhysicsComponent));
-    if(!comp)
-        return NULL;
-
-    if(colshapeconfig)
-    {
-        if(type == DENGINE_ECS_PHYSICS_COLSHAPE_BOX)
-        {
-            comp->colshapeconfig = malloc(sizeof (ECSPhysicsColShapeConfigBox));
-            memcpy(comp->colshapeconfig, colshapeconfig, sizeof(ECSPhysicsColShapeConfigBox));
-        }
-    }
-    comp->mass = mass;
-    return comp;
-}
-
 void denginescene_ecs_add_script(Entity* entity, const Script* script)
 {
     DENGINE_DEBUG_ENTER;
@@ -231,6 +202,9 @@ void denginescene_ecs_add_script(Entity* entity, const Script* script)
 void denginescene_ecs_transform_entity(Entity* entity)
 {
     DENGINE_DEBUG_ENTER;
+
+    if(entity->transform.manualtransform)
+        return;
 
     if(!entity->parent)
         denginescene_ecs_get_model_local(entity, entity->transform.world_model);

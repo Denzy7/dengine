@@ -11,3 +11,6 @@
 [submodule "deps/cpython-portable"]
 	path = deps/cpython-portable
 	url = https://github.com/Denzy7/cpython-portable
+[submodule "deps/bullet3_src"]
+	path = deps/bullet3_src
+	url = https://github.com/Denzy7/bullet3_src

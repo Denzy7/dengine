@@ -1,0 +1,9 @@
+#ifndef DENGINE_INI_H
+#define DENGINE_INI_H
+/* not necesarrily DENGINE_VERSION, its the actual 
+ * changes to dengine_ini that occurred in said
+ * DENGINE_VERSION
+ */
+#cmakedefine DENGINE_INIT_CONF_VERSION "@DENGINE_INIT_CONF_VERSION@"
+#endif
+

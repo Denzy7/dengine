@@ -44,10 +44,7 @@ int dengineutils_android_pollevents()
     struct android_poll_source* source;
     while((ALooper_pollAll(0, NULL, &events, (void**)&source)) >= 0)
     {
-        if(source != NULL)
-        {
-            source->process(_app, source);
-        }
+        source->process(_app, source);
     }
     return events;
 }
@@ -89,11 +86,10 @@ static void cmd_handle(struct android_app* app, int32_t cmd)
 
         case APP_CMD_INIT_WINDOW:
             dengineutils_logging_log("Getting window ready...");
-            iswindowrunning = 1;
             ANativeWindow_acquire(_app->window);
             if(initfunc)
                 initfunc(app);
-
+            iswindowrunning = 1;
             //Buggy fullscreen
             //ANativeActivity_setWindowFlags(app->activity, AWINDOW_FLAG_FULLSCREEN, 0);
             break;
@@ -103,7 +99,6 @@ static void cmd_handle(struct android_app* app, int32_t cmd)
             if(termfunc)
                 termfunc(app);
             ANativeWindow_release(app->window);
-            ANativeActivity_finish(app->activity);
             iswindowrunning = 0;
             break;
 
