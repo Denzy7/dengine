@@ -8,8 +8,6 @@ include(GNUInstallDirs)
 
 set(DENGINE_PKG_LIBS)
 set(DENGINE_PKG_DEPS)
-set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
-option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 
 option(DENGINE_FONT_EMBED_OPENSANS_REGULAR "Embed OpenSans Regular into dengine-gui" OFF)
 option(DENGINE_FONT_EMBED_OPENSANS_ITALIC "Embed OpenSans Italic into dengine-gui" OFF)
