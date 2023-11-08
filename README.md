@@ -54,6 +54,8 @@ Change dir to repo:
 
 	- Run the tests with a terminal emulator like [Termux](https://f-droid.org/en/packages/com.termux/). Termux has a very nice guide to [run executables on shared storage](https://wiki.termux.com/wiki/Termux-setup-storage)
 	
+# glue code
+- See [glue/README.md](glue/README.md) on how to use it to simplify dengine code
 
 # writing python scripts
 - **Linux**: Its actually very easy here. Just install the modules located in `<CMAKE_BUILD_DIR>/dengine-script-build/modules-build/to-python3-site-pacakages`. Install `dengine` directory to your Python `site-packages` or add the directory to your IDE/Editor Python path (VSCode-OSS in this case) 
