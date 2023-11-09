@@ -122,8 +122,8 @@ void drawcubes()
 
 extern "C" int car_world_start(void* arg)
 {    
-    initworld(&refworld);
     setontick(tickcbcar);
+    initworld(&refworld);
     prtbf = new char[prtbf_sz];
     scene = denginescene_new();
 
