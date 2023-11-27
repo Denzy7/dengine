@@ -255,8 +255,8 @@ struct wl_keyboard* wl_kbd = NULL;
 EGLDisplay egl_dpy;
 #endif
 #ifdef DENGINE_CONTEXT_GLX
-PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsARB = NULL;
-PFNGLXSWAPINTERVALEXTPROC glXSwapIntervalEXT = NULL;
+PFNGLXCREATECONTEXTATTRIBSARBPROC dengine_glXCreateContextAttribsARB = NULL;
+PFNGLXSWAPINTERVALEXTPROC dengine_glXSwapIntervalEXT = NULL;
 #endif
 #ifdef DENGINE_CONTEXT_WGL
 PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = NULL;
@@ -298,8 +298,8 @@ int dengine_window_init()
 #endif
 #ifdef DENGINE_CONTEXT_GLX
         //LOOK FOR GLX EXTENSIONS
-        glXSwapIntervalEXT = (PFNGLXSWAPINTERVALEXTPROC) glXGetProcAddress((GLubyte*) "glXSwapIntervalEXT");
-        glXCreateContextAttribsARB = (PFNGLXCREATECONTEXTATTRIBSARBPROC) glXGetProcAddress((GLubyte*)"glXCreateContextAttribsARB");
+        dengine_glXSwapIntervalEXT = (PFNGLXSWAPINTERVALEXTPROC) glXGetProcAddress((GLubyte*) "glXSwapIntervalEXT");
+        dengine_glXCreateContextAttribsARB = (PFNGLXCREATECONTEXTATTRIBSARBPROC) glXGetProcAddress((GLubyte*)"glXCreateContextAttribsARB");
 #endif
         init = 1;
     }else
@@ -558,7 +558,7 @@ void* _dengine_window_createandpoll(void* args)
         return NULL;
     }
 
-    if(!glXCreateContextAttribsARB)
+    if(!dengine_glXCreateContextAttribsARB)
     {
         dengineutils_logging_log("ERROR::Cannot getproc glXCreateContextAttribsARB");
         return NULL;
@@ -576,7 +576,7 @@ void* _dengine_window_createandpoll(void* args)
     if(attrs->share)
         ctx_shr = attrs->share->glx_ctx;
 
-    window.glx_ctx = glXCreateContextAttribsARB(x_dpy, conf[0], ctx_shr, True, ctxattr);
+    window.glx_ctx = dengine_glXCreateContextAttribsARB(x_dpy, conf[0], ctx_shr, True, ctxattr);
     //window.glx_ctx = glXCreateContext(x_dpy, vi, ctx_shr, GL_TRUE);
     if(!window.glx_ctx)
     {
@@ -1091,9 +1091,9 @@ int dengine_window_set_swapinterval(DengineWindow* window, int interval)
 #ifdef DENGINE_CONTEXT_EGL
     itv = eglSwapInterval(window->egl_dpy, interval);
 #elif defined(DENGINE_CONTEXT_GLX)
-    if(glXSwapIntervalEXT)
+    if(dengine_glXSwapIntervalEXT)
     {
-        glXSwapIntervalEXT(x_dpy, window->x_win, interval);
+        dengine_glXSwapIntervalEXT(x_dpy, window->x_win, interval);
         itv = interval;
     }
     else{
