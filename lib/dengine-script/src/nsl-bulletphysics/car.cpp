@@ -122,8 +122,9 @@ void drawcubes()
 
 extern "C" int car_world_start(void* arg)
 {    
-    setontick(tickcbcar);
     initworld(&refworld);
+    refworld->setInternalTickCallback(tickcbcar);
+
     prtbf = new char[prtbf_sz];
     scene = denginescene_new();
 
@@ -191,7 +192,7 @@ extern "C" int car_world_start(void* arg)
     /* we'll have to render these in a single pass, adding them to scene will degrade performance
      * since each will have its own mesh and material
      */
-    int gencoef = 3;
+    int gencoef = 5;
     for(int i = -gencoef; i < gencoef; i++)
     {
         for(int j = -gencoef; j < gencoef; j++)

@@ -12,13 +12,6 @@ btAlignedObjectArray<btCollisionShape*> shapes;
 /*Condition physicsthread_start;*/
 /*int physicsthr_run = 0, physicsthr_step = 0;*/
 
-btInternalTickCallback tickcb_user = NULL;
-
-void setontick(btInternalTickCallback tickcb)
-{
-    tickcb_user = tickcb;
-}
-
 /*void* physicsthr(void* thr)*/
 /*{*/
     /*dengineutils_thread_condition_wait(&physicsthread_start, &physicsthr_run); */
@@ -44,11 +37,6 @@ void setontick(btInternalTickCallback tickcb)
     /*return NULL;*/
 /*}*/
 
-void tickcbdengine(btDynamicsWorld* mWorld, btScalar tick)
-{
-    if(tickcb_user != NULL)
-        tickcb_user(mWorld, tick);
-}
 int initworld(btDynamicsWorld** refworld)
 {
     config = new btDefaultCollisionConfiguration();
@@ -57,7 +45,6 @@ int initworld(btDynamicsWorld** refworld)
     solver = new btSequentialImpulseConstraintSolver();
 
     _world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, config);
-    _world->setInternalTickCallback(tickcbdengine);
     _world->setGravity(btVector3(0, -9.8, 0));
 /*    dengineutils_thread_condition_create(&physicsthread_start);*/
     /*dengineutils_thread_create(physicsthr, NULL, &physicsthread);*/
@@ -80,13 +67,13 @@ void stepworld()
     /*physicsthr_step = 1;*/
     /*dengineutils_thread_condition_raise(&physicsthread_start);*/
 
-    static btScalar last = 0;
+    static double _lastts = 0.0;
     double t;
     dengineutils_timer_get_current_r(&t);
     t /= 1000.0;
-    if(last == 0)
-        last = t;
-    _world->stepSimulation(t - last);
+    if(_lastts == 0.0)
+        _lastts = t;
+    _world->stepSimulation(t - _lastts);
 }
 
 void destroyworld()

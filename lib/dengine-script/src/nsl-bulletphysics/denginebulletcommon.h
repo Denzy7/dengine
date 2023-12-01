@@ -28,7 +28,6 @@ void startworld();
 void destroyworld();
 
 void stepworld();
-void setontick(btInternalTickCallback tickcb);
 
 int create_rb(Entity* entity, ECSPhysicsColShape shape, ECSPhysicsColShapeConfigBox* cfg, btScalar mass, btRigidBody** bodyref);
 

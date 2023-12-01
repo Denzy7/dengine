@@ -72,8 +72,8 @@ void tickcbbasic(btDynamicsWorld* w, btScalar t)
 }
 extern "C" int basic_world_start(void*)
 {
-    setontick(tickcbbasic);
     initworld(&worldref);
+    worldref->setInternalTickCallback(tickcbbasic);
 
     prtbf = new char [prtbf_sz];
 
