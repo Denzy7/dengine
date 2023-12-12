@@ -10,7 +10,7 @@ int car_update(Entity* entity);
 
 extern unsigned int rover_obj_ln;
 extern unsigned char rover_obj[];
-const size_t prtbf_sz = 2048;
+static const size_t prtbf_sz = 2048;
 char* prtbf;
 Scene* scene;
 std::vector<Entity*> cubes;
@@ -88,10 +88,6 @@ int car_setup_chassis(Entity* entity)
 
     return 1;
 }
-void tickcbcar(btDynamicsWorld* mWorld, btScalar tick)
-{
-    car_update(chassis);
-}
 
 void drawcubes()
 {
@@ -110,10 +106,7 @@ void drawcubes()
     {
         Entity* ent = cubes.at(i);
         denginescene_ecs_transform_entity(ent);
-        dengine_shader_set_mat4(&mat->shader_color,
-                "model",
-                ent->transform.world_model[0]
-                );
+        dengine_shader_current_set_mat4("model", ent->transform.world_model[0]);
         dengine_draw_sequence_draw();
     }
     dengine_draw_sequence_end();
@@ -123,7 +116,6 @@ void drawcubes()
 extern "C" int car_world_start(void* arg)
 {    
     initworld(&refworld);
-    refworld->setInternalTickCallback(tickcbcar);
 
     prtbf = new char[prtbf_sz];
     scene = denginescene_new();
@@ -165,7 +157,7 @@ extern "C" int car_world_start(void* arg)
     };
     Texture tex_plane[2];
     memset(&tex_plane, 0, sizeof(tex_plane));
-    for(int i = 0; i < DENGINE_ARY_SZ(texs_plane); i++)
+    for(size_t i = 0; i < DENGINE_ARY_SZ(texs_plane); i++)
     {
         void* texmem;
         size_t texmem_len;
@@ -410,6 +402,7 @@ extern "C" int car_world_update(void* arg)
 
     denginescene_update(scene);
     drawcubes();
+    car_update(chassis);
 
     static float camdist = 40.0f;
     if(dengine_input_get_key('E'))
@@ -445,13 +438,13 @@ extern "C" int car_world_update(void* arg)
         {"Far +/-0.1 (use 5 or 6)", &dl_ent_dl->shadow.far_shadow},
     };
 
-    for(int i = 0; i < DENGINE_ARY_SZ(staticmessageslist); i++)
+    for(size_t i = 0; i < DENGINE_ARY_SZ(staticmessageslist); i++)
     {
         denginegui_text(fontsz / 4, h - fontsz - i * fontsz, staticmessageslist[i], NULL);
     }
 
     static vec4 orange = {1.0f, 0.5f, 0.3f, 1.0f};
-    for(int i = 0; i < DENGINE_ARY_SZ(shadowprops); i++)
+    for(size_t i = 0; i < DENGINE_ARY_SZ(shadowprops); i++)
     {
         char msg[1024];
         snprintf(msg, sizeof(msg), "%s : %.3f", shadowprops[i].str, *shadowprops[i].val);
@@ -544,8 +537,15 @@ extern "C" int car_world_update(void* arg)
 extern "C" int car_world_terminate(void* args)
 {
     denginescene_destroy(scene);
-    free(prtbf);
+    for(size_t i = 0; i < cubes.size(); i++)
+    {
+        Entity* e = cubes.at(i);
+        denginescene_ecs_destroy_entity(e);
+    }
+    delete[] prtbf;
     free(car_meshes);
+    dengine_shader_destroy(&stdshdr);
+    dengine_shader_destroy(&shadow2d);
     dengine_material_destroy(&plane_mat);
     dengine_material_destroy(&mat_car);
     dengine_material_destroy(&cube_mat);

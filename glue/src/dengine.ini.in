@@ -6,6 +6,11 @@ window_height=480
 # would you like screen multisampled anti aliasing?
 window_msaa=4
 
+[gl]
+gl_min=0
+gl_max=2
+gl_core=0
+
 #vsync
 window_swapinterval=1
  

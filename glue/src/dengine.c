@@ -31,6 +31,9 @@ DengineInitConfKey confkeys[] =
     {"font_size", DENGINE_INIT_CONF_TYPE_FLOAT, NULL},
     {"font_bitmapsize", DENGINE_INIT_CONF_TYPE_INT, NULL},
     {"cache_shaders", DENGINE_INIT_CONF_TYPE_INT, NULL},
+    {"gl_min", DENGINE_INIT_CONF_TYPE_INT, NULL},
+    {"gl_max", DENGINE_INIT_CONF_TYPE_INT, NULL},
+    {"gl_core", DENGINE_INIT_CONF_TYPE_INT, NULL},
 };
 
 const char* dengine_get_license()
@@ -87,6 +90,9 @@ DengineInitOpts* dengine_init_get_opts()
     confkeys[4].set = &DENGINE_INIT_OPTS.font_size;
     confkeys[5].set = &DENGINE_INIT_OPTS.font_bitmapsize;
     confkeys[6].set = &DENGINE_INIT_OPTS.cache_shaders;
+    confkeys[7].set = &DENGINE_INIT_OPTS.gl_min;
+    confkeys[8].set = &DENGINE_INIT_OPTS.gl_max;
+    confkeys[9].set = &DENGINE_INIT_OPTS.gl_core;
 
     Conf* conf = dengineutils_confserialize_new(prtbf, '=');
     FILE* f_conf = fopen(prtbf, "rb");
@@ -118,7 +124,14 @@ DengineInitOpts* dengine_init_get_opts()
     if(currentconfver == NULL ||
             strcmp(currentconfver, DENGINE_INIT_CONF_VERSION) != 0)
     {
-        dengineutils_logging_log("WARNING::your current version of dengine.ini may outdated! Consider migrating from %s.", prtbf);
+        dengineutils_logging_log("WARNING::your current version of dengine.ini may outdated! Consider migrating from %s.\n"
+                "you could try running on unix (inside %s)\n\t"
+                "diff -Naur dengine.ini dengine.%s.ini > dengine.%s.patch\n\t"
+                "patch -p0 < dengine.%s.patch", 
+                prtbf, prtbf,
+                DENGINE_INIT_CONF_VERSION,
+                DENGINE_INIT_CONF_VERSION,
+                DENGINE_INIT_CONF_VERSION);
     }
 
     /*TODO: conf migration / versioning?? */

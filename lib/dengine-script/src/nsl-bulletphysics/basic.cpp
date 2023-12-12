@@ -20,7 +20,7 @@ Entity* cam_ent;
 float black_f[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 std::vector<ECSPhysicsBody> cubes;
 
-void tickcbbasic(btDynamicsWorld* w, btScalar t)
+void basic_update()
 {
     for(size_t i = 0; i < cubes.size(); i++)
     {
@@ -73,7 +73,6 @@ void tickcbbasic(btDynamicsWorld* w, btScalar t)
 extern "C" int basic_world_start(void*)
 {
     initworld(&worldref);
-    worldref->setInternalTickCallback(tickcbbasic);
 
     prtbf = new char [prtbf_sz];
 
@@ -116,7 +115,7 @@ extern "C" int basic_world_start(void*)
     };
     Texture tex_plane[2];
     memset(&tex_plane, 0, sizeof(tex_plane));
-    for(int i = 0; i < DENGINE_ARY_SZ(texs_plane); i++)
+    for(size_t i = 0; i < DENGINE_ARY_SZ(texs_plane); i++)
     {
         void* texmem;
         size_t texmem_ln;
@@ -151,7 +150,7 @@ extern "C" int basic_world_start(void*)
     };
     Texture tex_cube[2];
     memset(&tex_cube, 0, sizeof(tex_cube));
-    for(int i = 0; i < DENGINE_ARY_SZ(texs_cube); i++)
+    for(size_t i = 0; i < DENGINE_ARY_SZ(texs_cube); i++)
     {
         void* texmem;
         size_t texmem_ln;
@@ -178,7 +177,7 @@ extern "C" int basic_world_start(void*)
 
     //feel free to increase pool
     Texture cube_tex_pool[3];
-    for(int i = 0; i < DENGINE_ARY_SZ(cube_tex_pool); i++)
+    for(size_t i = 0; i < DENGINE_ARY_SZ(cube_tex_pool); i++)
     {
         Texture* cube_tex = &cube_tex_pool[i];
         memset(cube_tex, 0, sizeof(Texture));
@@ -285,6 +284,7 @@ extern "C" int basic_world_update(void*)
         dl_ent_dl->shadow.enable = !dl_ent_dl->shadow.enable;
 
     denginescene_update(scene);
+    basic_update();
 
     int w, h;
     dengine_viewport_get(NULL, NULL, &w, &h);
@@ -314,13 +314,13 @@ extern "C" int basic_world_update(void*)
         {"Far +/-0.1 (use 5 or 6)", &dl_ent_dl->shadow.far_shadow},
     };
 
-    for(int i = 0; i < DENGINE_ARY_SZ(staticmessageslist); i++)
+    for(size_t i = 0; i < DENGINE_ARY_SZ(staticmessageslist); i++)
     {
         denginegui_text(fontsz / 4, h - fontsz - i * fontsz, staticmessageslist[i], NULL);
     }
 
     static vec4 orange = {1.0f, 0.5f, 0.3f, 1.0f};
-    for(int i = 0; i < DENGINE_ARY_SZ(shadowprops); i++)
+    for(size_t i = 0; i < DENGINE_ARY_SZ(shadowprops); i++)
     {
         char msg[1024];
         snprintf(msg, sizeof(msg), "%s : %.3f", shadowprops[i].str, *shadowprops[i].val);

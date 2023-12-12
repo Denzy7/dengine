@@ -1,7 +1,7 @@
 # glue code
 
 
-set(DENGINE_INIT_CONF_VERSION "0.7.1")
+set(DENGINE_INIT_CONF_VERSION "0.7.2")
 configure_file(src/dengine.ini.in dengine.ini)
 configure_file(src/dengine.ini.h.in dengine.ini.h)
 dengine_rc_compile(

@@ -32,7 +32,8 @@ int main(int argc, char** argv)
     DengineInitOpts* opts = dengine_init_get_opts();
     opts->window_title = "testdengine-script-nslbullet-car";
     dengine_init();
-    return testdengine_script_nslbullet_car_main(argc, argv);
+    int ret = testdengine_script_nslbullet_car_main(argc, argv);
     dengine_terminate();
+    return ret;
 }
 #endif

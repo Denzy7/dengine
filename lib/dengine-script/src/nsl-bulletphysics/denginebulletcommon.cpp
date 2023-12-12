@@ -74,6 +74,7 @@ void stepworld()
     if(_lastts == 0.0)
         _lastts = t;
     _world->stepSimulation(t - _lastts);
+    _lastts = t;
 }
 
 void destroyworld()
