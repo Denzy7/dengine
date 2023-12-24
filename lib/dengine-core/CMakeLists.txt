@@ -94,6 +94,7 @@ if(DENGINE_HAS_WAYLAND_CLIENT)
     #generate wl resources
     set(wl-prots
         stable/xdg-shell/xdg-shell.xml
+        unstable/xdg-decoration/xdg-decoration-unstable-v1.xml
     )
     foreach(prot ${wl-prots})
         set(in ${wayland_protocols_pkgdatadir}/${prot})
@@ -102,7 +103,7 @@ if(DENGINE_HAS_WAYLAND_CLIENT)
         set(outhdr ${CMAKE_CURRENT_BINARY_DIR}/${barename}.h)
         add_custom_command(
             OUTPUT ${outsrc}
-            COMMAND ${wayland_scanner} public-code ${in} ${outsrc}
+            COMMAND ${wayland_scanner} private-code ${in} ${outsrc}
             DEPENDS ${in}
             VERBATIM
         )

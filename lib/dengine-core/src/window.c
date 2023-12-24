@@ -31,6 +31,7 @@
 #include <wayland-client.h>
 #include <wayland-egl.h>
 #include "xdg-shell.xml.h"
+#include "xdg-decoration-unstable-v1.xml.h"
 #include <linux/input-event-codes.h> /* BTN_... */
 #include <sys/mman.h> /* mmap */
 #include <unistd.h> /* close */
@@ -84,6 +85,8 @@ static void xdg_toplevel_configure_bounds(void *data,struct xdg_toplevel *xdg_to
 #if XDG_TOPLEVEL_WM_CAPABILITIES_SINCE_VERSION >= 5
 static void xdg_toplevel_wmcap(void *data, struct xdg_toplevel *xdg_toplevel, struct wl_array *capabilities);
 #endif
+void zxdg_toplevel_decoration_v1_configure (void *data, struct zxdg_toplevel_decoration_v1 *zxdg_toplevel_decoration_v1,uint32_t mode);
+
 static void wl_seat_name(void *data, struct wl_seat *wl_seat, const char *name);
 static void wl_seat_caps(void* data, struct wl_seat* seat, uint32_t caps);
 
@@ -144,6 +147,7 @@ struct DengineWindow
    struct wl_surface* wl_sfc;
    struct xdg_surface* xdg_sfc;
    struct xdg_toplevel* xdg_top;
+   struct zxdg_toplevel_decoration_v1* zxdg_toplevel_decoration_v1; 
    struct wl_egl_window* wl_egl_win;
 #endif
     int gl_load;
@@ -213,6 +217,12 @@ static const struct wl_seat_listener wl_seat_listener =
     .name = wl_seat_name
 };
 
+static const struct zxdg_toplevel_decoration_v1_listener zxdg_toplevel_decoration_v1_listener = 
+{
+    .configure = zxdg_toplevel_decoration_v1_configure 
+};
+
+
 static const struct wl_pointer_listener wl_ptr_listener =
 {
     .enter = wl_pointer_enter,
@@ -243,6 +253,7 @@ struct wl_registry* wl_registry = NULL;
 struct xdg_wm_base* wm_base = NULL;
 struct wl_output* wl_out = NULL;
 struct wl_seat* wl_seat = NULL;
+struct zxdg_decoration_manager_v1* zxdg_decoration_manager_v1 = NULL;
 struct wl_pointer* wl_ptr = NULL;
 
 struct xkb_context* xkb_ctx = NULL;
@@ -431,6 +442,8 @@ void dengine_window_terminate()
     xkb_state_unref(xkb_state);
     xkb_keymap_unref(xkb_keymap);
     xkb_context_unref(xkb_ctx);
+    if(zxdg_decoration_manager_v1 != NULL)
+        zxdg_decoration_manager_v1_destroy(zxdg_decoration_manager_v1);
     wl_registry_destroy(wl_registry);
     wl_display_disconnect(wl_dpy);
 #endif
@@ -761,6 +774,13 @@ void* _dengine_window_createandpoll(void* args)
     xdg_toplevel_set_title(window.xdg_top, attrs->title);
     xdg_toplevel_add_listener(window.xdg_top, &xdg_toplevel_listener, NULL);
 
+    if(zxdg_decoration_manager_v1 == NULL)
+    {
+        dengineutils_logging_log("WARNING::zxdg_decoration_manager_v1 not found. no server side decorations for wayland!");
+    }else {
+        window.zxdg_toplevel_decoration_v1 = zxdg_decoration_manager_v1_get_toplevel_decoration(zxdg_decoration_manager_v1, window.xdg_top);
+        zxdg_toplevel_decoration_v1_add_listener(window.zxdg_toplevel_decoration_v1, &zxdg_toplevel_decoration_v1_listener, NULL);
+    }
     wl_surface_commit(window.wl_sfc);
 
     struct wl_region* opaque = wl_compositor_create_region(wl_comp);
@@ -888,6 +908,7 @@ void dengine_window_destroy(DengineWindow* window)
 
 #ifdef DENGINE_WIN_WAYLAND
    wl_egl_window_destroy(window->wl_egl_win);
+   zxdg_toplevel_decoration_v1_destroy(window->zxdg_toplevel_decoration_v1);
    xdg_toplevel_destroy(window->xdg_top);
    xdg_surface_destroy(window->xdg_sfc);
    wl_surface_destroy(window->wl_sfc);
@@ -1538,6 +1559,9 @@ static void registry_global(void* data, struct wl_registry* registry, uint32_t n
         wl_seat = wl_registry_bind(registry, name,
                                    &wl_seat_interface, version);
         wl_seat_add_listener(wl_seat, &wl_seat_listener, NULL);
+    }else if(strcmp(ifc, zxdg_decoration_manager_v1_interface.name) == 0)
+    {
+        zxdg_decoration_manager_v1 = wl_registry_bind(registry, name, &zxdg_decoration_manager_v1_interface, version);
     }
 }
 
@@ -1589,6 +1613,12 @@ static void xdg_toplevel_wmcap(void *data, struct xdg_toplevel *xdg_toplevel, st
 //    dengineutils_logging_log("xdg_toplevel_wmcap");
 }
 #endif
+void zxdg_toplevel_decoration_v1_configure (void *data,
+			  struct zxdg_toplevel_decoration_v1 *zxdg_toplevel_decoration_v1,
+			  uint32_t mode)
+{
+
+}
 static void wl_seat_name(void *data, struct wl_seat *wl_seat, const char *name)
 {
 
