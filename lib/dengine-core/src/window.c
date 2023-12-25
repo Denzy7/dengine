@@ -1035,7 +1035,8 @@ int dengine_window_loadgl(DengineWindow* window)
         dengineutils_logging_log("INFO::Using GL library: %s", GL);
     }
     gl = window->gl_lib;
-#ifdef DENGINE_ANDROID
+
+#ifdef DENGINE_CONTEXT_EGL 
     window->gl_load = gladLoadGLES2Loader((GLADloadproc)eglGetProcAddress);
 #else
     window->gl_load = gladLoadGLLoader((GLADloadproc)dengine_window_get_proc);

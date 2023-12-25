@@ -335,10 +335,8 @@ int dengine_shader_link(Shader* shader)
             {
                 fwrite(bin, len, 1, binfile);
                 fclose(binfile);
+                free(bin);
                 dengineutils_logging_log("TODO::save binary %s, len:%d", shader->cached_name, len);
-            }else {
-                dengineutils_logging_log("ERROR::save binary failed! %s");
-                perror(NULL);
             }
         }
     }
