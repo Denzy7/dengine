@@ -270,9 +270,9 @@ PFNGLXCREATECONTEXTATTRIBSARBPROC dengine_glXCreateContextAttribsARB = NULL;
 PFNGLXSWAPINTERVALEXTPROC dengine_glXSwapIntervalEXT = NULL;
 #endif
 #ifdef DENGINE_CONTEXT_WGL
-PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = NULL;
-PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = NULL;
-PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
+PFNWGLCREATECONTEXTATTRIBSARBPROC dengine_wglCreateContextAttribsARB = NULL;
+PFNWGLCHOOSEPIXELFORMATARBPROC dengine_wglChoosePixelFormatARB = NULL;
+PFNWGLSWAPINTERVALEXTPROC dengine_wglSwapIntervalEXT = NULL;
 #endif
 #ifdef DENGINE_WIN32
 WNDCLASSW wc = { };
@@ -543,7 +543,8 @@ void* _dengine_window_createandpoll(void* args)
         GLX_DEPTH_SIZE, _win_depth
     };
     int n_conf;
-    GLXFBConfig* conf = glXChooseFBConfig(x_dpy, 0, conf_vi_attr, &n_conf);
+    GLXFBConfig* conf = NULL;
+    conf = glXChooseFBConfig(x_dpy, 0, conf_vi_attr, &n_conf);
     if(!conf)
     {
         dengineutils_logging_log("ERROR::Cannot choose a valid GLXFBConfig");
@@ -568,13 +569,16 @@ void* _dengine_window_createandpoll(void* args)
     if(!window.x_win)
     {
         dengineutils_logging_log("ERROR::Cannot XCreateWindow");
-        return NULL;
+        goto winfail;
     }
 
+    /* i mean we could just use glXCreateContext but
+     * this is func is old as time itself!
+     */
     if(!dengine_glXCreateContextAttribsARB)
     {
         dengineutils_logging_log("ERROR::Cannot getproc glXCreateContextAttribsARB");
-        return NULL;
+        goto winfail;
     }
 
     int ctxattr[]=
@@ -593,8 +597,8 @@ void* _dengine_window_createandpoll(void* args)
     //window.glx_ctx = glXCreateContext(x_dpy, vi, ctx_shr, GL_TRUE);
     if(!window.glx_ctx)
     {
-        dengineutils_logging_log("ERROR::Cannot glXCreateContext");
-        return NULL;
+        dengineutils_logging_log("ERROR::Cannot glXCreateContextAttribARB");
+        goto winfail;
     }
 
 //    XFree(vi);
@@ -606,7 +610,7 @@ void* _dengine_window_createandpoll(void* args)
     if(!window.x_win )
     {
         dengineutils_logging_log("ERROR::Cannot XCreateWindow");
-        return NULL;
+        goto winfail;
     }
 
     window.egl_dpy = egl_dpy;
@@ -617,7 +621,7 @@ void* _dengine_window_createandpoll(void* args)
     if(!_dengine_window_egl_createctx(window.egl_dpy, &window.egl_sfc, &window.egl_ctx, shr, window.x_win))
     {
         dengineutils_logging_log("ERROR::WINDOW::Cannot create EGLContext");
-        return NULL;
+        goto winfail;
     }
 #endif
     // x11 delete message. why on earth is there no simple exit event?
@@ -670,38 +674,36 @@ void* _dengine_window_createandpoll(void* args)
         0,                                // reserved
         0, 0, 0
     };
-
-    HDC hdc = GetDC(window.win32_hwnd);
+    HDC hdc = NULL;
+    hdc = GetDC(window.win32_hwnd);
     int pix = ChoosePixelFormat(hdc, &pfd);
     SetPixelFormat(hdc, pix, &pfd);
     HGLRC dummy = wglCreateContext(hdc);
     if(dummy == NULL)
     {
         MessageBox(window.win32_hwnd, "Cannot wglContext dummy. OpenGL probably not supported", "Error", MB_OK | MB_ICONEXCLAMATION);
-        goto RelDCRetNULL;
-    }else
+        goto winfail;
+    }
+    
+    if(!wglMakeCurrent(hdc, dummy))
     {
-        if(!wglMakeCurrent(hdc, dummy))
-        {
-            MessageBox(window.win32_hwnd, "Cannot wglMakeCurrent dummy. OpenGL is really not supported", "Error", MB_OK | MB_ICONEXCLAMATION);
-            goto RelDCRetNULL;
-        }
-
-        wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) wglGetProcAddress("wglCreateContextAttribsARB");
-        wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC) wglGetProcAddress("wglChoosePixelFormatARB");
-        if(!wglChoosePixelFormatARB)
-        {
-            dengineutils_logging_log("WARNING::wglChoosePixelFormatARB NOT found. Cannot probably create \"modern\" contexts");
-        }
-        if(!wglCreateContextAttribsARB){
-            dengineutils_logging_log("WARNING::wglCreateContextAttribsARB NOT found. Cannot really create \"modern\" contexts");
-        }
+        MessageBox(window.win32_hwnd, "Cannot wglMakeCurrent dummy. OpenGL probably not supported", "Error", MB_OK | MB_ICONEXCLAMATION);
+        goto winfail;
     }
 
-    if(wglChoosePixelFormatARB)
+    dengine_wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) wglGetProcAddress("wglCreateContextAttribsARB");
+    dengine_wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC) wglGetProcAddress("wglChoosePixelFormatARB");
+
+    if(!dengine_wglChoosePixelFormatARB)
     {
-        wglDeleteContext(dummy);
-        dummy = NULL;
+        dengineutils_logging_log("WARNING::wglChoosePixelFormatARB NOT found. Cannot probably create \"modern\" contexts");
+    }
+    if(!dengine_wglCreateContextAttribsARB){
+        dengineutils_logging_log("WARNING::wglCreateContextAttribsARB NOT found. Cannot really create \"modern\" contexts");
+    }
+
+    if(dengine_wglChoosePixelFormatARB && dengine_wglCreateContextAttribsARB)
+    {
         const int pix_attrs[] =
         {
             WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
@@ -716,39 +718,35 @@ void* _dengine_window_createandpoll(void* args)
 
         int pixelFormat;
         UINT numFormats;
-        if(wglChoosePixelFormatARB(hdc, pix_attrs, NULL, 1, &pixelFormat, &numFormats) == FALSE)
+        if(dengine_wglChoosePixelFormatARB(hdc, pix_attrs, NULL, 1, &pixelFormat, &numFormats) == FALSE)
         {
             MessageBox(window.win32_hwnd, "wglChoosePixelFormatARB failed", "Error", MB_OK | MB_ICONEXCLAMATION);
-            goto RelDCRetNULL;
+            goto winfail;
         }
 
         int ctx_attrs[]=
         {
             WGL_CONTEXT_MAJOR_VERSION_ARB, _gl_max,
             WGL_CONTEXT_MINOR_VERSION_ARB, _gl_min,
-            WGL_CONTEXT_PROFILE_MASK_ARB, _gl_core ? WGL_CONTEXT_CORE_PROFILE_BIT_ARB : WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+            WGL_CONTEXT_PROFILE_MASK_ARB, _gl_core == 1 ? WGL_CONTEXT_CORE_PROFILE_BIT_ARB : WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
             0
         };
 
-        window.win32_ctx = wglCreateContextAttribsARB(hdc, window.win32_ctx_shr, ctx_attrs);
+        window.win32_ctx = dengine_wglCreateContextAttribsARB(hdc, window.win32_ctx_shr, ctx_attrs);
         if(window.win32_ctx == NULL)
         {
             dengineutils_logging_log("WARNING::wglCreateContextAttribsARB failed");
-            goto RelDCRetNULL;
-        }else
-        {
-            wglMakeCurrent(hdc, window.win32_ctx);
-            //get wglEXTS
-            wglSwapIntervalEXT = wglGetProcAddress("wglSwapIntervalEXT");
-            wglMakeCurrent(hdc, NULL);
+            goto winfail;
         }
+        wglMakeCurrent(hdc, window.win32_ctx);
+        //get wglEXTS
+        dengine_wglSwapIntervalEXT = wglGetProcAddress("wglSwapIntervalEXT");
+    }else {
+        window.win32_ctx = dummy;
+        dengineutils_logging_log("WARNING::Using dummy wglCreateContext Context. cant use \"modern\" opengl");
     }
 
-    if(window.win32_ctx == NULL && dummy != NULL)
-    {
-        window.win32_ctx = dummy;
-        dengineutils_logging_log("WARNING::Using dummy wglCreateContext Context");
-    }
+    wglMakeCurrent(hdc, NULL);
     ReleaseDC(window.win32_hwnd, hdc);
 #elif defined(DENGINE_ANDROID)
     /* we should have ANativeWindow_acquired */
@@ -757,14 +755,14 @@ void* _dengine_window_createandpoll(void* args)
     if(!_dengine_window_egl_createctx(window.egl_dpy, &window.egl_sfc, &window.egl_ctx, NULL, window.and_win))
     {
         dengineutils_logging_log("ERROR::WINDOW::Cannot create EGLContext");
-        return NULL;
-    }
+		goto winfail;
+	}
 #elif defined(DENGINE_WIN_WAYLAND)
     window.wl_sfc = wl_compositor_create_surface(wl_comp);
     if(window.wl_sfc == NULL)
     {
         dengineutils_logging_log("ERROR::cannot wl_compositor_create_surface");
-        return NULL;
+        goto winfail;
     }
 
     window.xdg_sfc = xdg_wm_base_get_xdg_surface(wm_base, window.wl_sfc);
@@ -792,7 +790,7 @@ void* _dengine_window_createandpoll(void* args)
     if(window.wl_egl_win == EGL_NO_SURFACE)
     {
         dengineutils_logging_log("ERROR::cannot wl_egl_window_create");
-        return NULL;
+        goto winfail;
     }
 
     window.egl_dpy = egl_dpy;
@@ -803,7 +801,7 @@ void* _dengine_window_createandpoll(void* args)
     if(!_dengine_window_egl_createctx(window.egl_dpy, &window.egl_sfc, &window.egl_ctx, shr, window.wl_egl_win))
     {
         dengineutils_logging_log("ERROR::WINDOW::Cannot _dengine_window_egl_createctx");
-        return NULL;
+        goto winfail;
     }
 
     window.width = attrs->width;
@@ -847,11 +845,24 @@ void* _dengine_window_createandpoll(void* args)
     }
     return NULL;
 
+winfail:
 #ifdef DENGINE_WIN32
-    RelDCRetNULL:
+    if(hdc)
         ReleaseDC(window.win32_hwnd, hdc);
-        return NULL;
 #endif
+#ifdef DENGINE_WIN_X11
+   if(conf)
+       XFree(conf);
+#endif
+
+    /* raise our cond last so main thread
+     * dont freeeze after failed window
+     * dont use attrs again since its been popped from stack
+     * */
+    attrs->ret = NULL;
+    *attrs->deref_and_set_to_one = 1;
+    dengineutils_thread_condition_raise(attrs->ret_cond);
+    return NULL;
 }
 
 DengineWindow* dengine_window_create(int width, int height, const char* title, const DengineWindow* share)
@@ -876,8 +887,13 @@ DengineWindow* dengine_window_create(int width, int height, const char* title, c
     dengineutils_thread_set_name(windowthr, "WindowThr");
     dengineutils_thread_condition_wait(&ret_cond, &oned);
 
+    /* kill failed window thred */
+    if(attrs.ret == NULL)
+        dengineutils_thread_wait(windowthr);
+    else	
+        attrs.ret->windowthr = windowthr;
+
     dengineutils_thread_condition_destroy(&ret_cond);
-    attrs.ret->windowthr = windowthr;
 
     return attrs.ret;
 }
@@ -1122,9 +1138,9 @@ int dengine_window_set_swapinterval(DengineWindow* window, int interval)
         dengineutils_logging_log("WARNING::glXSwapInternalEXT unavailable");
     }
 #elif defined(DENGINE_CONTEXT_WGL)
-    if(wglSwapIntervalEXT)
+    if(dengine_wglSwapIntervalEXT)
     {
-        wglSwapIntervalEXT(interval);
+        dengine_wglSwapIntervalEXT(interval);
         itv = interval;
     }
     else{
