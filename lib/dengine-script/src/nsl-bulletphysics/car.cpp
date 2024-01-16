@@ -48,11 +48,14 @@ int car_setup_wheel(Entity* entity)
                          entity->transform.position[1] - 4.0,
                          entity->transform.position[2]);
     btWheelInfo& info = vehicle->addWheel(connection, wheel_dir, wheel_axle, wheel_rest, 1.5, tuning, added < 2);
-    info.m_suspensionStiffness = 20.0f;
-    info.m_wheelsDampingRelaxation = 2.3f;
-    info.m_wheelsDampingCompression = 4.4f;
-    info.m_frictionSlip = 10.f;
-    info.m_rollInfluence = 0.02f;
+    info.m_suspensionStiffness = 15.0f;
+    info.m_wheelsDampingRelaxation = 0.8f;
+    info.m_wheelsDampingCompression = 0.5f;
+    if(added < 2 )
+        info.m_frictionSlip = 9.0f;
+    else
+        info.m_frictionSlip = 3.5f;
+    info.m_rollInfluence = 0.15f;
     wheels[added] = entity;
     added++;
     return 1;
@@ -365,7 +368,9 @@ int car_update(Entity* entity)
             vehicle->setSteeringValue(0.5 * dir_steer, i);
         }else
         {
-            vehicle->setBrake(200.0 * dir_brake, i);
+            /* 4x4 steer */
+            vehicle->setSteeringValue(0.5 * -dir_steer * dir_brake, i);
+            vehicle->setBrake(1000.0 * dir_brake, i);
         }
 
         vehicle->applyEngineForce(1750.0 * dir_engine, i);
@@ -422,7 +427,7 @@ extern "C" int car_world_update(void* arg)
     {
         "Press W/S to accelarate/brake",
         "A/D to steer left/right",
-        "X to brake",
+        "X to brake or 4x4 steer",
         "R to reset position",
         "E/C increase/decrease camera distance",
         "",
