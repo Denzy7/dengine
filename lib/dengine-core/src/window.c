@@ -960,7 +960,7 @@ void dengine_window_get_dim(DengineWindow* window, int* width, int* height)
         *height = attribs.height;
 #elif defined(DENGINE_WIN32)
     RECT rect;
-    GetWindowRect(window->win32_hwnd, &rect);
+    GetClientRect(window->win32_hwnd, &rect);
     if(width)
         *width = (int)(rect.right - rect.left);
     if(height)
