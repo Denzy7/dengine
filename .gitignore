@@ -1,5 +1,6 @@
 .cache
 *.log
+*.vim
 build/*
 CMakeLists.txt.user
 assets/priv/*
