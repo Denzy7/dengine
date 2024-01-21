@@ -27,6 +27,14 @@ int initworld(btDynamicsWorld** refworld);
 void startworld();
 void destroyworld();
 
+/* use to initialize stepworld().
+ * this is already done by initworld() but 
+ * call if physics snaps after the 
+ * first call to stepworld.
+ *
+ * useful if there is quite a delay after 
+ * calling initworld*/
+void firststep();
 void stepworld();
 
 int create_rb(Entity* entity, ECSPhysicsColShape shape, ECSPhysicsColShapeConfigBox* cfg, btScalar mass, btRigidBody** bodyref);

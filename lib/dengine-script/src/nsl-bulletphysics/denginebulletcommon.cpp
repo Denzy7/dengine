@@ -37,6 +37,7 @@ btAlignedObjectArray<btCollisionShape*> shapes;
     /*return NULL;*/
 /*}*/
 
+double _lastts = 0.0;
 int initworld(btDynamicsWorld** refworld)
 {
     config = new btDefaultCollisionConfiguration();
@@ -51,6 +52,8 @@ int initworld(btDynamicsWorld** refworld)
     /*dengineutils_thread_set_name(&physicsthread, "PhysicsThr");*/
     if(refworld)
         *refworld = _world;
+    
+    firststep();
     return 1;
 }
 
@@ -60,6 +63,12 @@ void startworld()
     //physicsthr_run = 1;
 }
 
+void firststep()
+{
+    dengineutils_timer_get_current_r(&_lastts);
+    _lastts /= 1000.0;
+}
+
 void stepworld()
 {
 /*    if(!physicsthr_run)*/
@@ -67,12 +76,9 @@ void stepworld()
     /*physicsthr_step = 1;*/
     /*dengineutils_thread_condition_raise(&physicsthread_start);*/
 
-    static double _lastts = 0.0;
     double t;
     dengineutils_timer_get_current_r(&t);
     t /= 1000.0;
-    if(_lastts == 0.0)
-        _lastts = t;
     _world->stepSimulation(t - _lastts);
     _lastts = t;
 }
