@@ -39,7 +39,7 @@ btRaycastVehicle::btVehicleTuning tuning;
 btCollisionShape* carbox;
 static int added = 0;
 Entity* wheels[4];
-static int dir_engine, dir_steer, dir_brake;
+static float dir_engine, dir_steer, dir_brake;
 static int resetonce = 0;
 
 int car_setup_wheel(Entity* entity)
@@ -49,13 +49,13 @@ int car_setup_wheel(Entity* entity)
                          entity->transform.position[2]);
     btWheelInfo& info = vehicle->addWheel(connection, wheel_dir, wheel_axle, wheel_rest, 1.5, tuning, added < 2);
     info.m_suspensionStiffness = 15.0f;
-    info.m_wheelsDampingRelaxation = 0.8f;
-    info.m_wheelsDampingCompression = 0.5f;
+    info.m_wheelsDampingRelaxation = 0.85f;
+    info.m_wheelsDampingCompression = 0.55f;
     if(added < 2 )
-        info.m_frictionSlip = 9.0f;
+        info.m_frictionSlip = 6.5f;
     else
         info.m_frictionSlip = 3.5f;
-    info.m_rollInfluence = 0.15f;
+    info.m_rollInfluence = 0.1f;
     wheels[added] = entity;
     added++;
     return 1;
@@ -68,7 +68,7 @@ int car_setup_chassis(Entity* entity)
     carbox = new btBoxShape(btVector3(2.0, 0.5, 4.0));
 
     btTransform local;
-    const float carmass = 800.0;
+    const float carmass = 1000.0;
     local.setIdentity();
     local.setOrigin(btVector3(entity->transform.position[0],
                               entity->transform.position[1],
@@ -317,6 +317,8 @@ extern "C" int car_world_start(void* arg)
 
 int car_update(Entity* entity)
 {
+    double delta_s = dengineutils_timer_get_delta() / 1000.0;
+    static const float lerpspeed = 5.0f;
 #ifndef SWBTNS
     if(dengine_input_get_key('W'))
         dir_engine = 1;
@@ -326,11 +328,11 @@ int car_update(Entity* entity)
         dir_engine = 0;
 
     if(dengine_input_get_key('D'))
-        dir_steer = -1;
+        dir_steer = glm_lerp(dir_steer, -1.0f, delta_s * lerpspeed);
     else if(dengine_input_get_key('A'))
-        dir_steer = 1;
-    else
-        dir_steer = 0;
+        dir_steer = glm_lerp(dir_steer, 1.0f, delta_s * lerpspeed);
+    else 
+        dir_steer = glm_lerp(dir_steer, 0.0f, delta_s * lerpspeed);
 
     if(dengine_input_get_key('X'))
         dir_brake = 1;
@@ -370,10 +372,10 @@ int car_update(Entity* entity)
         {
             /* 4x4 steer */
             vehicle->setSteeringValue(0.5 * -dir_steer * dir_brake, i);
-            vehicle->setBrake(1000.0 * dir_brake, i);
+            vehicle->setBrake(750.0 * dir_brake, i);
         }
 
-        vehicle->applyEngineForce(1750.0 * dir_engine, i);
+        vehicle->applyEngineForce(1500.0 * dir_engine, i);
 
         phy2ent(vehicle->getWheelTransformWS(i), wheels[i]);
     }
@@ -486,13 +488,18 @@ extern "C" int car_world_update(void* arg)
     float btnspace = 10;
     denginegui_set_button_repeatable(1);
     dir_steer = 0;
+    static const float lerpspeed = 3.0f;
+    double delta_s = delta / 1000.0;
     if(denginegui_button(btnoffset, (h / 2.0) - (btnheight / 2.0), btnwidth, btnheight, "A", NULL))
     {
-        dir_steer = 1;
+        dir_steer = glm_lerp(dir_steer, 1.0f, delta_s * lerpspeed);
     }
     if(denginegui_button(w - btnoffset - btnwidth, (h / 2.0) - (btnheight / 2.0), btnwidth, btnheight, "D", NULL))
     {
-        dir_steer = -1;
+        dir_steer = glm_lerp(dir_steer, -1.0f, delta_s * lerpspeed);
+    }
+
+        dir_steer = glm_lerp(dir_steer, 0.0f, delta_s * lerpspeed);
     }
 
     dir_engine = 0;
