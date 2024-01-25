@@ -42,13 +42,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
-      id: strings
-      shell: bash
-      run: |
-        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-
     - name: submodules
       run: |
         git submodule update --init --depth 1 deps/cglm deps/stb
@@ -56,7 +49,7 @@ jobs:
     - name: dependencies
       run: |
         if [ "$RUNNER_OS" == "Linux" ]; then
-          sudo apt install libgl-dev libx11-dev pkgconf libegl-dev
+          sudo apt update && sudo apt -y install libgl-dev libx11-dev pkgconf libegl-dev
         fi
       shell: bash
         
@@ -69,3 +62,10 @@ jobs:
       run: |
         cmake -S . -B build/${{ matrix.os }}
         cmake --build build/${{ matrix.os }}
+
+    - name: store linux build dir
+      if: runner.os == 'Linux'
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux build dir
+        path: ./build/${{ matrix.os }}
