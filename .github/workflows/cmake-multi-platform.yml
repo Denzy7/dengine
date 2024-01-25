@@ -60,8 +60,9 @@ jobs:
 
     - name: dependencies
       run: |
+        echo "$(pwd) or $PWD"
         if [ "$RUNNER_OS" == "Linux" ]; then
-          apt install libgl-dev libx11-dev pkgconf libegl-dev
+          sudo apt install libgl-dev libx11-dev pkgconf libegl-dev
         fi
         
     - name: dengine rc
