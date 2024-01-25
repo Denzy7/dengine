@@ -65,4 +65,5 @@ jobs:
         
     - name: dengine
       run: |
-        cmake -S ${{ github.workspace }} -B ${{ steps.strings.outputs.build-output-dir }}/
+        cmake -S ${{ github.workspace }} -B ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.os }}
+        cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.os }}
