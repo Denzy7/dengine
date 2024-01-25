@@ -58,6 +58,12 @@ jobs:
       run: |
         git submodule update --init --depth 1 ${{ github.workspace }}/deps/cglm ${{ github.workspace }}/deps/stb
 
+    - name: dependencies
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          apt install libgl-dev libx11-dev pkgconf libegl-dev
+        fi
+        
     - name: dengine rc
       run: |
         cmake -S ${{ github.workspace }}/main/dengine-rc -B ${{ steps.strings.outputs.build-output-dir }}/dengine-rc
