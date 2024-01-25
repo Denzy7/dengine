@@ -25,20 +25,15 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         build_type: [RelWithDebInfo]
-        c_compiler: [gcc, clang, cl]
+        c_compiler: [clang, cl]
         include:
           - os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
           - os: ubuntu-latest
-            c_compiler: gcc
-            cpp_compiler: g++
-          - os: ubuntu-latest
             c_compiler: clang
             cpp_compiler: clang++
         exclude:
-          - os: windows-latest
-            c_compiler: gcc
           - os: windows-latest
             c_compiler: clang
           - os: ubuntu-latest
@@ -56,21 +51,20 @@ jobs:
 
     - name: submodules
       run: |
-        git submodule update --init --depth 1 ${{ github.workspace }}/deps/cglm ${{ github.workspace }}/deps/stb
+        git submodule update --init --depth 1 deps/cglm deps/stb
 
     - name: dependencies
       run: |
-        echo "$(pwd) or $PWD"
         if [ "$RUNNER_OS" == "Linux" ]; then
           sudo apt install libgl-dev libx11-dev pkgconf libegl-dev
         fi
         
     - name: dengine rc
       run: |
-        cmake -S ${{ github.workspace }}/main/dengine-rc -B ${{ steps.strings.outputs.build-output-dir }}/dengine-rc
-        cmake --build ${{ steps.strings.outputs.build-output-dir }}/dengine-rc
+        cmake -S main/dengine-rc -B build/dengine-rc
+        cmake --build build/dengine-rc
         
     - name: dengine
       run: |
-        cmake -S ${{ github.workspace }} -B ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.os }}
-        cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.os }}
+        cmake -S . -B build/${{ matrix.os }}
+        cmake --build build/${{ matrix.os }}
