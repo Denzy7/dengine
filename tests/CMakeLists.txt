@@ -26,4 +26,11 @@ foreach(subdir ${subdirs})
     set_target_properties(${dir_tgts} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 endforeach()
+file(GLOB tests_binaries "${CMAKE_CURRENT_BINARY_DIR}/bin/*")
 
+if(WIN32)
+    install(PROGRAMS ${tests_binaries} DESTINATION lib)
+    message("win32")
+else()
+    install(PROGRAMS ${tests_binaries} DESTINATION lib/dengine-${DENGINE_VERSION}/tests)
+endif()
