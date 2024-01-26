@@ -63,9 +63,18 @@ jobs:
         cmake -S . -B build/${{ matrix.os }}
         cmake --build build/${{ matrix.os }}
 
-    - name: store linux build dir
+    - name: install and compress output
+      run: |
+        cmake --install build/${{ matrix.os }} --prefix out-${{ matrix.os }}
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          echo "use LD_LIBRARY_PATH=../../ to run executable so it pull libraries from lib" > out-${{ matrix.os }}/README_linux
+          tar c out-${{ matrix.os }}/** -O | zstd -9 > linux_build.tar.zst
+        fi
+      shell: bash
+
+    - name: linux build
       if: runner.os == 'Linux'
       uses: actions/upload-artifact@v4
       with:
-        name: linux build dir
-        path: ./build/${{ matrix.os }}
+        name: linux_build
+        path: ./linux_build.tar.zst
