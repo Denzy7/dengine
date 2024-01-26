@@ -29,8 +29,11 @@ endforeach()
 file(GLOB tests_binaries "${CMAKE_CURRENT_BINARY_DIR}/bin/*")
 
 if(WIN32)
-    install(PROGRAMS ${tests_binaries} DESTINATION lib)
     message("win32")
+    set(tests_install_dir lib/)
 else()
-    install(PROGRAMS ${tests_binaries} DESTINATION lib/dengine-${DENGINE_VERSION}/tests)
+    message("not win32")
+    set(tests_install_dir lib/dengine-${DENGINE_VERSION}/tests/)
 endif()
+
+install(PROGRAMS ${tests_binaries} DESTINATION ${tests_install_dir})
