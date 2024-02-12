@@ -56,12 +56,12 @@ jobs:
     - name: dengine-rc_configure_linux
       if: runner.os == 'Linux'
       run: |
-        cmake -S main/dengine-rc -B build/dengine-rc
+        cmake -S main/dengine-rc -B build/dengine-rc -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         
     - name: dengine-rc_configure_windows
       if: runner.os == 'Windows'
       run: |
-        cmake -S main/dengine-rc -B build/dengine-rc -G 'MinGW Makefiles'
+        cmake -S main/dengine-rc -B build/dengine-rc -G 'MinGW Makefiles' -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         
     - name: dengine-rc_build
       run: |
@@ -70,12 +70,12 @@ jobs:
     - name: dengine_configure_linux
       if: runner.os == 'Linux'
       run: |
-        cmake -S . -B build/${{ matrix.os }}
+        cmake -S . -B build/${{ matrix.os }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_SHARED_LIBS=ON
         
     - name: dengine_configure_windows
       if: runner.os == 'Windows'
       run: |
-        cmake -S . -B build/${{ matrix.os }} -G 'MinGW Makefiles'
+        cmake -S . -B build/${{ matrix.os }} -G 'MinGW Makefiles' -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_SHARED_LIBS=ON
       
     - name: dengine_build
       run: |
