@@ -198,6 +198,12 @@ if(NOT DengineRC_FOUND)
 endif()
 include(cmake/DengineRCHelper.cmake)
 
+if(WIN32)
+    set(tests_install_dir lib/)
+else()
+    set(tests_install_dir lib/dengine-${DENGINE_VERSION}/tests/)
+endif()
+
 add_subdirectory("glue" "glue-build")
 add_subdirectory(lib/dengine-utils "dengine-utils-build")
 add_subdirectory(lib/dengine-core "dengine-core-build")
@@ -209,7 +215,6 @@ if(DENGINE_SCRIPTING_PYTHON AND NOT ANDROID)
     #add python modules (shared libraries)
     add_subdirectory(lib/dengine-script/src/py_modules "dengine-script-pymodules-build")
 endif()
-
 
 if(DENGINE_BUILD_TESTS)
     add_subdirectory(tests "tests-build")
@@ -236,6 +241,7 @@ install(FILES ${PROJECT_BINARY_DIR}/dengine_config/dengine_config.h DESTINATION 
 install(DIRECTORY deps/glad/include/glad DESTINATION include/dengine-${DENGINE_VERSION}/deps/glad)
 install(DIRECTORY deps/glad/include/KHR DESTINATION include/dengine-${DENGINE_VERSION}/deps/glad)
 install(DIRECTORY deps/cglm/include/cglm DESTINATION include/dengine-${DENGINE_VERSION}/deps/cglm)
+install(DIRECTORY glue/include/dengine DESTINATION include/dengine-${DENGINE_VERSION}/glue)
 
 # pkgconf
 install(FILES "${PROJECT_BINARY_DIR}/dengine.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")

@@ -92,6 +92,7 @@ if(DENGINE_HAS_BULLET)
         LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests-build/bin"
     )
     target_link_libraries(nsl-bulletphysics-car ${dengine} ${bullet_LIBRARIES} nsl-bulletphysics-common)
+    install(TARGETS nsl-bulletphysics nsl-bulletphysics-car  DESTINATION ${tests_install_dir})
 endif()
 
 if(DENGINE_HAS_LIBPULSE_SIMPLE)
@@ -125,6 +126,7 @@ if(DENGINE_HAS_LIBPULSE_SIMPLE)
         LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests-build/bin"
     )
     target_link_libraries(nsl-pulseaudio ${dengine} ${libpulse_simple_LIBRARIES})
+    install(TARGETS nsl-pulseaudio DESTINATION ${tests_install_dir})
 endif()
 
 add_library(nsl-test SHARED
@@ -141,6 +143,7 @@ set_target_properties(nsl-test PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests-build/bin"
 )
 target_link_libraries(nsl-test ${dengine})
+install(TARGETS nsl-test DESTINATION ${tests_install_dir})
 
 install(TARGETS dengine-script DESTINATION lib)
 install(FILES ${dengine-script-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-script)
