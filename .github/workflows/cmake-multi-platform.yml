@@ -36,17 +36,17 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up MinGW
-      if: runner.os == 'Windows'
-      uses: egor-tensin/setup-mingw@v2
-      with:
-        platform: x64
+    # for building python 3.10.*+ but 3.9 which is minimum should work with gcc.exe 11+
+    # - name: Update MinGW to winlibs
+    #   if: runner.os == 'Windows'
+    #   uses: Denzy7/action-mingw@v0.1
 
     - name: submodules
       run: |
         git submodule update --init --depth 1 deps/cglm deps/stb
 
     - name: dependencies
+      if: runner.os == 'Linux'
       run: |
         if [ "$RUNNER_OS" == "Linux" ]; then
           sudo apt update && sudo apt -y install libgl-dev libx11-dev pkgconf libegl-dev
@@ -57,24 +57,30 @@ jobs:
       run: |
         cmake -S main/dengine-rc -B build/dengine-rc
         cmake --build build/dengine-rc
-        
-    - name: dengine
+
+    - name: dengine_configure_linux
+      if: runner.os == "Linux"
       run: |
         cmake -S . -B build/${{ matrix.os }}
+        
+    - name: dengine_configure_windows
+      if: runner.os == "Windows"
+      run: |
+        cmake -S . -B build/${{ matrix.os }} -G 'MinGW Makefiles'
+      
+    - name: dengine_build
+      run: |
         cmake --build build/${{ matrix.os }}
 
     - name: install and compress output
       run: |
         cmake --install build/${{ matrix.os }} --prefix out-${{ matrix.os }}
-        if [ "$RUNNER_OS" == "Linux" ]; then
-          echo "use LD_LIBRARY_PATH=../../ to run executable so it pull libraries from lib" > out-${{ matrix.os }}/README_linux
-          tar c out-${{ matrix.os }}/** -O | zstd -9 > linux_build.tar.zst
-        fi
+        echo "use LD_LIBRARY_PATH=../../ to run executable so it pull libraries from lib" > out-${{ matrix.os }}/README_linux.txt
+        tar c out-${{ matrix.os }}/** -O | zstd -9 > "$RUNNER_OS.tar.zst"
       shell: bash
 
-    - name: linux build
-      if: runner.os == 'Linux'
+    - name: ${{ runner.os }} build
       uses: actions/upload-artifact@v4
       with:
-        name: linux_build
-        path: ./linux_build.tar.zst
+        name: ${{ runner.os }}_build
+        path: ${{ runner.os }}.tar.zst
