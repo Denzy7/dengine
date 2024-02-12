@@ -20,7 +20,6 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         build_type: [RelWithDebInfo]
         c_compiler: [clang, x86_64-w64-mingw32-gcc ]
-        cpp_compiler: [clang++, x86_64-w64-mingw32-g++]
         include:
           - os: windows-latest
             c_compiler: x86_64-w64-mingw32-gcc
@@ -31,11 +30,9 @@ jobs:
         exclude:
           - os: windows-latest
             c_compiler: clang
-            cpp_compiler: clang++
           - os: ubuntu-latest
             c_compiler: x86_64-w64-mingw32-gcc
-            cpp_compiler: x86_64-w64-mingw32-g++
-
+            
     steps:
     - uses: actions/checkout@v3
 
