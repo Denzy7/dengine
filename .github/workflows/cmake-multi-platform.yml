@@ -59,12 +59,12 @@ jobs:
         cmake --build build/dengine-rc
 
     - name: dengine_configure_linux
-      if: runner.os == "Linux"
+      if: runner.os == 'Linux'
       run: |
         cmake -S . -B build/${{ matrix.os }}
         
     - name: dengine_configure_windows
-      if: runner.os == "Windows"
+      if: runner.os == 'Windows'
       run: |
         cmake -S . -B build/${{ matrix.os }} -G 'MinGW Makefiles'
       
