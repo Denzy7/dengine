@@ -1,0 +1,95 @@
+# This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
+# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
+name: CMake on multiple platforms
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      fail-fast: false
+      
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        build_type: [RelWithDebInfo]
+        c_compiler: [clang, x86_64-w64-mingw32-gcc ]
+        include:
+          - os: windows-latest
+            c_compiler: x86_64-w64-mingw32-gcc
+            cpp_compiler: x86_64-w64-mingw32-g++
+          - os: ubuntu-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+        exclude:
+          - os: windows-latest
+            c_compiler: clang
+          - os: ubuntu-latest
+            c_compiler: x86_64-w64-mingw32-gcc
+            
+    steps:
+    - uses: actions/checkout@v3
+
+    # for building python 3.10.*+ but 3.9 which is minimum should work with gcc.exe 11+
+    # - name: Update MinGW to winlibs
+    #   if: runner.os == 'Windows'
+    #   uses: Denzy7/action-mingw@v0.1
+
+    - name: submodules
+      run: |
+        git submodule update --init --depth 1 deps/cglm deps/stb
+
+    - name: dependencies
+      if: runner.os == 'Linux'
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          sudo apt update && sudo apt -y install libgl-dev libx11-dev pkgconf libegl-dev
+        fi
+      shell: bash
+      
+    - name: dengine-rc_configure_linux
+      if: runner.os == 'Linux'
+      run: |
+        cmake -S main/dengine-rc -B build/dengine-rc -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        
+    - name: dengine-rc_configure_windows
+      if: runner.os == 'Windows'
+      run: |
+        cmake -S main/dengine-rc -B build/dengine-rc -G 'MinGW Makefiles' -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        
+    - name: dengine-rc_build
+      run: |
+        cmake --build build/dengine-rc
+
+    - name: dengine_configure_linux
+      if: runner.os == 'Linux'
+      run: |
+        cmake -S . -B build/${{ matrix.os }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_SHARED_LIBS=ON
+        
+    - name: dengine_configure_windows
+      if: runner.os == 'Windows'
+      run: |
+        cmake -S . -B build/${{ matrix.os }} -G 'MinGW Makefiles' -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_SHARED_LIBS=ON
+      
+    - name: dengine_build
+      run: |
+        cmake --build build/${{ matrix.os }}
+
+    - name: install and compress output
+      run: |
+        cmake --install build/${{ matrix.os }} --prefix out-${{ matrix.os }}
+        echo "use LD_LIBRARY_PATH=../../ to run executable so it pull libraries from lib" > out-${{ matrix.os }}/README_linux.txt
+        tar c out-${{ matrix.os }}/** -O | zstd -9 > "$RUNNER_OS.tar.zst"
+      shell: bash
+
+    - name: ${{ runner.os }} build
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ runner.os }}_build
+        path: ${{ runner.os }}.tar.zst
