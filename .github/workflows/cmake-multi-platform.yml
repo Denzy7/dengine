@@ -52,10 +52,19 @@ jobs:
           sudo apt update && sudo apt -y install libgl-dev libx11-dev pkgconf libegl-dev
         fi
       shell: bash
-        
-    - name: dengine rc
+      
+    - name: dengine-rc_configure_linux
+      if: runner.os == 'Linux'
       run: |
         cmake -S main/dengine-rc -B build/dengine-rc
+        
+    - name: dengine-rc_configure_windows
+      if: runner.os == 'Windows'
+      run: |
+        cmake -S main/dengine-rc -B build/dengine-rc -G 'MinGW Makefiles'
+        
+    - name: dengine-rc_build
+      run: |
         cmake --build build/dengine-rc
 
     - name: dengine_configure_linux
