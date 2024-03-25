@@ -92,6 +92,7 @@ jobs:
         path: ${{ runner.os }}.tar.zst
     - name: assets package
       uses: actions/upload-artifact@v4
+      if: runner.os == 'Linux'
       with:
         name: assets package
         path: ./assets/
