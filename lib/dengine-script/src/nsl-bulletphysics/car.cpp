@@ -487,20 +487,21 @@ extern "C" int car_world_update(void* arg)
     float btnheight = 200;
     float btnspace = 10;
     denginegui_set_button_repeatable(1);
-    dir_steer = 0;
     static const float lerpspeed = 3.0f;
     double delta_s = delta / 1000.0;
+    int down = 0;
     if(denginegui_button(btnoffset, (h / 2.0) - (btnheight / 2.0), btnwidth, btnheight, "A", NULL))
     {
+        down = 1;
         dir_steer = glm_lerp(dir_steer, 1.0f, delta_s * lerpspeed);
     }
     if(denginegui_button(w - btnoffset - btnwidth, (h / 2.0) - (btnheight / 2.0), btnwidth, btnheight, "D", NULL))
     {
+        down = 1;
         dir_steer = glm_lerp(dir_steer, -1.0f, delta_s * lerpspeed);
     }
-
+    if (!down)
         dir_steer = glm_lerp(dir_steer, 0.0f, delta_s * lerpspeed);
-    }
 
     dir_engine = 0;
     if(denginegui_button(w - btnoffset - btnwidth, btnoffset, btnwidth, btnheight, "W", NULL))
