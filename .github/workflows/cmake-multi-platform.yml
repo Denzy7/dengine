@@ -1,5 +1,3 @@
-# This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
-# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
 name: CMake on multiple platforms
 
 on:
@@ -113,7 +111,7 @@ jobs:
       shell: bash
       run: |
         git submodule update --init --depth 1 deps/bullet3_src
-        cd ./tests/src/testdengine-android/apk
+        cd ./tests/src/testdengine-android/apk/
         ./gradlew assembleDebug -x lintVitalAnalyzeRelease -x lintAnalyzeDebug -x lintDebug
         
     - name: android build universal
@@ -121,32 +119,32 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: android_universal
-        path: app/build/outputs/apk/debug/app-universal-debug.apk
+        path: ./tests/src/testdengine-android/apk/app/build/outputs/apk/debug/app-universal-debug.apk
         
     - name: android build armebi-v7a
       if: runner.os == 'Linux'
       uses: actions/upload-artifact@v4
       with:
         name: android_armebi-v7a
-        path: app/build/outputs/apk/debug/app-armeabi-v7a-debug.apk
+        path: ./tests/src/testdengine-android/apk/app/build/outputs/apk/debug/app-armeabi-v7a-debug.apk
 
     - name: android build arm64-v8a
       if: runner.os == 'Linux'
       uses: actions/upload-artifact@v4
       with:
         name: android_arm64-v8a
-        path: app/build/outputs/apk/debug/app-arm64-v8a-debug.apk
+        path: ./tests/src/testdengine-android/apk/app/build/outputs/apk/debug/app-arm64-v8a-debug.apk
         
     - name: android build x86
       if: runner.os == 'Linux'
       uses: actions/upload-artifact@v4
       with:
         name: android_x86
-        path: app/build/outputs/apk/debug/app-x86-debug.apk
+        path: ./tests/src/testdengine-android/apk/app/build/outputs/apk/debug/app-x86-debug.apk
 
     - name: android build x86_64
       if: runner.os == 'Linux'
       uses: actions/upload-artifact@v4
       with:
         name: android_x86_64
-        path: app/build/outputs/apk/debug/app-x86_64-debug.apk
+        path: ./tests/src/testdengine-android/apk/app/build/outputs/apk/debug/app-x86_64-debug.apk
