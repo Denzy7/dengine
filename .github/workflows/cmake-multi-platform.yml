@@ -98,6 +98,7 @@ jobs:
       if: runner.os == 'Linux'
       uses: actions/setup-java@v3
       with:
+        distribution: ubuntu
         java-version: '17'
         cache: 'gradle'
         
