@@ -104,7 +104,9 @@ jobs:
         
     - name: Change wrapper permissions
       if: runner.os == 'Linux'
-      run: chmod +x ./gradlew
+      run: |
+        cd tests/src/testdengine-android/apk
+        chmod +x ./gradlew
 
     - name: test apk
       if: runner.os == 'Linux'
