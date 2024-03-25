@@ -90,12 +90,20 @@ jobs:
       with:
         name: ${{ runner.os }}_build
         path: ${{ runner.os }}.tar.zst
+    - name: symlink assets
+      shell: bash
+      if: runner.os == 'Linux'
+      run: |
+        mkdir ci-assets
+        cd ci-assets
+        ln -s ../assets .
+        
     - name: assets package
       uses: actions/upload-artifact@v4
       if: runner.os == 'Linux'
       with:
         name: assets package
-        path: ./assets/
+        path: ./ci-assets
 
     - name: Set Up JDK
       if: runner.os == 'Linux'
