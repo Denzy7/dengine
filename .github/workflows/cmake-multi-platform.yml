@@ -112,6 +112,7 @@ jobs:
       if: runner.os == 'Linux'
       shell: bash
       run: |
+        git submodule update --init --depth 1 deps/bullet3_src
         cd ./tests/src/testdengine-android/apk
         ./gradlew assembleDebug -x lintVitalAnalyzeRelease -x lintAnalyzeDebug -x lintDebug
         
