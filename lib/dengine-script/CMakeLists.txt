@@ -62,7 +62,9 @@ if(DENGINE_HAS_BULLET)
     target_link_libraries(nsl-bulletphysics ${dengine} ${bullet_LIBRARIES} nsl-bulletphysics-common)
 
     set(nslbullet-car-res
-       src/nsl-bulletphysics/rover.obj)
+       src/nsl-bulletphysics/rover.obj
+       src/nsl-bulletphysics/wheelmap.jpg
+       )
 
     # output after compile
     set(outres)

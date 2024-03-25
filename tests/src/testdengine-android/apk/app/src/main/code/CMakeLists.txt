@@ -31,16 +31,24 @@ endif()
 add_subdirectory(${BULLETSRC} "bullet-build")
 set(nslbulletcar_res
     ${DENGINE_DIR}/lib/dengine-script/src/nsl-bulletphysics/rover.obj
+    ${DENGINE_DIR}/lib/dengine-script/src/nsl-bulletphysics/wheelmap.jpg
     )
-get_filename_component(barename ${nslbulletcar_res} NAME)
-set(nslbulletcar_outres ${CMAKE_CURRENT_BINARY_DIR}/${barename}-res.c)
+set(nslbulletcar_outres)
+foreach(res ${nslbulletcar_res})
+    get_filename_component(barename ${res} NAME)
+    # inres and outres should be absolute paths for fair measure
+    set(inresname ${res})
+    get_filename_component(barename ${res} NAME)
+    set(outresname ${CMAKE_CURRENT_BINARY_DIR}/${barename}-res.c)
+    add_custom_command(
+        OUTPUT ${outresname}
+        COMMAND dengine-rc ${inresname} ${outresname}
+        DEPENDS ${inresname}
+        VERBATIM
+        )
+    list(APPEND nslbulletcar_outres ${outresname})
+endforeach()
 
-add_custom_command(
-	OUTPUT ${nslbulletcar_outres}
-	COMMAND dengine-rc ${nslbulletcar_res} ${nslbulletcar_outres}
-	DEPENDS ${nslbulletcar_res}
-	VERBATIM
-)
 add_library(nsl_bulletcar_android 
     ${DENGINE_DIR}/lib/dengine-script/src/nsl-bulletphysics/car.cpp
     ${DENGINE_DIR}/lib/dengine-script/src/nsl-bulletphysics/denginebulletcommon.cpp

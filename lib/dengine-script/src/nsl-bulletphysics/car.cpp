@@ -10,9 +10,14 @@ int car_update(Entity* entity);
 
 extern unsigned int rover_obj_ln;
 extern unsigned char rover_obj[];
+extern unsigned int wheelmap_jpg_ln;
+extern unsigned char wheelmap_jpg[];
+
 static const size_t prtbf_sz = 2048;
 char* prtbf;
 Scene* scene;
+int cubes_draw = 1;
+int physics_toggle = 1;
 std::vector<Entity*> cubes;
 DirLight* dl_ent_dl;
 Entity* chassis;
@@ -204,7 +209,7 @@ extern "C" int car_world_start(void* arg)
         }
     }
     /* car */
-    Texture tex_black, tex_random;
+    Texture tex_black, tex_random, wheelmap;
     dengine_texture_make_color(2, 2, black_f, 3, &tex_black);
     static float randcol[3];
 
@@ -232,7 +237,12 @@ extern "C" int car_world_start(void* arg)
     dengine_material_set_shader_color(&stdshdr, &mat_wheels);
     dengine_material_set_shader_shadow(&shadow2d, &mat_wheels);
 
-    dengine_material_set_texture(&tex_black, "diffuseTex", &mat_wheels);
+    memset(&wheelmap, 0, sizeof(wheelmap));
+    wheelmap.interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
+    wheelmap.auto_dataonload = 1;
+    dengine_texture_load_mem(wheelmap_jpg, wheelmap_jpg_ln, 1, &wheelmap);
+
+    dengine_material_set_texture(&wheelmap, "diffuseTex", &mat_wheels);
 
 //    for(size_t i = 0; i < 4; i++)
 //    {
@@ -246,35 +256,34 @@ extern "C" int car_world_start(void* arg)
 
     chassis->transform.manualtransform = 1;
     chassis->transform.position[1] = 4.0;
-    chassis->mesh_component = denginescene_ecs_new_meshcomponent(&car_meshes[2], &mat_car);
+    chassis->mesh_component = denginescene_ecs_new_meshcomponent(&car_meshes[0], &mat_car);
 
     car_setup_chassis(chassis);
     denginescene_add_entity(scene, chassis);
+    static const float axlediff = 3.4f;
+    static const float suspensionpoint = 4.0f;
 
     vec3 wheel_poses[] =
     {
-      {3.0, 4.0, 3.0},
-      {-3.0, 4.0, 3.0},
-      {3.0, 4.0, -3.0},
-      {-3.0, 4.0, -3.0}
-    };
-
-    Primitive* wheel_meshes[]=
-    {
-        &car_meshes[3],
-        &car_meshes[0],
-        &car_meshes[4],
-        &car_meshes[1],
+      {axlediff, suspensionpoint, axlediff},
+      {-axlediff, suspensionpoint, axlediff},
+      {axlediff, suspensionpoint, -axlediff},
+      {-axlediff, suspensionpoint, -axlediff}
     };
 
     for(int i = 0; i < 4; i++)
     {
         Entity* wheel = denginescene_ecs_new_entity();
-        wheel->transform.manualtransform = 1;
-        memcpy(wheel->transform.position, wheel_poses[i], sizeof(vec3));
-        wheel->mesh_component = denginescene_ecs_new_meshcomponent(wheel_meshes[i], &mat_wheels);
-        car_setup_wheel(wheel);
-        denginescene_add_entity(scene, wheel);
+        Entity* wheelroot = denginescene_ecs_new_entity();
+        memcpy(wheelroot->transform.position, wheel_poses[i], sizeof(vec3));
+        if(i % 2 == 0)
+            wheel->transform.rotation[1] = 0;
+        else
+            wheel->transform.rotation[1] = 180;
+        wheel->mesh_component = denginescene_ecs_new_meshcomponent(&car_meshes[1], &mat_wheels);
+        car_setup_wheel(wheelroot);
+        denginescene_ecs_parent(wheelroot, wheel);
+        denginescene_add_entity(scene, wheelroot);
     }
 
     PointLight pl;
@@ -385,7 +394,8 @@ int car_update(Entity* entity)
 
 extern "C" int car_world_update(void* arg)
 {
-    stepworld();
+    if(physics_toggle)
+        stepworld();
 
     double delta = dengineutils_timer_get_delta();
 
@@ -406,9 +416,14 @@ extern "C" int car_world_update(void* arg)
 
     if(dengine_input_get_key_once('V'))
         dl_ent_dl->shadow.enable = !dl_ent_dl->shadow.enable;
+    if(dengine_input_get_key_once('B'))
+        cubes_draw = !cubes_draw;
+    if(dengine_input_get_key_once('P'))
+        physics_toggle = !physics_toggle;
 
     denginescene_update(scene);
-    drawcubes();
+    if(cubes_draw)
+        drawcubes();
     car_update(chassis);
 
     static float camdist = 40.0f;
@@ -432,6 +447,8 @@ extern "C" int car_world_update(void* arg)
         "X to brake or 4x4 steer",
         "R to reset position",
         "E/C increase/decrease camera distance",
+        "B toggle visual cubes",
+        "P toggle physics",
         "",
         "+++ SHADOWS +++",
         "V to toggle shadows",
@@ -465,10 +482,13 @@ extern "C" int car_world_update(void* arg)
     static vec4 yellow = {1.0, 1.0, 0.0, 1.0};
 
     static double elapsed = 0.0;
+    static uint32_t frames = 0;
     elapsed += delta;
+    frames++;
     if(elapsed > 1000.0){
-        snprintf(fpstr, sizeof (fpstr), "%s :: FPS : %.1f(%.2fms)", (char*)glGetString(GL_VERSION), 1 / (delta / 1000.0), delta);
+        snprintf(fpstr, sizeof (fpstr), "%s :: FPS : %d(%.2fms)", (char*)glGetString(GL_VERSION), frames, delta);
         elapsed = 0.0;
+        frames = 0;
     }
 
     int shadowdgbsz = 128;
@@ -530,6 +550,13 @@ extern "C" int car_world_update(void* arg)
     if(denginegui_button(w - fontsz - shadowdgbsz - btnoffset - btnwidth
                 , h - fontsz - btnoffset - btnheight, btnwidth, btnheight / 2.0f, "V", NULL)) 
         dl_ent_dl->shadow.enable = !dl_ent_dl->shadow.enable;
+    if(denginegui_button(w - fontsz - shadowdgbsz - (3.0f * btnoffset) - (3.0f * btnwidth)
+                , h - fontsz - (btnheight / 2.0f), btnwidth, btnheight / 2.0f, "B", NULL))  
+        cubes_draw = !cubes_draw;
+    if(denginegui_button(w - fontsz - shadowdgbsz - (4.0f * btnoffset) - (4.0f * btnwidth)
+                , h - fontsz - (btnheight / 2.0f), btnwidth, btnheight / 2.0f, "P", NULL))  
+        physics_toggle = !physics_toggle;
+
     denginegui_set_button_repeatable(1);
     if(denginegui_button(w - fontsz - shadowdgbsz - (2.0f * btnoffset) - (2.0f * btnwidth)
                 , h - fontsz - (btnheight / 2.0f), btnwidth, btnheight / 2.0f, "E", NULL))  
