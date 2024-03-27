@@ -25,6 +25,12 @@ char* testdengine_lighting_standard_argv[] =
     "lighting_standard"
 };
 int testdengine_lighting_standard(int argc, char** argv);
+char* testdengine_gui_textbench_argv[] =
+{
+    "gui_textbench"
+};
+int testdengine_gui_textbench(int argc, char** argv);
+
 void testdengine_lighting_standard_setwindow(DengineWindow*);
 
 DengineAndroidTest tests[] = 
@@ -46,6 +52,12 @@ DengineAndroidTest tests[] =
         testdengine_lighting_standard_setwindow,
         DENGINE_ARY_SZ(testdengine_lighting_standard_argv),
         testdengine_lighting_standard_argv
+    },
+    {
+        testdengine_gui_textbench,
+        NULL,
+        DENGINE_ARY_SZ(testdengine_gui_textbench_argv),
+        testdengine_gui_textbench_argv
     },
 };
 

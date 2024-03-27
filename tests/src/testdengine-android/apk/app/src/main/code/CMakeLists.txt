@@ -69,6 +69,7 @@ add_library(GFX SHARED
     #tests
     ${DENGINE_DIR}/tests/src/testdengine-lighting/lighting-normalmap.c
     ${DENGINE_DIR}/tests/src/testdengine-lighting/lighting-standard.c
+    ${DENGINE_DIR}/tests/src/testdengine-gui/textbench.c
     ${DENGINE_DIR}/tests/src/testdengine-script/script-nslbullet-car.c
 
     #android glue

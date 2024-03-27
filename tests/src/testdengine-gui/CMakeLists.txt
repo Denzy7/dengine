@@ -30,4 +30,10 @@ target_link_libraries(testdengine-gui-embfonts
         dengine-core dengine-utils dengine-gui)
 set_property(TARGET testdengine-gui-embfonts PROPERTY C_STANDARD 99)
 
-
+#text benchmark
+add_executable(testdengine-gui-textbench
+        textbench.c
+        )
+target_link_libraries(testdengine-gui-textbench
+        ${dengine})
+set_property(TARGET testdengine-gui-textbench PROPERTY C_STANDARD 99)
