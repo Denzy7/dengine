@@ -24,8 +24,8 @@ int testdengine_gui_textbench(int argc, char** argv)
         frames++;
         if(elapsed >= 1000.0)
         {
-            snprintf(fpsstr, sizeof(fpsstr), "Text Benchmark: FPS:%d(%.1fms)", 
-                    frames, delta);
+            snprintf(fpsstr, sizeof(fpsstr), "Text Benchmark: FPS:%d(%.1fms) mul:%d", 
+                    frames, delta, mul);
             elapsed = 0;
             frames = 0;
         }
