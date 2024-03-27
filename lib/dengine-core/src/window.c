@@ -100,6 +100,7 @@ static void wl_pointer_axis_stop(void *data, struct wl_pointer *wl_pointer, uint
 static void wl_pointer_axis_value120(void *data, struct wl_pointer *wl_pointer, uint32_t axis, int32_t value120);
 static void wl_pointer_axis_source(void *data, struct wl_pointer *wl_pointer, uint32_t axis_source);
 static void wl_pointer_axis_discrete(void *data, struct wl_pointer *wl_pointer, uint32_t axis, int32_t discrete);
+static void wl_pointer_axis_relative_direction(void *data, struct wl_pointer *wl_pointer, uint32_t axis, uint32_t direction);
 
 static void wl_keyboard_keymap(void *data, struct wl_keyboard *wl_keyboard, uint32_t format, int32_t fd, uint32_t size);
 static void wl_keyboard_enter(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface, struct wl_array *keys);
@@ -234,7 +235,8 @@ static const struct wl_pointer_listener wl_ptr_listener =
     .axis_source = wl_pointer_axis_source,
     .axis_discrete = wl_pointer_axis_discrete,
     .axis_stop = wl_pointer_axis_stop,
-    .axis_value120 = wl_pointer_axis_value120
+    .axis_value120 = wl_pointer_axis_value120,
+    .axis_relative_direction = wl_pointer_axis_relative_direction 
 };
 
 static const struct wl_keyboard_listener wl_kbd_listener =
@@ -1736,6 +1738,10 @@ static void wl_pointer_axis_source(void *data, struct wl_pointer *wl_pointer, ui
 static void wl_pointer_axis_discrete(void *data, struct wl_pointer *wl_pointer, uint32_t axis, int32_t discrete)
 {
 
+}
+
+static void wl_pointer_axis_relative_direction(void *data, struct wl_pointer *wl_pointer, uint32_t axis, uint32_t direction)
+{
 }
 
 static void wl_keyboard_keymap(void *data, struct wl_keyboard *wl_keyboard, uint32_t format, int32_t fd, uint32_t size)

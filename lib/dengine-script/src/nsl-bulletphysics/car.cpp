@@ -18,6 +18,7 @@ char* prtbf;
 Scene* scene;
 int cubes_draw = 1;
 int physics_toggle = 1;
+int debugui = 1;
 std::vector<Entity*> cubes;
 DirLight* dl_ent_dl;
 Entity* chassis;
@@ -420,6 +421,8 @@ extern "C" int car_world_update(void* arg)
         cubes_draw = !cubes_draw;
     if(dengine_input_get_key_once('P'))
         physics_toggle = !physics_toggle;
+    if(dengine_input_get_key_once('G'))
+        debugui = !debugui;
 
     denginescene_update(scene);
     if(cubes_draw)
@@ -449,6 +452,7 @@ extern "C" int car_world_update(void* arg)
         "E/C increase/decrease camera distance",
         "B toggle visual cubes",
         "P toggle physics",
+        "G toggle debug UI",
         "",
         "+++ SHADOWS +++",
         "V to toggle shadows",
@@ -462,6 +466,10 @@ extern "C" int car_world_update(void* arg)
         {"Far +/-0.1 (use 5 or 6)", &dl_ent_dl->shadow.far_shadow},
     };
 
+    int shadowdgbsz = 128;
+    static vec4 yellow = {1.0, 1.0, 0.0, 1.0};
+    if(debugui){
+
     for(size_t i = 0; i < DENGINE_ARY_SZ(staticmessageslist); i++)
     {
         denginegui_text(fontsz / 4, h - fontsz - i * fontsz, staticmessageslist[i], NULL);
@@ -474,13 +482,20 @@ extern "C" int car_world_update(void* arg)
         snprintf(msg, sizeof(msg), "%s : %.3f", shadowprops[i].str, *shadowprops[i].val);
         denginegui_text(fontsz / 4, h - fontsz - i * fontsz - (float)DENGINE_ARY_SZ(staticmessageslist) * fontsz,  msg, orange);
     }
+
     vec2 pos2d_light;
             dengine_camera_world2screen(cam_ent->camera_component->camera, pl_ent->transform.position, pos2d_light);
     denginegui_panel(pos2d_light[0], pos2d_light[1], 30, 30, &pl_ent_gizmo, NULL, black_f);
 
-    static char fpstr[100];
-    static vec4 yellow = {1.0, 1.0, 0.0, 1.0};
 
+    denginegui_panel(w - shadowdgbsz - fontsz, h - shadowdgbsz - fontsz,
+            shadowdgbsz, shadowdgbsz, &dl_ent_dl->shadow.shadow_map.depth, NULL, black_f);
+
+
+
+    }
+
+    static char fpstr[100];
     static double elapsed = 0.0;
     static uint32_t frames = 0;
     elapsed += delta;
@@ -490,12 +505,7 @@ extern "C" int car_world_update(void* arg)
         elapsed = 0.0;
         frames = 0;
     }
-
-    int shadowdgbsz = 128;
-    denginegui_panel(w - shadowdgbsz - fontsz, h - shadowdgbsz - fontsz,
-            shadowdgbsz, shadowdgbsz, &dl_ent_dl->shadow.shadow_map.depth, NULL, black_f);
     denginegui_text(fontsz, fontsz, fpstr, yellow);
-
     char speed[128];
     snprintf(speed, sizeof(speed), "Speed: %.1f Km/h", vehicle->getCurrentSpeedKmHour());
 
@@ -556,6 +566,9 @@ extern "C" int car_world_update(void* arg)
     if(denginegui_button(w - fontsz - shadowdgbsz - (4.0f * btnoffset) - (4.0f * btnwidth)
                 , h - fontsz - (btnheight / 2.0f), btnwidth, btnheight / 2.0f, "P", NULL))  
         physics_toggle = !physics_toggle;
+    if(denginegui_button(w - fontsz - shadowdgbsz - (5.0f * btnoffset) - (5.0f * btnwidth)
+                , h - fontsz - (btnheight / 2.0f), btnwidth, btnheight / 2.0f, "G", NULL))  
+        debugui = !debugui;
 
     denginegui_set_button_repeatable(1);
     if(denginegui_button(w - fontsz - shadowdgbsz - (2.0f * btnoffset) - (2.0f * btnwidth)
