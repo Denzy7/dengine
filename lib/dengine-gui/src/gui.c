@@ -368,9 +368,10 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
                 q.x0 + w, q.y1 - y_off, q.s0 + ds, q.t0 + dt
             };
 
-            quad.array.data = vertices;
             // draw our stuff, update buffer
-            dengine_buffer_data(GL_ARRAY_BUFFER, &quad.array);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, quad.array.size, vertices);
+            DENGINE_CHECKGL;
+
             /* for text, we need to sequence draw since
              * everything is same quad, different data
              */
@@ -443,8 +444,8 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
         x + width, y + height, 1.0f, 1.0f,
         x + width,          y, 1.0f, 0.0f,
     };
-    quad.array.data = vertices;
-    dengine_buffer_data(GL_ARRAY_BUFFER, &quad.array);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, quad.array.size, vertices);
+    DENGINE_CHECKGL;
     dengine_draw_sequence_draw();
     dengine_draw_sequence_end();
     _denginegui_endquad();
