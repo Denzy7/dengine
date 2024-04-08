@@ -16,6 +16,8 @@ typedef struct
 typedef struct
 {
     AndroidPointer pointer0;
+    AndroidPointer pointers[10];
+    size_t pointer_count;
 
     char keys[4];
 

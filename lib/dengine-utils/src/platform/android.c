@@ -55,20 +55,36 @@ static int32_t input_event(struct android_app* app, AInputEvent* event)
     switch (type) {
         case AINPUT_EVENT_TYPE_MOTION:
         {
-            uint32_t action = AMotionEvent_getAction(event);
+            input.pointer_count = 0;
+            /*memset(input.pointers, 0, sizeof(input.pointers));*/
 
-            if(action ==  AMOTION_EVENT_ACTION_UP)
+            int32_t action = AMotionEvent_getAction(event);
+            int state = action & AMOTION_EVENT_ACTION_MASK;
+
+            size_t pointers = AMotionEvent_getPointerCount(event);
+            for(size_t i = 0; i < pointers; i++)
             {
-                input.pointer0.state = 1;
-            }else
-            {
-                input.pointer0.state = 0;
+                input.pointers[i].x = AMotionEvent_getX(event, i);
+                input.pointers[i].y = AMotionEvent_getY(event, i);
+                if(state ==  AMOTION_EVENT_ACTION_MOVE ||
+                        state == AMOTION_EVENT_ACTION_POINTER_DOWN ||
+                        state == AMOTION_EVENT_ACTION_DOWN
+                  )
+                    input.pointers[i].state = 1;
+                else
+                    input.pointers[i].state = 0;
             }
+            input.pointer_count = pointers;
+            memcpy(&input.pointer0, &input.pointers[0], sizeof(AndroidPointer));
 
-            input.pointer0.x = AMotionEvent_getX(event, 0);
-            input.pointer0.y = AMotionEvent_getY(event, 0);
+/*            for(size_t i = 0; i < 10; i++)*/
+            /*{*/
+                /*dengineutils_logging_log("%d = s:%d x:%f y:%f", i, input.pointers[i].state, input.pointers[i].x, input.pointers[i].y);*/
+            /*}*/
+
             break;
         }
+
 
         default:
             break;

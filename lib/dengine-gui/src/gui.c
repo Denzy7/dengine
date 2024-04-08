@@ -18,7 +18,9 @@
 #include <stb_truetype.h> //stbtt
 
 #include "dengine_config.h"
-
+#ifdef DENGINE_ANDROID
+#include "dengine-utils/platform/android.h"
+#endif
 #ifdef DENGINE_HAS_FONTCONFIG
 #include <fontconfig/fontconfig.h>
 char* fcfilestrbuf = NULL;
@@ -51,6 +53,7 @@ Shader gui_panel;
 Shader gui_discard;
 
 int initgui = 0;
+int repeatablestate = 1;
 #define PANEL_ALPHA 0.4f
 Texture dftpaneltex;
 
@@ -459,32 +462,71 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
     }
 }
 
+/* checks for input in screen region. useful for touchscreen only */
+int _denginegui_checkinputregion(float x, float y, float width, float height)
+{
+    int found = 0;
+#ifndef DENGINE_ANDROID
+    found = dengine_input_get_mousebtn(0);
+#else
+    int vh;
+    dengine_viewport_get(NULL, NULL, NULL, &vh);
+    AndroidInput* andrinput = dengineutils_android_get_input();
+    for(size_t i = 0; i < andrinput->pointer_count; i++)
+    {
+        float ay = vh - andrinput->pointers[i].y;
+        //dengineutils_logging_log("%f %f", andrinput->pointers[i].x, ay);
+        if(andrinput->pointers[i].x >= x && andrinput->pointers[i].x <= (x + width) &&
+                ay >= y && ay <= (y + height) &&
+                andrinput->pointers[i].state)
+        {
+            found = 1;
+            break;
+        }
+    }
+#endif
+    return found;
+}
+
 int denginegui_button(float x,float y, float width, float height, const char* text, float* rgba)
 {
     DENGINE_DEBUG_ENTER;
 
     int down = 0;
+    int inregion = 0;
+#ifdef DENGINE_ANDROID
+    inregion = _denginegui_checkinputregion(x, y, width, height);
+#else
     double mx = dengine_input_get_mousepos_x();
     double my = dengine_input_get_mousepos_y();
+    inregion = mx >= x && mx <= (x + width) &&
+            my >= y && my <= (y + height);
+#endif
 
-    if(mx >= x && mx <= (x + width) &&
-            my >= y && my <= (y + height) )
+    float hover[4] = {0.2f, 0.2f, 0.2f, PANEL_ALPHA};
+    float press[4] = {0.02f, 0.02f, 0.02f, PANEL_ALPHA};
+    if(rgba)
     {
-        float hover[4] = {0.2f, 0.2f, 0.2f, PANEL_ALPHA};
-        float press[4] = {0.02f, 0.02f, 0.02f, PANEL_ALPHA};
-        if(rgba)
-        {
-            for(int i = 0; i < 3; i++)
-                hover[i] += rgba[i];
-            hover[3] = rgba[3];
-        }else
-        {
-            for(int i = 0; i < 3; i++)
-                hover[i] += 0.01f;
-        }
+        for(int i = 0; i < 3; i++)
+            hover[i] += rgba[i];
+        hover[3] = rgba[3];
+    }else
+    {
+        for(int i = 0; i < 3; i++)
+            hover[i] += 0.01f;
+    }
 
-        if(dengine_input_get_mousebtn(0))
+    if(inregion){
+
+        /* TODO: check if its possible to connect a mouse and have hover on android
+         * also define can be misleading since its just onscreen input,
+         * which can be any device. even ios, (NOT THAT I'LL EVEN WRITE IOS CODE LOL)*/
+#ifndef DENGINE_ANDROID
+        if(!dengine_input_get_mousebtn(0))
         {
+            denginegui_panel(x, y, width, height, NULL, NULL, hover);
+        }else{
+#endif
             if(rgba)
             {
                 for(int i = 0; i < 3; i++)
@@ -496,16 +538,19 @@ int denginegui_button(float x,float y, float width, float height, const char* te
                     press[i] += 0.005f;
             }
             denginegui_panel(x, y, width, height, NULL, NULL, press);
-        }else{
-            denginegui_panel(x, y, width, height, NULL, NULL, hover);
+            down = btnrepeatable ? _denginegui_checkinputregion(x, y, width, height) : repeatablestate;
+            repeatablestate = 0;
+#ifndef DENGINE_ANDROID
         }
-
-        down = btnrepeatable ? dengine_input_get_mousebtn(0) : dengine_input_get_mousebtn_once(0);
-    }else
-    {
+#endif
+    } else {
         denginegui_panel(x, y, width, height, NULL, NULL, rgba);
     }
-
+    /* beware of ghost clicks in SW input when another touch
+     * interferes with the first touch */
+    if(!dengine_input_get_mousebtn(0)){
+        repeatablestate = 1;
+    }
     int scissor = glIsEnabled(GL_SCISSOR_TEST);
     DENGINE_CHECKGL;
     if(!scissor)
