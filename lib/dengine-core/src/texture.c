@@ -417,8 +417,10 @@ void _dengine_texture_autoload(Texture* texture)
     texture->internal_format=texture->format;
     if(!texture->type)
         texture->type=GL_UNSIGNED_BYTE;
-    texture->filter_min=GL_LINEAR;
-    texture->filter_mag=GL_LINEAR;
+    if(!texture->filter_min)
+        texture->filter_min=GL_LINEAR;
+    if(!texture->filter_mag)
+        texture->filter_mag=GL_LINEAR;
     dengine_texture_gen(1,texture);
     dengine_texture_bind(GL_TEXTURE_2D,texture);
     dengine_texture_data(GL_TEXTURE_2D,texture);
