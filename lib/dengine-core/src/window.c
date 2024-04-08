@@ -393,6 +393,7 @@ int dengine_window_init()
 
 #ifdef DENGINE_CONTEXT_EGL
     EGLint major, minor;
+
     if(!eglInitialize(egl_dpy, &major, &minor))
     {
         dengineutils_logging_log("ERROR::WINDOW::CANNOT_INIT_EGL!");
@@ -1255,9 +1256,10 @@ void _dengine_window_pollev(DengineWindow* window)
     if(window && dengineutils_android_iswindowrunning())
     {
         int h;
+        /* TODO: can use viewport? */
         dengine_window_get_dim(window, NULL, &h);
         AndroidInput* andr_input = dengineutils_android_get_input();
-        if(andr_input->pointer0.state == 0)
+        if(andr_input->pointer0.state == 1)
         {
             window->input.mse_x = andr_input->pointer0.x;
             window->input.mse_y = (float)h - andr_input->pointer0.y;
@@ -1284,7 +1286,7 @@ int dengine_window_poll(DengineWindow* window)
 #ifdef DENGINE_ANDROID
     /* THIS MUST BE CALLED FROM MAIN THREAD SO THAT WE HAVE ACCESS TO 
      * THE MAIN ALooper. YOU SERIOUSLY DON'T WANT TO DEAL WITH THE
-     * ALOOPER SHENANIGANS!!!
+     * ALOOPER SHENANIGANS IN MULTIPLE THREADS!!!
      */
     dengineutils_android_pollevents();
 #endif

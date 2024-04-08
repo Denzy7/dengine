@@ -62,6 +62,7 @@ int dengine_texture_load_mem(const void* mem, const size_t size, const int flip,
                                               0);
     }else if (texture->interface == DENGINE_TEXTURE_INTERFACE_FLOAT)
     {
+        texture->type = GL_FLOAT;
         texture->data = stbi_loadf_from_memory(mem, size,
                                               &texture->width, &texture->height,&texture->channels,
                                               0);
@@ -164,6 +165,7 @@ int dengine_texture_load_file(const char* file, int flip, Texture* texture)
         cache_blk_sz = sizeof(uint16_t);
     }else if (texture->interface == DENGINE_TEXTURE_INTERFACE_FLOAT)
     {
+        texture->type = GL_FLOAT;
         texture->data = stbi_loadf_from_file(fp,
                                               &texture->width, &texture->height,&texture->channels,
                                               0);
@@ -413,7 +415,8 @@ void _dengine_texture_autoload(Texture* texture)
 
     texture->format=texture->channels==3?GL_RGB:GL_RGBA;
     texture->internal_format=texture->format;
-    texture->type=GL_UNSIGNED_BYTE;
+    if(!texture->type)
+        texture->type=GL_UNSIGNED_BYTE;
     texture->filter_min=GL_LINEAR;
     texture->filter_mag=GL_LINEAR;
     dengine_texture_gen(1,texture);
