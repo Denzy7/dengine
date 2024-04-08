@@ -24,9 +24,9 @@ DirLight* dl_ent_dl;
 Entity* chassis;
 Entity* cam_ent;
 Primitive* car_meshes;
-Shader stdshdr, shadow2d;
+Shader stdshdr, shadow2d,sky2d;
 Primitive cube, plane;
-Material mat_car, mat_wheels;
+Material mat_car, mat_wheels, skymat;
 Material plane_mat, cube_mat;
 Entity* pl_ent;
 Texture pl_ent_gizmo;
@@ -60,7 +60,7 @@ int car_setup_wheel(Entity* entity)
     if(added < 2 )
         info.m_frictionSlip = 6.5f;
     else
-        info.m_frictionSlip = 3.5f;
+        info.m_frictionSlip = 4.5f;
     info.m_rollInfluence = 0.1f;
     wheels[added] = entity;
     added++;
@@ -148,6 +148,7 @@ extern "C" int car_world_start(void* arg)
 
     dengine_shader_make_standard(DENGINE_SHADER_STANDARD, &stdshdr);
     dengine_shader_make_standard(DENGINE_SHADER_SHADOW2D, &shadow2d);
+    dengine_shader_make_standard(DENGINE_SHADER_SKYBOX2D, &sky2d);
 
     dengine_primitive_gen_cube(&cube, &stdshdr);
     dengine_primitive_gen_plane(&plane, &stdshdr);
@@ -158,6 +159,34 @@ extern "C" int car_world_start(void* arg)
 
     dengine_material_setup(&cube_mat);
     dengine_material_set_shader_color(&stdshdr, &cube_mat);
+
+    dengine_material_setup(&skymat);
+    dengine_material_set_shader_color(&sky2d, &skymat);
+
+    void* skytexmem;
+    size_t skytexmem_ln;
+    Texture skytex;
+    memset(&skytex, 0, sizeof(skytex));
+    skytex.auto_dataonload = 1;
+    if(dengine_texture_issupprorted(GL_TEXTURE_2D, GL_FLOAT, GL_RGB, GL_RGB))
+    {
+        skytex.interface = DENGINE_TEXTURE_INTERFACE_FLOAT;
+        skytex.type = GL_FLOAT;
+        /* OES_texture_float.txt wants nearest */
+        skytex.filter_min = GL_NEAREST;
+        skytex.filter_mag = GL_NEAREST;
+    }else
+    {
+        dengineutils_logging_log("WARNING::skybox has been converted to lower precision 8 bit!");
+        skytex.interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
+        skytex.type = GL_UNSIGNED_BYTE;
+    }
+    dengine_load_asset("textures/hdri/sunset.hdr", &skytexmem, &skytexmem_ln);
+    dengine_texture_load_mem(skytexmem, skytexmem_ln, 1, &skytex);
+    free(skytexmem);
+    dengine_material_set_texture(&skytex, "eqireqMap", &skymat);
+    scene->skybox = denginescene_new_skybox(&cube, &skymat);
+
 
     static const char* texs_plane[][2]=
     {
@@ -382,10 +411,9 @@ int car_update(Entity* entity)
         {
             /* 4x4 steer */
             vehicle->setSteeringValue(0.5 * -dir_steer * dir_brake, i);
-            vehicle->setBrake(750.0 * dir_brake, i);
         }
-
-        vehicle->applyEngineForce(1500.0 * dir_engine, i);
+        vehicle->setBrake(100.0 * dir_brake, i);
+        vehicle->applyEngineForce(2500.0 * dir_engine, i);
 
         phy2ent(vehicle->getWheelTransformWS(i), wheels[i]);
     }
@@ -510,7 +538,6 @@ extern "C" int car_world_update(void* arg)
     snprintf(speed, sizeof(speed), "Speed: %.1f Km/h", vehicle->getCurrentSpeedKmHour());
 
     denginegui_text(fontsz, fontsz * 2, speed, NULL);
-
 #ifdef SWBTNS
     float btnoffset = 30;
     float btnwidth = 200;
@@ -520,16 +547,17 @@ extern "C" int car_world_update(void* arg)
     static const float lerpspeed = 3.0f;
     double delta_s = delta / 1000.0;
     int down = 0;
-    if(denginegui_button(btnoffset, (h / 2.0) - (btnheight / 2.0), btnwidth, btnheight, "A", NULL))
+    if(denginegui_button(btnoffset, (h / 3.75) - (btnheight / 2.0), btnwidth, btnheight, "A", NULL))
     {
         down = 1;
         dir_steer = glm_lerp(dir_steer, 1.0f, delta_s * lerpspeed);
     }
-    if(denginegui_button(w - btnoffset - btnwidth, (h / 2.0) - (btnheight / 2.0), btnwidth, btnheight, "D", NULL))
+    if(denginegui_button(btnwidth + (2.0 * btnoffset), (h / 3.75) - (btnheight / 2.0), btnwidth, btnheight, "D", NULL))
     {
         down = 1;
         dir_steer = glm_lerp(dir_steer, -1.0f, delta_s * lerpspeed);
     }
+
     if (!down)
         dir_steer = glm_lerp(dir_steer, 0.0f, delta_s * lerpspeed);
 
@@ -603,10 +631,12 @@ extern "C" int car_world_terminate(void* args)
     dengine_material_destroy(&mat_car);
     dengine_material_destroy(&cube_mat);
     dengine_material_destroy(&mat_wheels);
+    dengine_material_destroy(&skymat);
     delete carbox;
     delete vehicle;
     delete caster;
     destroyworld();
+
 
     return 1;
 }
