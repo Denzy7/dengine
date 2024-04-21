@@ -55,12 +55,12 @@ int car_setup_wheel(Entity* entity)
                          entity->transform.position[2]);
     btWheelInfo& info = vehicle->addWheel(connection, wheel_dir, wheel_axle, wheel_rest, 1.5, tuning, added < 2);
     info.m_suspensionStiffness = 15.0f;
-    info.m_wheelsDampingRelaxation = 0.85f;
-    info.m_wheelsDampingCompression = 0.55f;
+    info.m_wheelsDampingRelaxation = 2.6f;
+    info.m_wheelsDampingCompression = 4.6f;
     if(added < 2 )
-        info.m_frictionSlip = 6.5f;
+        info.m_frictionSlip = 2.0f;
     else
-        info.m_frictionSlip = 4.5f;
+        info.m_frictionSlip = 1.5f;
     info.m_rollInfluence = 0.1f;
     wheels[added] = entity;
     added++;
@@ -212,9 +212,9 @@ extern "C" int car_world_start(void* arg)
     plane_ent->transform.position[0] = 0.0;
     plane_ent->transform.position[1] = 0.0;
     plane_ent->transform.position[2] = 0.0;
-    plane_ent->transform.scale[0] = 75.0;
+    plane_ent->transform.scale[0] = 80.0;
     plane_ent->transform.scale[1] = 0.25;
-    plane_ent->transform.scale[2] = 75.0;
+    plane_ent->transform.scale[2] = 80.0;
     plane_ent->mesh_component = plane_mesh;
     create_rb(plane_ent, DENGINE_ECS_PHYSICS_COLSHAPE_BOX, NULL, 0.0, NULL);
     denginescene_add_entity(scene, plane_ent);
