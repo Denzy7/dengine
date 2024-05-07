@@ -86,8 +86,31 @@ void android_main(struct android_app* app)
     btnhgt = 100.0f;
     btnwid = w - fontsz;
 
-    while(dengine_update())
+    while(1)
     {
+        if(app->destroyRequested)
+        {
+            dengineutils_logging_log("destroyRequested=1, break while(1)");
+            break;
+        }
+
+        if(app->activityState == APP_CMD_PAUSE)
+        {
+            dengineutils_logging_log("freeze main");
+            while(!dengineutils_android_iswindowrunning())
+            {
+                dengineutils_android_pollevents();
+                if(app->destroyRequested)
+                {
+                    dengineutils_logging_log("destroyRequested=1, break cmd_pause");
+                    break;
+                }
+            }
+            dengineutils_logging_log("unfreeze main");
+        }
+
+        dengine_update();
+
         /* should probably use grid by finding 2 factors for all 
          * programs then dividing 
          * the elements then build grid, but one row will work for

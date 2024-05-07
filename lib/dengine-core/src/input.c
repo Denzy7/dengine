@@ -124,7 +124,8 @@ WindowInput* _windowinp = NULL;
 void _dengine_input_init()
 {
 #ifdef DENGINE_LINUX
-    dir = opendir(dev);
+    if(dir == NULL)
+        dir = opendir(dev);
 #endif
     memset(&_gamepads, 0, sizeof(_gamepads));
 }

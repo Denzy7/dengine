@@ -65,6 +65,10 @@
 #ifdef DENGINE_WIN32
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #endif
+#ifdef DENGINE_ANDROID
+void _dengine_window_android_onpause(struct android_app* app);
+void _dengine_window_android_oninitwindow(struct android_app* app);
+#endif
 #ifdef DENGINE_WIN_X11
 int _dengine_window_x11err(Display* dpy, XErrorEvent* err);
 #endif
@@ -114,7 +118,14 @@ void _dengine_window_processkey(WindowInput* input, char key, int isrelease);
 void _dengine_window_pollev(DengineWindow* window);
 
 #ifdef DENGINE_CONTEXT_EGL
-int _dengine_window_egl_createctx(EGLDisplay dpy, EGLSurface* egl_sfc, EGLContext* egl_ctx, EGLContext share, EGLNativeWindowType win);
+
+/* create tee full context (config, surface and context*/
+int _dengine_window_egl_createctx(EGLDisplay dpy, EGLSurface* sfc, EGLContext* ctx, EGLContext shr, EGLNativeWindowType win);
+
+int _dengine_window_egl_chooseconfig(EGLDisplay dpy, EGLConfig* config);
+int _dengine_window_egl_createwinsfc(EGLDisplay dpy, EGLConfig* config, EGLSurface* egl_sfc,  EGLNativeWindowType win);
+int _dengine_window_egl_createctxonly(EGLDisplay dpy, EGLConfig* config, EGLContext* egl_ctx, EGLContext share);
+
 #endif
 struct DengineWindow
 {
@@ -280,6 +291,9 @@ PFNWGLSWAPINTERVALEXTPROC dengine_wglSwapIntervalEXT = NULL;
 WNDCLASSW wc = { };
 static const wchar_t* wc_class = L"Dengine_Win32";
 #endif
+#ifdef DENGINE_ANDROID
+int waspaused = 0;
+#endif
 DengineWindow* current = NULL;
 DynLib gl = NULL;
 
@@ -407,13 +421,24 @@ int dengine_window_init()
     /*
      * directly create current (android only supports 1 window and display afaik)
      * and make it current. make sure we already ANativeWindow_acquired by polling
+     * we also want to keep it on the main thread
      */
     while(!dengineutils_android_iswindowrunning())
-        dengine_window_poll(NULL);
+        dengineutils_android_pollevents();
 
-    DengineWindow* _andr = dengine_window_create(0, 0, NULL, NULL);
-    dengine_window_makecurrent(_andr);
-    dengine_window_loadgl(_andr);
+    DengineWindow* window = calloc(1, sizeof(DengineWindow));
+    /* we should have ANativeWindow_acquired */
+    window->and_win = dengineutils_android_get_window();
+    window->egl_dpy = egl_dpy;
+    dengineutils_android_set_appfunc(_dengine_window_android_onpause, DENGINEUTILS_ANDROID_APPFUNC_PAUSE);
+    dengineutils_android_set_appfunc(_dengine_window_android_oninitwindow, DENGINEUTILS_ANDROID_APPFUNC_INITWINDOW);
+    if(!_dengine_window_egl_createctx(window->egl_dpy, &window->egl_sfc, &window->egl_ctx, NULL, window->and_win))
+    {
+        dengineutils_logging_log("ERROR::WINDOW::Cannot create EGLContext");
+        return 0;
+	}
+    dengine_window_makecurrent(window);
+    dengine_window_loadgl(window);
 #endif
     _dengine_input_init();
     return init;
@@ -751,15 +776,6 @@ void* _dengine_window_createandpoll(void* args)
 
     wglMakeCurrent(hdc, NULL);
     ReleaseDC(window.win32_hwnd, hdc);
-#elif defined(DENGINE_ANDROID)
-    /* we should have ANativeWindow_acquired */
-    window.and_win = dengineutils_android_get_window();
-    window.egl_dpy = egl_dpy;
-    if(!_dengine_window_egl_createctx(window.egl_dpy, &window.egl_sfc, &window.egl_ctx, NULL, window.and_win))
-    {
-        dengineutils_logging_log("ERROR::WINDOW::Cannot create EGLContext");
-		goto winfail;
-	}
 #elif defined(DENGINE_WIN_WAYLAND)
     window.wl_sfc = wl_compositor_create_surface(wl_comp);
     if(window.wl_sfc == NULL)
@@ -942,10 +958,15 @@ void dengine_window_destroy(DengineWindow* window)
    while (dengine_window_isrunning(window)) {
        dengine_window_poll(window);
    }
-
+    /* TODO: android multithreading is completely fucked.
+     * as it runs on main thread. you dont want to deal with 
+     * using alooper with another thread. but we should make it 
+     * run alooer in another thread. soon....
+     */
+#ifndef DENGINE_ANDROID
    dengineutils_thread_wait(window->windowthr);
    dengineutils_thread_condition_destroy(&window->pollcond);
-
+#endif
    free(window->windowthr);
    free(window);
 }
@@ -1003,12 +1024,7 @@ void dengine_window_swapbuffers(DengineWindow* window)
 int dengine_window_isrunning(DengineWindow* window)
 {
     DENGINE_DEBUG_ENTER;
-
-#ifdef DENGINE_ANDROID
-    return dengineutils_android_iswindowrunning();
-#else
     return window->running;
-#endif
 }
 
 void* dengine_window_get_proc(const char* name)
@@ -1113,15 +1129,7 @@ int dengine_window_makecurrent(DengineWindow* window)
 DengineWindow* dengine_window_get_current()
 {
     DENGINE_DEBUG_ENTER;
-
-#ifdef DENGINE_ANDROID
-    if(dengineutils_android_iswindowrunning())
-        return current;
-    else
-        return NULL;
-#else
     return current;
-#endif
 }
 
 int dengine_window_set_swapinterval(DengineWindow* window, int interval)
@@ -1289,12 +1297,13 @@ int dengine_window_poll(DengineWindow* window)
      * ALOOPER SHENANIGANS IN MULTIPLE THREADS!!!
      */
     dengineutils_android_pollevents();
-#endif
-
+    _dengine_window_pollev(window);
+#else
     if(window != NULL && window->deref == 0){
         window->deref = 1;
         dengineutils_thread_condition_raise(&window->pollcond);
     }
+#endif
 
 #ifdef DENGINE_HAS_GTK3
    gtk_main_iteration_do(0);
@@ -1389,7 +1398,16 @@ WindowInput* dengine_window_get_input(DengineWindow* window)
 /* PLATFORM SPECIFICS */
 
 #ifdef DENGINE_CONTEXT_EGL
-int _dengine_window_egl_createctx(EGLDisplay dpy, EGLSurface* egl_sfc, EGLContext* egl_ctx, EGLContext share, EGLNativeWindowType win)
+int _dengine_window_egl_createwinsfc(EGLDisplay dpy, EGLConfig* config, EGLSurface* egl_sfc,  EGLNativeWindowType win)
+{
+    *egl_sfc = eglCreateWindowSurface(dpy, *config, win, NULL);
+    if(*egl_sfc == EGL_NO_SURFACE){
+        dengineutils_logging_log("ERROR::WINDOW::NO_EGL_SURFACE!");
+        return 0;
+    }
+    return 1;
+}
+int _dengine_window_egl_chooseconfig(EGLDisplay dpy, EGLConfig* config)
 {
     //EGL spec we want
     EGLint egl_spec_desired[] ={
@@ -1417,12 +1435,23 @@ int _dengine_window_egl_createctx(EGLDisplay dpy, EGLSurface* egl_sfc, EGLContex
     EGLConfig configs[supported_count];
     eglChooseConfig(dpy, egl_spec_desired, configs, supported_count, &supported_count);
 
-    *egl_sfc = eglCreateWindowSurface(dpy, configs[0], win, NULL);
-    if(*egl_sfc == EGL_NO_SURFACE){
-        dengineutils_logging_log("ERROR::WINDOW::NO_EGL_SURFACE!");
-        return 0;
-    }
+    memcpy(config, &configs[0], sizeof(EGLConfig));
+    return 1;
+}
 
+int _dengine_window_egl_createctx(EGLDisplay dpy, EGLSurface* sfc, EGLContext* ctx, EGLContext shr, EGLNativeWindowType win)
+{
+    EGLConfig config;
+    if(!_dengine_window_egl_chooseconfig(dpy, &config) ||
+            !_dengine_window_egl_createwinsfc(dpy, &config, sfc, win) ||
+            !_dengine_window_egl_createctxonly(dpy, &config, ctx, shr))
+        return 0;
+    return 1;
+}
+
+int _dengine_window_egl_createctxonly(EGLDisplay dpy, EGLConfig* config, EGLContext* egl_ctx, EGLContext share)
+
+{
     //The opengl context we want
     EGLint egl_context_attribs[] =
     {
@@ -1430,7 +1459,7 @@ int _dengine_window_egl_createctx(EGLDisplay dpy, EGLSurface* egl_sfc, EGLContex
         EGL_CONTEXT_MINOR_VERSION, _gl_min,
         EGL_NONE
     };
-    *egl_ctx = eglCreateContext(dpy, configs[0], share, egl_context_attribs);
+    *egl_ctx = eglCreateContext(dpy, *config, share, egl_context_attribs);
     if(*egl_ctx == EGL_NO_CONTEXT){
         dengineutils_logging_log("ERROR::WINDOW::NO_EGL_CONTEXT!");
         return 0;
@@ -1549,6 +1578,32 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     }
 }
 
+#endif
+
+#ifdef DENGINE_ANDROID
+void _dengine_window_android_onpause(struct android_app* app)
+{
+    waspaused = 1;
+}
+void _dengine_window_android_oninitwindow(struct android_app* app)
+{
+    if(waspaused){
+        DengineWindow* window = DENGINE_WINDOW_CURRENT; 
+        window->and_win = dengineutils_android_get_window();
+        EGLConfig config;
+        if(!_dengine_window_egl_chooseconfig(egl_dpy, &config) ||
+            !_dengine_window_egl_createwinsfc(egl_dpy, &config, 
+                &window->egl_sfc, dengineutils_android_get_window()))
+        {
+            dengineutils_logging_log("ERROR::Failed to recreate EGLSurface");
+            exit(1);
+        }else {
+            dengine_window_makecurrent(DENGINE_WINDOW_CURRENT);
+            dengineutils_logging_log("INFO::Recreate EGLSurface");
+        }
+        waspaused = 0;
+    }
+}
 #endif
 
 #ifdef DENGINE_WIN_X11

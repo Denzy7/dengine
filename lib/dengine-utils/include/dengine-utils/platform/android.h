@@ -28,15 +28,29 @@ typedef struct
 extern "C" {
 #endif
 
+
+typedef enum{
+    DENGINEUTILS_ANDROID_APPFUNC_INITWINDOW,
+    DENGINEUTILS_ANDROID_APPFUNC_TERMINATE,
+    DENGINEUTILS_ANDROID_APPFUNC_RESUME,
+    DENGINEUTILS_ANDROID_APPFUNC_PAUSE,
+
+    DENGINEUTILS_ANDROID_APPFUNC_COUNT
+}DengineAndroidAppFuncType;
+
 struct android_app* dengineutils_android_get_app();
 
 void dengineutils_android_set_app(struct android_app* app);
+
+void dengineutils_android_set_appfunc(DengineAndroidAppFunc func, DengineAndroidAppFuncType type);
 
 void dengineutils_android_set_initfunc(DengineAndroidAppFunc func);
 
 void dengineutils_android_set_terminatefunc(DengineAndroidAppFunc func);
 
 int dengineutils_android_pollevents();
+
+int dengineutils_android_waitevents();
 
 void dengineutils_android_set_filesdir();
 

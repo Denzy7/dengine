@@ -9,11 +9,10 @@
 
 struct android_app* _app;
 
-DengineAndroidAppFunc initfunc = NULL;
-DengineAndroidAppFunc termfunc = NULL;
-
 int iswindowrunning = 0;
 AndroidInput input;
+
+DengineAndroidAppFunc appfuncs[DENGINEUTILS_ANDROID_APPFUNC_COUNT];
 
 void _dengineutils_android_terminate(struct android_app* app);
 int dengineutils_android_set_immersivemode();
@@ -38,15 +37,25 @@ int dengineutils_android_asset2file2mem(File2Mem* f2m)
     return rd;
 }
 
-int dengineutils_android_pollevents()
+int _dengineutils_android_poll(int timeout)
 {
     int events;
     struct android_poll_source* source;
-    while((ALooper_pollAll(0, NULL, &events, (void**)&source)) >= 0)
+    while((ALooper_pollAll(timeout, NULL, &events, (void**)&source)) >= 0)
     {
         source->process(_app, source);
     }
     return events;
+}
+
+int dengineutils_android_pollevents()
+{
+    return _dengineutils_android_poll(0);
+}
+
+int dengineutils_android_waitevents()
+{
+    return _dengineutils_android_poll(-1);
 }
 
 static int32_t input_event(struct android_app* app, AInputEvent* event)
@@ -92,6 +101,12 @@ static int32_t input_event(struct android_app* app, AInputEvent* event)
     return 0;
 }
 
+void callappfunc_secure(struct android_app* app, DengineAndroidAppFuncType type)
+{
+    if(appfuncs[type])
+        appfuncs[type](app);
+}
+
 static void cmd_handle(struct android_app* app, int32_t cmd)
 {
     //dengineutils_logging_log("cmd %u", cmd);
@@ -103,22 +118,22 @@ static void cmd_handle(struct android_app* app, int32_t cmd)
         case APP_CMD_INIT_WINDOW:
             dengineutils_logging_log("Getting window ready...");
             ANativeWindow_acquire(_app->window);
-            if(initfunc)
-                initfunc(app);
-            iswindowrunning = 1;
             //Buggy fullscreen
             //ANativeActivity_setWindowFlags(app->activity, AWINDOW_FLAG_FULLSCREEN, 0);
+            callappfunc_secure(app, DENGINEUTILS_ANDROID_APPFUNC_INITWINDOW);
             break;
 
         case APP_CMD_TERM_WINDOW:
             dengineutils_logging_log("Term window");
-            if(termfunc)
-                termfunc(app);
             ANativeWindow_release(app->window);
-            iswindowrunning = 0;
+            callappfunc_secure(app, DENGINEUTILS_ANDROID_APPFUNC_TERMINATE);
             break;
 
         case APP_CMD_GAINED_FOCUS:
+            /* gained focus is last to be called so our window should be ready
+             * for drawing
+             */
+            iswindowrunning = 1;
             dengineutils_logging_log("Gained focus");
             break;
 
@@ -127,27 +142,43 @@ static void cmd_handle(struct android_app* app, int32_t cmd)
             break;
 
         case APP_CMD_PAUSE:
+            /* art swaps our window even after terminate_Window. we only 
+             * truly exit once we destroy. we need this so we can receive
+             * on resume and block android_main until the surface is recreated
+             *
+             * we need this here so its immediately intercepted and stop rendering 
+             * to a null surface. pause is first called once user switches app or goes home
+             */
+            iswindowrunning = 0;
             dengineutils_logging_log("Paused");
+            callappfunc_secure(app, DENGINEUTILS_ANDROID_APPFUNC_PAUSE);
             break;
 
         case APP_CMD_RESUME:
             dengineutils_logging_log("Resumed");
+            callappfunc_secure(app, DENGINEUTILS_ANDROID_APPFUNC_RESUME);
             break;
 
         case APP_CMD_DESTROY:
+
             dengineutils_logging_log("Destroy");
             break;
     }
 }
 
+void dengineutils_android_set_appfunc(DengineAndroidAppFunc func, DengineAndroidAppFuncType type)
+{
+    appfuncs[type] = func;
+}
+
 void dengineutils_android_set_initfunc(DengineAndroidAppFunc func)
 {
-    initfunc = func;
+    dengineutils_android_set_appfunc(func, DENGINEUTILS_ANDROID_APPFUNC_INITWINDOW);
 }
 
 void dengineutils_android_set_terminatefunc(DengineAndroidAppFunc func)
 {
-    termfunc = func;
+    dengineutils_android_set_appfunc(func, DENGINEUTILS_ANDROID_APPFUNC_TERMINATE);
 }
 
 struct android_app* dengineutils_android_get_app()
@@ -160,6 +191,7 @@ void dengineutils_android_set_app(struct android_app* app)
     _app = app;
     _app->onAppCmd = cmd_handle;
     _app->onInputEvent = input_event;
+    memset(appfuncs, 0, sizeof(appfuncs));
     dengineutils_android_set_immersivemode();
 }
 
