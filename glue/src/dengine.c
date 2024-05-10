@@ -313,6 +313,14 @@ int dengine_update()
     }
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#ifdef DENGINE_ANDROID
+    while(!dengineutils_android_get_activityfocused())
+    {
+        dengineutils_android_pollevents();
+        if(!dengineutils_android_iswindowrunning())
+            break;
+    }
+#endif
     if(DENGINE_INIT_OPTS.window_createnative)
         return dengine_window_isrunning(DENGINE_INIT_OPTS.window);
     else

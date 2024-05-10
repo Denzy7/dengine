@@ -65,6 +65,9 @@ AAssetManager* dengineutils_android_get_assetmgr();
 int dengineutils_android_iswindowrunning();
 
 AndroidInput* dengineutils_android_get_input();
+
+int dengineutils_android_get_activityfocused();
+
 #ifdef __cplusplus
 }
 #endif

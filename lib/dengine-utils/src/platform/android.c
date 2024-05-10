@@ -11,11 +11,13 @@ struct android_app* _app;
 
 int iswindowrunning = 0;
 AndroidInput input;
+int isactivityfocused = 0;
 
 DengineAndroidAppFunc appfuncs[DENGINEUTILS_ANDROID_APPFUNC_COUNT];
 
 void _dengineutils_android_terminate(struct android_app* app);
 int dengineutils_android_set_immersivemode();
+
 int dengineutils_android_asset2file2mem(File2Mem* f2m)
 {
     AAssetManager* asset_mgr = _app->activity->assetManager;
@@ -130,6 +132,7 @@ static void cmd_handle(struct android_app* app, int32_t cmd)
             break;
 
         case APP_CMD_GAINED_FOCUS:
+            isactivityfocused = 1;
             /* gained focus is last to be called so our window should be ready
              * for drawing
              */
@@ -138,18 +141,12 @@ static void cmd_handle(struct android_app* app, int32_t cmd)
             break;
 
         case APP_CMD_LOST_FOCUS:
+            isactivityfocused = 0;
             dengineutils_logging_log("Lost focus");
             break;
 
         case APP_CMD_PAUSE:
-            /* art swaps our window even after terminate_Window. we only 
-             * truly exit once we destroy. we need this so we can receive
-             * on resume and block android_main until the surface is recreated
-             *
-             * we need this here so its immediately intercepted and stop rendering 
-             * to a null surface. pause is first called once user switches app or goes home
-             */
-            iswindowrunning = 0;
+
             dengineutils_logging_log("Paused");
             callappfunc_secure(app, DENGINEUTILS_ANDROID_APPFUNC_PAUSE);
             break;
@@ -160,7 +157,14 @@ static void cmd_handle(struct android_app* app, int32_t cmd)
             break;
 
         case APP_CMD_DESTROY:
-
+            /* art swaps our window even after terminate_Window. we only 
+             * truly exit once we destroy. we need this so we can receive
+             * on resume and block android_main until the surface is recreated
+             *
+             * we need this here so its immediately intercepted and stop rendering 
+             * to a null surface. pause is first called once user switches app or goes home
+             */
+            iswindowrunning = 0;
             dengineutils_logging_log("Destroy");
             break;
     }
@@ -354,4 +358,9 @@ int dengineutils_android_set_immersivemode(){
     (*vm)->DetachCurrentThread(vm);
 
     return success;
+}
+
+int dengineutils_android_get_activityfocused()
+{
+    return isactivityfocused;
 }
