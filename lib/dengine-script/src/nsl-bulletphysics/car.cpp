@@ -55,8 +55,8 @@ int car_setup_wheel(Entity* entity)
                          entity->transform.position[2]);
     btWheelInfo& info = vehicle->addWheel(connection, wheel_dir, wheel_axle, wheel_rest, 1.5, tuning, added < 2);
     info.m_suspensionStiffness = 15.0f;
-    info.m_wheelsDampingRelaxation = 2.6f;
-    info.m_wheelsDampingCompression = 4.6f;
+    info.m_wheelsDampingRelaxation = 0.85f;
+    info.m_wheelsDampingCompression = 0.55f;
     if(added < 2 )
         info.m_frictionSlip = 2.0f;
     else
@@ -74,7 +74,7 @@ int car_setup_chassis(Entity* entity)
     carbox = new btBoxShape(btVector3(2.0, 0.5, 4.0));
 
     btTransform local;
-    const float carmass = 1000.0;
+    const float carmass = 750.0;
     local.setIdentity();
     local.setOrigin(btVector3(entity->transform.position[0],
                               entity->transform.position[1],
@@ -413,7 +413,7 @@ int car_update(Entity* entity)
             vehicle->setSteeringValue(0.5 * -dir_steer * dir_brake, i);
         }
         vehicle->setBrake(100.0 * dir_brake, i);
-        vehicle->applyEngineForce(2500.0 * dir_engine, i);
+        vehicle->applyEngineForce(1500.0 * dir_engine, i);
 
         phy2ent(vehicle->getWheelTransformWS(i), wheels[i]);
     }

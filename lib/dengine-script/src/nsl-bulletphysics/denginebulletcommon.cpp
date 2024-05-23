@@ -79,7 +79,7 @@ void stepworld()
     double t;
     dengineutils_timer_get_current_r(&t);
     t /= 1000.0;
-    _world->stepSimulation(t - _lastts);
+    _world->stepSimulation((t - _lastts) * (1.125), 0);
     _lastts = t;
 }
 
