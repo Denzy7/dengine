@@ -36,6 +36,15 @@ DengineInitConfKey confkeys[] =
     {"gl_core", DENGINE_INIT_CONF_TYPE_INT, NULL},
 };
 
+#ifdef DENGINE_ANDROID
+void backbutton_func(struct android_app* app);
+#endif
+
+
+#ifdef DENGINE_ANDROID
+int _dengine_backbutton_pressed = 0;
+#endif
+
 const char* dengine_get_license()
 {
     return (const char*)LICENSE_md;
@@ -194,6 +203,10 @@ int dengine_init()
 #ifdef DENGINE_ANDROID
         //Android creates a window already in init and sets it current
         DENGINE_INIT_OPTS.window = dengine_window_get_current();
+        if(DENGINE_INIT_OPTS.android_handlebackbutton){
+            dengineutils_android_handle_backbutton(1);
+            dengineutils_android_set_backbuttonfunc(backbutton_func);
+        }
 #else
         DENGINE_INIT_OPTS.window = dengine_window_create(DENGINE_INIT_OPTS.window_width, DENGINE_INIT_OPTS.window_height, DENGINE_INIT_OPTS.window_title, NULL);
         if(!DENGINE_INIT_OPTS.window)
@@ -320,6 +333,10 @@ int dengine_update()
         if(!dengineutils_android_iswindowrunning())
             break;
     }
+    if(_dengine_backbutton_pressed){
+        _dengine_backbutton_pressed = 0;
+        return 0;
+    }
 #endif
     if(DENGINE_INIT_OPTS.window_createnative)
         return dengine_window_isrunning(DENGINE_INIT_OPTS.window);
@@ -346,3 +363,10 @@ int dengine_load_asset(const char* path, void** mem, size_t* length)
         *length = f2m.size;
     return 1;
 }
+
+#ifdef DENGINE_ANDROID
+void backbutton_func(struct android_app* app)
+{
+    _dengine_backbutton_pressed = 1;
+}
+#endif

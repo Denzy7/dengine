@@ -63,6 +63,8 @@ typedef struct
     int cache_shaders;
 
     int enable_logthread;
+
+    int android_handlebackbutton;
 }DengineInitOpts;
 #ifdef __cplusplus
 extern "C" {

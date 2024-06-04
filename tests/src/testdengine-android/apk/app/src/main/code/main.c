@@ -76,8 +76,9 @@ void android_main(struct android_app* app)
     dengineutils_logging_log("DENGINE_TESTS: begin!");
 
     dengineutils_android_set_app(app);
-    dengine_init();
     initopts = dengine_init_get_opts();
+    initopts->android_handlebackbutton = 1;
+    dengine_init();
 
     fontsz = denginegui_get_fontsz();
     dengine_viewport_get(NULL, NULL, &w, &h);    
@@ -94,14 +95,18 @@ void android_main(struct android_app* app)
             break;
         }
 
-        dengine_update();
+        /* since we handle back btn, we'll have to finish
+         * manually
+         */
+        if(!dengine_update())
+            ANativeActivity_finish(app->activity);
 
         /* should probably use grid by finding 2 factors for all 
          * programs then dividing 
          * the elements then build grid, but one row will work for
          * now!
          */
-        denginegui_text(fontsz, h - fontsz, "DENGINE TESTS. CLICK ANY TEST BELOW (there is still no way to switch tests, you'll have to restart the app!)", NULL);
+        denginegui_text(fontsz, h - fontsz, "DENGINE TESTS. CLICK ANY TEST BELOW (press back to return here for tests that support it)", NULL);
         for(i = 0; i < DENGINE_ARY_SZ(tests); i++)
         {
            if(denginegui_button(fontsz,
