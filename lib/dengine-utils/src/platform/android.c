@@ -12,7 +12,10 @@ struct android_app* _app;
 int iswindowrunning = 0;
 AndroidInput input;
 int isactivityfocused = 0;
+int handlebackbutton = 0;
 
+/* TODO: we'd want a vtor of callbacks*/
+DengineAndroidAppFunc onbackfunc = NULL;
 DengineAndroidAppFunc appfuncs[DENGINEUTILS_ANDROID_APPFUNC_COUNT];
 
 void _dengineutils_android_terminate(struct android_app* app);
@@ -63,15 +66,18 @@ int dengineutils_android_waitevents()
 static int32_t input_event(struct android_app* app, AInputEvent* event)
 {
     uint32_t type = AInputEvent_getType(event);
+    int32_t keycode = AKeyEvent_getKeyCode(event);
+    int32_t action = AMotionEvent_getAction(event);
+    int state = action & AMOTION_EVENT_ACTION_MASK;
+
     switch (type) {
         case AINPUT_EVENT_TYPE_MOTION:
         {
+            /* TODO: use ptrid
+            uint32_t ptrid = action >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+            */
             input.pointer_count = 0;
             /*memset(input.pointers, 0, sizeof(input.pointers));*/
-
-            int32_t action = AMotionEvent_getAction(event);
-            int state = action & AMOTION_EVENT_ACTION_MASK;
-
             size_t pointers = AMotionEvent_getPointerCount(event);
             for(size_t i = 0; i < pointers; i++)
             {
@@ -99,6 +105,17 @@ static int32_t input_event(struct android_app* app, AInputEvent* event)
 
         default:
             break;
+    }
+
+    /* ありがとうございます！
+     * https://stackoverflow.com/questions/12130618/android-ndk-how-to-override-onbackpressed-in-nativeactivity-without-java
+     */
+    if(keycode == AKEYCODE_BACK && action == AKEY_EVENT_ACTION_UP){
+        if(handlebackbutton){
+            if(onbackfunc)
+                onbackfunc(app);
+            return 1;
+        }
     }
     return 0;
 }
@@ -364,3 +381,13 @@ int dengineutils_android_get_activityfocused()
 {
     return isactivityfocused;
 }
+
+void dengineutils_android_handle_backbutton(int state)
+{
+    handlebackbutton = state;
+}
+void dengineutils_android_set_backbuttonfunc(DengineAndroidAppFunc func)
+{
+    onbackfunc = func;
+}
+
