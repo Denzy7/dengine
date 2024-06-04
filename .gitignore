@@ -2,6 +2,6 @@
 *.log
 *.vim
 build/*
-CMakeLists.txt.user
+*.user*
 assets/priv/*
 testspriv/*
