@@ -1,95 +1,78 @@
 #include "denginebulletcommon.h"
+#include <BulletCollision/CollisionDispatch/btCollisionDispatcherMt.h>
+#include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMt.h>
+#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorldMt.h>
 #include <dengine-utils/thread.h>
 #include <time.h>
+#include <vector>
+
+btScalar _fq = 1.0 / 60.0, _tscale = 1.0, _ffq = 18.0 / 60.0;
 btDynamicsWorld* _world = NULL;
 btDefaultCollisionConfiguration* config = NULL;
 btCollisionDispatcher* dispatcher = NULL;
 btBroadphaseInterface* broadphase = NULL;
-btSequentialImpulseConstraintSolver* solver = NULL;
+btConstraintSolver* solver = NULL;
 btAlignedObjectArray<btCollisionShape*> shapes;
 
-/*Thread physicsthread;*/
-/*Condition physicsthread_start;*/
-/*int physicsthr_run = 0, physicsthr_step = 0;*/
+std::vector<btInternalTickCallback> _tickcbs;
+void _tickcb(btDynamicsWorld* world, btScalar timeStep)
+{
+    for(size_t i = 0; i < _tickcbs.size(); i++)
+    {
+        _tickcbs[i](world, timeStep);
+    }
+}
 
-/*void* physicsthr(void* thr)*/
-/*{*/
-    /*dengineutils_thread_condition_wait(&physicsthread_start, &physicsthr_run); */
-    /*static const btScalar fixed = 1.0f / 60.0f;*/
-
-    /*double current = 0;*/
-    /*double last = current;*/
-
-    /*struct timespec spec;*/
-    /*memset(&spec, 0, sizeof(spec));*/
-    /*spec.tv_nsec = fixed * 1e9;*/
-    /*while(physicsthr_run)*/
-    /*{*/
-        /*dengineutils_thread_condition_wait(&physicsthread_start, &physicsthr_step); */
-        /*physicsthr_step = 0;*/
-        /*dengineutils_timer_get_current_r(&current);*/
-        /*current /= 1000.0;*/
-        /*if(last == 0)*/
-            /*last = current;*/
-        /*_world->stepSimulation(current - last, 1, fixed);*/
-        /*last = current; */
-    /*}*/
-    /*return NULL;*/
-/*}*/
-
-double _lastts = 0.0;
 int initworld(btDynamicsWorld** refworld)
 {
-    config = new btDefaultCollisionConfiguration();
-    dispatcher = new btCollisionDispatcher(config);
+    btITaskScheduler* sched = btCreateDefaultTaskScheduler();
     broadphase = new btDbvtBroadphase();
-    solver = new btSequentialImpulseConstraintSolver();
+    if(sched == NULL)
+    {
+        dengineutils_logging_log("WARNING::default scheduler not available. using single thread");
+        config = new btDefaultCollisionConfiguration();
+        dispatcher = new btCollisionDispatcher(config);
+        solver = new btSequentialImpulseConstraintSolver();
+        _world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, config);
+    }else {
+        btSetTaskScheduler(sched);
+        dengineutils_logging_log("INFO::multithread sched %s threads=%d",
+                sched->getName(),
+                sched->getNumThreads()
+                );
+        btDefaultCollisionConstructionInfo config_info;
+        config_info.m_defaultMaxPersistentManifoldPoolSize = 80000;
+        config_info.m_defaultMaxCollisionAlgorithmPoolSize = 80000;
+        config = new btDefaultCollisionConfiguration(config_info);
+        dispatcher = new btCollisionDispatcherMt(config);
+        btConstraintSolver* solvers[BT_MAX_THREAD_COUNT];
+        for(uint64_t i = 0; i < BT_MAX_THREAD_COUNT; i++)
+        {
+            solvers[i] = new btSequentialImpulseConstraintSolver();
+        }
+        btConstraintSolverPoolMt* solver_pool = new btConstraintSolverPoolMt(solvers, BT_MAX_THREAD_COUNT);
+        solver = new btSequentialImpulseConstraintSolverMt();
+        _world = new btDiscreteDynamicsWorldMt(dispatcher, broadphase, solver_pool, solver, config);
+    }
+    _world->getSolverInfo().m_solverMode = 
+        SOLVER_SIMD | SOLVER_USE_WARMSTARTING | 0;
+    _world->getSolverInfo().m_numIterations = 10;
 
-    _world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, config);
     _world->setGravity(btVector3(0, -9.8, 0));
-/*    dengineutils_thread_condition_create(&physicsthread_start);*/
-    /*dengineutils_thread_create(physicsthr, NULL, &physicsthread);*/
-    /*dengineutils_thread_set_name(&physicsthread, "PhysicsThr");*/
     if(refworld)
         *refworld = _world;
-    
-    firststep();
+
+   _world->setInternalTickCallback(_tickcb); 
     return 1;
-}
-
-void startworld()
-{
-    //dengineutils_thread_condition_raise(&physicsthread_start);
-    //physicsthr_run = 1;
-}
-
-void firststep()
-{
-    dengineutils_timer_get_current_r(&_lastts);
-    _lastts /= 1000.0;
 }
 
 void stepworld()
 {
-/*    if(!physicsthr_run)*/
-        /*return;*/
-    /*physicsthr_step = 1;*/
-    /*dengineutils_thread_condition_raise(&physicsthread_start);*/
-
-    double t;
-    dengineutils_timer_get_current_r(&t);
-    t /= 1000.0;
-    _world->stepSimulation((t - _lastts) * (1.125), 0);
-    _lastts = t;
+    _world->stepSimulation(_fq * _tscale, 0, _ffq);
 }
 
 void destroyworld()
 {
-/*    physicsthr_run = 0;*/
-    /*stepworld();*/
-    /*dengineutils_thread_wait(&physicsthread);*/
-    /*dengineutils_thread_condition_destroy(&physicsthread_start);*/
-
     //remove the rigidbodies from the dynamics world and delete them
     for (int i = _world->getNumCollisionObjects() - 1; i >= 0; i--)
     {
@@ -197,4 +180,24 @@ void phy2ent(const btTransform& transform, Entity* entity)
     for(int j = 0; j < 3; j++){
         entity->transform.rotation[j] = glm_deg(entity->transform.rotation[j]);
     }
+}
+
+void set_frequency(const btScalar& fq)
+{
+    _fq = fq;
+}
+
+void set_timescale(const btScalar& ts)
+{
+    _tscale = ts;
+}
+
+void add_tickcb(btInternalTickCallback cb)
+{
+    _tickcbs.push_back(cb);
+}
+
+void set_maxfrequency(const btScalar& ffq)
+{
+    _ffq = ffq;
 }

@@ -768,7 +768,7 @@ void* _dengine_window_createandpoll(void* args)
         }
         wglMakeCurrent(hdc, window.win32_ctx);
         //get wglEXTS
-        dengine_wglSwapIntervalEXT = wglGetProcAddress("wglSwapIntervalEXT");
+        dengine_wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
     }else {
         window.win32_ctx = dummy;
         dengineutils_logging_log("WARNING::Using dummy wglCreateContext Context. cant use \"modern\" opengl");

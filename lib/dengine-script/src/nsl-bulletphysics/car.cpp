@@ -6,6 +6,7 @@ typedef struct
     float* val;
 }ShadowProp;
 
+void car_tickcb(btDynamicsWorld* world, float ts);
 int car_update(Entity* entity);
 
 extern unsigned int rover_obj_ln;
@@ -20,6 +21,7 @@ int cubes_draw = 1;
 int physics_toggle = 1;
 int debugui = 1;
 std::vector<Entity*> cubes;
+std::vector<ECSPhysicsBody> stacks;
 DirLight* dl_ent_dl;
 Entity* chassis;
 Entity* cam_ent;
@@ -71,7 +73,7 @@ int car_setup_chassis(Entity* entity)
 {
     btRigidBody* carbody;
 
-    carbox = new btBoxShape(btVector3(2.0, 0.5, 4.0));
+    carbox = new btBoxShape(btVector3(3.0, 0.5, 4.0));
 
     btTransform local;
     const float carmass = 750.0;
@@ -125,6 +127,8 @@ void drawcubes()
 extern "C" int car_world_start(void* arg)
 {    
     initworld(&refworld);
+    add_tickcb(car_tickcb);
+    set_timescale(1.125);
 
     prtbf = new char[prtbf_sz];
     scene = denginescene_new();
@@ -238,6 +242,46 @@ extern "C" int car_world_start(void* arg)
             cubes.push_back(cube_ent);
         }
     }
+    /* walls **/
+    float wallheight = 2.5f;
+    float walllength = plane_ent->transform.scale[0];
+    float wallthicl = 0.5f;
+    static const float wallpos[][2] = 
+    {
+        {-1.0f,  0.0f},
+        { 1.0f,  0.0f},
+        { 0.0f, -1.0f},
+        { 0.0f,  1.0f}
+    };
+    for(int i = 0; i < 4; i++)
+    {
+        Entity* wall = denginescene_ecs_new_entity();
+        wall->transform.scale[0] = wallthicl; 
+        wall->transform.scale[1] = wallheight;
+        wall->transform.scale[2] = walllength;
+        wall->transform.position[0] = wallpos[i][0] * walllength;
+        wall->transform.position[1] = wallheight;
+        wall->transform.position[2] = wallpos[i][1] * walllength;
+        if(i > 1)
+            wall->transform.rotation[1] += 90.0f;
+        create_rb(wall, DENGINE_ECS_PHYSICS_COLSHAPE_BOX, NULL, 0.0, NULL);
+        cubes.push_back(wall);
+    }
+
+    for(int i = 1; i < 10; i++)
+    {
+        Entity* cubestack = denginescene_ecs_new_entity();
+        btRigidBody* bodyref;
+        glm_vec3_scale(cubestack->transform.scale, 2.0, cubestack->transform.scale);
+        cubestack->transform.position[1] += i + (i * 2.0);
+        cubestack->transform.position[2] = 10.0;
+        create_rb(cubestack, DENGINE_ECS_PHYSICS_COLSHAPE_BOX, NULL, 1.0, &bodyref);
+        ECSPhysicsBody epb;
+        epb.ent = cubestack;
+        epb.body = bodyref;
+        stacks.push_back(epb);
+        cubes.push_back(cubestack);
+    }
     /* car */
     Texture tex_black, tex_random, wheelmap;
     dengine_texture_make_color(2, 2, black_f, 3, &tex_black);
@@ -349,43 +393,12 @@ extern "C" int car_world_start(void* arg)
     denginescene_add_entity(scene, dl_ent);
     dl_ent_dl = (DirLight*)dl_ent->light_component->light;
 
-    startworld();
-
     return 1;
 }
 
 int car_update(Entity* entity)
 {
-    double delta_s = dengineutils_timer_get_delta() / 1000.0;
-    static const float lerpspeed = 5.0f;
-#ifndef SWBTNS
-    if(dengine_input_get_key('W'))
-        dir_engine = 1;
-    else if(dengine_input_get_key('S'))
-        dir_engine = -1;
-    else
-        dir_engine = 0;
-
-    if(dengine_input_get_key('D'))
-        dir_steer = glm_lerp(dir_steer, -1.0f, delta_s * lerpspeed);
-    else if(dengine_input_get_key('A'))
-        dir_steer = glm_lerp(dir_steer, 1.0f, delta_s * lerpspeed);
-    else 
-        dir_steer = glm_lerp(dir_steer, 0.0f, delta_s * lerpspeed);
-
-    if(dengine_input_get_key('X'))
-        dir_brake = 1;
-    else
-        dir_brake = 0;
-
-#endif
-
     phy2ent(vehicle->getChassisWorldTransform(), entity);
-
-    if(dengine_input_get_key_once('R'))
-    {
-        resetonce = 1;
-    }
 
     if(resetonce)
     {
@@ -427,6 +440,7 @@ extern "C" int car_world_update(void* arg)
         stepworld();
 
     double delta = dengineutils_timer_get_delta();
+    double delta_s = delta / 1000.0;
 
     if(dengine_input_get_key('1'))
         dl_ent_dl->shadow.max_bias -= 0.001;
@@ -452,10 +466,37 @@ extern "C" int car_world_update(void* arg)
     if(dengine_input_get_key_once('G'))
         debugui = !debugui;
 
+    static const float lerpspeed = 5.0f;
+#ifndef SWBTNS
+    if(dengine_input_get_key('W'))
+        dir_engine = 1;
+    else if(dengine_input_get_key('S'))
+        dir_engine = -1;
+    else
+        dir_engine = 0;
+
+    if(dengine_input_get_key('D'))
+        dir_steer = glm_lerp(dir_steer, -1.0f, delta_s * lerpspeed);
+    else if(dengine_input_get_key('A'))
+        dir_steer = glm_lerp(dir_steer, 1.0f, delta_s * lerpspeed);
+    else 
+        dir_steer = glm_lerp(dir_steer, 0.0f, delta_s * lerpspeed);
+
+    if(dengine_input_get_key('X'))
+        dir_brake = 1;
+    else
+        dir_brake = 0;
+
+    if(dengine_input_get_key_once('R'))
+    {
+        resetonce = 1;
+    }
+
+#endif
+
     denginescene_update(scene);
     if(cubes_draw)
         drawcubes();
-    car_update(chassis);
 
     static float camdist = 40.0f;
     if(dengine_input_get_key('E'))
@@ -519,8 +560,6 @@ extern "C" int car_world_update(void* arg)
     denginegui_panel(w - shadowdgbsz - fontsz, h - shadowdgbsz - fontsz,
             shadowdgbsz, shadowdgbsz, &dl_ent_dl->shadow.shadow_map.depth, NULL, black_f);
 
-
-
     }
 
     static char fpstr[100];
@@ -544,8 +583,6 @@ extern "C" int car_world_update(void* arg)
     float btnheight = 200;
     float btnspace = 10;
     denginegui_set_button_repeatable(1);
-    static const float lerpspeed = 3.0f;
-    double delta_s = delta / 1000.0;
     int down = 0;
     if(denginegui_button(btnoffset, (h / 3.75) - (btnheight / 2.0), btnwidth, btnheight, "A", NULL))
     {
@@ -641,3 +678,12 @@ extern "C" int car_world_terminate(void* args)
     return 1;
 }
 
+void car_tickcb(btDynamicsWorld* world, float ts)
+{
+    car_update(chassis);
+    for(size_t i = 0; i < stacks.size(); i++)
+    {
+        ECSPhysicsBody epb = stacks[i];
+        phy2ent(epb.body->getWorldTransform(), epb.ent);
+    }
+}

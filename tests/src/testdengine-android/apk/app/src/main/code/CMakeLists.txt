@@ -28,6 +28,7 @@ if(NOT EXISTS ${BULLETSRC}/CMakeLists.txt)
     message(FATAL_ERROR "we need submodule deps/bullet_src, update it to build. see deps/README.md in repo for help")
 endif()
 
+ADD_DEFINITIONS( -DBT_THREADSAFE=1 )
 add_subdirectory(${BULLETSRC} "bullet-build")
 set(nslbulletcar_res
     ${DENGINE_DIR}/lib/dengine-script/src/nsl-bulletphysics/rover.obj

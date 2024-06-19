@@ -19,6 +19,7 @@ char* prtbf;
 Entity* cam_ent;
 float black_f[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 std::vector<ECSPhysicsBody> cubes;
+void basic_tickcb(btDynamicsWorld* world, float ts);
 
 void basic_update()
 {
@@ -73,6 +74,7 @@ void basic_update()
 extern "C" int basic_world_start(void*)
 {
     initworld(&worldref);
+    add_tickcb(basic_tickcb);
 
     prtbf = new char [prtbf_sz];
 
@@ -257,7 +259,6 @@ extern "C" int basic_world_start(void*)
     denginescene_add_entity(scene, dl_ent);
     dl_ent_dl = (DirLight*)dl_ent->light_component->light;
 
-    startworld();
     return 1;
 }
 
@@ -284,7 +285,6 @@ extern "C" int basic_world_update(void*)
         dl_ent_dl->shadow.enable = !dl_ent_dl->shadow.enable;
 
     denginescene_update(scene);
-    basic_update();
 
     int w, h;
     dengine_viewport_get(NULL, NULL, &w, &h);
@@ -356,3 +356,7 @@ extern "C" int basic_world_terminate(void* args)
     return 1;
 }
 
+void basic_tickcb(btDynamicsWorld* world, float ts)
+{
+    basic_update();
+}
