@@ -70,6 +70,10 @@ void dengine_primitive_attributes_enable(const Primitive* primitive, const Shade
 void dengine_primitive_destroy(Primitive* primitive);
 
 /*!
+ * \brief Generate a horizontal NDC 3D line
+ * */
+void dengine_primitive_gen_line(Primitive* prim, const Shader* shader);
+/*!
  * \brief Generate an NDC fullscreen quad
  * \param primitive Primitive to use
  * \param shader Shader to use

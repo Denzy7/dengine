@@ -18,7 +18,7 @@ static const size_t prtbf_sz = 2048;
 char* prtbf;
 Scene* scene;
 int cubes_draw = 1;
-int physics_toggle = 1;
+int physics_toggle = 1, physics_debugui = 0;
 int debugui = 1;
 std::vector<Entity*> cubes;
 std::vector<ECSPhysicsBody> stacks;
@@ -73,7 +73,7 @@ int car_setup_chassis(Entity* entity)
 {
     btRigidBody* carbody;
 
-    carbox = new btBoxShape(btVector3(3.0, 0.5, 4.0));
+    carbox = new btBoxShape(btVector3(3.5, 1.0, 6.0));
 
     btTransform local;
     const float carmass = 750.0;
@@ -135,7 +135,7 @@ extern "C" int car_world_start(void* arg)
 
     Camera cam;
     dengine_camera_setup(&cam);
-    cam.far = 200.0;
+    cam.far = 250.0;
     cam.clearonuse = 0;
     dengine_camera_set_rendermode(DENGINE_CAMERA_RENDER_FOWARD, &cam);
     cam.clearcolor[0] = 0.1f;
@@ -147,6 +147,7 @@ extern "C" int car_world_start(void* arg)
     cam_ent->camera_component = denginescene_ecs_new_cameracomponent(&cam);
     cam_ent->transform.rotation[0] = -35.0f;
     cam_ent->transform.rotation[1] = 225.0f;
+    enable_debugdrawer(cam_ent->camera_component->camera);
 
     denginescene_add_entity(scene, cam_ent);
 
@@ -465,6 +466,8 @@ extern "C" int car_world_update(void* arg)
         physics_toggle = !physics_toggle;
     if(dengine_input_get_key_once('G'))
         debugui = !debugui;
+    if(dengine_input_get_key_once('H'))
+        physics_debugui = !physics_debugui;
 
     static const float lerpspeed = 5.0f;
 #ifndef SWBTNS
@@ -511,6 +514,8 @@ extern "C" int car_world_update(void* arg)
     dengine_viewport_get(NULL, NULL, &w, &h);
 
     denginegui_panel(0, 0, w, h, cam_ent->camera_component->camera->framebuffer.color, NULL, black_f);
+    if(physics_debugui)
+        refworld->debugDrawWorld();
     float fontsz = denginegui_get_fontsz();
     static const char* staticmessageslist[] =
     {
@@ -521,6 +526,7 @@ extern "C" int car_world_update(void* arg)
         "E/C increase/decrease camera distance",
         "B toggle visual cubes",
         "P toggle physics",
+        "H toggle physics debug (WILL CAUSE LAG!)",
         "G toggle debug UI",
         "",
         "+++ SHADOWS +++",
@@ -634,6 +640,9 @@ extern "C" int car_world_update(void* arg)
     if(denginegui_button(w - fontsz - shadowdgbsz - (5.0f * btnoffset) - (5.0f * btnwidth)
                 , h - fontsz - (btnheight / 2.0f), btnwidth, btnheight / 2.0f, "G", NULL))  
         debugui = !debugui;
+    if(denginegui_button(w - fontsz - shadowdgbsz - (6.0f * btnoffset) - (6.0f * btnwidth)
+                , h - fontsz - (btnheight / 2.0f), btnwidth, btnheight / 2.0f, "H", NULL))  
+        physics_debugui = !physics_debugui;
 
     denginegui_set_button_repeatable(1);
     if(denginegui_button(w - fontsz - shadowdgbsz - (2.0f * btnoffset) - (2.0f * btnwidth)

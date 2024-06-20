@@ -17,7 +17,7 @@ extern "C" {
  */
 typedef struct{
     uint32_t buffer_id; /*!< Buffer ID. Don't change this */
-    void* data; /*!< Buffer data pointer */
+    const void* data; /*!< Buffer data pointer */
     size_t size; /*!< Buffer size of pointer */
     uint32_t usage; /*!< Usage. GL_STATIC_DRAW OR GL_DYNAMIC_DRAW */
 } Buffer;

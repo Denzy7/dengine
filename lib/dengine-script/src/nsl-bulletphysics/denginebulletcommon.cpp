@@ -6,6 +6,7 @@
 #include <time.h>
 #include <vector>
 
+
 btScalar _fq = 1.0 / 60.0, _tscale = 1.0, _ffq = 18.0 / 60.0;
 btDynamicsWorld* _world = NULL;
 btDefaultCollisionConfiguration* config = NULL;
@@ -13,6 +14,85 @@ btCollisionDispatcher* dispatcher = NULL;
 btBroadphaseInterface* broadphase = NULL;
 btConstraintSolver* solver = NULL;
 btAlignedObjectArray<btCollisionShape*> shapes;
+
+ATTRIBUTE_ALIGNED16(class)
+    DengineDebugDrawer: public btIDebugDraw
+{
+    DefaultColors m_ourColors;
+    int m_debugMode;
+    Primitive line;
+    Shader dftshr;
+
+    public:
+    const Camera* debugcam;
+
+    BT_DECLARE_ALIGNED_ALLOCATOR();
+    DengineDebugDrawer()
+    {
+        /* require opengl to be loaded */
+        if(glad_glGetError == NULL)
+        {
+            printf("we need opengl to be initialized before loading the nsl\n");
+            exit(1);
+        }
+        m_debugMode = btIDebugDraw::DBG_DrawWireframe; 
+        setDebugMode(m_debugMode);
+        dengine_shader_make_standard(DENGINE_SHADER_DEFAULT, &dftshr);
+        dengine_primitive_gen_line(&line, &dftshr);
+        dengine_buffer_bind(GL_ARRAY_BUFFER, &line.array);
+        /* well be chainging this every line point so we steam it */
+        line.array.usage = GL_DYNAMIC_DRAW;
+        glBufferData(GL_ARRAY_BUFFER, sizeof(btScalar) * 6, NULL, line.array.usage);
+    }
+
+    virtual ~DengineDebugDrawer()
+    {
+    }
+
+    virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color)
+    {
+        mat4 model;
+        glm_mat4_identity(model);
+        btScalar buf[6];
+        memcpy(buf, to.m_floats, sizeof(btScalar) * 3);
+        memcpy(buf + 3, from.m_floats, sizeof(btScalar) * 3);
+            
+        //glm_translate(model, pos);
+
+        dengine_shader_set_vec3(&dftshr, "color", color.m_floats);
+        dengine_shader_set_mat4(&dftshr, "model", &model[0][0]);
+        dengine_camera_apply(&dftshr, debugcam);
+        dengine_buffer_bind(GL_ARRAY_BUFFER, &line.array);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(btScalar) * 6, buf); DENGINE_CHECKGL;
+        dengine_draw_primitive(&line, &dftshr);
+    }
+
+    virtual void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color)
+    {
+        drawLine(PointOnB, PointOnB + normalOnB * distance, color);
+        btVector3 ncolor(0, 0, 0);
+        drawLine(PointOnB, PointOnB + normalOnB * 0.01, ncolor);
+    }
+
+    virtual void reportErrorWarning(const char* warningString)
+    {
+    }
+
+    virtual void draw3dText(const btVector3& location, const char* textString)
+    {
+    }
+
+    virtual void setDebugMode(int debugMode)
+    {
+        m_debugMode = debugMode;
+    }
+
+    virtual int getDebugMode() const
+    {
+        return m_debugMode;
+    }
+}_drawer;
+
 
 std::vector<btInternalTickCallback> _tickcbs;
 void _tickcb(btDynamicsWorld* world, btScalar timeStep)
@@ -61,6 +141,8 @@ int initworld(btDynamicsWorld** refworld)
     _world->setGravity(btVector3(0, -9.8, 0));
     if(refworld)
         *refworld = _world;
+
+    _world->setDebugDrawer(&_drawer);
 
    _world->setInternalTickCallback(_tickcb); 
     return 1;
@@ -200,4 +282,9 @@ void add_tickcb(btInternalTickCallback cb)
 void set_maxfrequency(const btScalar& ffq)
 {
     _ffq = ffq;
+}
+
+void enable_debugdrawer(const Camera* camera)
+{
+    _drawer.debugcam = camera;
 }

@@ -4,6 +4,7 @@
 #include "dengine/entrygl.h" //entrygl
 #include "dengine-utils/vtor.h"
 #include "dengine-utils/debug.h"
+#include "dengine-utils/macros.h"
 
 #include <string.h> //memset
 
@@ -95,6 +96,40 @@ void dengine_primitive_destroy(Primitive* primitive)
     }
     dengine_buffer_destroy(1, &primitive->array);
     dengine_buffer_destroy(1, &primitive->index);
+}
+
+void dengine_primitive_gen_line(Primitive* prim, const Shader* shader)
+{
+    memset(prim, 0, sizeof(Primitive));
+
+    static const float line_array[] = 
+    {
+        -1.0f, 0.0f, 0.0f,
+         1.0f, 0.0f, 0.0f
+    };
+
+    static const uint16_t line_index[] = 
+    {
+        0, 1
+    };
+
+    prim->draw_mode = GL_LINES;
+    prim->draw_type = GL_UNSIGNED_SHORT;
+
+    prim->array.data = line_array;
+    prim->array.size = sizeof(line_array);
+    prim->array.usage = GL_STATIC_DRAW;
+
+    prim->index.data = line_index;
+    prim->index.size = sizeof(line_index);
+    prim->index.usage = GL_STATIC_DRAW;
+    prim->index_count = DENGINE_ARY_SZ(line_index);
+
+    prim->aPos.size = 3;
+    prim->aPos.stride = sizeof(float) * 3;
+    prim->aPos.type = GL_FLOAT;
+
+    dengine_primitive_setup(prim, shader);
 }
 
 void dengine_primitive_gen_quad(Primitive* primitive, const Shader* shader)

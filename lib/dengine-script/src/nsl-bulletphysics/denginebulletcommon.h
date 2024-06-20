@@ -26,6 +26,9 @@ typedef struct
 int initworld(btDynamicsWorld** refworld);
 void destroyworld();
 
+/* camera to use for debugger */
+void enable_debugdrawer(const Camera* camera);
+
 /* thr maximum amount of time the physics 
  * engine should run and immediately 
  * product a step. defaults to 18/60 (ie.
