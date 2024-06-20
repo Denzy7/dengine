@@ -101,7 +101,7 @@ int denginegui_init()
 
     quad.array.data = vertices;
     quad.array.size = sizeof(vertices);
-    quad.array.usage = GL_STREAM_DRAW;
+    quad.array.usage = GL_DYNAMIC_DRAW;
 
     quad.index.data = indices;
     quad.index.size = sizeof(indices);
