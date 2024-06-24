@@ -20,17 +20,21 @@
 
 #include <stddef.h> //size_t
 
-typedef struct _vtor
+typedef struct vtor
 {
     void* data;
     size_t count;
     size_t capacity;
     size_t type_sz;
+    char ptrs; /*!<are we storing pointers? */
 } vtor;
 
 int vtor_create_alloc(vtor* vtor, size_t type_sz, size_t num);
 
 int vtor_create(vtor* vtor, size_t type_sz);
+
+/* a vector holding pointers */
+int vtor_create_ptrs(vtor* vtor);
 
 void vtor_pushback(vtor* vtor, const void* val);
 
@@ -74,44 +78,55 @@ int vtor_create(vtor* vtor, size_t type_sz)
 {
     return vtor_create_alloc(vtor, type_sz, 2);
 }
+int vtor_create_ptrs(vtor* vtor)
+{
+    vtor->ptrs = 1;
+    return vtor_create_alloc(vtor, sizeof(void*), 2);
+}
 
+void _vtor_copytonewdata(vtor* vtor, void* newdata)
+{
+    if(vtor->ptrs)
+    {
+        char** oldref = vtor->data;
+        char** newref = newdata;
+        for(size_t i = 0; i < vtor->count; i++)
+        {
+            newref[i] = oldref[i]; 
+        }
+    }else {
+        memcpy(newdata, vtor->data, vtor->type_sz * vtor->capacity);
+    }
+}
 void vtor_pushback(vtor* vtor, const void* val)
 {
-    size_t capacity = vtor->capacity;
-    size_t type_sz = vtor->type_sz;
-
-    if(vtor->count == vtor->capacity && type_sz > 0)
+    if(vtor->count == vtor->capacity)
     {
         /* expand vtor */
-
-        //temp buffer
-        void* tmp = malloc(capacity * type_sz);
-        memcpy(tmp, vtor->data, capacity * type_sz);
-
-        //free old
+        size_t sz = vtor->type_sz * vtor->capacity * 2;
+        void* newdata = malloc(sz);
+        _vtor_copytonewdata(vtor, newdata);
+        
+        vtor->capacity *= 2;
         free(vtor->data);
-
-        //realloc
-        vtor->data = malloc(type_sz * capacity * 2);
-
-        //copy back
-        memcpy(vtor->data, tmp, type_sz * capacity);
-
-        //free temp
-        free(tmp);
-
-        //set capacity
-        vtor->capacity = capacity * 2;
+        vtor->data = newdata;
 
 #ifdef VTOR_VERBOSE
         printf("realloc vec type_sz : %zu, capacity : %zu\n", vtor->type_sz, vtor->capacity);
 #endif // VTOR_VERBOSE
     }
 
+
     if(vtor->data)
     {
         void* new_loc = vtor->data + (vtor->type_sz * vtor->count);
-        memcpy(new_loc, val, type_sz);
+        if(vtor->ptrs)
+        {
+            char** ref = vtor->data;
+            ref[vtor->count] = (char*)val;
+        }else {
+            memcpy(new_loc, val, vtor->type_sz);
+        }
         vtor->count++;
 
 #ifdef VTOR_VERBOSE
@@ -128,7 +143,6 @@ void vtor_free(vtor* vtor)
     if(vtor->data)
     {
         free(vtor->data);
-        memset(vtor, 0, sizeof (struct _vtor));
 #ifdef VTOR_VERBOSE
         printf("free vec type_sz : %zu, capacity : %zu, count : %zu\n", vtor->type_sz, vtor->capacity, vtor->count);
     }else{
@@ -139,39 +153,24 @@ void vtor_free(vtor* vtor)
 
 void vtor_popback(vtor* vtor)
 {
-    if(vtor->data && vtor->count > 0)
-    {
-        vtor->count--;
+    vtor->count--;
 #ifdef VTOR_VERBOSE
         printf("popback vec type_sz : %zu, capacity : %zu, count : %zu\n", vtor->type_sz, vtor->capacity, vtor->count);
-    }else{
-        printf("cannot popback. null vtor->data\n");
 #endif // VTOR_VERBOSE
+    if(vtor->count == vtor->capacity / 2)
+    {
+        /* contract vtor */
+        void* newdata = malloc((vtor->capacity / 2) * vtor->type_sz);
+        _vtor_copytonewdata(vtor, newdata);
+        free(vtor->data);
+        vtor->data = newdata;
 
-        size_t capacity = vtor->capacity;
-        size_t type_sz = vtor->type_sz;
-
-        if(vtor->count == capacity / 2 && type_sz)
-        {
-            /* contract vtor */
-
-            //temp buffer
-            void* tmp = malloc((capacity / 2) * type_sz);
-            memcpy(tmp, vtor->data, (capacity / 2) * type_sz);
-
-            //free old
-            free(vtor->data);
-
-            //set temp
-            vtor->data = tmp;
-
-            //set capacity
-            vtor->capacity = capacity / 2;
+        //set capacity
+        vtor->capacity /= 2;
 
 #ifdef VTOR_VERBOSE
-            printf("contract vec type_sz : %zu, capacity : %zu, count : %zu\n", vtor->type_sz, vtor->capacity, vtor->count);
+        printf("contract vec type_sz : %zu, capacity : %zu, count : %zu\n", vtor->type_sz, vtor->capacity, vtor->count);
 #endif
-        }
     }
 }
 

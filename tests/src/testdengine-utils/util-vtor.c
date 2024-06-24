@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 #include <dengine-utils/vtor.h>
 #include <dengine-utils/logging.h>
@@ -14,11 +16,16 @@ typedef struct
     float* x, *y;
     float* nullptr;
 }vtor3_data;
+typedef struct
+{
+    float x;
+    int y;
+    const char* s;
+}vtor4_data;
 
 int main(int argc, char *argv[])
 {
     dengineutils_rng_set_seedwithtime();
-
     //a simple vector that stores some singular type e.g. floats
     vtor* vtor1 = malloc(sizeof (vtor));
     vtor_create(vtor1, sizeof (float));
@@ -95,6 +102,38 @@ int main(int argc, char *argv[])
             dengineutils_logging_log("nullptr. nothing to see here!");
         }
     }
+    vtor4_data data4[] = 
+    {
+        {1, 2.0f, "hello"},
+        {3, 4.0f, "there"},
+        {5, 6.0f, "world"},
+        {5, 6.0f, "world"},
+        {3, 4.0f, "there"},
+        {1, 2.0f, "hello"},
+        {1, 2.0f,"hello"},
+        {3, 4.0f, "there"},
+        {5, 6.0f, "world"},
+    };
+    /* store pointers. provided the pointers (data4) stays in scope */
+    vtor vtor4;
+    vtor_create_ptrs(&vtor4);
+    for(int i = 0; i < 9; i++)
+    {
+        vtor4_data* data = &data4[i];
+        dengineutils_logging_log("ref: %p, vtor: %p", data, vtor4.data);
+        vtor_pushback(&vtor4, data);
+    }
+    for(int i = 0; i < 9; i++)
+    {
+        /* pointer arith to seek to our stored pointer */
+        vtor4_data** data4_vtorref = vtor4.data;
+        dengineutils_logging_log("ptr:%p, %d %f %s", 
+                data4_vtorref[i],
+                data4_vtorref[i]->x,
+                data4_vtorref[i]->y,
+                data4_vtorref[i]->s);
+    }
+    vtor_free(&vtor4);
 
     vtor_free(vtor1);
     free(vtor1);
