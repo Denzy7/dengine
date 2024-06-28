@@ -117,6 +117,7 @@ int dengineutils_logging_init()
 {
     Thread logthr;
     dengineutils_thread_create(_dengineutils_logging_logthr, NULL, &logthr);
+    memset(&logcallbacks, 0, sizeof(logcallbacks));
     vtor_create(&logcallbacks, sizeof(LoggingCallbackVtor));
 
     // android stdout callback

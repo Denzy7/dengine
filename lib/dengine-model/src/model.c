@@ -69,6 +69,12 @@ Primitive* _denginemodel_load_obj(const void* mem, const size_t sz, size_t* mesh
 
     vtor verts, tcoords, norms,offsets;
     vtor array_buf, index_buf;
+    memset(&verts, 0, sizeof(vtor));
+    memset(&tcoords, 0, sizeof(vtor));
+    memset(&norms, 0, sizeof(vtor));
+    memset(&offsets, 0, sizeof(vtor));
+    memset(&array_buf, 0, sizeof(vtor));
+    memset(&index_buf, 0, sizeof(vtor));
 
     size_t n_vertices = 0, n_texcoord = 0, n_normals = 0, n_faces = 0, n_meshes = 0;
 

@@ -187,6 +187,7 @@ void dengine_primitive_gen_plane(Primitive* primitive, const Shader* shader)
     memset(primitive,0,sizeof (Primitive));
 
     vtor plane_array;
+    memset(&plane_array, 0, sizeof(plane_array));
     vtor_create(&plane_array, sizeof(float));
 
     for(int i = -1; i <= 1; i += 2)
@@ -309,9 +310,11 @@ void dengine_primitive_gen_cube(Primitive* primitive, const Shader* shader)
     memset(primitive,0,sizeof (Primitive));
 
     vtor cube_array;
+    memset(&cube_array, 0, sizeof(cube_array));
     vtor_create(&cube_array, sizeof(float));
 
     vtor cube_vertices;
+    memset(&cube_vertices, 0, sizeof(cube_vertices));
     vtor_create(&cube_vertices, sizeof(float));
     for(int i = -1; i <= 1; i += 2)
     {
@@ -539,6 +542,8 @@ void dengine_primitive_gen_grid(const uint16_t slice, Primitive* primitive, cons
     memset(primitive,0,sizeof (Primitive));
 
     vtor grid_vertices, grid_indices;
+    memset(&grid_vertices, 0, sizeof(grid_vertices));
+    memset(&grid_indices, 0, sizeof(grid_indices));
     vtor_create(&grid_vertices, sizeof(float));
     vtor_create(&grid_indices, sizeof(uint16_t));
 
