@@ -58,9 +58,11 @@ Change dir to repo:
 - See [glue/README.md](glue/README.md) on how to use it to simplify dengine code
 
 # writing python scripts
-- **Linux**: Its actually very easy here. Just install the modules located in `<CMAKE_BUILD_DIR>/dengine-script-build/modules-build/to-python3-site-pacakages`. Install `dengine` directory to your Python `site-packages` or add the directory to your IDE/Editor Python path (VSCode-OSS in this case) 
-- **Windows**: Its very tricky here as it depends on the Python version installed and what it was compiled with. Upstream Python is build with MSVC. Note the precompiled releases use MinGW which is obviously **NOT** compatible with MSVC. So a little hack is to [build a custom interpretor with MinGW](main/python-dengine-script/README.md) and add it to VSCode. Alternatively, compile everything with MSVC, which I haven't tested. Then copy to `site-packages`(I don't have Windows nor MSVC. I'm also not a big MS fan 🤷)
+- Be sure to skim through [stubs documentation](lib/dengine-script/src/python/stubs/README.md) to see how to work with then, especially if you are running Windows.
 
-# github actions releases
+- **Linux**: Its actually very easy here. Just install the modules located in `<CMAKE_BUILD_DIR>/dengine-script-build/modules-build/python-modules`. Install `dengine` directory to your Python `site-packages` or add the directory to your IDE/Editor Python path (VSCode-OSS in this case) 
+- **Windows**: You'll probably have to use the stubs. Unless you managed to build everyting with MSVC, which is usually what upstream python is built on
+
+# github actions artifact releases
 now availabe on github actions! you need to be logged in  
-[check out the cmake workflow](https://github.com/Denzy7/dengine/actions/workflows/cmake-multi-platform.yml)
+[check out the latest succesfull build and download artifacts](https://github.com/Denzy7/dengine/actions/workflows/dengine.yml)

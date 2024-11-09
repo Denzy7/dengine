@@ -25,5 +25,5 @@ if(WIN32)
     set_target_properties(dengine-model PROPERTIES PREFIX "")
 endif()
 
-install(TARGETS dengine-model DESTINATION lib)
+install(TARGETS dengine-model DESTINATION lib/dengine-${DENGINE_VERSION})
 install(FILES ${dengine-model-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-model)

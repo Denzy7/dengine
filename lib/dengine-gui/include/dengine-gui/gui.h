@@ -9,6 +9,14 @@ extern "C" {
 
 int denginegui_init();
 
+/* some 3.1 drivers (Sandy Bridge Win32: 9.17.10.4459) as well as
+ * some random GLES 2.0 implementations of glBufferSubData are kinda broken :(  
+ *
+ * switch between glBufferData and glBufferSubData to see which has better
+ * performance
+ */
+void denginegui_use_subdata(int state);
+
 void denginegui_terminate();
 
 int denginegui_set_font(const void* ttf, const float fontsize, const uint32_t bitmap_size);

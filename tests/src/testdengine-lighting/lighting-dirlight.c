@@ -154,11 +154,11 @@ int main(int argc, char** argv)
     DirLight dLight;
     dLight.shadow.enable = 1;
     dLight.shadow.shadow_map_size = 512;
-    dLight.position[0] = 2.0f;
-    dLight.position[1] = 4.0f;
-    dLight.position[2] = -1.0f;
+    dLight.direction[0] = 2.0f;
+    dLight.direction[1] = 4.0f;
+    dLight.direction[2] = -1.0f;
     dengine_lighting_setup_dirlight(&dLight);
-    dengine_shader_set_vec3(&shader, "lightDir", dLight.position);
+    dengine_shader_set_vec3(&shader, "lightDir", dLight.direction);
 
     Texture texture;
     memset(&texture, 0, sizeof(Texture));

@@ -118,6 +118,10 @@ int testdengine_lighting_normalmap(int argc, char **argv)
 #endif
     }
 #endif
+
+    /*TODO: before we actually get a working lighting system,
+     * we set number of lights manually */
+    dengine_shader_set_int(&stdshdr, "nr_pointLights", 1);
     
     while(dengine_update())
     {

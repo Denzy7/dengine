@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 
-project(dengine VERSION 0.7.0)
+project(dengine VERSION 0.8.0)
 
 #this is just a slight nuance with cmake rather than renaming the project
 set(DENGINE_VERSION "${dengine_VERSION}")
@@ -8,6 +8,19 @@ include(GNUInstallDirs)
 
 set(DENGINE_PKG_LIBS)
 set(DENGINE_PKG_DEPS)
+
+# * shadow3d is very expensive! (especially on mobile. you might
+# * see up to a 40% perfomance decrease there!) 
+# *
+# * USE RESPONSIBLY!
+# *
+# * you have to manually calculate shadow 3d for each light
+# * as done below with the compile defines. glsl is kinda
+# * messed up when using sampler array. you'll still have
+# * to index it manually so...
+option(DENGINE_LIGHTING_SHADOW3D "Compile with 3D shadows support. 3D shadows are very expensive" ON)
+set(DENGINE_LIGHTING_MAX_POINT "4" CACHE STRING "Compile shaders to support a maximum of these point lights")
+set(DENGINE_LIGHTING_MAX_SPOT "4" CACHE STRING "Compile shaders to support a maximum of these spot lights")
 
 option(DENGINE_FONT_EMBED_OPENSANS_REGULAR "Embed OpenSans Regular into dengine-gui" OFF)
 option(DENGINE_FONT_EMBED_OPENSANS_ITALIC "Embed OpenSans Italic into dengine-gui" OFF)
@@ -24,15 +37,16 @@ option(DENGINE_BUILD_TESTS "Build the test suite and examples" ON)
 
 option(DENGINE_MT "Build for multithreading using mutexes" ON)
 
-option(DENGINE_SCRIPTING_PYTHON "Enable support for experimental Python scripting. Disable if you get random segfault!" OFF)
-option(DENGINE_USE_SYSTEM_PYTHON "Use system python or build custom. Might cause some serious path issues if using system Python" ON)
-if(ANDROID)
-    option(DENGINE_ANDROID_TERMUX "Enable if building for X11 Termux")
-endif()
+option(DENGINE_SCRIPTING_PYTHON "Enable support for experimental Python scripting. Disable if you get random segfault! Requires relevant submodules to be cloned. See deps/README.md" ON)
+option(DENGINE_USE_SYSTEM_PYTHON "Use system python or build custom. Custom build may cause compatibility issue. Check if compatible with deps/cpython_portable. Of course no need to compile python if already on system" ON)
 set(DENGINE_WIN CACHE STRING "Force Window API. Possible Values: X11, WAYLAND")
 set(DENGINE_CONTEXT CACHE STRING "Force Context API. Possible Values: GLX, EGL")
 option(DENGINE_DEBUG "Enable general debug facilities. Use only in Debug builds as it has alot of overhead" OFF)
 option(DENGINE_DEBUG_GL "Enable OpenGL debug facilities. Use only in Debug builds as it has alot of overhead" OFF)
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    set(DENGINE_DEBUG_GL 1)
+    set(DENGINE_DEBUG 1)
+endif()
 
 find_library(DENGINE_HAS_LIBZ z)
 find_library(DENGINE_HAS_EGL EGL)
@@ -129,6 +143,40 @@ if(PkgConfig_FOUND AND NOT ANDROID_NDK)
     endif()
 else()
     message(WARNING ">>> Could not find pkg-config. Will compile From sources")
+
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/deps/bullet3_src/CMakeLists.txt)
+        ADD_DEFINITIONS( -DBT_THREADSAFE=1 )
+        add_subdirectory(deps/bullet3_src "bullet_build")
+        #TODO: get from builddir 
+        set(bullet_LIBRARIES LinearMath BulletDynamics BulletCollision BulletSoftBody)
+        set(bullet_INCLUDE_DIRS deps/bullet3_src/src)
+        set(DENGINE_HAS_BULLET 1)
+        include_directories(${bullet_INCLUDE_DIRS})
+    else()
+        message(WARNING "submodule deps/bullet_src not init. run `git submodule update --init --depth 1 deps/bullet3_src`")
+    endif()
+    if(DENGINE_SCRIPTING_PYTHON)
+        set(DENGINE_USE_SYSTEM_PYTHON 0)
+    endif()
+
+    
+endif()
+
+if(DENGINE_SCRIPTING_PYTHON AND NOT DENGINE_USE_SYSTEM_PYTHON)
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython-portable/CMakeLists.txt)
+        set(PYSRC ${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython)
+        set(PYVER "3.9")
+        set(DENGINE_HAS_PYTHON3 1)
+        include_directories(
+            ${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython/Include
+            ${CMAKE_CURRENT_BINARY_DIR}/cpython-portable-build/config
+        )
+        message(WARNING "A custom Python will be compiled from source. Ensure version ${PYVER} is compatible with your scripts and their dependencies")
+        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython-portable "cpython-portable-build")
+        set(python3_LIBRARIES cpython-portable)
+    else()
+        message(FATAL_ERROR "cpython-portable not found but python scripting requested. either undefine DENGINE_SCRIPTING_PYTHON, enable DENGINE_USE_SYSTEM_PYTHON or run `git submodule update --init --depth 1 deps/cpython deps/cpython-portable`")
+    endif()
 endif()
 
 # base includes to build 
@@ -145,20 +193,11 @@ set(dengine_incl
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/dengine-script/include
     ${CMAKE_CURRENT_SOURCE_DIR}/glue/include
     )
-include_directories(${dengine_incl})
-
-if(DENGINE_SCRIPTING_PYTHON)
-    if(NOT python3_LIBRARIES)
-        set(PYSRC ${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython)
-        set(PYVER "3.9")
-        include_directories(
-            ${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython/Include
-            ${CMAKE_CURRENT_BINARY_DIR}/deps/cpython-portable/config
-        )
-        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps/cpython-portable)
-        set(python3_LIBRARIES cpython-portable)
-    endif()
+#native app glue
+if(ANDROID_NDK)
+    list(APPEND dengine_incl ${ANDROID_NDK}/sources)
 endif()
+include_directories(${dengine_incl})
 
 include(CheckSymbolExists)
 include(CheckIncludeFile)
@@ -172,7 +211,6 @@ set(CMAKE_REQUIRED_FLAGS "-D_GNU_SOURCE")
 check_symbol_exists(pthread_setname_np "pthread.h" DENGINE_HAS_PTHREAD_SETNAME_NP)
 set(CMAKE_REQUIRED_FLAGS "")
 
-set(DENGINE_PYTHON_DENGINE_SCRIPT_VER 1)
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)
 
 if (NOT MSVC)
@@ -183,13 +221,14 @@ set(dengine
     dengine-utils
     dengine-core
     dengine-gui
-    dengine-scene
     dengine-script
     dengine-model
+    dengine-scene
 
     #using ${dengine} is using glue implicitly
     dengine_glue_lib
     )
+
 set(denginerc_loc "${dengine_SOURCE_DIR}/build/dengine-rc")
 set(DengineRC_DIR ${denginerc_loc})
 find_package(DengineRC)
@@ -199,22 +238,22 @@ endif()
 include(cmake/DengineRCHelper.cmake)
 
 if(WIN32)
-    set(tests_install_dir lib/)
+    set(tests_install_dir lib/dengine-${DENGINE_VERSION})
 else()
     set(tests_install_dir lib/dengine-${DENGINE_VERSION}/tests/)
 endif()
 
-add_subdirectory("glue" "glue-build")
+if(MINGW AND CMAKE_CROSSCOMPILING)
+    add_subdirectory(deps/ntldd "ntldd")
+endif()
 add_subdirectory(lib/dengine-utils "dengine-utils-build")
 add_subdirectory(lib/dengine-core "dengine-core-build")
 add_subdirectory(lib/dengine-gui "dengine-gui-build")
 add_subdirectory(lib/dengine-model "dengine-model-build")
 add_subdirectory(lib/dengine-script "dengine-script-build")
 add_subdirectory(lib/dengine-scene "dengine-scene-build")
-if(DENGINE_SCRIPTING_PYTHON AND NOT ANDROID)
-    #add python modules (shared libraries)
-    add_subdirectory(lib/dengine-script/src/py_modules "dengine-script-pymodules-build")
-endif()
+add_subdirectory(glue "glue-build")
+add_subdirectory(nsl "nsl-build")
 
 if(DENGINE_BUILD_TESTS)
     add_subdirectory(tests "tests-build")
@@ -222,13 +261,11 @@ endif()
 
 #please ignore this
 if(DENGINE_BUILD_TESTS_PRIV)
-    add_subdirectory(testspriv)
+    add_subdirectory(testspriv "testspriv-build")
 endif()
 
-add_subdirectory(main/dengitor)
-if(MINGW AND DENGINE_SCRIPTING_PYTHON)
-    # for mingw32 only
-    add_subdirectory(main/python-dengine-script)
+if(GTK3_LIBRARIES)
+    add_subdirectory(main/dengitor "dengitor-build")
 endif()
 
 foreach(i ${dengine})
@@ -242,6 +279,8 @@ install(DIRECTORY deps/glad/include/glad DESTINATION include/dengine-${DENGINE_V
 install(DIRECTORY deps/glad/include/KHR DESTINATION include/dengine-${DENGINE_VERSION}/deps/glad)
 install(DIRECTORY deps/cglm/include/cglm DESTINATION include/dengine-${DENGINE_VERSION}/deps/cglm)
 install(DIRECTORY glue/include/dengine DESTINATION include/dengine-${DENGINE_VERSION}/glue)
-
+if(PYSRC)
+    install(TARGETS cpython-portable DESTINATION lib/dengine-${DENGINE_VERSION})
+endif()
 # pkgconf
 install(FILES "${PROJECT_BINARY_DIR}/dengine.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")

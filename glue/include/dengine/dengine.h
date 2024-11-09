@@ -26,6 +26,7 @@
 #include <dengine-utils/timer.h>
 #include <dengine-utils/confserialize.h>
 #include <dengine-utils/zipread.h>
+#include <dengine-utils/types.h>
 #ifdef DENGINE_ANDROID
 #include <dengine-utils/platform/android.h>
 #endif
@@ -37,6 +38,9 @@
 #include <dengine-scene/scene.h>
 
 #include <dengine-script/script.h>
+#ifdef DENGINE_SCRIPTING_PYTHON
+#include <dengine-script/python/python.h>
+#endif
 
 typedef struct
 {
@@ -58,6 +62,8 @@ typedef struct
 
     float font_size;
     int font_bitmapsize;
+
+    int gui_subdata;
 
     int cache_textures;
     int cache_shaders;

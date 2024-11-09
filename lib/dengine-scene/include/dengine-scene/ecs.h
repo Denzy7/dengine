@@ -1,7 +1,6 @@
 #ifndef ECS_H
 #define ECS_H
 
-#include <stdint.h> //uint32_t
 #include <cglm/cglm.h>
 
 #include "dengine/primitive.h"
@@ -27,26 +26,41 @@ typedef struct
     mat4 world_model;
 }TransformComponent;
 
+typedef enum 
+{
+    DENGINESCENE_ECS_MESHCOMPONENT_DRAWMODE_DISABLED,
+    DENGINESCENE_ECS_MESHCOMPONENT_DRAWMODE_ENABLED,
+    DENGINESCENE_ECS_MESHCOMPONENT_DRAWMODE_SHADOWONLY,
+}MeshDrawMode;
 typedef struct
 {
-    int draw;
-    Primitive* mesh;
-    Material* material;
+    MeshDrawMode drawmode;
+    Primitive mesh;
+    Material material;
 }MeshComponent;
 
 typedef struct
 {
     LightType type;
-    Light light;
+    Light* light;
 }LightComponent;
 
 typedef struct
 {
-    Camera* camera;
-    int last_cam;
+    /* we store entry stuff here. we'll change them 
+     * throught out rendering so we set once and set back
+     * once here
+     */
+    int entry_x, entry_y, entry_w, entry_h;;
+    int entry_depthfunc, entry_cullmode;
+    int entry_srcalpha, entry_dstalpha;
+
+    int entry_depthon, entry_cullon, entry_blendon;
+
+    Camera camera;
 }CameraComponent;
 
-typedef struct _Entity
+typedef struct Entity
 {
     uint32_t entity_id;
     int active;
@@ -54,26 +68,24 @@ typedef struct _Entity
     char* name;
 
     /* PARENT-CHILD R/SHIPS */
-
-    struct _Entity* parent;
+    /* its a recusive structure so it maintains struct keyword */
+    struct Entity* parent;
     vtor children;
 
     /* SCRIPTS */
     vtor scripts;
 
     /* MORE COMPONENTS HERE */
-
+    /* additional components are kept as pointers
+     * so we can discern if it added
+     * by checking NULL instad of each var
+     *
+     * also they'll be stored on the heap that way it wont overflow if we have many entities
+     */
     MeshComponent* mesh_component;
-    LightComponent* light_component;
     CameraComponent* camera_component;
-    /* Some simple data to pass to a physics engine i.e. Bullet (nsl) */
-    //PhysicsComponent* physics_component;
+    LightComponent* light_component;
 }Entity;
-
-typedef struct
-{
-    Entity* child;
-}EntityChild;
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,7 +95,7 @@ extern "C" {
  * \brief Create a new empty entity
  * \return An empty active entity with no components
  */
-Entity* denginescene_ecs_new_entity();
+int denginescene_ecs_new_entity(Entity** entity);
 
 /*!
  * \brief Destroy an allocated entity, its underlying entities and components
@@ -107,10 +119,20 @@ void denginescene_ecs_parent(Entity* parent, Entity* child);
 
 void denginescene_ecs_get_model_local(Entity* entity,mat4 mat4x4);
 
+/* note this is not homogenous and contains
+ * the position the entity forward would be.
+ * to get the homogenous, subtract the current position
+ */
 void denginescene_ecs_get_front(Entity* entity, vec3 front);
-
+/* note this is not homogenous and contains
+ * the position the entity forward would be.
+ * to get the homogenous, subtract the current position
+ */
 void denginescene_ecs_get_right(Entity* entity, vec3 right);
-
+/* note this is not homogenous and contains
+ * the position the entity forward would be.
+ * to get the homogenous, subtract the current position
+ */
 void denginescene_ecs_get_up(Entity* entity, vec3 up);
 
 /*!
@@ -119,15 +141,19 @@ void denginescene_ecs_get_up(Entity* entity, vec3 up);
  */
 void denginescene_ecs_transform_entity(Entity* entity);
 
-MeshComponent* denginescene_ecs_new_meshcomponent(const Primitive* mesh, const Material* material);
+int denginescene_ecs_new_meshcomponent(const Primitive* mesh, const Material* material, MeshComponent** component);
 
-CameraComponent* denginescene_ecs_new_cameracomponent(const Camera* camera);
+int denginescene_ecs_new_cameracomponent(const Camera* camera, CameraComponent** component);
 
-LightComponent* denginescene_ecs_new_lightcomponent(LightType type, Light light);
+int denginescene_ecs_new_lightcomponent(LightType type, const Light* light, LightComponent** component);
 
 //PhysicsComponent* denginescene_ecs_new_physicscomponent(ECSPhysicsColShape type, const void* colshapeconfig, const float mass);
 
 void denginescene_ecs_add_script(Entity* entity, const Script* script);
+
+void denginescene_ecs_scripts_run(Entity* entity, ScriptFunc func, void* args);
+
+void denginescene_ecs_dumphierachy_stdio(Entity* entity, FILE* stdiof);
 
 #ifdef __cplusplus
 }

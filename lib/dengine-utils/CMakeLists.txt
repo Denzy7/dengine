@@ -17,6 +17,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/src/dengine-utils.rc
 src/stream.c
 src/zipread.c
 src/dynlib.c
+src/types.c
 )
 
 set(dengine-utils-hdr
@@ -34,6 +35,7 @@ include/dengine-utils/stream.h
 include/dengine-utils/zipread.h
 include/dengine-utils/macros.h
 include/dengine-utils/dynlib.h
+include/dengine-utils/types.h
 )
 
 if(ANDROID_NDK)
@@ -66,17 +68,6 @@ if(NOT WIN32)
     list(APPEND dengine-utils-link dl)
 endif()
 
-#native app glue
-if(ANDROID_NDK)
-    target_include_directories(dengine-utils PUBLIC
-            #FOR debugging without Android studio
-            #"/home/denzy/Android/Sdk/ndk/23.1.7779620/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include"
-            #"/home/denzy/Android/Sdk/ndk/23.1.7779620/sources"
-
-            ${ANDROID_NDK}/sources
-            )
-endif()
-
 #android and logcat
 if(ANDROID_NDK)
     list(APPEND dengine-utils-link android log)
@@ -89,5 +80,5 @@ endif()
 
 target_link_libraries(dengine-utils PRIVATE ${dengine-utils-link})
 
-install(TARGETS dengine-utils DESTINATION lib)
+install(TARGETS dengine-utils DESTINATION lib/dengine-${DENGINE_VERSION})
 install(FILES ${dengine-utils-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-utils)

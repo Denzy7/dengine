@@ -1,4 +1,6 @@
 # windows
+**Recommended you use MSYS2. This method involves manually setting up MinGW.**  
+
 Ensure you have an existing installation of MinGW. If not, go ahead and download its [installer](http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download) for Windows.  
 **If you want more recent versions of MinGW** see below
 
@@ -21,12 +23,16 @@ The following helpers can be used:
   32-bit cmake : `i686-w64-mingw32-cmake -S . -B build`  
   64-bit cmake : `x86_64-w64-mingw32-cmake -S . -B build`  
 
+
+# msys2
+MSYS2 has mingw already up-to-date and built in and is simply a linux enviromnent. The scripts to copy libs should also work fine with msys2
+
 # cmake
 
 With that, run:  
 `cmake -S . -B build/desktop`
 
-(Windows users pass) `-G "MinGW Makefiles"`
+(MinGW users pass) `-G "MinGW Makefiles"`
 
 If you are getting an error `CMAKE_MAKE_PROGRAM not set`, did you add the `bin` folder to `PATH`?
 

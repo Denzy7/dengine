@@ -66,6 +66,7 @@
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #endif
 #ifdef DENGINE_ANDROID
+int32_t _dengine_window_android_oninput(struct android_app* app, AInputEvent* event);
 void _dengine_window_android_onpause(struct android_app* app);
 void _dengine_window_android_oninitwindow(struct android_app* app);
 #endif
@@ -114,7 +115,7 @@ static void wl_keyboard_key(void *data, struct wl_keyboard *wl_keyboard, uint32_
 static void wl_keyboard_repeatinfo (void *data, struct wl_keyboard *wl_keyboard, int32_t rate, int32_t delay);
 #endif
 
-void _dengine_window_processkey(WindowInput* input, char key, int isrelease);
+void _dengine_window_processkey(StandardInput* input, uint32_t key, int isdown);
 void _dengine_window_pollev(DengineWindow* window);
 
 #ifdef DENGINE_CONTEXT_EGL
@@ -164,23 +165,8 @@ struct DengineWindow
 #endif
     int gl_load;
     DynLib gl_lib;
-    WindowInput input;
-    Thread* windowthr;
-
-    Condition pollcond;
-    int deref;
+    StandardInput input;
 };
-
-typedef struct
-{
-    int width;
-    int height;
-    const char* title;
-    const DengineWindow* share;
-    DengineWindow* ret;
-    Condition* ret_cond;
-    int* deref_and_set_to_one;
-}CreateWindowAttrs;
 
 #define DFT_GL_MAX 2
 #define DFT_GL_MIN 0
@@ -418,27 +404,23 @@ int dengine_window_init()
 #endif
 
 #ifdef DENGINE_ANDROID
+    if(dengineutils_android_get_app() == NULL)
+    {
+        dengineutils_logging_log("ERROR::YOU NEED TO SET ANDROID APP IN android_main as the first thing!");
+        return 0;
+    }
+
     /*
      * directly create current (android only supports 1 window and display afaik)
-     * and make it current. make sure we already ANativeWindow_acquired by polling
-     * we also want to keep it on the main thread
+     *  make sure we already ANativeWindow_acquired by polling
      */
     while(!dengineutils_android_iswindowrunning())
         dengineutils_android_pollevents();
 
-    DengineWindow* window = calloc(1, sizeof(DengineWindow));
-    /* we should have ANativeWindow_acquired */
-    window->and_win = dengineutils_android_get_window();
-    window->egl_dpy = egl_dpy;
     dengineutils_android_set_appfunc(_dengine_window_android_onpause, DENGINEUTILS_ANDROID_APPFUNC_PAUSE);
     dengineutils_android_set_appfunc(_dengine_window_android_oninitwindow, DENGINEUTILS_ANDROID_APPFUNC_INITWINDOW);
-    if(!_dengine_window_egl_createctx(window->egl_dpy, &window->egl_sfc, &window->egl_ctx, NULL, window->and_win))
-    {
-        dengineutils_logging_log("ERROR::WINDOW::Cannot create EGLContext");
-        return 0;
-	}
-    dengine_window_makecurrent(window);
-    dengine_window_loadgl(window);
+    dengineutils_android_set_inputfunc(_dengine_window_android_oninput);
+
 #endif
     _dengine_input_init();
     return init;
@@ -479,49 +461,6 @@ void dengine_window_terminate()
     _dengine_input_terminate();
 }
 
-void _dengine_window_processkey(WindowInput* input, char key, int isrelease)
-{
-    if(key >= 33 && key <= 126)
-    {
-        if(isrelease)
-        {
-            for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++) {
-                if(input->alpnum[i].key == key)
-                {
-                    input->alpnum[i].state = 0;
-                    input->alpnum[i].key = 0;
-                }
-            }
-//            for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
-//            {
-//                printf("[%c] ", input->alpnum[i].key);
-//            }
-//            printf("\n");
-        }else
-        {
-            for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++) {
-                //dont dupe;
-                if(input->alpnum[i].key == key)
-                    break;
-
-                if(input->alpnum[i].key != key &&
-                        input->alpnum[i].key == 0 &&
-                        input->alpnum[i].state != -1)
-                {
-                    input->alpnum[i].key = key;
-                    break;
-                }
-            }
-//            for (int i = 0; i < DENGINE_WINDOW_ALPNUM; i++)
-//            {
-//                printf("[%c] ", input->alpnum[i].key);
-//            }
-//            printf("\n");
-        }
-
-    }
-}
-
 void dengine_window_request_GL(int gl_major, int gl_minor, int gl_core)
 {
     DENGINE_DEBUG_ENTER;
@@ -549,12 +488,11 @@ void dengine_window_request_defaultall()
     _gl_core = 0;
 }
 
-void* _dengine_window_createandpoll(void* args)
+DengineWindow* dengine_window_create(int width, int height, const char* title, const DengineWindow* share)
 {
-    CreateWindowAttrs* attrs = args;
-
+    DengineWindow* ret;
     DengineWindow window;
-    memset(&window, 0, sizeof (DengineWindow));
+    memset(&window, 0, sizeof(window));
 #ifdef DENGINE_WIN_X11
     Window root = DefaultRootWindow(x_dpy);
     window.x_swa.event_mask =
@@ -591,7 +529,7 @@ void* _dengine_window_createandpoll(void* args)
 //                           vi->depth, InputOutput, vi->visual,
 //                           CWColormap | CWEventMask, &window.x_swa);
 
-    window.x_win = XCreateWindow(x_dpy, root, 0, 0, attrs->width, attrs->height, 0,
+    window.x_win = XCreateWindow(x_dpy, root, 0, 0, width, height, 0,
                            CopyFromParent, InputOutput, CopyFromParent,
                            CWEventMask, &window.x_swa);
     if(!window.x_win)
@@ -618,8 +556,8 @@ void* _dengine_window_createandpoll(void* args)
     };
 
     GLXContext ctx_shr = NULL;
-    if(attrs->share)
-        ctx_shr = attrs->share->glx_ctx;
+    if(share)
+        ctx_shr = share->glx_ctx;
 
     window.glx_ctx = dengine_glXCreateContextAttribsARB(x_dpy, conf[0], ctx_shr, True, ctxattr);
     //window.glx_ctx = glXCreateContext(x_dpy, vi, ctx_shr, GL_TRUE);
@@ -655,28 +593,29 @@ void* _dengine_window_createandpoll(void* args)
     // x11 delete message. why on earth is there no simple exit event?
     XSetWMProtocols(x_dpy, window.x_win, &wm_delete, 1);
     XMapWindow(x_dpy, window.x_win);
-    XStoreName(x_dpy, window.x_win, attrs->title);
+    XStoreName(x_dpy, window.x_win, title);
 #elif defined(DENGINE_WIN32)
-    wchar_t title_wcs[256];
-
-    mbstowcs(title_wcs, attrs->title, sizeof(title_wcs));
+    size_t titlestrlen = mbstowcs(NULL, title, 0) ;
+    wchar_t* title_wcs = calloc(titlestrlen + 1, sizeof(wchar_t));
+    mbstowcs(title_wcs, title, titlestrlen);
     window.win32_hwnd = CreateWindowExW(0,
                              wc_class,
                              title_wcs,
                              WS_OVERLAPPEDWINDOW,
-                             0, 0, attrs->width, attrs->height,
+                             0, 0, width, height,
                              NULL,
                              NULL,
                              wc.hInstance,
                              NULL);
+    free(title_wcs);
     if(window.win32_hwnd == NULL)
     {
         return NULL;
     }
-    window.width = attrs->width;
-    window.height = attrs->height;
-    if(attrs->share)
-        window.win32_ctx_shr = attrs->share->win32_ctx;
+    window.width = width;
+    window.height = height;
+    if(share)
+        window.win32_ctx_shr = share->win32_ctx;
 
     ShowWindow(window.win32_hwnd , SW_NORMAL);
 
@@ -788,7 +727,7 @@ void* _dengine_window_createandpoll(void* args)
     xdg_surface_add_listener(window.xdg_sfc, &xdg_sfc_listener, NULL);
 
     window.xdg_top = xdg_surface_get_toplevel(window.xdg_sfc);
-    xdg_toplevel_set_title(window.xdg_top, attrs->title);
+    xdg_toplevel_set_title(window.xdg_top, title);
     xdg_toplevel_add_listener(window.xdg_top, &xdg_toplevel_listener, NULL);
 
     if(zxdg_decoration_manager_v1 == NULL)
@@ -801,11 +740,11 @@ void* _dengine_window_createandpoll(void* args)
     wl_surface_commit(window.wl_sfc);
 
     struct wl_region* opaque = wl_compositor_create_region(wl_comp);
-    wl_region_add(opaque, 0, 0, attrs->width, attrs->height);
+    wl_region_add(opaque, 0, 0, width, height);
     wl_surface_set_opaque_region(window.wl_sfc, opaque);
     wl_region_destroy(opaque);
 
-    window.wl_egl_win = wl_egl_window_create(window.wl_sfc, attrs->width, attrs->height);
+    window.wl_egl_win = wl_egl_window_create(window.wl_sfc, width, height);
     if(window.wl_egl_win == EGL_NO_SURFACE)
     {
         dengineutils_logging_log("ERROR::cannot wl_egl_window_create");
@@ -814,8 +753,8 @@ void* _dengine_window_createandpoll(void* args)
 
     window.egl_dpy = egl_dpy;
     EGLContext shr = EGL_NO_CONTEXT;
-    if(attrs->share)
-        shr = attrs->share->egl_ctx;
+    if(share)
+        shr = share->egl_ctx;
 
     if(!_dengine_window_egl_createctx(window.egl_dpy, &window.egl_sfc, &window.egl_ctx, shr, window.wl_egl_win))
     {
@@ -823,16 +762,28 @@ void* _dengine_window_createandpoll(void* args)
         goto winfail;
     }
 
-    window.width = attrs->width;
-    window.height = attrs->height;
+    window.width = width;
+    window.height = height;
+#elif defined(DENGINE_ANDROID)
+/* we should have ANativeWindow_acquired */
+    window.and_win = dengineutils_android_get_window();
+    window.egl_dpy = egl_dpy;
+    if(!_dengine_window_egl_createctx(window.egl_dpy, &window.egl_sfc, &window.egl_ctx, NULL, window.and_win))
+    {
+        dengineutils_logging_log("ERROR::WINDOW::Cannot create EGLContext");
+        goto winfail;
+	}
 #endif
-    DengineWindow* ret = calloc(1, sizeof(DengineWindow));
+
+    ret = calloc(1, sizeof(DengineWindow));
     memcpy(ret, &window, sizeof(DengineWindow));
     ret->running = 1;
+
 #ifdef DENGINE_WIN32
     //set lpParam
     SetWindowLongPtr(ret->win32_hwnd, GWLP_USERDATA, (LONG_PTR)ret);
 #endif
+
 #ifdef DENGINE_WIN_WAYLAND
    /* set user datum (data plural?) */
     xdg_toplevel_set_user_data(ret->xdg_top, ret);
@@ -843,26 +794,7 @@ void* _dengine_window_createandpoll(void* args)
     wl_display_roundtrip(wl_dpy);
 #endif
 
-    /* create out poll cond */
-    dengineutils_thread_condition_create(&ret->pollcond);
-
-    /* raise our cond last so main thread
-     * gets hold of created window
-     * from here control is handed to main thread, so
-     * dont use attrs again since its been popped from stack
-     * */
-    attrs->ret = ret;
-    *attrs->deref_and_set_to_one = 1;
-    dengineutils_thread_condition_raise(attrs->ret_cond);
-
-    while (ret->running) {
-        dengineutils_thread_condition_wait(&ret->pollcond,
-                                           &ret->deref);
-        ret->deref = 0;
-        _dengine_input_gamepad_poll();
-        _dengine_window_pollev(ret);
-    }
-    return NULL;
+    return ret;
 
 winfail:
 #ifdef DENGINE_WIN32
@@ -873,48 +805,7 @@ winfail:
    if(conf)
        XFree(conf);
 #endif
-
-    /* raise our cond last so main thread
-     * dont freeeze after failed window
-     * dont use attrs again since its been popped from stack
-     * */
-    attrs->ret = NULL;
-    *attrs->deref_and_set_to_one = 1;
-    dengineutils_thread_condition_raise(attrs->ret_cond);
     return NULL;
-}
-
-DengineWindow* dengine_window_create(int width, int height, const char* title, const DengineWindow* share)
-{
-    DENGINE_DEBUG_ENTER;
-
-    CreateWindowAttrs attrs;
-    memset(&attrs, 0, sizeof(CreateWindowAttrs));
-
-    attrs.width = width;
-    attrs.height = height;
-    attrs.title = title;
-    attrs.share = share;
-    Condition ret_cond;
-    dengineutils_thread_condition_create(&ret_cond);
-    attrs.ret_cond = &ret_cond;
-    int oned = 0;
-    attrs.deref_and_set_to_one = &oned;
-
-    Thread* windowthr = calloc(1, sizeof(Thread));
-    dengineutils_thread_create(_dengine_window_createandpoll, &attrs, windowthr);
-    dengineutils_thread_set_name(windowthr, "WindowThr");
-    dengineutils_thread_condition_wait(&ret_cond, &oned);
-
-    /* kill failed window thred */
-    if(attrs.ret == NULL)
-        dengineutils_thread_wait(windowthr);
-    else	
-        attrs.ret->windowthr = windowthr;
-
-    dengineutils_thread_condition_destroy(&ret_cond);
-
-    return attrs.ret;
 }
 
 void dengine_window_destroy(DengineWindow* window)
@@ -954,20 +845,7 @@ void dengine_window_destroy(DengineWindow* window)
    if(window->gl_lib)
         dengineutils_dynlib_close(window->gl_lib);
 
-   /* some ensure the window isnt running */
-   while (dengine_window_isrunning(window)) {
-       dengine_window_poll(window);
-   }
-    /* TODO: android multithreading is completely fucked.
-     * as it runs on main thread. you dont want to deal with 
-     * using alooper with another thread. but we should make it 
-     * run alooer in another thread. soon....
-     */
-#ifndef DENGINE_ANDROID
-   dengineutils_thread_wait(window->windowthr);
-   dengineutils_thread_condition_destroy(&window->pollcond);
-#endif
-   free(window->windowthr);
+   window->running = 0;
    free(window);
 }
 
@@ -1118,7 +996,7 @@ int dengine_window_makecurrent(DengineWindow* window)
     if(make)
     {
         current = window;
-        dengine_input_set_window(current);
+        dengine_input_set_input(&window->input);
     }
     else{
         dengineutils_logging_log("WARNING::Unable to make current [%p]", window);
@@ -1189,50 +1067,36 @@ void _dengine_window_pollev(DengineWindow* window)
             dengine_viewport_set(0, 0, w, h);
         }
 
-        if(window->ev.type == KeyPress)
+        if(window->ev.type == KeyPress || window->ev.type == KeyRelease)
         {
             XLookupString(&window->ev.xkey, &key, 1, &keysym, NULL);
             char up = toupper(key);
-            _dengine_window_processkey(&window->input, up, 0);
+            int state = 1;
+            if(window->ev.type == KeyRelease)
+                state = 0;
+            _dengine_window_processkey(&window->input, up, state);
         }
 
-        if(window->ev.type == KeyRelease)
+        if(window->ev.type == ButtonPress || window->ev.type == ButtonRelease)
         {
-            XLookupString(&window->ev.xkey, &key, 1, &keysym, NULL);
-            char up = toupper(key);
-            _dengine_window_processkey(&window->input, up, 1);
-        }
+            MouseButton btn = DENGINE_INPUT_MSEBTN_PRIMARY;
+            if(window->ev.xbutton.button == Button2)
+                btn = DENGINE_INPUT_MSEBTN_MIDDLE;
+            else if(window->ev.xbutton.button == Button3)
+                btn = DENGINE_INPUT_MSEBTN_SECONDARY;
 
-        if(window->ev.type == ButtonPress)
-        {
-            if(window->ev.xbutton.button >= Button1 &&
-                    window->ev.xbutton.button <= Button3)
-            {
-                window->input.msebtn[window->ev.xbutton.button - 1] = 1;
-//                printf("press %u %u\n", window->ev.xbutton.button,
-//                       window->ev.xbutton.state);
-            }
-        }
+            window->input.mouse_btns[btn].button = btn;
+            window->input.mouse_btns[btn].state = 1;
+            if(window->ev.type == ButtonRelease)
+                memset(&window->input.mouse_btns[btn], 0, sizeof(ButtonInfo));
 
-        if(window->ev.type == ButtonRelease)
-        {
-            if(window->ev.xbutton.button >= Button1 &&
-                    window->ev.xbutton.button <= Button3)
-            {
-                window->input.msebtn[window->ev.xbutton.button - 1] = 0;
-//                printf("press %u %u\n", window->ev.xbutton.button,
-//                       window->ev.xbutton.state);
-            }
-
-            if(window->ev.xbutton.button == Button5)
-            {
-                window->input.msesrl_y = -1.0;
-            }
 
             if(window->ev.xbutton.button == Button4)
-            {
-                window->input.msesrl_y = 1.0;
-            }
+                window->input.mouse_scroll_y = 1.0;
+            else if(window->ev.xbutton.button == Button5)
+                window->input.mouse_scroll_y = -1.0;
+//                printf("press %u %u\n", window->ev.xbutton.button,
+//                       window->ev.xbutton.state);
         }
 
         if(window->ev.type == MotionNotify)
@@ -1246,65 +1110,59 @@ void _dengine_window_pollev(DengineWindow* window)
                           &x, &y,
                           &masks);
 
-            window->input.mse_x = x;
-            window->input.mse_y = h - y;
+            window->input.mouse_x = x;
+            window->input.mouse_y = h - y;
         }
     }
     #elif defined(DENGINE_WIN32)
-    while(window->running && GetMessageW(&window->win32_msg, window->win32_hwnd, 0, 0))
+    while(PeekMessageW(&window->win32_msg, window->win32_hwnd, 0, 0, PM_REMOVE))
     {
         TranslateMessage(&window->win32_msg);
         DispatchMessageW(&window->win32_msg);
     }
     #elif defined(DENGINE_ANDROID)
+    dengineutils_android_pollevents();
     /* we should have received all input data from 
      * dengineutils_android_pollevents()
      */
     window->running = dengineutils_android_iswindowrunning();
-    if(window && dengineutils_android_iswindowrunning())
-    {
-        int h;
-        /* TODO: can use viewport? */
-        dengine_window_get_dim(window, NULL, &h);
-        AndroidInput* andr_input = dengineutils_android_get_input();
-        if(andr_input->pointer0.state == 1)
-        {
-            window->input.mse_x = andr_input->pointer0.x;
-            window->input.mse_y = (float)h - andr_input->pointer0.y;
-            if(window->input.msebtn[0] != -1)
-                window->input.msebtn[0] = 1;
-        }else
-        {
-            window->input.msebtn[0] = 0;
-            window->input.mse_x = 0.0;
-            window->input.mse_y = 0.0;
-        }
-    }
     #elif defined(DENGINE_WIN_WAYLAND)
     wl_display_dispatch_pending(wl_dpy);
     #endif
 }
 
+void _dengine_window_processkey(StandardInput* input, uint32_t key, int isdown)
+{
+    for(size_t i = 0; i < DENGINE_ARY_SZ(input->keys); i++)
+    {
+        if(isdown)
+        {
+            /*prevent dupes */
+            if(input->keys[i].button == key)
+                break;
+
+            if(!input->keys[i].button){
+                input->keys[i].button = key;
+                input->keys[i].state = 1;
+                break;
+            }
+        }else {
+            if(input->keys[i].button == key){
+                memset(&input->keys[i], 0, sizeof(input->keys[i]));
+            }
+        }
+    }
+}
 int dengine_window_poll(DengineWindow* window)
 {
     DENGINE_DEBUG_ENTER;
 
     int polled = 0;
-
-#ifdef DENGINE_ANDROID
-    /* THIS MUST BE CALLED FROM MAIN THREAD SO THAT WE HAVE ACCESS TO 
-     * THE MAIN ALooper. YOU SERIOUSLY DON'T WANT TO DEAL WITH THE
-     * ALOOPER SHENANIGANS IN MULTIPLE THREADS!!!
-     */
-    dengineutils_android_pollevents();
     _dengine_window_pollev(window);
-#else
-    if(window != NULL && window->deref == 0){
-        window->deref = 1;
-        dengineutils_thread_condition_raise(&window->pollcond);
-    }
-#endif
-
+    _dengine_input_gamepad_poll();
+    /* TODO: gtk dialog doesn't dissapear after a dialog close. we 
+     * probably should do this after the dialog 
+     */
 #ifdef DENGINE_HAS_GTK3
    gtk_main_iteration_do(0);
 #endif
@@ -1388,7 +1246,7 @@ int dengine_window_set_position(DengineWindow* window, int x, int y)
     return set;
 }
 
-WindowInput* dengine_window_get_input(DengineWindow* window)
+StandardInput* dengine_window_get_input(DengineWindow* window)
 {
     DENGINE_DEBUG_ENTER;
 
@@ -1485,95 +1343,108 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     char key[MB_CUR_MAX];
     wctomb(key, wParam);
+    key[0] = toupper(key[0]);
 
     switch (uMsg) {
 
-    case WM_SIZE:{
-//        dengineutils_logging_log("WM_SIZE : %u", uMsg);
-        int width = LOWORD(lParam);
-        int height = HIWORD(lParam);
-        if(window && window->gl_load)
-            dengine_viewport_set(0, 0, width, height);
-        return 0;
-    }
+        case WM_SIZE:{
+                         //        dengineutils_logging_log("WM_SIZE : %u", uMsg);
+                         int width = LOWORD(lParam);
+                         int height = HIWORD(lParam);
+                         if(window && window->gl_load)
+                             dengine_viewport_set(0, 0, width, height);
+                         return 0;
+                     }
 
-    case WM_PAINT:{
-//        dengineutils_logging_log("WM_PAINT : %u", uMsg);
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hwnd, &ps);
-        FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
-        EndPaint(hwnd, &ps);
-        return 0;
-    }
+        case WM_PAINT:{
+                          //        dengineutils_logging_log("WM_PAINT : %u", uMsg);
+                          PAINTSTRUCT ps;
+                          HDC hdc = BeginPaint(hwnd, &ps);
+                          FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+                          EndPaint(hwnd, &ps);
+                          return 0;
+                      }
 
-    case WM_CLOSE:
-    {
-//        dengineutils_logging_log("WM_CLOSE : %u", uMsg);
-//        if(MessageBoxW(hwnd, L"Do you want to quit?", L"Dengine", MB_OKCANCEL) == IDOK)
-//        {
-            window->running = 0;
-            return 0;
-//        }
-    }
+        case WM_CLOSE:
+                      {
+                          //        dengineutils_logging_log("WM_CLOSE : %u", uMsg);
+                          //        if(MessageBoxW(hwnd, L"Do you want to quit?", L"Dengine", MB_OKCANCEL) == IDOK)
+                          //        {
+                          window->running = 0;
+                          return 0;
+                          //        }
+                      }
 
-    case WM_LBUTTONDOWN:
-    {
-        if(window->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] != -1)
-            window->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] = 1;
-        return 0;
-    }
-    case WM_LBUTTONUP:
-    {
-        window->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] = 0;
-        return 0;
-    }
-    case WM_RBUTTONDOWN:
-    {
-        if(window->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] != -1)
-            window->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] = 1;
-        return 0;
-    }
-    case WM_RBUTTONUP:
-    {
-        window->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] = 0;
-        return 0;
-    }
-    case WM_MBUTTONDOWN:
-    {
-        if(window->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] != -1)
-            window->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] = 1;
-        return 0;
-    }
-    case WM_MBUTTONUP:
-    {
-        window->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] = 0;
-        return 0;
-    }
+        case WM_LBUTTONDOWN:
+                      {
+                          window->input.mouse_btns[DENGINE_INPUT_MSEBTN_PRIMARY].button = DENGINE_INPUT_MSEBTN_PRIMARY; 
+                          window->input.mouse_btns[DENGINE_INPUT_MSEBTN_PRIMARY].state = 1;
+                          return 0;
+                      }
+        case WM_LBUTTONUP:
+                      {
+                          ZeroMemory(&window->input.mouse_btns[DENGINE_INPUT_MSEBTN_PRIMARY], sizeof(ButtonInfo));
+                          return 0;
+                      }
+        case WM_RBUTTONDOWN:
+                      {
+                          window->input.mouse_btns[DENGINE_INPUT_MSEBTN_SECONDARY].button = DENGINE_INPUT_MSEBTN_SECONDARY; 
+                          window->input.mouse_btns[DENGINE_INPUT_MSEBTN_SECONDARY].state = 1;
+ 
+                          return 0;
+                      }
+        case WM_RBUTTONUP:
+                      {
+                          ZeroMemory(&window->input.mouse_btns[DENGINE_INPUT_MSEBTN_SECONDARY], sizeof(ButtonInfo));
+                          return 0;
+                      }
 
-    case WM_MOUSEMOVE:
-    {
-        int h;
-        dengine_window_get_dim(window, NULL, &h);
-        window->input.mse_x = GET_X_LPARAM(lParam);
-        window->input.mse_y = h - GET_Y_LPARAM(lParam);
-        return 0;
-    }
+        case WM_MBUTTONDOWN:
+                      {
+                          window->input.mouse_btns[DENGINE_INPUT_MSEBTN_MIDDLE].button = DENGINE_INPUT_MSEBTN_MIDDLE; 
+                          window->input.mouse_btns[DENGINE_INPUT_MSEBTN_MIDDLE].state = 1;
+                          return 0;
+                      }
+        case WM_MBUTTONUP:
+                      {
+                          ZeroMemory(&window->input.mouse_btns[DENGINE_INPUT_MSEBTN_MIDDLE], sizeof(ButtonInfo));
+                          return 0;
+                      }
 
-    case WM_KEYUP:
-    {
-        _dengine_window_processkey(&window->input, key[0], 1);
-        return 0;
-    }
+        case WM_MOUSEMOVE:
+                      {
+                          int h;
+                          dengine_window_get_dim(window, NULL, &h);
+                          window->input.mouse_x = GET_X_LPARAM(lParam);
+                          window->input.mouse_y = h - GET_Y_LPARAM(lParam);
+                          return 0;
+                      }
+        case WM_KEYUP:
+                      {
+                          _dengine_window_processkey(&window->input, key[0], 0);
+                          return 0;
+                      }
 
-    case WM_KEYDOWN:
-    {
-        _dengine_window_processkey(&window->input, key[0], 0);
-        return 0;
-    }
+        case WM_KEYDOWN:
+                      {
+                          _dengine_window_processkey(&window->input, key[0], 1);
+                          return 0;
+                      }
 
-    default:{
-        return DefWindowProcW(hwnd, uMsg, wParam, lParam);;
-    }
+        case WM_MOUSEWHEEL:
+                      {
+                          /*TODO: bruh */
+                          if(HIWORD(wParam) > UINT16_MAX / 2)
+                              window->input.mouse_scroll_y = -1.0f;
+                          else
+                              window->input.mouse_scroll_y = 1.0f;
+                          return 0;
+                      }
+
+        default:{
+                    return DefWindowProcW(hwnd, uMsg, wParam, lParam);;
+                }
+
 
     }
 }
@@ -1581,6 +1452,61 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 #endif
 
 #ifdef DENGINE_ANDROID
+int32_t _dengine_window_android_oninput(struct android_app* app, AInputEvent* event)
+{
+    uint32_t type = AInputEvent_getType(event);
+    int32_t action = AMotionEvent_getAction(event);
+    int state = action & AMOTION_EVENT_ACTION_MASK;
+    StandardInput* stdinput = &current->input;
+    uint32_t ptrid = action >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+    uint32_t cnt = AMotionEvent_getPointerCount(event);
+    int h;
+
+    dengine_window_get_dim(current, NULL, &h);
+
+    switch (type) {
+        default:
+            break;
+        case AINPUT_EVENT_TYPE_MOTION:
+            {
+                if(cnt == 1)
+                {
+                    memset(stdinput->touches, 0, sizeof(stdinput->touches));
+                }
+                for(uint32_t i = 0; i < cnt; i++)
+                {
+                    stdinput->touches[i].x = AMotionEvent_getX(event, i);
+                    stdinput->touches[i].y = h - AMotionEvent_getY(event, i);
+                }
+
+                stdinput->mouse_btns[DENGINE_INPUT_MSEBTN_PRIMARY].state = 1;
+                stdinput->mouse_x = stdinput->touches[0].x;
+                stdinput->mouse_y = stdinput->touches[0].y;
+                if(ptrid < DENGINE_ARY_SZ(stdinput->touches)){
+                    stdinput->touches[ptrid].isdown = 1;
+                    if(state == AMOTION_EVENT_ACTION_UP || state == AMOTION_EVENT_ACTION_POINTER_UP){
+                        stdinput->mouse_btns[DENGINE_INPUT_MSEBTN_PRIMARY].state = 0;
+                        stdinput->touches[ptrid].isdown = 0;
+                        stdinput->touches[ptrid].oneshot = 0;
+                    }
+                }
+                
+
+                /*for(size_t i = 0; i < DENGINE_ARY_SZ(stdinput->touches); i++)*/
+                /*{*/
+                    /*dengineutils_logging_log("%f %f %d %d",*/
+                            /*stdinput->touches[i].x,*/
+                            /*stdinput->touches[i].y,*/
+                            /*stdinput->touches[i].isdown,*/
+                            /*stdinput->touches[i].oneshot);*/
+                /*}*/
+                /*dengineutils_logging_log("\n");*/
+                break;
+            }
+    }
+    return 0;
+
+}
 void _dengine_window_android_onpause(struct android_app* app)
 {
     waspaused = 1;
@@ -1697,7 +1623,7 @@ void zxdg_toplevel_decoration_v1_configure (void *data,
 }
 static void wl_seat_name(void *data, struct wl_seat *wl_seat, const char *name)
 {
-
+    return;
 }
 
 static void wl_seat_caps(void* data, struct wl_seat* seat, uint32_t caps)
@@ -1713,73 +1639,52 @@ static void wl_seat_caps(void* data, struct wl_seat* seat, uint32_t caps)
         wl_keyboard_add_listener(wl_kbd, &wl_kbd_listener, NULL);
     }
 }
-/* currently focused window */
-DengineWindow* focused_ptr = NULL;
-DengineWindow* focused_kbd = NULL;
+
 static void wl_pointer_enter(void *data, struct wl_pointer *pointer, uint32_t serial, struct wl_surface *surface, wl_fixed_t x, wl_fixed_t y)
 {
-    focused_ptr = wl_surface_get_user_data(surface);
+    wl_pointer_set_user_data(pointer, wl_surface_get_user_data(surface));
 }
 
 static void wl_pointer_motion(void *data, struct wl_pointer *wl_pointer, uint32_t time, wl_fixed_t x, wl_fixed_t y)
 {
-    focused_ptr->input.mse_x = wl_fixed_to_double(x);
-    focused_ptr->input.mse_y = focused_ptr->height - wl_fixed_to_double(y);
+    DengineWindow* window = wl_pointer_get_user_data(wl_pointer);
+    window->input.mouse_x = wl_fixed_to_double(x);
+    window->input.mouse_y = window->height - wl_fixed_to_double(y);
 }
 
 static void wl_pointer_frame(void* data, struct wl_pointer* pointer)
 {
-
+    return;
 }
 static void wl_pointer_button(void *data, struct wl_pointer *wl_pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state)
 {
-    if(button == BTN_LEFT)
-    {
-        if(focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] != -1)
-        {
-            focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] = 1;
-        }
-        if(state == WL_POINTER_BUTTON_STATE_RELEASED)
-            focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_PRIMARY] = 0;
-
-    }else if(button == BTN_RIGHT)
-    {
-        if(focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] != -1)
-        {
-            focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] = 1;
-        }
-        if(state == WL_POINTER_BUTTON_STATE_RELEASED)
-            focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_SECONDARY] = 0;
-    }else if(button == BTN_MIDDLE)
-    {
-        if(focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] != -1)
-        {
-            focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] = 1;
-        }
-        if(state == WL_POINTER_BUTTON_STATE_RELEASED)
-            focused_ptr->input.msebtn[DENGINE_INPUT_MSEBTN_MIDDLE] = 0;
-    }
+    uint32_t btn = button - BTN_LEFT;
+    DengineWindow* window = wl_pointer_get_user_data(wl_pointer);
+    window->input.mouse_btns[btn].button = btn;
+    window->input.mouse_btns[btn].state = 1;
+    if(state == WL_POINTER_BUTTON_STATE_RELEASED)
+        memset(&window->input.mouse_btns[btn], 0, sizeof(ButtonInfo));
 //    dengineutils_logging_log("btn:%u", button);
 }
 static void wl_pointer_leave(void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface)
 {
-    focused_ptr = NULL;
+    return;
 }
 
 static void wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis, wl_fixed_t value)
 {
-//    dengineutils_logging_log("axis:%u value:%f", axis, wl_fixed_to_double(value));
     int value_int = wl_fixed_to_int(value);
     int value_norm = value_int / abs(value_int);
+    DengineWindow* window = wl_pointer_get_user_data(wl_pointer);
     if(axis == 0)
     {
-        focused_ptr->input.msesrl_y = value_norm;
+        window->input.mouse_scroll_y = -value_norm;
     }
 }
 
 static void wl_pointer_axis_stop(void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis)
 {
-
+   
 }
 
 static void wl_pointer_axis_value120(void *data, struct wl_pointer *wl_pointer, uint32_t axis, int32_t value120)
@@ -1815,11 +1720,11 @@ static void wl_keyboard_keymap(void *data, struct wl_keyboard *wl_keyboard, uint
 }
 static void wl_keyboard_enter(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface, struct wl_array *keys)
 {
-    focused_kbd = wl_surface_get_user_data(surface);
+    wl_keyboard_set_user_data(wl_keyboard, wl_surface_get_user_data(surface));
 }
 static void wl_keyboard_leave(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface)
 {
-    focused_kbd = NULL;
+    return;
 }
 static void wl_keyboard_mods(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group)
 {
@@ -1829,11 +1734,12 @@ static void wl_keyboard_mods(void *data, struct wl_keyboard *wl_keyboard, uint32
 }
 static void wl_keyboard_key(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t time, uint32_t key, uint32_t state)
 {
-    char kv[2];
+    char kv[4];
     xkb_state_key_get_utf8(xkb_state, key + 8, kv, sizeof(kv));
     char up = toupper(kv[0]);
-    _dengine_window_processkey(&focused_kbd->input, up, !state);
-//    dengineutils_logging_log("wl_keyboard_key: kv=%c, state=%u", kv[0], state);
+    DengineWindow* window = wl_keyboard_get_user_data(wl_keyboard);
+    _dengine_window_processkey(&window->input, up, state);
+    /*dengineutils_logging_log("wl_keyboard_key: kv=%c, state=%u toupper:%c", kv[0], state, up);*/
 }
 
 static void wl_keyboard_repeatinfo (void *data, struct wl_keyboard *wl_keyboard, int32_t rate, int32_t delay)

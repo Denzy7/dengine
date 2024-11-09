@@ -1,7 +1,7 @@
 # glue code
 
 
-set(DENGINE_INIT_CONF_VERSION "0.7.2")
+set(DENGINE_INIT_CONF_VERSION "0.8.0")
 configure_file(src/dengine.ini.in dengine.ini)
 configure_file(src/dengine.ini.h.in dengine.ini.h)
 dengine_rc_compile(
@@ -19,4 +19,4 @@ target_include_directories(dengine_glue_lib PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(dengine_glue_lib PRIVATE dengine-core dengine-utils dengine-gui dengine-script)
 
-install(TARGETS dengine_glue_lib DESTINATION lib)
+install(TARGETS dengine_glue_lib DESTINATION lib/dengine-${DENGINE_VERSION})

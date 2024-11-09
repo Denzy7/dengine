@@ -156,6 +156,10 @@ int dengineutils_thread_condition_wait(Condition* condition, int* deref_and_set_
     return 1;
 }
 
+int dengineutils_thread_condition_wait_self(Condition* condition)
+{
+    return dengineutils_thread_condition_wait(condition, &condition->oned);
+}
 int dengineutils_thread_condition_raise(Condition* condition)
 {
 #ifdef DENGINE_WIN32

@@ -12,9 +12,16 @@ set(dengine-scene-hdr
 include/dengine-scene/ecs.h
 include/dengine-scene/scene.h
 )
+if(DENGINE_HAS_PYTHON3)
+    list(APPEND dengine-scene-hdr
+        include/dengine-scene/scriptingsync/python/entity.h
+    )
+    list(APPEND dengine-scene-src 
+        src/scriptingsync/python/entity.c
+    )
+endif()
 
-add_library(dengine-scene STATIC ${dengine-scene-hdr} ${dengine-scene-src})
-set(dengine-scene-link)
+add_library(dengine-scene ${dengine-scene-hdr} ${dengine-scene-src})
 set_target_properties(dengine-scene PROPERTIES
                       VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
                       SOVERSION ${dengine_VERSION_MAJOR}
@@ -24,11 +31,8 @@ set_target_properties(dengine-scene PROPERTIES
 if(WIN32)
   set_target_properties(dengine-scene PROPERTIES PREFIX "")
 endif()
-if(UNIX)
-    list(APPEND dengine-scene-link m)
-endif()
 
-target_link_libraries(dengine-scene PRIVATE dengine-core dengine-script dengine-utils ${dengine-scene-link})
+target_link_libraries(dengine-scene PRIVATE dengine-core dengine-utils dengine-script)
 
-install(TARGETS dengine-scene DESTINATION lib)
+install(TARGETS dengine-scene DESTINATION lib/dengine-${DENGINE_VERSION})
 install(FILES ${dengine-scene-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-scene)

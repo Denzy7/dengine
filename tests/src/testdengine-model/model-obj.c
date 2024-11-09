@@ -49,6 +49,7 @@ int main(int argc, char** argv)
                 "Normal = aNormal;"
             "}";
     shader.fragment_code =
+            "precision mediump float;"
             "varying vec3 Normal;"
             "void main()"
             "{"

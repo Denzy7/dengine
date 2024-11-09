@@ -39,6 +39,7 @@ typedef struct
 
 typedef struct
 {
+    int oned;
 #ifdef DENGINE_WIN32
     CRITICAL_SECTION critsec;
     CONDITION_VARIABLE condvar;
@@ -96,6 +97,11 @@ int dengineutils_thread_condition_destroy(Condition* condition);
  *
  */
 int dengineutils_thread_condition_wait(Condition* condition, int* deref_and_set_to_one);
+
+/* same as condtion_wait, but uses the oned in
+ * the Condition struct
+ */
+int dengineutils_thread_condition_wait_self(Condition* condition);
 
 int dengineutils_thread_condition_raise(Condition* condition);
 

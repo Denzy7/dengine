@@ -22,17 +22,30 @@ typedef struct
     uint32_t target;
 }MaterialTexture;
 
+/* properties in the standard shaders */
+typedef struct 
+{
+    float diffuse[3];
+    float specular[3];
+    float ambient[3];
+    float alpha;
+    float specular_power;
+}MaterialProperties;
+
+typedef uint32_t MaterialID;
 /*! \struct Material
  *  Defines data in a Material
  */
 typedef struct
 {
+    MaterialID id; /* tracked for scene batching */
     Shader shader_color; /*!< Color shader */
     Shader shader_shadow; /*!< 2D shadow shader */
     Shader shader_shadow3d; /*!< 3D shadow shader */
 
     MaterialTexture textures[DENGINE_MAX_MATERIAL_TEXTURES]; /*!< Added Textures */
     uint32_t textures_count; /*!< Added Texture count*/
+    MaterialProperties properties; /*! Properties to upload to shader_color */
 
     Texture white; /*!< White texture this material uses */
     Texture normalmap; /*!< Empty normal map texture this material uses */
@@ -81,7 +94,7 @@ void dengine_material_set_shader_shadow3d(const Shader* shader, Material* materi
 int dengine_material_set_texture(const Texture* texture, const char* sampler, Material* material);
 
 /*!
- * \brief Use a material in a shader
+ * \brief Use a material in a shader. It sets material uniforms so beware it switches active shader
  * \param material Material to use. Careful when passing NULL as it unbinds everything!
  */
 void dengine_material_use(const Material* material);

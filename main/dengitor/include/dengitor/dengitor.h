@@ -7,52 +7,37 @@
 
 #include "dengitor/inspector.h"
 #include "dengitor/prefs.h"
+#include "dengitor/viewportopts.h"
+#include "dengitor/scenetree.h"
+#include "dengitor/w2v.h"
+#include "dengitor/utils.h"
+#include "dengitor/viewportopts.h"
+#include "dengitor/glarea.h"
+#include "dengitor/log.h"
 
-typedef enum
-{
-    DENGITOR_GLAREA_MODE_SCENE,
-    DENGITOR_GLAREA_MODE_GAME
-}GLAreaMode;
+typedef void(*Dengitor_Callback_OnEvent)();
 
 typedef struct
 {
     GtkApplicationWindow* main;
-    GtkAboutDialog* about;
     GtkBuilder* builder;
+    int activated;
 
     GdkCursor* cursor_blank;
     GdkCursor* cursor_arrow;
 
-    GtkGLArea* glarea;
-    GtkAllocation* glarea_alloc;
-
-    GtkTreeView* log;
-
-    GtkEventBox* glarea_evbox;
-    int glarea_evbox_first;
-    int glarea_evbox_rot;
-    double glarea_evbox_x;
-    double glarea_evbox_y;
-    double glarea_evbox_dx;
-    double glarea_evbox_dy;
-
-    GLAreaMode glarea_mode;
     GtkToggleButton* toggle_scene;
     GtkToggleButton* toggle_game;
 
-    Inspector inspector;
-    Prefs prefs;
-
-    GtkDialog* viewport_opts;
-    GtkAdjustment* viewport_opts_fov;
-    GtkAdjustment* viewport_opts_grid_width;
-    GtkAdjustment* viewport_opts_grid_scale;
-    GtkColorButton* viewport_opts_grid_colour;
-    GtkToggleButton* viewport_opts_grid_draw;
+    DengitorLog log;
+    DengitorInspector inspector;
+    DengitorPrefs prefs;
+    DengitorViewportOpts viewportops;
+    DengitorGLArea glarea;
+    DengitorSceneTree tree;
 
     Entity* scene_camera;
     Scene* scene_current;
-    Entity* scene_entity_current;
     float scene_entity_current_axis_width;
     int scene_camera_last_w;
     int scene_camera_last_h;
@@ -67,8 +52,10 @@ typedef struct
     float scene_axis_width;
     float scene_axis_scale;
 
-    GtkTreeView* scene_treeview;
-    GtkTreeStore* scene_treeview_store;
+    StandardInput stdinput;
+    NSL nsl_dengitor;
+
+    vtor oneventcbs;
 
     Shader shader_default;
     Shader shader_standard;
@@ -79,38 +66,11 @@ typedef struct
     Shader shader_skybox_2d;
 }Dengitor;
 
-void dengitor_onactivate(GtkApplication* app);
+Dengitor* dengitor_get();
 
-void dengitor_aboutdialog_show();
+/* essentially when editor runs an update step */
+void dengitor_onevent_addcallback(Dengitor_Callback_OnEvent callback);
 
-void dengitor_aboutdialog_hide();
-
-gboolean dengitor_main_ontick(GtkWidget* widget, GdkFrameClock* clock, gpointer data);
-
-void dengitor_glarea_onrealize(GtkGLArea* area);
-
-void dengitor_glarea_onunrealize(GtkGLArea* area);
-
-void dengitor_glarea_onrender(GtkGLArea* area);
-
-void dengitor_glarea_evbox_onmotion(GtkEventBox* evbox, GdkEventMotion* motion);
-
-void dengitor_glarea_evbox_onbtnpress(GtkEventBox* evbox, GdkEventButton* button);
-
-void dengitor_glarea_evbox_onbtnrelease(GtkEventBox* evbox, GdkEventButton* button);
-
-void dengitor_glarea_evbox_onkeypress(GtkEventBox* evbox, GdkEventKey* key);
-
-void dengitor_toggle_scenegame_ontoggle(GtkToggleButton* toggle_btn, gpointer flag);
-
-void dengitor_scene_treeview_oncursorchange(GtkTreeView* tree);
-
-void dengitor_draw_axis(Primitive* axis, Shader* shader);
-
-void dengitor_viewport_opts_setup(GtkBuilder* builder);
-
-void dengitor_viewport_opts_grid_draw_ontoggle(GtkToggleButton* toggle_btn);
-
-void dengitor_viewport_opts_show(GtkDialog* viewportopts);
+void dengitor_redraw();
 
 #endif // DENGITOR_H

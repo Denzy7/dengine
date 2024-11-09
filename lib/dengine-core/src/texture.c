@@ -474,6 +474,9 @@ int dengine_texture_issupprorted(uint32_t target, uint32_t type, uint32_t intern
 {
     DENGINE_DEBUG_ENTER;
 
+    Texture entry_tex;
+    dengine_entrygl_texture(target, &entry_tex );
+
     int supported = 1;
     uint32_t tex;
     static const int width = 8, height = 8;
@@ -509,6 +512,8 @@ int dengine_texture_issupprorted(uint32_t target, uint32_t type, uint32_t intern
 
     //clear errors
     glGetError();
+
+    dengine_texture_bind(target, &entry_tex);
 
     return supported;
 }

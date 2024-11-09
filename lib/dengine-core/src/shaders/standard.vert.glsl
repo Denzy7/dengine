@@ -15,11 +15,13 @@ attribute vec3 aTangent;
 attribute vec3 aBiTangent;
 
 varying vec3 Normal, CamPos, FragPos;
+varying vec4 FragPosDirLightSpace;
 varying vec2 TexCoord;
 varying mat3 TBN;
 
 uniform Camera camera;
 uniform mat4 model;
+uniform mat4 dL_shadow_projview;
 
 void main()
 {
@@ -29,7 +31,7 @@ void main()
     TexCoord = aTexCoord;
     CamPos = camera.position;
     FragPos = vec3(model * vec4(aPos, 1.0));
-
+    FragPosDirLightSpace = dL_shadow_projview * vec4(FragPos, 1.0);
     vec3 T = normalize(vec3(model * vec4(aTangent, 0)));
     vec3 B = normalize(vec3(model * vec4(aBiTangent, 0)));
     vec3 N = normalize(vec3(model * vec4(aNormal, 0)));

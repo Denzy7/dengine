@@ -19,7 +19,9 @@ android {
         {
             cmake
             {
-                arguments "-DDENGINE_SCRIPTING_PYTHON=OFF", "-DBUILD_SHARED_LIBS=ON" 
+                arguments "-DDENGINE_SCRIPTING_PYTHON=ON",
+                          "-DBUILD_SHARED_LIBS=ON",
+                          "-DDENGINE_LIGHTING_SHADOW3D=OFF"
             }
         }
     }

@@ -11,8 +11,13 @@ enum
     DENGITOR_SCENETREE_COLCNT
 };
 
-void dengitor_scenetree_traverse(Scene* scene, GtkTreeStore* store);
+typedef struct
+{
+    GtkTreeView* tree;
+}DengitorSceneTree;
 
-void dengitor_scenetree_setup(GtkTreeView* tree);
+void dengitor_scenetree_traverse(Scene* scene, DengitorSceneTree* tree);
+
+void dengitor_scenetree_setup(GtkBuilder* builder, DengitorSceneTree* tree);
 
 #endif // SCENETREE_H

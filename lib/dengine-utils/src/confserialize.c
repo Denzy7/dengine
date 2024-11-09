@@ -28,6 +28,7 @@ Conf* dengineutils_confserialize_new(const char* destfile, const char seperator)
 
     if(conf)
     {
+        memset(&conf->keys_values, 0, sizeof(vtor));
         vtor_create(&conf->keys_values, sizeof(ConfKV));
     }
     return conf;

@@ -14,3 +14,9 @@
 [submodule "deps/bullet3_src"]
 	path = deps/bullet3_src
 	url = https://github.com/Denzy7/bullet3_src
+[submodule "deps/ntldd"]
+	path = deps/ntldd
+	url = https://github.com/Denzy7/ntldd
+[submodule "deps/mingw-ldd"]
+	path = deps/mingw-ldd
+	url = https://github.com/xantares/mingw-ldd

@@ -20,6 +20,12 @@ char* testdengine_script_nslbullet_car_argv[] =
 };
 int testdengine_script_nslbullet_car_main(int argc, char **argv);
 
+char* testdengine_scece_ecs_argv[] = 
+{
+    "scene_ecs"
+};
+int testdengine_scece_ecs_main(int argc, char **argv);
+
 char* testdengine_lighting_standard_argv[] =
 {
     "lighting_standard"
@@ -40,6 +46,12 @@ DengineAndroidTest tests[] =
         NULL,
         DENGINE_ARY_SZ(testdengine_lighting_normalmap_argv),
         testdengine_lighting_normalmap_argv
+    },
+    {
+        testdengine_scece_ecs_main,
+        NULL,
+        DENGINE_ARY_SZ(testdengine_scece_ecs_argv),
+        testdengine_scece_ecs_argv
     },
     {
         testdengine_script_nslbullet_car_main,
@@ -87,6 +99,7 @@ void android_main(struct android_app* app)
     btnhgt = 100.0f;
     btnwid = w - fontsz;
 
+    dengineutils_logging_log("INFO:START MAIN LOOP");
     while(1)
     {
         if(app->destroyRequested)

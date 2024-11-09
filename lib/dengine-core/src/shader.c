@@ -33,6 +33,9 @@ extern char shadow2d_frag_glsl[];
 extern char shadow3d_vert_glsl[];
 extern char shadow3d_frag_glsl[];
 extern char shadow3d_geom_glsl[];
+extern char shadow3d_es_vert_glsl[];
+extern char shadow3d_es_frag_glsl[];
+extern char shadow3d_es_geom_glsl[];
 
 extern char gui_vert_glsl[];
 extern char gui_panel_frag_glsl[];
@@ -47,13 +50,13 @@ extern char skybox_vert_glsl[];
 extern char skyboxcube_frag_glsl[];
 extern char skybox2d_frag_glsl[];
 
-static const char *stdshaderssrcfiles[][4]=
+static const char* const stdshaderssrcfiles[DENGINE_SHADER_COUNT][7]=
 {
-    //name(for program binary), vertex_shader, fragment_shader, geometry_shader
+    //name(for program binary), vertex_shader, fragment_shader, geometry_shader, vert_es, frag_es, geom_es
     {"standard", standard_vert_glsl, standard_frag_glsl},
     {"default", default_vert_glsl ,default_frag_glsl},
     {"shadow2d", shadow2d_vert_glsl, shadow2d_frag_glsl},
-    {"shadow3d", shadow3d_vert_glsl, shadow3d_frag_glsl, shadow3d_geom_glsl},
+    {"shadow3d", shadow3d_vert_glsl, shadow3d_frag_glsl, shadow3d_geom_glsl, shadow3d_es_vert_glsl, shadow3d_es_frag_glsl, shadow3d_es_geom_glsl},
     {"gui_text", gui_vert_glsl, gui_text_frag_glsl},
     {"gui_panel", gui_vert_glsl, gui_panel_frag_glsl},
     {"gui_discard", gui_vert_glsl, discard_frag_glsl},
@@ -61,6 +64,13 @@ static const char *stdshaderssrcfiles[][4]=
     {"skyboxcube", skybox_vert_glsl, skyboxcube_frag_glsl},
     {"skybox2d", skybox_vert_glsl, skybox2d_frag_glsl},
 };
+typedef struct 
+{
+    Shader shader;
+    int loaded;
+}LoadedStdShdrs;
+int loadedstdshdrs_init = 0;
+LoadedStdShdrs loadedstdshdrs[DENGINE_SHADER_COUNT];
 
 void _dengine_shader_set_binfmt();
 
@@ -230,6 +240,7 @@ int dengine_shader_setup(Shader* shader)
         }
     }
 */
+    shader->hint = DENGINE_SHADER_SCENEQUEUER_SHADERHINT_OPAQUE;
     shader->program_id = glCreateProgram(); DENGINE_CHECKGL;
 
     if(!binfmt)
@@ -427,11 +438,25 @@ void dengine_shader_current_set_int(const char* name, const int value)
     glUniform1i(location, value); DENGINE_CHECKGL;
 }
 
-int dengine_shader_make_standard(StandardShader type, Shader* shader)
+int dengine_shader_make_standard(StandardShader type, Shader* out)
 {
     DENGINE_DEBUG_ENTER;
+    memset(out, 0, sizeof(Shader));
 
-    memset(shader,0,sizeof(Shader));
+    if(!loadedstdshdrs_init)
+    {
+        memset(loadedstdshdrs, 0, sizeof(loadedstdshdrs));
+        loadedstdshdrs_init = 1;
+    }
+
+    Shader* shader = &loadedstdshdrs[type].shader;
+
+    if(loadedstdshdrs[type].loaded)
+    {
+        dengineutils_logging_log("INFO::Give already loaded stdshdr %u", type);
+        memcpy(out, &loadedstdshdrs[type].shader, sizeof(Shader));
+        return 1;
+    }
 
     dengine_shader_create(shader);
     shader->cached_name = stdshaderssrcfiles[type][0];
@@ -440,13 +465,21 @@ int dengine_shader_make_standard(StandardShader type, Shader* shader)
     {
         NULL, NULL, NULL //Is this necessary? YES!, its contents are undefined unless set explicitly
     };
+    int isgles = 0;
+#ifdef DENGINE_GL_GLAD
+    if(GLAD_GL_ES_VERSION_3_2)
+        isgles = 1;
+#endif
 
     /* set vert, frag, geom */
     for (int i = 0; i < 3; i++) {
         //+1 to skip name
         const char* stdshdrsrcfile = stdshaderssrcfiles[type][i + 1];
+        if(isgles && stdshaderssrcfiles[type][i + 1 + 3] != NULL){
+            stdshdrsrcfile = stdshaderssrcfiles[type][i + 1 + 3];
+        }
         if(stdshdrsrcfile)
-            stdshdrsrc[i] = stdshaderssrcfiles[type][i + 1];
+            stdshdrsrc[i] = stdshdrsrcfile;
     }
 
     shader->vertex_code = stdshdrsrc[0];
@@ -454,12 +487,20 @@ int dengine_shader_make_standard(StandardShader type, Shader* shader)
     shader->geometry_code = stdshdrsrc[2];
 
     if(dengineutils_filesys_isinit() && shadercache && _dengine_shader_incache(shader->cached_name))
-        return dengine_shader_setup(shader);
+    {
+        dengine_shader_setup(shader);
+        memcpy(out, shader, sizeof(Shader));
+        loadedstdshdrs[type].loaded = 1;
+        return 1;
+    }
 
     int setup = dengine_shader_setup(shader);
 
     if(type == DENGINE_SHADER_DEFAULT)
         dengine_shader_set_vec3(shader,"color", default_shader_col);
+
+    loadedstdshdrs[type].loaded = 1;
+    memcpy(out, shader, sizeof(Shader));
 
     return setup;
 }

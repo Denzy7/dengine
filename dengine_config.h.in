@@ -1,8 +1,15 @@
 #ifndef DENGINE_CONFIG_H_INCLUDED
 #define DENGINE_CONFIG_H_INCLUDED
 
-#cmakedefine DENGINE_VERSION "@DENGINE_VERSION@"
+/* cmake options */
+#cmakedefine CMAKE_BUILD_TYPE "@CMAKE_BUILD_TYPE@"
+#ifndef CMAKE_BUILD_TYPE
+#define CMAKE_BUILD_TYPE "Default"
+#endif
+#cmakedefine ANDROID_NDK
+#cmakedefine BUILD_SHARED_LIBS
 
+#cmakedefine DENGINE_VERSION "@DENGINE_VERSION@"
 #cmakedefine DENGINE_MT
 #cmakedefine DENGINE_HAS_PTHREAD_H
 #cmakedefine DENGINE_HAS_PTHREAD_TYPES_H
@@ -11,8 +18,9 @@
 #cmakedefine DENGINE_CONTEXT @DENGINE_CONTEXT@
 #cmakedefine DENGINE_DEBUG
 #cmakedefine DENGINE_DEBUG_GL
-
-
+#cmakedefine DENGINE_LIGHTING_SHADOW3D
+#cmakedefine DENGINE_LIGHTING_MAX_POINT @DENGINE_LIGHTING_MAX_POINT@
+#cmakedefine DENGINE_LIGHTING_MAX_SPOT @DENGINE_LIGHTING_MAX_SPOT@
 /*
  * Uncomment to hide compile dir since it has sensitive info like
  * your username.
@@ -22,26 +30,22 @@
 //#define DENGINE_HIDECOMPILEDIR
 
 #define DENGINE_GL_GLAD
-#if defined(_WIN32) || defined (__MINGW32__)
+#if defined(_WIN32) || defined (__MINGW32__) || (__CYGWIN__)
     #define DENGINE_WIN32
     #define DENGINE_CONTEXT_WGL
     #define DENGINE_FONT_DEFAULT "C:/Windows/fonts/arial.ttf"
-#if defined(__MINGW32__)
-    #define DENGINE_MINGW_ARCH "i686"
-#elif defined(__MINGW64__)
-    #define DENGINE_MINGW_ARCH "x86_64"
-#endif
-    #cmakedefine DENGINE_PYTHON_DENGINE_SCRIPT_VER @DENGINE_PYTHON_DENGINE_SCRIPT_VER@
-#elif defined(__ANDROID__)
-    #cmakedefine DENGINE_ANDROID_TERMUX
-    #ifdef DENGINE_ANDROID_TERMUX
-        #define DENGINE_WIN_X11 //termux x11 + glx
-        #define DENGINE_CONTEXT_GLX
-    #else
-        #define DENGINE_ANDROID //this means we're using Android ndk. not termux x11
-        #define DENGINE_CONTEXT_EGL
-        #define DENGINE_ANDROID_LOG_TAG "Dengine-Android"
-    #endif
+#elif defined(ANDROID_NDK) 
+/*
+ * should work for the madlads compiling on termux x11. 
+ * it skips here and goes straight to __linux__ glx and x11
+ * since termux doesn't use ndk toolchain? 
+ *
+ * TODO: unless compiling 
+ * using termux-packages toolset? Still untested
+ */
+    #define DENGINE_ANDROID
+    #define DENGINE_CONTEXT_EGL
+    #define DENGINE_ANDROID_LOG_TAG "Dengine-Android"
     //Android is Linux
     #define DENGINE_LINUX
     #define DENGINE_FONT_DEFAULT "/system/fonts/DroidSansMono.ttf"

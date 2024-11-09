@@ -6,60 +6,34 @@
 
 typedef struct
 {
-    GtkWidget* transform;
-
-    GtkContainer* transform_position;
-    GtkContainer* transform_rotation;
-    GtkContainer* transform_scale;
-}TransformWidget;
-
-typedef struct
-{
-    GtkWidget* camera;
-
-    GtkAdjustment* camera_fov;
-
-    GtkEntry* camera_near;
-    GtkEntry* camera_far;
-
-    GtkEntry* camera_width;
-    GtkEntry* camera_height;
-    GtkButton* camera_resize;
-
-    GtkColorButton* camera_clearcolour;
-}CameraWidget;
-
-typedef struct
-{
-    GtkWidget* light;
-
-    GtkComboBox* light_type;
-
-    GtkColorButton* light_ambient;
-    GtkColorButton* light_diffuse;
-    GtkColorButton* light_specular;
-    GtkAdjustment* light_strength;
-
-    GtkComboBox* light_shadow_mode;
-    GtkEntry* light_shadow_size;
-    GtkButton* light_shadow_resize;
-
-    GtkToggleButton* light_shadow_pcf;
-    GtkAdjustment* light_shadow_pcf_samples;
-
-}LightWidget;
-
-typedef struct
-{
     GtkContainer* inspector;
+    Entity* currententity;
 
-    TransformWidget transform_widget;
-    CameraWidget camera_widget;
-    LightWidget light_widget;
-}Inspector;
+    GtkWidget* transform_widget;
+    GtkWidget* camera_widget;
+    GtkWidget* light_widget;
+    GtkWidget* mesh_widget;
+}DengitorInspector;
 
-void dengitor_inspector_setup(GtkBuilder* builder, Inspector* inspector);
+/* for the container that parents  widget of type wtype,
+ * set vector component v[i] of type vtype, 
+ * increasing i each time a widget of wtype is found.
+ * also redraws the whole window
+ *
+ * works for the following basic input widgets: 
+ *  entry, color button, scale, check button
+ */
+guint dengitor_inspector_vecn_set(GtkWidget* widget, GType wtype, void* v, DengineType vtype, guint n);
 
-void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector);
+/* same as dengitor_inspector_vecn_set but get value to put in widget from v[i]
+ * a more appropriate name woulb be getfrom?
+ *
+ * doesn't redraw window as its unnecessary
+ */
+guint dengitor_inspector_vecn_get(GtkWidget* widget, GType wtype, void* v, DengineType vtype, guint n);
+
+void dengitor_inspector_setup(GtkBuilder* builder, DengitorInspector* inspector);
+
+void dengitor_inspector_do_entity(Entity* entity, DengitorInspector* inspector);
 
 #endif // DENGITOR_INSPECTOR_H

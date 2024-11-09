@@ -1,0 +1,136 @@
+name: Building dengine libs, dengitor and tests(including apk)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_linux:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: submodules
+        run: |
+          git submodule update --init --depth 1 deps/cglm deps/stb deps/cpython deps/cpython-portable
+
+      - name: linux setup and dependencies
+        run: |
+          sudo apt update
+          sudo apt -y install libgtk-3-dev pkgconf libgl-dev libx11-dev libegl-dev
+
+      - name: dengine-rc
+        run: |
+          cmake -S main/dengine-rc -B build/dengine-rc
+          cmake --build build/dengine-rc
+
+      - name: linux config, build and install
+        run: |
+          cmake -S . -B build/linux -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=ON
+          cmake --build build/linux -j$(nproc)
+          cmake --install build/linux --prefix out-linux
+
+      - name: linux build
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux_build
+          path: out-linux
+
+      - name: assets package
+        uses: actions/upload-artifact@v4
+        with:
+          name: assets package
+          path: ./assets
+
+      - name: Set Up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Change wrapper permissions
+        run: |
+          cd tests/src/testdengine-android/apk
+          chmod +x ./gradlew
+
+      - name: test apk
+        run: |
+          git submodule update --init --depth 1 deps/bullet3_src
+          cd ./tests/src/testdengine-android/apk/
+          ./gradlew assembleDebug -x lintVitalAnalyzeRelease -x lintAnalyzeDebug -x lintDebug
+
+
+      - name: android build universal
+        uses: actions/upload-artifact@v4
+        with:
+          name: android_universal_debug
+          path: ./tests/src/testdengine-android/apk/app/build/outputs/apk/debug/app-universal-debug.apk
+        
+      - name: android build armebi-v7a
+        uses: actions/upload-artifact@v4
+        with:
+          name: android_armebi-v7a_debug
+          path: ./tests/src/testdengine-android/apk/app/build/outputs/apk/debug/app-armeabi-v7a-debug.apk
+
+      - name: android build arm64-v8a
+        uses: actions/upload-artifact@v4
+        with:
+          name: android_arm64-v8a_debug
+          path: ./tests/src/testdengine-android/apk/app/build/outputs/apk/debug/app-arm64-v8a-debug.apk
+        
+      - name: android build x86
+        uses: actions/upload-artifact@v4
+        with:
+          name: android_x86_debug
+          path: ./tests/src/testdengine-android/apk/app/build/outputs/apk/debug/app-x86-debug.apk
+
+      - name: android build x86_64
+        uses: actions/upload-artifact@v4
+        with:
+          name: android_x86_64_debug
+          path: ./tests/src/testdengine-android/apk/app/build/outputs/apk/debug/app-x86_64-debug.apk
+
+  build_msys2:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: true
+    defaults:
+      run:
+        shell: msys2 {0}
+            
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: git mingw-w64-ucrt-x86_64-toolchain base-devel mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-gtk3 mingw-w64-ucrt-x86_64-bullet
+
+      - name: submodules
+        run: |
+          git submodule update --init --depth 1 deps/stb deps/cglm
+
+      - name: dengine-rc
+        run: |
+          cmake -S main/dengine-rc -B build/dengine-rc
+          cmake --build build/dengine-rc
+
+      - name: configure, build and install msys2
+        run: |
+          cmake -S . -B build/msys2 -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=ON
+          cmake --build build/msys2 -j$(nproc)
+          cmake --install build/msys2 --prefix out-msys2
+
+      - name: msys2 build
+        uses: actions/upload-artifact@v4
+        with:
+          name: msys2_build
+          path: out-msys2
+

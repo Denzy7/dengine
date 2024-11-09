@@ -87,5 +87,5 @@ if(fontconfig_LIBRARIES AND UNIX)
 endif()
 target_link_libraries(dengine-gui PRIVATE dengine-core dengine-utils ${dengine-gui-link})
 
-install(TARGETS dengine-gui DESTINATION lib)
+install(TARGETS dengine-gui DESTINATION lib/dengine-${DENGINE_VERSION})
 install(FILES ${dengine-gui-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-gui)

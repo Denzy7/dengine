@@ -9,11 +9,11 @@
 #define DENGINEUTILS_STREAM_MSG_OPENFAILED "ERROR::Failed to open"
 #define DENGINEUTILS_STREAM_MSG_UNKNOWNTYPE "ERROR::Unknown StreamType"
 #define DENGINEUTILS_STREAM_MSG_UNKNOWNMODE "ERROR::Unknown StreamMode"
-#define DENGINEUTILS_STREAM_MSG_NOWRITEANDROID "ERROR::StreamType=ANDROIDASSET is not writable"
+#define DENGINEUTILS_STREAM_MSG_RO "ERROR::StreamType is read-only"
 
-Stream* dengineutils_stream_new(const char* path, StreamType type, StreamMode mode)
+int dengineutils_stream_new(const char* path, StreamType type, StreamMode mode, Stream* stream)
 {
-    Stream* stream;
+    memset(stream, 0, sizeof(Stream));
     if(type == DENGINEUTILS_STREAM_TYPE_FILE)
     {
         FILE* file = NULL;
@@ -29,16 +29,15 @@ Stream* dengineutils_stream_new(const char* path, StreamType type, StreamMode mo
         }else
         {
             dengineutils_logging_log(DENGINEUTILS_STREAM_MSG_UNKNOWNMODE " for [ %s ]", path);
-            return NULL;
+            return 0;
         }
 
         if(!file)
         {
             dengineutils_logging_log(DENGINEUTILS_STREAM_MSG_OPENFAILED " [ %s ]", path);
-            return NULL;
+            return 0;
         }
 
-        stream = calloc(1, sizeof(struct _Stream));
         stream->path = strdup(path);
         stream->fp = file;
         stream->type = type;
@@ -46,7 +45,7 @@ Stream* dengineutils_stream_new(const char* path, StreamType type, StreamMode mo
         fseeko(stream->fp, 0, SEEK_END);
         stream->size = ftello(stream->fp);
         rewind(stream->fp);
-        return stream;
+        return 1;
     }else if(type == DENGINEUTILS_STREAM_TYPE_ANDROIDASSET)
     {
 #ifdef DENGINE_ANDROID
@@ -58,7 +57,7 @@ Stream* dengineutils_stream_new(const char* path, StreamType type, StreamMode mo
         }else if(mode > DENGINEUTILS_STREAM_MODE_READ)
         {
             dengineutils_logging_log(DENGINEUTILS_STREAM_MSG_UNKNOWNMODE);
-            return NULL;
+            return 0;
         }
 
         AAssetManager* mgr = dengineutils_android_get_assetmgr();
@@ -67,70 +66,86 @@ Stream* dengineutils_stream_new(const char* path, StreamType type, StreamMode mo
         if(!asset)
         {
             dengineutils_logging_log(DENGINEUTILS_STREAM_MSG_OPENFAILED " [ %s ]", path);
-            return NULL;
+            return 0;
         }
 
-        stream = calloc(1, sizeof(struct _Stream));
         stream->path = strdup(path);
         stream->asset = asset;
         stream->type = type;
         stream->mode = _mode;
         stream->size = AAsset_getLength(asset);
         stream->buffer = AAsset_getBuffer(asset);
-        return stream;
+        return 1;
 #else
         dengineutils_logging_log(DENGINEUTILS_STREAM_MSG_TYPE4ANDROID);
-        return NULL;
+        return 0;
 #endif
     }else
     {
         dengineutils_logging_log(DENGINEUTILS_STREAM_MSG_UNKNOWNTYPE);
-        return NULL;
+        return 0;
     }
 }
 
-size_t dengineutils_stream_read(void* dest, const size_t size, const size_t count, const Stream* stream)
+int dengineutils_stream_new_mem(const void* buffer, size_t sz, Stream* stream)
 {
+    memset(stream, 0, sizeof(Stream));
+    stream->buffer = buffer;
+    stream->size = sz;
+    stream->type = DENGINEUTILS_STREAM_TYPE_MEMORY;
+    return 1;
+}
+size_t dengineutils_stream_read(void* dest, const size_t size, const size_t count, Stream* stream)
+{
+    size_t ret = 0;
     if(stream->type == DENGINEUTILS_STREAM_TYPE_FILE)
     {
-        return fread(dest, size, count, stream->fp);
+        ret = fread(dest, size, count, stream->fp);
+        stream->eof = feof(stream->fp);
     }else if(stream->type == DENGINEUTILS_STREAM_TYPE_ANDROIDASSET)
     {
 #ifdef DENGINE_ANDROID
-        return AAsset_read(stream->asset, dest, size * count);
+        ret = AAsset_read(stream->asset, dest, size * count);
 #else
         dengineutils_logging_log(DENGINEUTILS_STREAM_MSG_TYPE4ANDROID);
-        return 0;
 #endif
+    }else if (stream->type == DENGINEUTILS_STREAM_TYPE_MEMORY)
+    {
+        memcpy(dest, stream->buffer + stream->pos, size * count);
+        stream->pos += size * count;
+        stream->eof = stream->pos >= stream->size;
+        return size;
     }else
     {
         dengineutils_logging_log(DENGINEUTILS_STREAM_MSG_UNKNOWNTYPE);
         return 0;
     }
+    return ret;
 }
-
+;
 size_t dengineutils_stream_write(const void* src, const size_t size, const size_t count, const Stream* stream)
 {
     if(stream->type == DENGINEUTILS_STREAM_TYPE_FILE)
     {
         return fwrite(src, size, count, stream->fp);
-    }else if(stream->type == DENGINEUTILS_STREAM_TYPE_ANDROIDASSET)
+    }else if(stream->type == DENGINEUTILS_STREAM_TYPE_ANDROIDASSET || stream->type == DENGINEUTILS_STREAM_TYPE_MEMORY) 
     {
-        dengineutils_logging_log(DENGINEUTILS_STREAM_MSG_NOWRITEANDROID);
+        dengineutils_logging_log(DENGINEUTILS_STREAM_MSG_RO);
         return 0;
-    } else
+    }else
     {
         dengineutils_logging_log(DENGINEUTILS_STREAM_MSG_UNKNOWNTYPE);
         return 0;
     }
 }
 
-off_t dengineutils_stream_seek(const Stream* stream, const off_t offset, const int whence)
+off_t dengineutils_stream_seek(Stream* stream, const off_t offset, const int whence)
 {
     if(stream->type == DENGINEUTILS_STREAM_TYPE_FILE)
     {
         fseeko(stream->fp, offset, whence);
-        return ftello(stream->fp);
+        stream->pos = ftello(stream->fp);
+        return stream->pos;
     }else if(stream->type == DENGINEUTILS_STREAM_TYPE_ANDROIDASSET)
     {
 #ifdef DENGINE_ANDROID
@@ -139,6 +154,17 @@ off_t dengineutils_stream_seek(const Stream* stream, const off_t offset, const i
         dengineutils_logging_log(DENGINEUTILS_STREAM_MSG_TYPE4ANDROID);
         return 0;
 #endif
+    }else if(stream->type == DENGINEUTILS_STREAM_TYPE_MEMORY)
+    {
+        if(whence == SEEK_CUR)
+            stream->pos += offset;
+        else if(whence == SEEK_SET)
+            stream->pos = offset;
+        else if(whence == SEEK_END)
+            stream->pos = stream->size + offset;
+        /* cant have memory stream reading random memory! */
+        stream->eof = stream->pos >= stream->size;
+        return stream->pos;
     }else{
         dengineutils_logging_log(DENGINEUTILS_STREAM_MSG_UNKNOWNTYPE);
         return 0;
@@ -154,5 +180,4 @@ void dengineutils_stream_destroy(Stream* stream)
         AAsset_close(stream->asset);
 #endif
     free(stream->path);
-    free(stream);
 }
