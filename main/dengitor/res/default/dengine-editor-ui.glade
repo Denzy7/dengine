@@ -1,11 +1,112 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 -->
+<!-- Generated with glade 3.40.0 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
   <object class="GtkWindow">
     <property name="can-focus">False</property>
+    <property name="default-width">440</property>
+    <property name="default-height">250</property>
     <child>
-      <placeholder/>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">label</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScaleButton">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="focus-on-click">False</property>
+            <property name="receives-default">True</property>
+            <property name="relief">none</property>
+            <property name="orientation">vertical</property>
+            <child internal-child="plus_button">
+              <object class="GtkButton">
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="relief">none</property>
+              </object>
+            </child>
+            <child internal-child="minus_button">
+              <object class="GtkButton">
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="relief">none</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkVolumeButton">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="focus-on-click">False</property>
+            <property name="receives-default">True</property>
+            <property name="relief">none</property>
+            <property name="orientation">vertical</property>
+            <property name="icons">audio-volume-muted-symbolic
+audio-volume-high-symbolic
+audio-volume-low-symbolic
+audio-volume-medium-symbolic</property>
+            <child internal-child="plus_button">
+              <object class="GtkButton">
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="relief">none</property>
+              </object>
+            </child>
+            <child internal-child="minus_button">
+              <object class="GtkButton">
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="relief">none</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScale">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="orientation">vertical</property>
+            <property name="round-digits">1</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+      </object>
     </child>
   </object>
   <object class="GtkAboutDialog" id="about">
@@ -23,6 +124,7 @@
     <property name="artists">Denzy7</property>
     <property name="logo-icon-name">applications-development</property>
     <property name="license-type">custom</property>
+    <signal name="delete-event" handler="dengitor_widget_hide_ondelete" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox">
         <property name="can-focus">False</property>
@@ -45,12 +147,10 @@
       </object>
     </child>
   </object>
-  <object class="GtkAdjustment" id="camera_component_scale_adjustment">
-    <property name="lower">1</property>
-    <property name="upper">180</property>
-    <property name="value">60</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">0.5</property>
+  <object class="GtkAdjustment" id="adjustment1">
+    <property name="upper">100</property>
+    <property name="step-increment">0.5</property>
+    <property name="page-increment">10</property>
   </object>
   <object class="GtkWindow" id="camera_component_root">
     <property name="can-focus">False</property>
@@ -104,10 +204,12 @@
                       <object class="GtkScale" id="camera_component_scale">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
-                        <property name="adjustment">camera_component_scale_adjustment</property>
+                        <property name="adjustment">adjustment1</property>
                         <property name="show-fill-level">True</property>
                         <property name="fill-level">180</property>
                         <property name="round-digits">1</property>
+                        <signal name="map" handler="_dengitor_inspector_component_camera_fov_onmap" swapped="no"/>
+                        <signal name="value-changed" handler="_dengitor_inspector_component_camera_fov_onchange" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -164,6 +266,8 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">0</property>
+                                <signal name="changed" handler="_dengine_inspector_component_camera_nearclip_onchange" swapped="no"/>
+                                <signal name="map" handler="_dengine_inspector_component_camera_nearclip_onmap" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -416,18 +520,23 @@
       </object>
     </child>
   </object>
-  <object class="GtkAdjustment" id="light_component_shadow_pcf_samples">
-    <property name="lower">2</property>
-    <property name="upper">16</property>
-    <property name="value">2</property>
+  <object class="GtkAdjustment" id="adjustment2">
+    <property name="upper">120</property>
+    <property name="value">60</property>
     <property name="step-increment">1</property>
-    <property name="page-increment">1</property>
+    <property name="page-increment">10</property>
   </object>
-  <object class="GtkAdjustment" id="light_component_strength_adjustment">
-    <property name="upper">100</property>
+  <object class="GtkAdjustment" id="adjustment3">
+    <property name="lower">1</property>
+    <property name="upper">10</property>
     <property name="value">1</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">0.5</property>
+    <property name="step-increment">0.01</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment4">
+    <property name="upper">10</property>
+    <property name="step-increment">0.01</property>
+    <property name="page-increment">10</property>
   </object>
   <object class="GtkWindow" id="light_component_root">
     <property name="can-focus">False</property>
@@ -489,6 +598,7 @@
                           <item translatable="yes">Point</item>
                           <item translatable="yes">Spot</item>
                         </items>
+                        <signal name="map" handler="dengitor_inspector_component_light_type_onmap" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -534,6 +644,8 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="receives-default">True</property>
+                                <signal name="color-set" handler="dengitor_inspector_component_light_ambient_onchange" swapped="no"/>
+                                <signal name="map" handler="dengitor_inspector_component_light_ambient_onmap" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -569,6 +681,8 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="receives-default">True</property>
+                                <signal name="color-set" handler="dengitor_inspector_component_light_diffuse_onchange" swapped="no"/>
+                                <signal name="map" handler="dengitor_inspector_component_light_diffuse_onmap" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -638,8 +752,11 @@
                               <object class="GtkScale">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
-                                <property name="adjustment">light_component_strength_adjustment</property>
-                                <property name="round-digits">1</property>
+                                <property name="adjustment">adjustment4</property>
+                                <property name="round-digits">2</property>
+                                <property name="digits">2</property>
+                                <signal name="map" handler="dengitor_inspector_component_light_strength_onmap" swapped="no"/>
+                                <signal name="value-changed" handler="dengitor_inspector_component_light_strength_onchange" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -688,7 +805,7 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Mode</property>
+                                <property name="label" translatable="yes">Enabled</property>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -697,15 +814,14 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkComboBoxText" id="light_component_shadow_mode">
+                              <object class="GtkCheckButton">
                                 <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="active">0</property>
-                                <items>
-                                  <item translatable="yes">Enabled</item>
-                                  <item translatable="yes">Enabled with invisible mesh</item>
-                                  <item translatable="yes">Disabled</item>
-                                </items>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="use-stock">True</property>
+                                <property name="draw-indicator">True</property>
+                                <signal name="map" handler="dengitor_inspector_component_light_shadow_toggle_onmap" swapped="no"/>
+                                <signal name="toggled" handler="dengitor_inspector_component_light_shadow_toggle_ontoggle" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -858,7 +974,6 @@
                                       <object class="GtkScale">
                                         <property name="visible">True</property>
                                         <property name="can-focus">True</property>
-                                        <property name="adjustment">light_component_shadow_pcf_samples</property>
                                         <property name="show-fill-level">True</property>
                                         <property name="fill-level">16</property>
                                         <property name="round-digits">1</property>
@@ -926,10 +1041,289 @@
       </object>
     </child>
   </object>
+  <object class="GtkAdjustment" id="adjustment5">
+    <property name="lower">1</property>
+    <property name="upper">20</property>
+    <property name="value">1</property>
+    <property name="step-increment">0.01</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkDialog" id="viewport_opts">
+    <property name="can-focus">False</property>
+    <property name="title" translatable="yes">Viewport Options</property>
+    <property name="default-width">320</property>
+    <property name="type-hint">dialog</property>
+    <signal name="delete-event" handler="dengitor_widget_hide_ondelete" swapped="no"/>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
+            <child>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">OK</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <signal name="clicked" handler="gtk_widget_hide" object="viewport_opts" swapped="yes"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Field of View</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScale">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="adjustment">adjustment2</property>
+                <property name="show-fill-level">True</property>
+                <property name="fill-level">180</property>
+                <property name="round-digits">1</property>
+                <signal name="map" handler="dengitor_viewportopts_fov_onmap" swapped="no"/>
+                <signal name="value-changed" handler="dengitor_viewportopts_fov_onvaluechange" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Grid Width</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScale">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="adjustment">adjustment3</property>
+                <property name="fill-level">10</property>
+                <property name="round-digits">1</property>
+                <signal name="map" handler="dengitor_viewportopts_grid_width_onmap" swapped="no"/>
+                <signal name="value-changed" handler="dengitor_viewportopts_grid_width_onvaluechange" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Grid Colour</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkColorButton" id="viewport_opts_grid_colour">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="rgba">rgb(229,165,10)</property>
+                <signal name="color-set" handler="dengitor_viewportopts_grid_color_oncolorset" swapped="no"/>
+                <signal name="map" handler="dengitor_viewportopts_grid_color_onmap" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Grid Scale</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScale">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="round-digits">1</property>
+                <signal name="map" handler="dengitor_viewportopts_grid_scale_onmap" swapped="no"/>
+                <signal name="value-changed" handler="dengitor_viewportopts_grid_scale_onvaluechange" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Padding</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScale">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="adjustment">adjustment5</property>
+                <property name="fill-level">25</property>
+                <property name="round-digits">1</property>
+                <signal name="map" handler="dengitor_viewportopts_padding_onmap" swapped="no"/>
+                <signal name="value-changed" handler="dengitor_viewportopts_padding_onchange" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Draw Grid</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="use-stock">True</property>
+                <property name="draw-indicator">True</property>
+                <signal name="map" handler="dengitor_viewportopts_grid_draw_onmap" swapped="no"/>
+                <signal name="toggled" handler="dengitor_viewportopts_grid_draw_ontoggle" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">5</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkApplicationWindow" id="main">
     <property name="can-focus">False</property>
-    <property name="default-width">1280</property>
-    <property name="default-height">720</property>
+    <property name="default-width">854</property>
+    <property name="default-height">480</property>
+    <signal name="event" handler="dengitor_onevent" swapped="no"/>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -1003,6 +1397,7 @@
                             <property name="can-focus">False</property>
                             <property name="use-underline">True</property>
                             <property name="use-stock">True</property>
+                            <signal name="activate" handler="gtk_widget_destroy" object="main" swapped="yes"/>
                           </object>
                         </child>
                       </object>
@@ -1062,6 +1457,7 @@
                             <property name="can-focus">False</property>
                             <property name="use-underline">True</property>
                             <property name="use-stock">True</property>
+                            <signal name="activate" handler="gtk_widget_show" object="prefs" swapped="yes"/>
                           </object>
                         </child>
                       </object>
@@ -1087,12 +1483,13 @@
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <child>
-                          <object class="GtkImageMenuItem" id="menu_action">
+                          <object class="GtkImageMenuItem" id="menu_about">
                             <property name="label">gtk-about</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="use-underline">True</property>
                             <property name="use-stock">True</property>
+                            <signal name="activate" handler="gtk_widget_show" object="about" swapped="yes"/>
                           </object>
                         </child>
                       </object>
@@ -1192,12 +1589,13 @@
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <child>
-                              <object class="GtkToggleButton" id="toggle_scene">
+                              <object class="GtkRadioButton" id="toggle_scene">
                                 <property name="label" translatable="yes">Scene</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
-                                <property name="receives-default">True</property>
-                                <property name="active">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="draw-indicator">True</property>
+                                <signal name="toggled" handler="dengitor_glarea_toggle_scene" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -1206,16 +1604,18 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToggleButton" id="toggle_game">
+                              <object class="GtkRadioButton" id="toggle_game">
                                 <property name="label" translatable="yes">Game</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
-                                <property name="receives-default">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="draw-indicator">True</property>
+                                <signal name="toggled" handler="dengitor_glarea_toggle_game" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
-                                <property name="position">2</property>
+                                <property name="position">1</property>
                               </packing>
                             </child>
                           </object>
@@ -1231,6 +1631,7 @@
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
+                            <signal name="clicked" handler="gtk_widget_show" object="viewport_opts" swapped="yes"/>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -1249,6 +1650,9 @@
                       <object class="GtkEventBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <signal name="button-press-event" handler="dengitor_glarea_evbox_onbtnpress" swapped="no"/>
+                        <signal name="button-release-event" handler="dengitor_glarea_evbox_onbtnrelease" swapped="no"/>
+                        <signal name="motion-notify-event" handler="dengitor_glarea_evbox_onmotion" swapped="no"/>
                         <child>
                           <object class="GtkGLArea" id="glarea">
                             <property name="visible">True</property>
@@ -1257,6 +1661,9 @@
                             <property name="has-alpha">True</property>
                             <property name="has-depth-buffer">True</property>
                             <property name="use-es">True</property>
+                            <signal name="realize" handler="dengitor_glarea_onrealize" swapped="no"/>
+                            <signal name="render" handler="dengitor_glarea_onrender" swapped="no"/>
+                            <signal name="unrealize" handler="dengitor_glarea_onunrealize" swapped="no"/>
                           </object>
                         </child>
                       </object>
@@ -1307,6 +1714,9 @@
                                   <object class="GtkTreeView" id="scene_treeview">
                                     <property name="visible">True</property>
                                     <property name="can-focus">True</property>
+                                    <signal name="cursor-changed" handler="dengitor_scene_treeview_oncursorchange" swapped="no"/>
+                                    <signal name="key-press-event" handler="_dengitor_scenetree_onkeypress" swapped="no"/>
+                                    <signal name="row-activated" handler="_dengitor_scenetree_onrowactivated" swapped="no"/>
                                     <child internal-child="selection">
                                       <object class="GtkTreeSelection"/>
                                     </child>
@@ -1387,11 +1797,12 @@
               </object>
               <packing>
                 <property name="resize">True</property>
-                <property name="shrink">False</property>
+                <property name="shrink">True</property>
               </packing>
             </child>
             <child>
               <object class="GtkPaned">
+                <property name="height-request">250</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="wide-handle">True</property>
@@ -1442,7 +1853,7 @@
                   </object>
                   <packing>
                     <property name="resize">True</property>
-                    <property name="shrink">False</property>
+                    <property name="shrink">True</property>
                   </packing>
                 </child>
                 <child>
@@ -1511,6 +1922,20 @@
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
+                          <object class="GtkButton" id="log_clear">
+                            <property name="label" translatable="yes">Clear</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                            <signal name="clicked" handler="dengitor_log_clear" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkScrolledWindow">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
@@ -1530,20 +1955,6 @@
                           </object>
                           <packing>
                             <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="log_clear">
-                            <property name="label" translatable="yes">Clear</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <signal name="clicked" handler="_dengitor_log_clear" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">1</property>
                           </packing>
@@ -1578,13 +1989,224 @@
                 </child>
               </object>
               <packing>
-                <property name="resize">True</property>
-                <property name="shrink">False</property>
+                <property name="resize">False</property>
+                <property name="shrink">True</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="mesh_component_root">
+    <property name="can-focus">False</property>
+    <child>
+      <object class="GtkExpander" id="mesh_component">
+        <property name="visible">True</property>
+        <property name="can-focus">True</property>
+        <property name="expanded">True</property>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">MESH</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Draw mode</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="active">1</property>
+                        <items>
+                          <item translatable="yes">Disabled</item>
+                          <item translatable="yes">Enabled</item>
+                          <item translatable="yes">Shadow only</item>
+                        </items>
+                        <signal name="changed" handler="dengitor_inspector_components_mesh_mode_onchange" swapped="no"/>
+                        <signal name="map" handler="dengitor_inspector_components_mesh_mode_onmap" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+        <child type="label">
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Mesh</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkDialog" id="prefs">
+    <property name="can-focus">False</property>
+    <property name="title" translatable="yes">Preferences</property>
+    <property name="default-width">320</property>
+    <property name="type-hint">dialog</property>
+    <signal name="delete-event" handler="dengitor_widget_hide_ondelete" swapped="no"/>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">OK</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <signal name="clicked" handler="gtk_widget_hide" object="prefs" swapped="yes"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Font</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFontButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="font">Sans 12</property>
+                <property name="language">en-gb</property>
+                <property name="preview-text"/>
+                <signal name="font-set" handler="_dengitor_prefs_fontset" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Theme</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBoxText" id="theme">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="active">0</property>
+                <items>
+                  <item translatable="yes">System Default</item>
+                  <item translatable="yes">Breeze Light</item>
+                  <item translatable="yes">Breeze Dark</item>
+                </items>
+                <signal name="changed" handler="_dengitor_prefs_theme" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
@@ -1714,6 +2336,9 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">0</property>
+                                <property name="input-purpose">number</property>
+                                <signal name="changed" handler="_dengitor_inspector_component_transform_pos_onchange" swapped="no"/>
+                                <signal name="map" handler="_dengitor_inspector_component_transform_pos_onmap" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -1726,6 +2351,9 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">0</property>
+                                <property name="input-purpose">number</property>
+                                <signal name="changed" handler="_dengitor_inspector_component_transform_pos_onchange" swapped="no"/>
+                                <signal name="map" handler="_dengitor_inspector_component_transform_pos_onmap" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -1738,6 +2366,9 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">0</property>
+                                <property name="input-purpose">number</property>
+                                <signal name="changed" handler="_dengitor_inspector_component_transform_pos_onchange" swapped="no"/>
+                                <signal name="map" handler="_dengitor_inspector_component_transform_pos_onmap" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -1785,6 +2416,8 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">0</property>
+                                <signal name="changed" handler="_dengitor_inspector_component_transform_rot_onchange" swapped="no"/>
+                                <signal name="map" handler="_dengitor_inspector_component_transform_rot_onmap" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -1797,6 +2430,8 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">0</property>
+                                <signal name="changed" handler="_dengitor_inspector_component_transform_rot_onchange" swapped="no"/>
+                                <signal name="map" handler="_dengitor_inspector_component_transform_rot_onmap" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -1809,6 +2444,8 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">0</property>
+                                <signal name="changed" handler="_dengitor_inspector_component_transform_rot_onchange" swapped="no"/>
+                                <signal name="map" handler="_dengitor_inspector_component_transform_rot_onmap" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -1923,250 +2560,6 @@
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">Transform</property>
           </object>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkAdjustment" id="viewport_opts_fov_adjustment">
-    <property name="lower">1</property>
-    <property name="upper">180</property>
-    <property name="value">60</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">0.5</property>
-  </object>
-  <object class="GtkAdjustment" id="viewport_opts_grid_scale">
-    <property name="lower">5</property>
-    <property name="upper">100</property>
-    <property name="step-increment">0.10</property>
-    <property name="page-increment">10</property>
-  </object>
-  <object class="GtkAdjustment" id="viewport_opts_grid_width">
-    <property name="lower">1</property>
-    <property name="upper">10</property>
-    <property name="value">1</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">0.5</property>
-  </object>
-  <object class="GtkDialog" id="viewport_opts">
-    <property name="can-focus">False</property>
-    <property name="title" translatable="yes">Viewport Options</property>
-    <property name="default-width">320</property>
-    <property name="type-hint">dialog</property>
-    <child internal-child="vbox">
-      <object class="GtkBox">
-        <property name="can-focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can-focus">False</property>
-            <property name="layout-style">end</property>
-            <child>
-              <object class="GtkButton" id="viewport_opts_ok">
-                <property name="label" translatable="yes">OK</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Field of View</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkScale" id="viewport_opts_fov">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="adjustment">viewport_opts_fov_adjustment</property>
-                <property name="show-fill-level">True</property>
-                <property name="fill-level">180</property>
-                <property name="round-digits">1</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Grid Width</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkScale">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="adjustment">viewport_opts_grid_width</property>
-                <property name="fill-level">10</property>
-                <property name="round-digits">1</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Grid Colour</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkColorButton" id="viewport_opts_grid_colour">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="rgba">rgb(229,165,10)</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Grid Scale</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkScale">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="adjustment">viewport_opts_grid_scale</property>
-                <property name="round-digits">1</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Draw Grid</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkCheckButton" id="viewport_opts_grid_draw">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="use-stock">True</property>
-                <property name="draw-indicator">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">5</property>
-          </packing>
         </child>
       </object>
     </child>

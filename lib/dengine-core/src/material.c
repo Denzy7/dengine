@@ -8,9 +8,10 @@
 #include <string.h> //memset
 #include <stdlib.h> //malloc
 #include <stdio.h>
-
+MaterialID _nummaterials = 0;
 void dengine_material_setup(Material* material)
 {
+
     DENGINE_DEBUG_ENTER;
 
     memset(material, 0, sizeof(Material));
@@ -18,6 +19,18 @@ void dengine_material_setup(Material* material)
     static const float normal[] = {0.5, 0.5, 1.};
     dengine_texture_make_color(8, 8, white, 3, &material->white);
     dengine_texture_make_color(8, 8, normal, 3, &material->normalmap);
+
+    for(int i = 0; i < 3; i++)
+    {
+        material->properties.ambient[i] = 1.0f;
+        material->properties.diffuse[i] = 1.0f;
+        material->properties.specular[i] = 1.0f;
+    }
+    material->properties.alpha = 1.0f;
+    material->properties.specular_power = 32.0f;
+
+    material->id = _nummaterials;
+    _nummaterials++;
 }
 
 void dengine_material_set_shader_color(const Shader* shader, Material* material)
@@ -38,6 +51,7 @@ void dengine_material_set_shader_color(const Shader* shader, Material* material)
     for (int i = 0; i < count; i++)
     {
         glGetActiveUniform(shader->program_id, i, max_uniform_ln, NULL, &size, &type, uniform_name); DENGINE_CHECKGL;
+        /*printf("active: %s\n", uniform_name);*/
         if (type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE)
         {
             if(material->textures_count > max_units)
@@ -61,7 +75,6 @@ void dengine_material_set_shader_color(const Shader* shader, Material* material)
                     else
                         texture->texture = material->white;
                 }
-                dengine_shader_set_int(shader, uniform_name, material->textures_count);
                 material->textures_count++;
             }
         }
@@ -108,10 +121,17 @@ void dengine_material_use(const Material* material)
     DENGINE_DEBUG_ENTER;
 
     if (material) {
+        dengine_shader_use(&material->shader_color);
         for (size_t i = 0; i < material->textures_count; i++) {
             glActiveTexture(GL_TEXTURE0 + i); DENGINE_CHECKGL;
             dengine_texture_bind(material->textures[i].target, &material->textures[i].texture);
+            dengine_shader_current_set_int(material->textures[i].sampler, i);
         }
+        dengine_shader_current_set_vec3("material.color.diffuse", material->properties.diffuse);
+        dengine_shader_current_set_vec3("material.color.specular", material->properties.specular);
+        dengine_shader_current_set_vec3("material.color.ambient", material->properties.ambient);
+        dengine_shader_current_set_float("material.specular_power", material->properties.specular_power);
+        dengine_shader_current_set_float("material.alpha", material->properties.alpha);
     }else
     {
         int max_tex=0;

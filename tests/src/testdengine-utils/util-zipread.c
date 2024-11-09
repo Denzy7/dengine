@@ -13,24 +13,24 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    Stream* zipstream = dengineutils_stream_new(zip,  DENGINEUTILS_STREAM_TYPE_FILE, DENGINEUTILS_STREAM_MODE_READ);
-    if(!zipstream)
+    Stream zipstream ; 
+    if(!dengineutils_stream_new(zip,  DENGINEUTILS_STREAM_TYPE_FILE, DENGINEUTILS_STREAM_MODE_READ, &zipstream))
     {
         dengineutils_logging_log("ERROR::Failed to create zipstream");
         return -1;
     }
 
     ZipRead zipread;
-    int read = dengineutils_zipread_load(zipstream, &zipread);
+    int read = dengineutils_zipread_load(&zipstream, &zipread);
     if(!read)
     {
         dengineutils_logging_log("ERROR::Failed to read zip");
         return -1;
     }
-    dengineutils_logging_log("INFO::%u Central Directory Records", zipread.eocdr->cd_records);
+    dengineutils_logging_log("INFO::%u Central Directory Records", zipread.eocdr.cd_records);
 
     char compr_meth[30];
-    for(uint16_t i = 0; i < zipread.eocdr->cd_records; i++)
+    for(uint16_t i = 0; i < zipread.eocdr.cd_records; i++)
     {
         CDFHR* cdfhr = &zipread.cdfhrs[i];
         if(cdfhr->compression == 0)
@@ -57,11 +57,11 @@ int main(int argc, char *argv[])
                                  );
     }
 
-    dengineutils_logging_log("INFO::%u Central Directory Records Done!", zipread.eocdr->cd_records);
+    dengineutils_logging_log("INFO::%u Central Directory Records Done!", zipread.eocdr.cd_records);
 
     void* zip2mem;
     uint32_t zip2mem_sz;
-    if(dengineutils_zipread_decompress_cdfhr_mem(zipstream, &zipread.cdfhrs[0], &zip2mem, &zip2mem_sz))
+    if(dengineutils_zipread_decompress_cdfhr_mem(&zipstream, &zipread.cdfhrs[0], &zip2mem, &zip2mem_sz))
     {
         dengineutils_logging_log("Read cdfhr[0] [%s] to mem %u", zipread.cdfhrs[0].name, zip2mem_sz);
         FILE* f = fopen("zip2mem", "wb");
@@ -75,12 +75,12 @@ int main(int argc, char *argv[])
     }
 
     const char* zipout = "zipout";
-    if(dengineutils_zipread_decompress_zip(zipstream, &zipread, zipout))
+    if(dengineutils_zipread_decompress_zip(&zipstream, &zipread, zipout))
     {
         dengineutils_logging_log("INFO::extracted to %s", zipout);
         dengineutils_zipread_free(&zipread);
     }
 
-    dengineutils_stream_destroy(zipstream);
+    dengineutils_stream_destroy(&zipstream);
     return 0;
 }

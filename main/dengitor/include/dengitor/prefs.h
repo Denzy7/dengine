@@ -11,27 +11,20 @@ typedef struct
 
 typedef struct
 {
-    GtkBuilder* builder;
     GtkWidget* prefs;
 
     GtkComboBox* theme;
     PrefsTheme* themes;
     uint32_t themes_count;
 
+    const char* breeze_dark;
+    uint32_t breeze_dark_sz;
+    const char* breeze_light;
+    uint32_t breeze_light_sz;
     GtkCssProvider* provider;
+}DengitorPrefs;
 
-    GtkFontChooser* font;
-    GtkButton* font_change;
+void dengitor_prefs_setup(GtkBuilder* builder, DengitorPrefs* prefs);
 
-    GtkButton* ok;
-    GtkButton* cancel;
-
-}Prefs;
-
-void dengitor_prefs_setup(GtkBuilder* builder, Prefs* prefs);
-
-void dengitor_prefs_show(GtkWidget* widget, Prefs* prefs);
-
-void dengitor_prefs_hide(GtkWidget* widget, Prefs* prefs);
 
 #endif // DENGITOR_PREFS_H

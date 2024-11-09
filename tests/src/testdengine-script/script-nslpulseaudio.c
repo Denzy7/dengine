@@ -20,9 +20,10 @@ int main(int argc, char *argv[])
     }
 
     //play whole ogg then exit
-    while(denginescript_call(&simple, DENGINE_SCRIPT_FUNC_UPDATE, NULL) == 0)
+    while(dengine_update())
     {
-        dengine_update();
+        if(denginescript_call(&simple, DENGINE_SCRIPT_FUNC_UPDATE, NULL))
+            break;
     }
     denginescript_call(&simple, DENGINE_SCRIPT_FUNC_TERMINATE, NULL);
     dengine_terminate();

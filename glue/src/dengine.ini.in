@@ -2,18 +2,23 @@ version=@DENGINE_INIT_CONF_VERSION@
 [window]
 window_width=854
 window_height=480
-
 # would you like screen multisampled anti aliasing?
 window_msaa=4
+#vsync
+window_swapinterval=1
 
 [gl]
 gl_min=0
 gl_max=2
 gl_core=0
-
-#vsync
-window_swapinterval=1
  
+
+# this is per user and should disabled if your gpu has poor glBufferSubData implementation
+# most dont anyway but some older GPU's might need it disabled
+[gui]
+gui_subdata=1
+
+
 [fontconfigs]
 # fontsize in pixel size
 font_size=18.0

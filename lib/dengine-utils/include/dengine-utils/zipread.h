@@ -15,6 +15,7 @@
 #include <stdint.h> //uint16,32
 #include "dengine-utils/stream.h" //stream seek, read
 
+#pragma pack(push, 1)
 typedef struct
 {
     uint32_t eoc; /*!< End of central directory magic number */
@@ -29,9 +30,8 @@ typedef struct
     uint32_t off_cd;
 
     uint16_t comment_sz;
-    uint8_t* comment;
+    char* comment;
 }EOCDR;
-#define OFF_EOCDR 22
 
 typedef struct
 {
@@ -62,16 +62,15 @@ typedef struct
 
     uint32_t off_lfh; /*!< Offset to file header record */
 
-    uint8_t* name; /*!< Name of file */
+    char* name; /*!< Name of file */
     uint8_t* extra; /*!< Extra options */
-    uint8_t* comment; /*!< File comment */
+    char* comment; /*!< File comment */
 }CDFHR;
-#define OFF_CDFHR 46
-#define OFF_LFHR 30
+#pragma pack(pop)
 
 typedef struct
 {
-    EOCDR* eocdr;
+    EOCDR eocdr;
     CDFHR* cdfhrs;
 }ZipRead;
 
@@ -79,15 +78,17 @@ typedef struct
 extern "C" {
 #endif // __cplusplus
 
-int dengineutils_zipread_load(const Stream* stream, ZipRead* zipread);
+int dengineutils_zipread_load(Stream* stream, ZipRead* zipread);
 
 void dengineutils_zipread_free(const ZipRead* zipread);
 
-int dengineutils_zipread_decompress_cdfhr_mem(const Stream* stream, const CDFHR* cdfhr, void** dest, uint32_t* size);
+int dengineutils_zipread_find_cdfhr(const char* path, CDFHR** cdfhr, const ZipRead* zipread); 
 
-int dengineutils_zipread_decompress_cdfhr(const Stream* stream, const CDFHR* cdfhr, const char* dest);
+int dengineutils_zipread_decompress_cdfhr_mem(Stream* stream, const CDFHR* cdfhr, void** dest, uint32_t* size);
 
-int dengineutils_zipread_decompress_zip(const Stream* stream, const ZipRead* zipread, const char* dest);
+int dengineutils_zipread_decompress_cdfhr(Stream* stream, const CDFHR* cdfhr, const char* dest);
+
+int dengineutils_zipread_decompress_zip(Stream* stream, const ZipRead* zipread, const char* dest);
 #ifdef __cplusplus
 }
 #endif // __cplusplus

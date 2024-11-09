@@ -55,7 +55,7 @@ void dengine_framebuffer_gen(const size_t count, Framebuffer* framebuffers);
 void dengine_framebuffer_bind(uint32_t target, const Framebuffer* framebuffer);
 
 /*!
- * \brief Attach a texture to a framebuffer (GL/ES 3.2+)
+ * \brief Attach any texture to a framebuffer (GL/ES 3.2+)
  * \param attachment Which attachment point to use
  * \param texture Texture to attach
  * \param framebuffer Framebuffer to use
@@ -71,6 +71,14 @@ void dengine_framebuffer_attach(FramebufferAttachmentType attachment, Texture* t
  * \param framebuffer Framebuffer to use
  */
 void dengine_framebuffer_attach2D(FramebufferAttachmentType attachment, Texture* texture, Framebuffer* framebuffer);
+
+/*!
+ * \brief Attach cubemap to Framebuffer
+ * \param attachment point
+ * \param texture Cubemap
+ * \param framebuffer Framebuffer
+ */
+void dengine_framebuffer_attachCube(FramebufferAttachmentType attachment, Texture* texture, Framebuffer* framebuffer);
 
 /*!
  * \brief Attach a Renderbuffer to a framebuffer

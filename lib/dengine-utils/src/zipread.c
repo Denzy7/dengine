@@ -6,12 +6,15 @@
 #include "dengine-utils/logging.h"
 #include "dengine-utils/str.h" //strndup
 #include "dengine-utils/os.h" //mkdir,direxist
-#include "dengine-utils/macros.h"
 
 #include "dengine_config.h"
 #ifdef DENGINE_HAS_LIBZ
 #include <zlib.h>
 #endif
+
+#define OFF_EOCDR 22
+#define OFF_CDFHR 46
+#define OFF_LFHR 30
 
 // magic numbers for various zip sections
 static const uint8_t LFH_MGC[] = {0x50, 0x4b, 0x03, 0x04};
@@ -48,35 +51,29 @@ void _dengineutils_zipread_writeout(const void* mem, const CDFHR* cdfhr, const c
     }
 }
 
-int dengineutils_zipread_load(const Stream* stream, ZipRead* zipread)
+int dengineutils_zipread_load(Stream* stream, ZipRead* zipread)
 {
+    memset(zipread, 0, sizeof(ZipRead));
+
     char find_eocdr = 0;
     uint8_t eocdr_mgc_test[4];
 
-    off_t eocdr_off = -OFF_EOCDR;
+    /*off_t eocdr_off = */
 
-    dengineutils_stream_seek(stream, eocdr_off, SEEK_END);
-    dengineutils_stream_read(eocdr_mgc_test, 1, 4, stream);
+    dengineutils_stream_seek(stream, -OFF_EOCDR, SEEK_END);
+    while(!find_eocdr)
+    {
+        dengineutils_stream_read(eocdr_mgc_test, 1, 4, stream);
 
-    if(!memcmp(eocdr_mgc_test, EOCD_MGC, 4))
-    {
-        find_eocdr = 1;
-    }else
-    {
-        dengineutils_stream_seek(stream, 0, SEEK_END);
-        off_t sz = stream->size;
-        while(sz > 0)
+        if(!memcmp(eocdr_mgc_test, EOCD_MGC, 4))
         {
-            dengineutils_stream_seek(stream, sz - 1, SEEK_SET);
-            dengineutils_stream_read(eocdr_mgc_test, 1, 4, stream);
-            if(!memcmp(eocdr_mgc_test, EOCD_MGC, 4))
-            {
-                find_eocdr = 1;
-                eocdr_off = sz;
-                break;
-            }
-            sz--;
+            find_eocdr = 1;
+            dengineutils_stream_seek(stream, -4, SEEK_CUR);
+            break;
         }
+        dengineutils_stream_seek(stream, -5, SEEK_CUR);
+        if(stream->pos <= 4)
+            break;
     }
 
     if(!find_eocdr)
@@ -85,66 +82,26 @@ int dengineutils_zipread_load(const Stream* stream, ZipRead* zipread)
         return 0;
     }
 
-    EOCDR* eocdr = calloc(1, sizeof(EOCDR));
+    dengineutils_stream_read(&zipread->eocdr, offsetof(EOCDR, comment), 1, stream);
 
-    dengineutils_stream_seek(stream, eocdr_off, SEEK_END);
+    if(zipread->eocdr.comment_sz){
+        zipread->eocdr.comment = calloc(zipread->eocdr.comment_sz + 1, 1);
+        dengineutils_stream_read(zipread->eocdr.comment, zipread->eocdr.comment_sz, 1, stream);
+    }
 
-    dengineutils_stream_read(&eocdr->eoc, 4, 1, stream);
-
-    dengineutils_stream_read(&eocdr->disk_no, 2, 1, stream);
-    dengineutils_stream_read(&eocdr->disk_cd_start, 2, 1, stream);
-    dengineutils_stream_read(&eocdr->disk_cd_records, 2, 1, stream);
-
-    dengineutils_stream_read(&eocdr->cd_records, 2, 1, stream);
-    dengineutils_stream_read(&eocdr->cd_size, 4, 1, stream);
-
-    dengineutils_stream_read(&eocdr->off_cd, 4, 1, stream);
-
-    dengineutils_stream_read(&eocdr->comment_sz, 2, 1, stream);
-
-    if(eocdr->off_cd == UINT32_MAX)
+    if(zipread->eocdr.off_cd == UINT32_MAX)
     {
-        dengineutils_logging_log("Incompatible with Zip64");
-        free(eocdr);
+        dengineutils_logging_log("ERROR::Zip64 is currently not supported :|");
         return 0;
     }
 
     //read eocdr comment
-    if(eocdr->comment_sz)
+
+    dengineutils_stream_seek(stream, zipread->eocdr.off_cd, SEEK_SET);
+    CDFHR* cdfhrs = calloc(zipread->eocdr.cd_records, sizeof(CDFHR));
+    for(uint16_t i = 0; i <  zipread->eocdr.cd_records; i++)
     {
-        eocdr->comment = calloc(eocdr->comment_sz + 1, 1);
-        dengineutils_stream_read(eocdr->comment, 1, eocdr->comment_sz, stream);
-    }
-
-    dengineutils_stream_seek(stream, eocdr->off_cd, SEEK_SET);
-    CDFHR* cdfhrs = calloc(eocdr->cd_records, sizeof(CDFHR));
-    for(uint16_t i = 0; i < eocdr->cd_records; i++)
-    {
-        dengineutils_stream_read(&cdfhrs[i].cd, 4, 1, stream);
-
-        dengineutils_stream_read(&cdfhrs[i].version_made, 2, 1, stream);
-        dengineutils_stream_read(&cdfhrs[i].version_extract, 2, 1, stream);
-
-        dengineutils_stream_read(&cdfhrs[i].flags, 2, 1, stream);
-        dengineutils_stream_read(&cdfhrs[i].compression, 2, 1, stream);
-
-        dengineutils_stream_read(&cdfhrs[i].lastmod_time, 2, 1, stream);
-        dengineutils_stream_read(&cdfhrs[i].lastmod_date, 2, 1, stream);
-
-        dengineutils_stream_read(&cdfhrs[i].crc32, 4, 1, stream);
-
-        dengineutils_stream_read(&cdfhrs[i].sz_compressed, 4, 1, stream);
-        dengineutils_stream_read(&cdfhrs[i].sz_uncompressed, 4, 1, stream);
-
-        dengineutils_stream_read(&cdfhrs[i].sz_name, 2, 1, stream);
-        dengineutils_stream_read(&cdfhrs[i].sz_extra, 2, 1, stream);
-        dengineutils_stream_read(&cdfhrs[i].sz_comment, 2, 1, stream);
-        dengineutils_stream_read(&cdfhrs[i].disk, 2, 1, stream);
-
-        dengineutils_stream_read(&cdfhrs[i].attrs_internal, 2, 1, stream);
-        dengineutils_stream_read(&cdfhrs[i].attrs_external, 4, 1, stream);
-
-        dengineutils_stream_read(&cdfhrs[i].off_lfh, 4, 1, stream);
+        dengineutils_stream_read(&cdfhrs[i].cd, offsetof(CDFHR, name), 1, stream);
 
         //name
         cdfhrs[i].name = calloc(cdfhrs[i].sz_name + 1, 1);
@@ -157,19 +114,18 @@ int dengineutils_zipread_load(const Stream* stream, ZipRead* zipread)
         //comment
         if(cdfhrs[i].sz_comment)
         {
-            cdfhrs[i].comment = malloc(cdfhrs[i].sz_comment);
+            cdfhrs[i].comment = calloc(cdfhrs[i].sz_comment, 1);
             dengineutils_stream_read(cdfhrs[i].comment, 1, cdfhrs[i].sz_comment, stream);
         }
     }
-    zipread->eocdr = eocdr;
     zipread->cdfhrs = cdfhrs;
 
     return 1;
 }
 
-int dengineutils_zipread_decompress_zip(const Stream* stream, const ZipRead* zipread, const char* dest)
+int dengineutils_zipread_decompress_zip(Stream* stream, const ZipRead* zipread, const char* dest)
 {
-    for(uint16_t i = 0; i < zipread->eocdr->cd_records; i++)
+    for(uint16_t i = 0; i < zipread->eocdr.cd_records; i++)
     {
         CDFHR* cdfhr = &zipread->cdfhrs[i];
 
@@ -183,8 +139,9 @@ int dengineutils_zipread_decompress_zip(const Stream* stream, const ZipRead* zip
     return 1;
 }
 
-int dengineutils_zipread_decompress_cdfhr_mem(const Stream* stream, const CDFHR* cdfhr, void** dest, uint32_t* size)
+int dengineutils_zipread_decompress_cdfhr_mem(Stream* stream, const CDFHR* cdfhr, void** dest, uint32_t* size)
 {
+    /*TODO: parse LFHR. some archivers put file info here??? */
     uint8_t lfh_mem[OFF_LFHR];
     dengineutils_stream_seek(stream, cdfhr->off_lfh, SEEK_SET);
 
@@ -199,7 +156,9 @@ int dengineutils_zipread_decompress_cdfhr_mem(const Stream* stream, const CDFHR*
 
         uint8_t* data = malloc(cdfhr->sz_compressed);
         *size = cdfhr->sz_uncompressed;
-        *dest = malloc(*size);
+        *dest = malloc(*size + 1);
+        /* could be string :] */
+        ((char*)*dest)[*size] = 0;
         dengineutils_stream_read(data, 1, cdfhr->sz_compressed, stream);
 
         if(cdfhr->compression == 0)
@@ -256,99 +215,41 @@ int dengineutils_zipread_decompress_cdfhr_mem(const Stream* stream, const CDFHR*
     return ret;
 }
 
-int dengineutils_zipread_decompress_cdfhr(const Stream* stream, const CDFHR* cdfhr, const char* dest)
+int dengineutils_zipread_decompress_cdfhr(Stream* stream, const CDFHR* cdfhr, const char* dest)
 {
-    uint8_t lfh_mem[OFF_LFHR];
-    dengineutils_stream_seek(stream, cdfhr->off_lfh, SEEK_SET);
+    void* mem;
+    uint32_t memsz;
+    if(!dengineutils_zipread_decompress_cdfhr_mem(stream, cdfhr, &mem, &memsz))
+        return 0;
 
-    dengineutils_stream_read(lfh_mem, 1, OFF_LFHR, stream);
-
-    int ret = 0;
-
-    if(!memcmp(lfh_mem, LFH_MGC, 4))
-    {
-        //skip name + extra + empty 4 bytes
-        dengineutils_stream_seek(stream, cdfhr->sz_extra + cdfhr->sz_name + 4, SEEK_CUR);
-
-        uint8_t* data = malloc(cdfhr->sz_compressed);
-        dengineutils_stream_read(data, 1, cdfhr->sz_compressed, stream);
-
-        if(cdfhr->compression == 0)
-        {
-            //store in dest
-            _dengineutils_zipread_writeout(data, cdfhr, dest);
-            ret = 1;
-        }else if(cdfhr->compression == 8)
-        {
-#ifdef DENGINE_HAS_LIBZ
-            uint8_t* uncomp = malloc(cdfhr->sz_uncompressed);
-
-            z_stream zs;
-            memset(&zs, 0, sizeof(z_stream));
-
-            zs.next_in = data;
-            zs.avail_in = cdfhr->sz_compressed;
-
-            /*
-             * https://www.zlib.net/manual.html#Advanced
-             */
-            int res = inflateInit2(&zs, -15);
-            if(res != Z_OK)
-            {
-                dengineutils_logging_log("WARNING::inflateInit failed %s", zs.msg);
-                ret = 0;
-                goto releaseres;
-            }
-
-            zs.next_out = uncomp;
-            zs.avail_out = cdfhr->sz_uncompressed;
-
-            res = inflate(&zs, Z_FINISH);
-
-            if(res == Z_STREAM_END)
-            {
-                _dengineutils_zipread_writeout(uncomp, cdfhr, dest);
-                ret = 1;
-            }else
-            {
-                dengineutils_logging_log("WARNING::inflate failed with %d\n%s", res, zs.msg);
-                ret = 0;
-            }
-            inflateEnd(&zs);
-
-            releaseres:
-
-            free(uncomp);
-#else
-            dengineutils_logging_log("WARNING::libz not linked. Cannot inflate");
-            ret = 0;
-#endif
-        }else
-        {
-            dengineutils_logging_log("WARNING::Unsupported compression method");
-        }
-        free(data);
-    }else
-    {
-        dengineutils_logging_log("ERROR::Cannot find LFHR magic number");
-    }
-    return ret;
+    _dengineutils_zipread_writeout(mem, cdfhr, dest);
+    return 1;
 }
 
 void dengineutils_zipread_free(const ZipRead* zipread)
 {
-    if(zipread->eocdr->comment_sz)
-        free(zipread->eocdr->comment);
+    if(zipread->eocdr.comment_sz)
+        free(zipread->eocdr.comment);
 
-    for(uint16_t i = 0; i < zipread->eocdr->cd_records; i++)
+    for(uint16_t i = 0; i < zipread->eocdr.cd_records; i++)
     {
         CDFHR* cdfhr = &zipread->cdfhrs[i];
         free(cdfhr->name);
         free(cdfhr->extra);
-        if(cdfhr->sz_comment)
-            free(cdfhr->comment);
+        free(cdfhr->comment);
     }
 
     free(zipread->cdfhrs);
-    free(zipread->eocdr);
+}
+
+int dengineutils_zipread_find_cdfhr(const char* path, CDFHR** cdfhr, const ZipRead* zipread)
+{
+    for(uint32_t i = 0; i < zipread->eocdr.cd_records; i++)
+    {
+        if(!strcmp(zipread->cdfhrs[i].name, path)){
+            *cdfhr = &zipread->cdfhrs[i];
+            return 1;
+        }
+    }
+    return 0;
 }

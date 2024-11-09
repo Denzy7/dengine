@@ -1,0 +1,21 @@
+set(PROJECT_VERSION @PROJECT_VERSION@)
+set(PROJECT_BINARY_DIR @PROJECT_BINARY_DIR@)
+set(CMAKE_CROSSCOMPILING @CMAKE_CROSSCOMPILING@)
+set(PROJECT_SOURCE_DIR @PROJECT_SOURCE_DIR@)
+set(exe @exe@)
+set(ext @ext@)
+set(cwd @cwd@)
+file(GLOB_RECURSE installexe 
+    ${CMAKE_INSTALL_PREFIX}/**/${exe}.${ext})
+#runs as cwd in CMAKE_CURRENT_SOURCE_DIR
+execute_process(
+    COMMAND bash "${PROJECT_SOURCE_DIR}/tools/mingw/mingw_copylibs.sh" "${CMAKE_INSTALL_PREFIX}" "${PROJECT_VERSION}" "${installexe}" "${PROJECT_BINARY_DIR}" "${CMAKE_CROSSCOMPILING}"
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${cwd}
+)
+
+if(result)
+    message(FATAL_ERROR "mingw script failed with error code ${result}")
+else()
+    message(STATUS "mingw script completed successfully")
+endif()

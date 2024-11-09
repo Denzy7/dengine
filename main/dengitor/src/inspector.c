@@ -1,328 +1,214 @@
-#include "dengitor/inspector.h"
-#include "dengitor/utils.h"
-#include "dengitor/w2v.h"
+#include "dengitor/dengitor.h"
 
-Entity* current_entity = NULL;
-ShadowOp* current_shadowop = NULL;
-uint32_t current_shadowop_tgt = 0;
-
-void _dengine_inspector_camera_resize(GtkButton* button, Inspector* inspector)
+typedef enum
 {
-    int w, h;
-    GtkEntryBuffer* buffer = gtk_entry_get_buffer(inspector->camera_widget.camera_width);
-    sscanf(gtk_entry_buffer_get_text( buffer ), "%d", &w);
+    WIDGET_OP_SET,
+    WIDGET_OP_GET,
+}WidgetOp;
 
-    buffer = gtk_entry_get_buffer(inspector->camera_widget.camera_height);
-    sscanf(gtk_entry_buffer_get_text( buffer ), "%d", &h);
+typedef struct
+{
+    GtkWidget** widget;
+    const char* str;
+}ComponentMap;
 
-    if(current_entity && current_entity->camera_component)
+typedef struct
+{
+    void* map;
+    GtkWidget* widget;
+}WidgetMap;
+
+guint dengitor_inspector_vecn_op(GtkWidget* widget, GType wtype, void* v, DengineType vtype, guint n, WidgetOp op)
+{
+    GList* l = gtk_container_get_children(GTK_CONTAINER(gtk_widget_get_parent(GTK_WIDGET(widget))));
+    char str[1024];
+    guint i = 0, j = 0;
+    for(i = 0; i < g_list_length(l); i++)
     {
-        dengine_camera_resize(current_entity->camera_component->camera, w, h);
-        dengineutils_logging_log("INFO::resize camera to %dx%d", w, h);
+        memset(str, 0, sizeof(str));
+
+        GtkWidget* get = g_list_nth(l, i)->data;
+
+        if(j > n)
+            break;
+
+        if(wtype == GTK_TYPE_ENTRY && GTK_IS_ENTRY(get))
+        {
+            if(widget == get)
+            {
+                if(op == WIDGET_OP_SET)
+                {
+                    if(!dengineutils_types_parse(vtype,
+                                gtk_entry_get_text(GTK_ENTRY(get)),
+                                v + (j * dengineutils_types_get_size(vtype))
+                                )
+                      )
+                    {
+                        memset(v + (j * dengineutils_types_get_size(vtype)), 0, dengineutils_types_get_size(vtype));
+                    }
+                }else if(op == WIDGET_OP_GET)
+                {
+                    if(dengineutils_types_tostr(vtype, str, sizeof(str), v + (j * dengineutils_types_get_size(vtype))))
+                    {
+                        GtkEntryBuffer* buffer = gtk_entry_get_buffer(GTK_ENTRY(get));
+                        gtk_entry_buffer_set_text(buffer, str, strlen(str));
+                    }
+                }
+            }else {
+                j++;
+            }
+        }else if(wtype == GTK_TYPE_COLOR_BUTTON && GTK_IS_COLOR_BUTTON(get))
+        {
+            if(widget == get)
+            {
+                /*TODO: use like the scale example below. convert to str then parse.
+                 * but are we going to incr j for every iteration of r,g,b,a?*/
+                if(vtype != DENGINEUTILS_TYPE_FLOAT)
+                    dengineutils_logging_log("WARNING::need float type for vecn");
+                float* fv = v;
+                GdkRGBA rgba;
+                if(op == WIDGET_OP_SET)
+                {
+                    gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(get), &rgba);
+
+                    fv[0] = rgba.red;
+                    if(n > 1)
+                        fv[1] = rgba.green;
+                    if(n > 2)
+                        fv[2] = rgba.blue;
+                    if(n > 3)
+                        fv[3] = rgba.alpha;
+                }else {
+                    rgba.red = fv[0];
+                    if(n > 1)
+                        rgba.green = fv[1];
+                    if(n > 2)
+                        rgba.blue = fv[2];
+                    if(n > 3)
+                        rgba.alpha = fv[3];
+                    gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(get), &rgba);
+                }
+                break;
+            }else {
+                j++;
+            }
+        }else if(wtype == GTK_TYPE_SCALE && GTK_IS_SCALE(get))
+        {
+            if(widget == get)
+            {
+                double val;
+                if(op == WIDGET_OP_SET)
+                {
+                    val = gtk_range_get_value(GTK_RANGE(get));
+                    dengineutils_types_tostr(DENGINEUTILS_TYPE_DOUBLE, str, sizeof(str), &val);
+                    dengineutils_types_parse(vtype,
+                            str,
+                            v + (j * dengineutils_types_get_size(vtype)));
+                }else if (op == WIDGET_OP_GET) {
+                    dengineutils_types_tostr(vtype, str, sizeof(str),
+                            v + (j * dengineutils_types_get_size(vtype)));
+                    dengineutils_types_parse(DENGINEUTILS_TYPE_DOUBLE,
+                            str,
+                            &val);
+                    gtk_range_set_value(GTK_RANGE(get), val);
+                }
+
+            }else {
+                j++;
+            }
+        }else if(wtype == GTK_TYPE_CHECK_BUTTON && GTK_IS_CHECK_BUTTON(get))
+        {
+            if(widget == get)
+            {
+                int val;
+                if(op == WIDGET_OP_SET)
+                {
+                    val = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(get));
+                    dengineutils_types_tostr(DENGINEUTILS_TYPE_INT32, str, sizeof(str), &val);
+                    dengineutils_types_parse(vtype,
+                            str,
+                            v + (j * dengineutils_types_get_size(vtype)));
+                }else if (op == WIDGET_OP_GET) {
+                    dengineutils_types_tostr(vtype, str, sizeof(str),
+                            v + (j * dengineutils_types_get_size(vtype)));
+                    dengineutils_types_parse(vtype,
+                            str,
+                            &val);
+                    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(get), val);
+                }
+            }else {
+                j++;
+            }
+        }
     }
+    if(op == WIDGET_OP_SET)
+        dengitor_redraw();
+    return j;
+}
+guint dengitor_inspector_vecn_set(GtkWidget* widget, GType wtype, void* v, DengineType vtype, guint n)
+{
+    return dengitor_inspector_vecn_op(widget, wtype, v, vtype, n, WIDGET_OP_SET);
+}
+guint dengitor_inspector_vecn_get(GtkWidget* widget, GType wtype, void* v, DengineType vtype, guint n)
+{
+    return dengitor_inspector_vecn_op(widget, wtype, v, vtype, n, WIDGET_OP_GET);
 }
 
-void _dengine_inspector_shadowop_resize(GtkButton* button, Inspector* inspector)
-{
-    int sz;
-    GtkEntryBuffer* buffer = gtk_entry_get_buffer(inspector->light_widget.light_shadow_size);
-    sscanf(gtk_entry_buffer_get_text( buffer ), "%d", &sz);
 
-    if(current_shadowop)
-    {
-        dengine_lighting_shadowop_resize(current_shadowop_tgt, current_shadowop, sz);
-        dengineutils_logging_log("INFO::resize shadowop to %dx%d", sz, sz);
-    }
-}
 
-void dengitor_inspector_setup(GtkBuilder* builder, Inspector* inspector)
+void dengitor_inspector_setup(GtkBuilder* builder, DengitorInspector* inspector)
 {
-    GtkContainer* transform_widget_root,* camera_widget_root,* light_widget_root;
     inspector->inspector = GTK_CONTAINER(gtk_builder_get_object(builder, "inspector_vbox"));
 
-    inspector->transform_widget.transform = GTK_WIDGET( gtk_builder_get_object(builder, "transform_component") );
-    inspector->transform_widget.transform_position = GTK_CONTAINER( gtk_builder_get_object(builder, "transform_component_pos") );
-    inspector->transform_widget.transform_rotation = GTK_CONTAINER( gtk_builder_get_object(builder, "transform_component_rot") );
-    inspector->transform_widget.transform_scale = GTK_CONTAINER( gtk_builder_get_object(builder, "transform_component_scl") );
+    ComponentMap components[] = 
+    {
+        {&inspector->transform_widget, "transform_component"},
+        {&inspector->camera_widget, "camera_component"},
+        {&inspector->light_widget, "light_component"},
+        {&inspector->mesh_widget, "mesh_component"},
+    };
 
-    transform_widget_root = GTK_CONTAINER(  gtk_widget_get_parent(inspector->transform_widget.transform) );
-    dengitor_utils_changecontainer(inspector->transform_widget.transform,
-                                   transform_widget_root, inspector->inspector);
-    g_object_unref(transform_widget_root);
-
-    inspector->camera_widget.camera = GTK_WIDGET( gtk_builder_get_object(builder, "camera_component") );
-    inspector->camera_widget.camera_fov = GTK_ADJUSTMENT( gtk_builder_get_object(builder, "camera_component_scale_adjustment") );
-    inspector->camera_widget.camera_near = GTK_ENTRY( gtk_builder_get_object(builder, "camera_component_near") );
-    inspector->camera_widget.camera_far = GTK_ENTRY( gtk_builder_get_object(builder, "camera_component_far") );
-    inspector->camera_widget.camera_width = GTK_ENTRY( gtk_builder_get_object(builder, "camera_component_width") );
-    inspector->camera_widget.camera_height = GTK_ENTRY( gtk_builder_get_object(builder, "camera_component_height") );
-    inspector->camera_widget.camera_resize = GTK_BUTTON( gtk_builder_get_object(builder, "camera_component_resize") );
-    inspector->camera_widget.camera_clearcolour = GTK_COLOR_BUTTON( gtk_builder_get_object(builder, "camera_component_clearcol") );
-
-    camera_widget_root = GTK_CONTAINER(  gtk_widget_get_parent(inspector->camera_widget.camera) );
-    dengitor_utils_changecontainer(inspector->camera_widget.camera,
-                                   camera_widget_root, inspector->inspector);
-    g_object_unref(camera_widget_root);
-
-    inspector->light_widget.light = GTK_WIDGET( gtk_builder_get_object(builder, "light_component") );
-    inspector->light_widget.light_type = GTK_COMBO_BOX( gtk_builder_get_object(builder, "light_component_type") );
-    inspector->light_widget.light_ambient = GTK_COLOR_BUTTON( gtk_builder_get_object(builder, "light_component_ambient") );
-    inspector->light_widget.light_diffuse = GTK_COLOR_BUTTON( gtk_builder_get_object(builder, "light_component_diffuse") );
-    inspector->light_widget.light_specular = GTK_COLOR_BUTTON( gtk_builder_get_object(builder, "light_component_specular") );
-    inspector->light_widget.light_strength = GTK_ADJUSTMENT( gtk_builder_get_object(builder, "light_component_strength_adjustment") );
-    inspector->light_widget.light_shadow_mode = GTK_COMBO_BOX( gtk_builder_get_object(builder, "light_component_shadow_mode") );
-    inspector->light_widget.light_shadow_size = GTK_ENTRY( gtk_builder_get_object(builder, "light_component_shadow_size") );
-    inspector->light_widget.light_shadow_resize = GTK_BUTTON ( gtk_builder_get_object(builder, "light_component_shadow_resize") );
-    inspector->light_widget.light_shadow_pcf = GTK_TOGGLE_BUTTON( gtk_builder_get_object(builder, "light_component_shadow_pcf") );
-    inspector->light_widget.light_shadow_pcf_samples = GTK_ADJUSTMENT( gtk_builder_get_object(builder, "light_component_shadow_pcf_samples") );
-
-    light_widget_root = GTK_CONTAINER( gtk_widget_get_parent(inspector->light_widget.light) );
-    dengitor_utils_changecontainer(inspector->light_widget.light,
-                                   light_widget_root, inspector->inspector);
-    g_object_unref(light_widget_root);
-
+    GtkContainer* container;
+    for(size_t i = 0; i < DENGINE_ARY_SZ(components); i++)
+    {
+        *components[i].widget = GTK_WIDGET( gtk_builder_get_object(builder, components[i].str));
+        container = GTK_CONTAINER( gtk_widget_get_parent(*components[i].widget) );
+        dengitor_utils_changecontainer(*components[i].widget,
+                container, inspector->inspector);
+        g_object_unref(container);
+    }
 }
 
-void dengitor_inspector_do_entity(Entity* entity, Inspector* inspector)
+void dengitor_inspector_do_entity(Entity* entity, DengitorInspector* inspector)
 {
     // hide all. only show if we have the component
-    gtk_widget_hide(inspector->camera_widget.camera);
-    gtk_widget_hide(inspector->transform_widget.transform);
-    gtk_widget_hide(inspector->light_widget.light);
+    GList* l = gtk_container_get_children(GTK_CONTAINER(inspector->inspector));
+    for(size_t i = 0; i < g_list_length(l); i++)
+    {
+        GtkWidget* w = g_list_nth(l, i)->data;
+        gtk_widget_hide(w);
+    }
 
-    current_entity = entity;
-
-    // we outta here...
     if(!entity)
         return;
 
-    gtk_widget_show_all(inspector->transform_widget.transform);
+    inspector->currententity = entity;
 
-    //pull transform data
-    GList* pos_list = gtk_container_get_children(inspector->transform_widget.transform_position);
-    GList* rot_list = gtk_container_get_children(inspector->transform_widget.transform_rotation);
-    GList* scl_list = gtk_container_get_children(inspector->transform_widget.transform_scale);
+    WidgetMap map[] = 
+    {
+        {entity->mesh_component, inspector->mesh_widget},
+        {entity->light_component, inspector->light_widget},
+        {entity->camera_component, inspector->camera_widget},
+    };
 
-    GtkEntry* entry;
-    GtkAdjustment* adjustment;
-    GtkButton* button;
-    GtkColorButton* colorbtn;
-    GtkEntryBuffer* buffer;
-    GtkToggleButton* toggle;
-    GdkRGBA rgba;
-    char prtbf[1024];
-
-    /*
-     * NOTE:
-     *
-     * Inspector uses a combination of diconnecting
-     * and connecting signals to work
-     *
-     * This approach allows more flexibility with w2v
-     * so that values can be instantly mapped to a widget
-     *
-     * This does come at the cost of disconnecting previous
-     * signal and connecting a new one with selected entity (its
-     * important it occurs in that order). Failure to will cause
-     * the selected entity to pull data from previous entity
-     * (WHICH YOU DONT BASICALLY WANT) or multiple callbacks!
-     *
-     * Then pull its data (from ecs or core structs)
-     * to the widget.
-     *
-     * Some widgets just need to pull ecs data (like getting camera
-     * render width) these do not need to connect any signals
+    gtk_widget_show_all(inspector->transform_widget);
+    /*show conditionally so widgets dont have to check for component 
      */
 
-    for(guint i = 0; i < 3; i++)
+    for(size_t i = 0; i < DENGINE_ARY_SZ(map); i++)
     {
-        GList* pos_nth = g_list_nth(pos_list, i);
-        GList* rot_nth = g_list_nth(rot_list, i);
-        GList* scl_nth = g_list_nth(scl_list, i);
-
-        // pos
-        entry = GTK_ENTRY(pos_nth->data);
-        buffer = gtk_entry_get_buffer(entry);
-        dengitor_utils_disconnect(gtk_entry_get_type(), entry, "changed");
-        g_signal_connect(entry, "changed",
-                         G_CALLBACK(dengitor_w2v_entry2float), &entity->transform.position[i]);
-        g_snprintf(prtbf, sizeof(prtbf), "%.1f", entity->transform.position[i]);
-        gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
-
-        //rot
-        entry = GTK_ENTRY(rot_nth->data);
-        buffer = gtk_entry_get_buffer(entry);
-        dengitor_utils_disconnect(gtk_entry_get_type(), entry, "changed");
-        g_signal_connect(entry, "changed",
-                         G_CALLBACK(dengitor_w2v_entry2float), &entity->transform.rotation[i]);
-        g_snprintf(prtbf, sizeof(prtbf), "%.1f", entity->transform.rotation[i]);
-        gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
-
-        //scl
-        entry = GTK_ENTRY(scl_nth->data);
-        buffer = gtk_entry_get_buffer(entry);
-        dengitor_utils_disconnect(gtk_entry_get_type(), entry, "changed");
-        g_signal_connect(entry, "changed",
-                         G_CALLBACK(dengitor_w2v_entry2float), &entity->transform.scale[i]);
-        g_snprintf(prtbf, sizeof(prtbf), "%.1f", entity->transform.scale[i]);
-        gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
+        if(map[i].map)
+            gtk_widget_show_all(map[i].widget);
     }
-
-    if(entity->camera_component)
-    {
-        Camera* camera = entity->camera_component->camera;
-        gtk_widget_show_all(inspector->camera_widget.camera);
-
-        // fov
-        adjustment = inspector->camera_widget.camera_fov;
-        dengitor_utils_disconnect(gtk_adjustment_get_type(), adjustment, "value-changed");
-        g_signal_connect(adjustment, "value-changed",
-                         G_CALLBACK(dengitor_w2v_adjustment2float),&camera->fov);
-        gtk_adjustment_set_value(adjustment, camera->fov);
-
-        //near
-        entry = inspector->camera_widget.camera_near;
-        buffer = gtk_entry_get_buffer(entry);
-        dengitor_utils_disconnect(gtk_entry_get_type(), entry, "changed");
-        g_signal_connect(entry, "changed",
-                         G_CALLBACK(dengitor_w2v_entry2float), &camera->near);
-        g_snprintf(prtbf, sizeof(prtbf), "%.2f", camera->near);
-        gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
-
-        //far
-        entry = inspector->camera_widget.camera_far;
-        buffer = gtk_entry_get_buffer(entry);
-        dengitor_utils_disconnect(gtk_entry_get_type(), entry, "changed");
-        g_signal_connect(entry, "changed",
-                         G_CALLBACK(dengitor_w2v_entry2float), &camera->far);
-        g_snprintf(prtbf, sizeof(prtbf), "%.2f", camera->far);
-        gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
-
-        //width
-        entry = inspector->camera_widget.camera_width;
-        buffer = gtk_entry_get_buffer(entry);
-        g_snprintf(prtbf, sizeof(prtbf), "%d", camera->render_width);
-        gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
-
-        //height
-        entry = inspector->camera_widget.camera_height;
-        buffer = gtk_entry_get_buffer(entry);
-        g_snprintf(prtbf, sizeof(prtbf), "%d", camera->render_height);
-        gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
-
-        button = inspector->camera_widget.camera_resize;
-        dengitor_utils_disconnect(gtk_button_get_type(), button, "clicked");
-        g_signal_connect(button, "clicked",
-                         G_CALLBACK(_dengine_inspector_camera_resize), inspector);
-        //clear
-        dengitor_utils_float4_to_rgba(camera->clearcolor, &rgba);
-        gtk_color_chooser_set_rgba(
-                    GTK_COLOR_CHOOSER(inspector->camera_widget.camera_clearcolour),
-                    &rgba);
-    }
-
-    if(entity->light_component)
-    {
-        LightOp* light_op = NULL;
-        ShadowOp* shadow_op = NULL;
-        gint active_type = 0, active_shadow = 0;
-
-        if(entity->light_component->type == DENGINE_LIGHT_DIR)
-        {
-            light_op = &((DirLight*)entity->light_component->light)->light;
-            shadow_op = &((DirLight*)entity->light_component->light)->shadow;
-            current_shadowop_tgt = GL_TEXTURE_2D;
-        }else if(entity->light_component->type == DENGINE_LIGHT_POINT)
-        {
-            active_type = 1;
-            light_op = &((PointLight*)entity->light_component->light)->light;
-            shadow_op = &((PointLight*)entity->light_component->light)->shadow;
-            current_shadowop_tgt = GL_TEXTURE_CUBE_MAP;
-        }else if(entity->light_component->type == DENGINE_LIGHT_SPOT)
-        {
-            active_type = 2;
-            light_op = &((SpotLight*)entity->light_component->light)->pointLight.light;
-            shadow_op = &((SpotLight*)entity->light_component->light)->pointLight.shadow;
-            current_shadowop_tgt = GL_TEXTURE_CUBE_MAP;
-        }
-        gtk_combo_box_set_active( inspector->light_widget.light_type, active_type);
-
-        gtk_widget_show_all(inspector->light_widget.light);
-
-        if(light_op)
-        {
-            //ambient
-            colorbtn = inspector->light_widget.light_ambient;
-            dengitor_utils_disconnect(gtk_color_button_get_type(), colorbtn, "color-set");
-            g_signal_connect(colorbtn, "color-set",
-                              G_CALLBACK(dengitor_w2v_colorbtn2float4), light_op->ambient);
-            dengitor_utils_float4_to_rgba(light_op->ambient, &rgba);
-            gtk_color_chooser_set_rgba( GTK_COLOR_CHOOSER(colorbtn), &rgba );
-
-            //diffuse
-            colorbtn = inspector->light_widget.light_diffuse;
-            dengitor_utils_disconnect(gtk_color_button_get_type(), colorbtn, "color-set");
-            g_signal_connect(colorbtn, "color-set",
-                              G_CALLBACK(dengitor_w2v_colorbtn2float4), light_op->diffuse);
-            dengitor_utils_float4_to_rgba(light_op->diffuse, &rgba);
-            gtk_color_chooser_set_rgba( GTK_COLOR_CHOOSER(colorbtn), &rgba );
-
-            //specular
-            colorbtn = inspector->light_widget.light_specular;
-            dengitor_utils_disconnect(gtk_color_button_get_type(), colorbtn, "color-set");
-            g_signal_connect(colorbtn, "color-set",
-                              G_CALLBACK(dengitor_w2v_colorbtn2float4), light_op->specular);
-            dengitor_utils_float4_to_rgba(light_op->specular, &rgba);
-            gtk_color_chooser_set_rgba( GTK_COLOR_CHOOSER(colorbtn), &rgba );
-
-            //strength
-            adjustment = inspector->light_widget.light_strength;
-            dengitor_utils_disconnect(gtk_adjustment_get_type(), adjustment, "value-changed");
-            g_signal_connect(adjustment, "value-changed",
-                             G_CALLBACK(dengitor_w2v_adjustment2float), &light_op->strength);
-            gtk_adjustment_set_value(adjustment, light_op->strength);
-
-
-        }
-
-        if(shadow_op)
-        {
-            current_shadowop = shadow_op;
-
-            if(shadow_op->enable)
-                active_shadow = 0;
-            else if(shadow_op->invisiblemesh)
-                active_shadow = 1;
-            else if(!shadow_op->enable)
-                active_shadow = 2;
-
-            gtk_combo_box_set_active( inspector->light_widget.light_shadow_mode, active_shadow);
-
-            //shadow sz
-            entry = inspector->light_widget.light_shadow_size;
-            buffer = gtk_entry_get_buffer(entry);
-            g_snprintf(prtbf, sizeof(prtbf), "%d", shadow_op->shadow_map_size);
-            gtk_entry_buffer_set_text(buffer, prtbf, strlen(prtbf));
-
-            //shadow res
-            button = inspector->light_widget.light_shadow_resize;
-            dengitor_utils_disconnect(gtk_button_get_type(), button, "clicked");
-            g_signal_connect(button, "clicked",
-                             G_CALLBACK(_dengine_inspector_shadowop_resize), inspector);
-
-            //shadow pcf
-            toggle = inspector->light_widget.light_shadow_pcf;
-            dengitor_utils_disconnect(gtk_toggle_button_get_type(), toggle, "toggled");
-            g_signal_connect(toggle, "toggled",
-                             G_CALLBACK(dengitor_w2v_toggle2int), &shadow_op->pcf);
-
-            //shadow pcf sampling
-            adjustment = inspector->light_widget.light_shadow_pcf_samples;
-            dengitor_utils_disconnect(gtk_adjustment_get_type(), adjustment, "value-changed");
-            g_signal_connect(adjustment, "value-changed",
-                             G_CALLBACK(dengitor_w2v_adjustment2int), &shadow_op->pcf_samples);
-            gtk_adjustment_set_value(adjustment, (gdouble) shadow_op->pcf_samples);
-
-        }
-    }
+    //pull transform data
 }

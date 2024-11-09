@@ -1,39 +1,32 @@
 #include "dengine/dengine.h"
 #include "dengine.ini.h"
 #include <string.h> //memset
-DengineInitOpts DENGINE_INIT_OPTS;
+static DengineInitOpts DENGINE_INIT_OPTS;
 int DENGINE_HAS_GOT_INIT_OPTS = 0;
 extern unsigned char LICENSE_md[];
 extern unsigned char dengine_ini[];
 extern unsigned int dengine_ini_ln;
 
-typedef enum{
-    DENGINE_INIT_CONF_TYPE_INT,
-    /*DENGINE_INIT_CONF_TYPE_STRING,*/
-    DENGINE_INIT_CONF_TYPE_FLOAT,
-
-    DENGINE_INIT_CONF_TYPE_COUNT
-}DengineInitConfType;
-
 typedef struct
 {
     const char* key;
-    DengineInitConfType type;
-    void* set;
+    DengineType type;
+    void* address;
 }DengineInitConfKey;
 
 DengineInitConfKey confkeys[] =
 {
-    {"window_width", DENGINE_INIT_CONF_TYPE_INT, NULL},
-    {"window_height", DENGINE_INIT_CONF_TYPE_INT, NULL},
-    {"window_msaa", DENGINE_INIT_CONF_TYPE_INT, NULL},
-    {"window_swapinterval", DENGINE_INIT_CONF_TYPE_INT, NULL},
-    {"font_size", DENGINE_INIT_CONF_TYPE_FLOAT, NULL},
-    {"font_bitmapsize", DENGINE_INIT_CONF_TYPE_INT, NULL},
-    {"cache_shaders", DENGINE_INIT_CONF_TYPE_INT, NULL},
-    {"gl_min", DENGINE_INIT_CONF_TYPE_INT, NULL},
-    {"gl_max", DENGINE_INIT_CONF_TYPE_INT, NULL},
-    {"gl_core", DENGINE_INIT_CONF_TYPE_INT, NULL},
+    {"window_width", DENGINEUTILS_TYPE_INT32, &DENGINE_INIT_OPTS.window_width},
+    {"window_height", DENGINEUTILS_TYPE_INT32, &DENGINE_INIT_OPTS.window_height},
+    {"window_msaa", DENGINEUTILS_TYPE_INT32, &DENGINE_INIT_OPTS.window_msaa},
+    {"window_swapinterval", DENGINEUTILS_TYPE_INT32, &DENGINE_INIT_OPTS.window_swapinterval},
+    {"font_size", DENGINEUTILS_TYPE_FLOAT, &DENGINE_INIT_OPTS.font_size},
+    {"font_bitmapsize", DENGINEUTILS_TYPE_INT32, &DENGINE_INIT_OPTS.font_bitmapsize},
+    {"cache_shaders", DENGINEUTILS_TYPE_INT32, &DENGINE_INIT_OPTS.cache_shaders},
+    {"gl_min", DENGINEUTILS_TYPE_INT32, &DENGINE_INIT_OPTS.gl_min},
+    {"gl_max", DENGINEUTILS_TYPE_INT32, &DENGINE_INIT_OPTS.gl_max},
+    {"gl_core", DENGINEUTILS_TYPE_INT32, &DENGINE_INIT_OPTS.gl_core},
+    {"gui_subdata", DENGINEUTILS_TYPE_INT32, &DENGINE_INIT_OPTS.gui_subdata},
 };
 
 #ifdef DENGINE_ANDROID
@@ -61,9 +54,11 @@ DengineInitOpts* dengine_init_get_opts()
     dengineutils_filesys_init();
 
 #ifdef DENGINE_ANDROID
-    //Can safely set files and cachedirs
-    dengineutils_android_set_filesdir();
-    dengineutils_android_set_cachedir();
+    if(dengineutils_android_get_app() == NULL)
+    {
+        dengineutils_logging_log("ERROR::ENSURE, you have used dengineutils_android_set_app in your android_main before using using any dengine_init* function");
+        return NULL;
+    }
 #endif
     DENGINE_INIT_OPTS.window_createnative = 1;
     DENGINE_INIT_OPTS.window_title = "Dengine!";
@@ -78,6 +73,10 @@ DengineInitOpts* dengine_init_get_opts()
      * and dengitor (to redirect stdout to logging widget)
      */
     DENGINE_INIT_OPTS.enable_logthread = 1;
+#ifdef DENGINE_LIGHTING_SHADOW3D
+        dengineutils_logging_log("WARNING::Shadow3D compiled and enabled on mobile, its highly recommened you recompile and disable to avoid a huge performance penalty");
+#endif
+    
 #endif
 
     const size_t prtbf_sz = 2048;
@@ -90,18 +89,6 @@ DengineInitOpts* dengine_init_get_opts()
 
     snprintf(prtbf, prtbf_sz, "%s/dengine/dengine.ini",
              dengineutils_filesys_get_filesdir());
-
-    /* bind sets to keys */
-    confkeys[0].set = &DENGINE_INIT_OPTS.window_width;
-    confkeys[1].set = &DENGINE_INIT_OPTS.window_height;
-    confkeys[2].set = &DENGINE_INIT_OPTS.window_msaa;
-    confkeys[3].set = &DENGINE_INIT_OPTS.window_swapinterval;
-    confkeys[4].set = &DENGINE_INIT_OPTS.font_size;
-    confkeys[5].set = &DENGINE_INIT_OPTS.font_bitmapsize;
-    confkeys[6].set = &DENGINE_INIT_OPTS.cache_shaders;
-    confkeys[7].set = &DENGINE_INIT_OPTS.gl_min;
-    confkeys[8].set = &DENGINE_INIT_OPTS.gl_max;
-    confkeys[9].set = &DENGINE_INIT_OPTS.gl_core;
 
     Conf* conf = dengineutils_confserialize_new(prtbf, '=');
     FILE* f_conf = fopen(prtbf, "rb");
@@ -157,13 +144,11 @@ DengineInitOpts* dengine_init_get_opts()
     for(size_t i = 0; i < DENGINE_ARY_SZ(confkeys); i++)
     {
         const char* k = dengineutils_confserialize_get_value(confkeys[i].key, conf);
-        if(k == NULL || confkeys[i].set == NULL)
+        if(k == NULL){
+            dengineutils_logging_log("WARNING::conf doesn't have needed key [ %s ], please migrate or delete this invalid config file", confkeys[i].key);
             continue;
-
-        if(confkeys[i].type == DENGINE_INIT_CONF_TYPE_INT)
-            sscanf(k, "%d", (int*)confkeys[i].set);
-        else if(confkeys[i].type == DENGINE_INIT_CONF_TYPE_FLOAT)
-            sscanf(k, "%f", (float*)confkeys[i].set);
+        }
+        dengineutils_types_parse(confkeys[i].type, k, confkeys[i].address);
     }
 
     dengineutils_confserialize_free(conf);
@@ -181,8 +166,14 @@ int dengine_init()
     //DEBUGGING, INCASE OF SIGSEGV OR SIGABRT
     dengineutils_debug_init();
 
+    DengineInitOpts* opts = &DENGINE_INIT_OPTS; 
+
     if(!DENGINE_HAS_GOT_INIT_OPTS)
-        DENGINE_INIT_OPTS = *dengine_init_get_opts();
+        opts = dengine_init_get_opts();
+
+    /* this fails if app isn't set on android since it returns NULL */
+    if(opts == NULL)
+        return 0;
 
     if(DENGINE_INIT_OPTS.window_msaa)
         dengine_window_request_MSAA(DENGINE_INIT_OPTS.window_msaa);
@@ -201,13 +192,12 @@ int dengine_init()
             return 0;
         }
 #ifdef DENGINE_ANDROID
-        //Android creates a window already in init and sets it current
-        DENGINE_INIT_OPTS.window = dengine_window_get_current();
         if(DENGINE_INIT_OPTS.android_handlebackbutton){
             dengineutils_android_handle_backbutton(1);
             dengineutils_android_set_backbuttonfunc(backbutton_func);
         }
-#else
+#endif
+
         DENGINE_INIT_OPTS.window = dengine_window_create(DENGINE_INIT_OPTS.window_width, DENGINE_INIT_OPTS.window_height, DENGINE_INIT_OPTS.window_title, NULL);
         if(!DENGINE_INIT_OPTS.window)
         {
@@ -220,11 +210,13 @@ int dengine_init()
              dengineutils_logging_log("ERROR::Cannot makecurrent window");
              return 0;
          }
-#endif
          dengine_window_set_swapinterval(DENGINE_INIT_OPTS.window,
                                          DENGINE_INIT_OPTS.window_swapinterval);
-         //set window to poll for input
-         dengine_input_set_window(DENGINE_INIT_OPTS.window);
+         /*
+          * set window to poll for input. not really necessary since
+          * make current alreadt does this
+          */
+         dengine_input_set_input( dengine_window_get_input(DENGINE_INIT_OPTS.window));
     }
 
     if(DENGINE_INIT_OPTS.gl_loaddefault)
@@ -249,6 +241,7 @@ int dengine_init()
     //caching
     dengine_texture_set_texturecache(DENGINE_INIT_OPTS.cache_textures);
     dengine_shader_set_shadercache(DENGINE_INIT_OPTS.cache_shaders);
+    denginegui_use_subdata(DENGINE_INIT_OPTS.gui_subdata);
 
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -265,11 +258,11 @@ int dengine_init()
     else
         snprintf(msaastr, 9, "NO MSAA");
 
-    dengineutils_logging_log("TODO::DENGINE : %s", DENGINE_VERSION);
+    dengineutils_logging_log("TODO::DENGINE : %s, BuildType: %s", DENGINE_VERSION, CMAKE_BUILD_TYPE);
     dengineutils_logging_log("INFO::GL : %s\nGLSL : %s\nVENDOR : %s\nRENDERDER : %s\n"
-                             "VIEWPORT : %dx%d %s",
+                             "VIEWPORT : %dx%d %s swapinterval(requested):%d",
                              GL, GLSL, VENDOR, RENDERDER,
-                             viewport[2], viewport[3], msaastr);
+                             viewport[2], viewport[3], msaastr, DENGINE_INIT_OPTS.window_swapinterval);
 
     //GUI. SET FONT TOO
     if(!denginegui_init())
@@ -280,9 +273,6 @@ int dengine_init()
     //SEED RNG. NOT MT-SAFE!(AFAIK)
     dengineutils_rng_set_seedwithtime();
 
-    //init logthread
-    if(DENGINE_INIT_OPTS.enable_logthread)
-        dengineutils_logging_init();
 
     //INIT SCRIPTING
     denginescript_init();
@@ -294,6 +284,13 @@ int dengine_init()
     //backface culling. save draw calls ✅
     if(DENGINE_INIT_OPTS.enable_backfaceculling)
         glEnable(GL_CULL_FACE);
+
+    /*
+     * should be one of the last thing to init so we get as much 
+     * init info into stdout in case of crash
+     */
+    if(DENGINE_INIT_OPTS.enable_logthread)
+        dengineutils_logging_init();
 
     return 1;
 }
@@ -327,6 +324,9 @@ int dengine_update()
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #ifdef DENGINE_ANDROID
+/* we need to still poll even when not in focus
+ * so we can recreate egl context on resume
+ */
     while(!dengineutils_android_get_activityfocused())
     {
         dengineutils_android_pollevents();

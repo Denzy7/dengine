@@ -186,6 +186,8 @@ int testdengine_lighting_standard(int argc, char** argv)
     dLight.shadow.enable = 1;
     dLight.shadow.shadow_map_size = 512;
     dengine_lighting_setup_dirlight(&dLight);
+    dLight.shadow.far_shadow = 125.0f;
+    dLight.shadow_ortho = 10.0f;
     dLight.light.strength = .5;
 
     PointLight pLight;
@@ -202,8 +204,6 @@ int testdengine_lighting_standard(int argc, char** argv)
 
     SpotLight sLight;
     memset(&sLight, 0, sizeof(SpotLight));
-    sLight.pointLight.shadow.enable = 1;
-    sLight.pointLight.shadow.shadow_map_size = 512;
     sLight.pointLight.position[0] = 1.f;
     sLight.pointLight.position[1] = 3.f;
     sLight.pointLight.position[2] = .5f;
@@ -243,17 +243,20 @@ int testdengine_lighting_standard(int argc, char** argv)
 
     float* posflt[]=
     {
-        pos, camera.position, dLight.position, pLight.position, sLight.pointLight.position, tgt
+        pos, camera.position, dLight.direction, pLight.position, sLight.pointLight.position, tgt
     };
-    char postr[60];
+    char postr[128];
 
 
     vec3 gizmoscl = {.75f, .75f, .75f};
-    vec3 up = {.0f, 1.f, .0f};
+    vec3 up = {.0f, 1.0f, .0f};
     mat4 view;
 
     glLineWidth(4.0f);
-
+    /*TODO: before we actually get a working lighting system,
+     * we set number of dynamic lights manually */
+    dengine_shader_set_int(&stdshader, "nr_pointLights", 1);
+    dengine_shader_set_int(&stdshader, "nr_spotLights", 1);
     while (dengine_window_isrunning(window)) {
         snprintf(shadowtogglestr, sizeof (shadowtogglestr), "Click to toggle 3D shadows : %d", use_shadow3d);
 
@@ -290,9 +293,15 @@ int testdengine_lighting_standard(int argc, char** argv)
         dengine_camera_apply(&stdshader, &camera);
         dengine_camera_apply(&dftshader, &camera);
 
-        sLight.direction[0] = (tgt[0] - sLight.pointLight.position[0]);
-        sLight.direction[1] = (tgt[1] - sLight.pointLight.position[1]);
-        sLight.direction[2] = (tgt[2] - sLight.pointLight.position[2]);
+        for(int i = 0; i < 3; i++)
+        {
+            sLight.direction[i] = sLight.pointLight.position[i] - tgt[i]; 
+        }
+        if(dengine_input_get_key('L'))
+            sLight.innerCutOff += (delta / 1000.0) * 10.0;
+        if(dengine_input_get_key('K'))
+            sLight.innerCutOff -= (delta / 1000.0) * 10.0;
+
 
         dengine_lighting_apply_dirlight(&dLight, &stdshader);
         dengine_lighting_apply_pointlight(&pLight, &stdshader);
@@ -345,6 +354,18 @@ int testdengine_lighting_standard(int argc, char** argv)
         //GIZMO pass
         //Cull face for drawing  regular
         glDisable(GL_CULL_FACE);
+
+        //dirLight  quad + axis
+        glm_mat4_identity(model);
+        glm_mat4_zero(view);
+        glm_look(dLight.direction, dLight.direction, up, view);
+        glm_mat4_inv(view, view);
+        glm_mat4_mul(model, view, model);
+        glm_scale(model, gizmoscl);
+        dengine_shader_set_mat4(&dftshader, "model", model[0]);
+        dengine_shader_set_vec3(&dftshader, "color", dLight.light.diffuse);
+        dengine_draw_primitive(&quad, &dftshader);
+        draw_axis(&axis,&dftshader);
 
         //pLight quad + axis
         glm_mat4_identity(model);
@@ -404,7 +425,7 @@ int testdengine_lighting_standard(int argc, char** argv)
         denginegui_panel(0, fontsz, tex_widths,tex_widths,&dLight.shadow.shadow_map.depth, NULL, NULL);
 
         int postrs_count = DENGINE_ARY_SZ(postrs);
-        snprintf(postr, sizeof (postr), "Click to change pos mode : %s <%d of %d>", postrs[curpstr], curpstr + 1, postrs_count);
+        snprintf(postr, sizeof (postr), "Click to change pos mode : %s <%d of %d> , x:%.2f, y:%.2f, z:%.2f", postrs[curpstr], curpstr + 1, postrs_count, ptr[0], ptr[1], ptr[2]);
         if(denginegui_button(offset, h - 4 * fontsz, w - 2 * offset, 2 * fontsz, postr, NULL))
         {
             curpstr++;

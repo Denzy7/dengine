@@ -10,9 +10,11 @@
 #include "dengine/input.h"
 #include "dengine/entrygl.h"
 #include "dengine/viewport.h"
+#include "dengine/window.h"
 
 #include "dengine-utils/logging.h"
 #include "dengine-utils/debug.h"
+#include "dengine-utils/macros.h"
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h> //stbtt
@@ -33,6 +35,9 @@ const int fcfilestrbufsz = 2048;
 #include <stdlib.h> //malloc
 #include <string.h> //memset
 #include <stdio.h>  //printf
+                    //
+
+void notreallysubdata(GLenum e, GLintptr off, GLsizeiptr s, const void* data);
 
 stbtt_packedchar packedchar_data[96];
 stbtt_fontinfo info;
@@ -44,6 +49,7 @@ float _fontsz = 0.0f;
 int btnrepeatable = 0;
 int paneldiscard = 0;
 float discardthreshold = 0.1f;
+void (*dengine_subdata)(GLenum, GLintptr, GLsizeiptr, const void*) = notreallysubdata;
 
 //the standard gui quad
 Primitive quad;
@@ -53,9 +59,13 @@ Shader gui_panel;
 Shader gui_discard;
 
 int initgui = 0;
-int repeatablestate = 1;
 #define PANEL_ALPHA 0.4f
 Texture dftpaneltex;
+
+void notreallysubdata(GLenum e, GLintptr off, GLsizeiptr s, const void* data)
+{
+    glBufferData(e, s, data, GL_DYNAMIC_DRAW);
+}
 
 const char* _denginegui_get_defaultfont()
 {
@@ -101,7 +111,7 @@ int denginegui_init()
 
     quad.array.data = vertices;
     quad.array.size = sizeof(vertices);
-    quad.array.usage = GL_STREAM_DRAW;
+    quad.array.usage = GL_DYNAMIC_DRAW;
 
     quad.index.data = indices;
     quad.index.size = sizeof(indices);
@@ -123,7 +133,6 @@ int denginegui_init()
         dengine_shader_make_standard(DENGINE_SHADER_GUI_PANEL, &gui_panel) &&
         dengine_shader_make_standard(DENGINE_SHADER_GUI_DISCARD, &gui_discard);
         
-
     #ifdef DENGINE_HAS_FONTCONFIG
     fcfilestrbuf = calloc(fcfilestrbufsz, sizeof(char));
     #endif
@@ -372,7 +381,7 @@ void denginegui_text(float x, float y, const char* text, float* rgba)
             };
 
             // draw our stuff, update buffer
-            glBufferSubData(GL_ARRAY_BUFFER, 0, quad.array.size, vertices);
+            dengine_subdata(GL_ARRAY_BUFFER, 0, quad.array.size, vertices);
             DENGINE_CHECKGL;
 
             /* for text, we need to sequence draw since
@@ -447,7 +456,7 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
         x + width, y + height, 1.0f, 1.0f,
         x + width,          y, 1.0f, 0.0f,
     };
-    glBufferSubData(GL_ARRAY_BUFFER, 0, quad.array.size, vertices);
+    dengine_subdata(GL_ARRAY_BUFFER, 0, quad.array.size, vertices);
     DENGINE_CHECKGL;
     dengine_draw_sequence_draw();
     dengine_draw_sequence_end();
@@ -462,31 +471,6 @@ void denginegui_panel(float x, float y, float width, float height, Texture* text
     }
 }
 
-/* checks for input in screen region. useful for touchscreen only */
-int _denginegui_checkinputregion(float x, float y, float width, float height)
-{
-    int found = 0;
-#ifndef DENGINE_ANDROID
-    found = dengine_input_get_mousebtn(0);
-#else
-    int vh;
-    dengine_viewport_get(NULL, NULL, NULL, &vh);
-    AndroidInput* andrinput = dengineutils_android_get_input();
-    for(size_t i = 0; i < andrinput->pointer_count; i++)
-    {
-        float ay = vh - andrinput->pointers[i].y;
-        //dengineutils_logging_log("%f %f", andrinput->pointers[i].x, ay);
-        if(andrinput->pointers[i].x >= x && andrinput->pointers[i].x <= (x + width) &&
-                ay >= y && ay <= (y + height) &&
-                andrinput->pointers[i].state)
-        {
-            found = 1;
-            break;
-        }
-    }
-#endif
-    return found;
-}
 
 int denginegui_button(float x,float y, float width, float height, const char* text, float* rgba)
 {
@@ -495,7 +479,7 @@ int denginegui_button(float x,float y, float width, float height, const char* te
     int down = 0;
     int inregion = 0;
 #ifdef DENGINE_ANDROID
-    inregion = _denginegui_checkinputregion(x, y, width, height);
+    inregion = dengine_input_get_touch(x, y, width, height);
 #else
     double mx = dengine_input_get_mousepos_x();
     double my = dengine_input_get_mousepos_y();
@@ -538,19 +522,24 @@ int denginegui_button(float x,float y, float width, float height, const char* te
                     press[i] += 0.005f;
             }
             denginegui_panel(x, y, width, height, NULL, NULL, press);
-            down = btnrepeatable ? _denginegui_checkinputregion(x, y, width, height) : repeatablestate;
-            repeatablestate = 0;
+#ifdef DENGINE_ANDROID
+            down = btnrepeatable ?
+                dengine_input_get_touch(x, y, width, height) :
+                dengine_input_get_touch_once(x, y, width, height);
+
+
+#else
+            down = btnrepeatable ? 
+                dengine_input_get_mousebtn(DENGINE_INPUT_MSEBTN_PRIMARY) :
+                dengine_input_get_mousebtn_once(DENGINE_INPUT_MSEBTN_PRIMARY);
+#endif
 #ifndef DENGINE_ANDROID
         }
 #endif
     } else {
         denginegui_panel(x, y, width, height, NULL, NULL, rgba);
     }
-    /* beware of ghost clicks in SW input when another touch
-     * interferes with the first touch */
-    if(!dengine_input_get_mousebtn(0)){
-        repeatablestate = 1;
-    }
+
     int scissor = glIsEnabled(GL_SCISSOR_TEST);
     DENGINE_CHECKGL;
     if(!scissor)
@@ -587,3 +576,15 @@ void denginegui_set_panel_discard_threshold(float threshold)
 {
     discardthreshold = threshold;
 }
+
+void denginegui_use_subdata(int state)
+{
+    if(state){
+        dengine_subdata = glBufferSubData;
+    }
+    else{
+        dengineutils_logging_log("WARNING::Using glBufferData for GUI instead");
+        dengine_subdata = notreallysubdata;
+    }
+}
+

@@ -2,7 +2,6 @@
 #define LIGHTING_H
 
 #include <stdint.h> //uint32
-
 #include "dengine/framebuffer.h" //fbo's
 #include "dengine/shader.h" //set_mat4, bind_blocks?
 #include "dengine/primitive.h" //draw
@@ -14,6 +13,10 @@ typedef enum
     DENGINE_LIGHT_SPOT,
 }LightType;
 
+/*TODO: configure file from cmake so values are automatically changed */
+#define MAX_POINT 4
+#define MAX_SPOT 4
+
 typedef struct LightOp
 {
     int enable;
@@ -23,6 +26,9 @@ typedef struct LightOp
     float specular[4];
 
     float strength;
+
+
+    char __std140pad[8];
 }LightOp;
 
 typedef struct ShadowOp
@@ -38,11 +44,15 @@ typedef struct ShadowOp
     float max_bias, min_bias;
 
     float far_shadow, near_shadow;
+    char __std140pad[8];
 }ShadowOp;
 
 typedef struct DirLight
 {
-    float position[4];
+    float direction[4]; /*!< direction here is a bit incorrect. its more of direection + position,
+                          yes, a dirLight technically can't have a position but this is very useful
+                          when we want to fit a shadowmap that perfectly fits a scene and the camera
+                          keeps a good distance so as not to show articats*/
     float shadow_projview[16];
     float shadow_ortho;
 
@@ -77,13 +87,15 @@ typedef struct SpotLight
 typedef struct Lighting
 {
     DirLight dLight;
-    PointLight* pLights;
-    SpotLight* sLights;
+    PointLight* pLights[MAX_POINT];
+    SpotLight* sLights[MAX_POINT];
 
     uint32_t n_pLights, n_sLights;
 }Lighting;
 
-typedef void* Light;
+/* type is inferred on usage
+ * pass the pointer to the light*/
+typedef void Light;
 
 #ifdef __cplusplus
 extern "C" {
@@ -94,11 +106,15 @@ int dengine_lighting_init(const uint32_t n_PL, const uint32_t n_SL);
 void dengine_lighting_terminate();
 
 
-void dengine_lighting_light_setup(LightType type, const Light light);
+void dengine_lighting_light_setup(const LightType type, Light* light);
 
-void dengine_lighting_light_apply(LightType type, const Light light, const Shader* shader);
+void dengine_lighting_light_apply(const LightType type, const Light* light, const Shader* shader);
 
-void dengine_lighting_light_shadow_draw(LightType type, Light light, const Shader* shader, const Primitive* primitive, const float* modelmtx);
+LightOp* dengine_lighting_light_get_lightop(LightType type, Light* light);
+
+ShadowOp* dengine_lighting_light_get_shadowop(LightType type, Light* light);
+
+void dengine_lighting_light_shadow_draw(LightType type, Light* light, const Shader* shader, const Primitive* primitive, const float* modelmtx);
 
 //Shadow op
 

@@ -3,11 +3,7 @@
 int testdengine_script_nslbullet_car_main(int argc, char **argv)
 {
     NSL nsl;
-#ifdef DENGINE_ANDROID
-    nsl = denginescript_nsl_load("libnsl_bulletcar_android.so");
-#else
-    nsl = denginescript_nsl_load("./nsl-bulletphysics-car.nsl");
-#endif
+    nsl = denginescript_nsl_load("nsl-bulletphysics-car.nsl");
     if(!nsl)
         return -1;
     Script car_world;

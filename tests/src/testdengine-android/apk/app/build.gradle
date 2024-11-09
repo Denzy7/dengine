@@ -12,14 +12,16 @@ android {
         applicationId "com.denzygames.testdengine"
         minSdk 24
         targetSdk 33
-        versionCode 1
+        versionCode 2
         versionName "1.0"
 
         externalNativeBuild
         {
             cmake
             {
-                arguments "-DDENGINE_SCRIPTING_PYTHON=OFF", "-DBUILD_SHARED_LIBS=ON" 
+                arguments "-DDENGINE_SCRIPTING_PYTHON=ON",
+                          "-DBUILD_SHARED_LIBS=ON",
+                          "-DDENGINE_LIGHTING_SHADOW3D=OFF"
             }
         }
     }

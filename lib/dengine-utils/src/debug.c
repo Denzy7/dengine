@@ -21,7 +21,6 @@ void _dengineutils_debug_hand_termandexit(int sig);
 char** trace = NULL;
 char* fmt=NULL;
 uint32_t traceptr=0;
-Mutex tracemutex;
 
 struct _sigstr
 {
@@ -48,8 +47,6 @@ void dengineutils_debug_init()
     {
         signal(_sigtable_exit[i].sig,_dengineutils_debug_hand_termandexit);
     }
-
-    dengineutils_thread_mutex_create(&tracemutex);
 }
 
 void dengineutils_debug_terminate()
@@ -68,10 +65,9 @@ void dengineutils_debug_terminate()
 
 void dengineutils_debug_trace_push(const char* str)
 {
-    if(!trace)
-        return;
-
-    dengineutils_thread_mutex_lock(&tracemutex);
+#ifndef DENGINE_DEBUG
+    return;
+#endif
 
     if(traceptr==DENGINE_DEBUG_TRACESIZE)
         traceptr=0;
@@ -79,7 +75,6 @@ void dengineutils_debug_trace_push(const char* str)
     snprintf(trace[traceptr],DENGINE_DEBUG_TRACESTRLN,"%s",str);
     traceptr++;
 
-    dengineutils_thread_mutex_unlock(&tracemutex);
 }
 
 void dengineutils_debug_trace_dump()

@@ -1,4 +1,5 @@
 #include <dengine/dengine.h>
+#include <dengine-script/python/python.h>
 
 int main(int argc, char *argv[])
 {

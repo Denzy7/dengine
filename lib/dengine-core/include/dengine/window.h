@@ -7,6 +7,7 @@
 #define WINDOW_H
 
 #include "dengine_config.h" //DENGINE_WIN_, DENGINE_GL_
+#include "dengine/input.h"
 
 typedef enum
 {
@@ -15,24 +16,8 @@ typedef enum
     DENGINE_CONTEXT_TYPE_EGL
 }ContextType;
 
-#define DENGINE_WINDOW_ALPNUM 4
-#define DENGINE_WINDOW_MSEBTN 3
-
 #define DENGINE_WINDOW_CURRENT dengine_window_get_current()
 
-typedef struct
-{
-    char key;
-    int state;
-}KeyInfo;
-
-typedef struct
-{
-    KeyInfo alpnum[DENGINE_WINDOW_ALPNUM];
-    int msebtn[DENGINE_WINDOW_MSEBTN];
-    double msesrl_y;
-    double mse_x, mse_y;
-}WindowInput;
 
 typedef struct DengineWindow DengineWindow;
 
@@ -80,7 +65,7 @@ void dengine_window_set_fullscreen(DengineWindow* window, int state);
 
 int dengine_window_set_position(DengineWindow* window, int x, int y);
 
-WindowInput* dengine_window_get_input(DengineWindow* window);
+StandardInput* dengine_window_get_input(DengineWindow* window);
 
 #ifdef __cplusplus
 }

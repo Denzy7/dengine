@@ -6,7 +6,9 @@
 #include <string.h> //str
 
 #include "dengine-utils/logging.h"
-
+#ifdef DENGINE_ANDROID
+#include "dengine-utils/platform/android.h"
+#endif
 const size_t dirbuflen = 2048;
 char* srcdir = NULL,* assetdir = NULL,* cachedir = NULL,* filesdir = NULL;
 int hasloggedassetdir=0, filesysinit = 0;
@@ -193,14 +195,15 @@ const char* dengineutils_filesys_get_assetsdir()
 const char* dengineutils_filesys_get_filesdir()
 {
 #ifdef DENGINE_ANDROID
-    //Set by jni by dengine_android_set_filesdir
-    return filesdir;
+    struct android_app* app = dengineutils_android_get_app();
+    snprintf(filesdir, dirbuflen, "%s",app->activity->externalDataPath);
 #elif defined(DENGINE_LINUX)
     snprintf(filesdir, dirbuflen, "%s/.local/share",getenv("HOME"));
 #elif defined(DENGINE_WIN32)
     snprintf(filesdir, dirbuflen, "%s", getenv("APPDATA"));
 #endif
-    dengineutils_os_mkdir(filesdir);
+    if(!dengineutils_os_direxist(filesdir))
+        dengineutils_os_mkdir(filesdir);
     return filesdir;
 }
 
@@ -216,8 +219,12 @@ const char* dengineutils_filesys_get_filesdir_dengine()
 const char* dengineutils_filesys_get_cachedir()
 {
 #ifdef DENGINE_ANDROID
+    struct android_app* app = dengineutils_android_get_app();
+    char* files = strdup(app->activity->externalDataPath);
+    *strrchr(files, '/') = 0;
+    snprintf(cachedir, dirbuflen, "%s/cache",files);
+    free(files);
     //Set by jni by dengine_android_set_cachedir
-    return cachedir;
 #elif defined(DENGINE_LINUX)
     snprintf(cachedir, dirbuflen, "%s/.cache",getenv("HOME"));
 #elif defined(DENGINE_WIN32)

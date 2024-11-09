@@ -5,3 +5,4 @@ build/*
 *.user*
 assets/priv/*
 testspriv/*
+venv

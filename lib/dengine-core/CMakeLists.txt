@@ -49,6 +49,11 @@ include/dengine/entrygl.h
 include/dengine/dgl.h
 )
 
+configure_file(
+    src/shaders/standard.frag.glsl.in
+    standard.frag.glsl
+)
+
 # resource list
 set(coreres
     lib/dengine-core/src/shaders/debug-normals.frag.glsl
@@ -63,13 +68,19 @@ set(coreres
     lib/dengine-core/src/shaders/shadow3d.vert.glsl
     lib/dengine-core/src/shaders/shadow3d.frag.glsl
     lib/dengine-core/src/shaders/shadow3d.geom.glsl
+    lib/dengine-core/src/shaders/shadow3d_es.vert.glsl
+    lib/dengine-core/src/shaders/shadow3d_es.frag.glsl
+    lib/dengine-core/src/shaders/shadow3d_es.geom.glsl
     lib/dengine-core/src/shaders/skybox.vert.glsl
     lib/dengine-core/src/shaders/skybox2d.frag.glsl
     lib/dengine-core/src/shaders/skyboxcube.frag.glsl
-    lib/dengine-core/src/shaders/standard.frag.glsl
     lib/dengine-core/src/shaders/standard.vert.glsl
     lib/dengine-core/src/shaders/discard.frag.glsl
     LICENSE.md
+)
+
+set(coreres_generated
+    standard.frag.glsl
 )
 
 # output after compile
@@ -78,6 +89,20 @@ set(outres)
 # compile
 foreach(res ${coreres})
     set(inresname ${dengine_SOURCE_DIR}/${res})
+    get_filename_component(barename ${res} NAME)
+    set(outresname ${CMAKE_CURRENT_BINARY_DIR}/${barename}-res.c)
+    add_custom_command(
+        OUTPUT ${outresname}
+        COMMAND dengine-rc -enb ${inresname} ${outresname}
+        DEPENDS ${inresname}
+        VERBATIM
+    )
+# append
+    list(APPEND outres ${outresname})
+endforeach()
+# compile
+foreach(res ${coreres_generated})
+    set(inresname ${CMAKE_CURRENT_BINARY_DIR}/${res})
     get_filename_component(barename ${res} NAME)
     set(outresname ${CMAKE_CURRENT_BINARY_DIR}/${barename}-res.c)
     add_custom_command(
@@ -170,5 +195,5 @@ endif()
 
 target_link_libraries(dengine-core PRIVATE dengine-utils ${dengine-core-link})
 
-install(TARGETS dengine-core DESTINATION lib)
+install(TARGETS dengine-core DESTINATION lib/dengine-${DENGINE_VERSION})
 install(FILES ${dengine-core-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine)

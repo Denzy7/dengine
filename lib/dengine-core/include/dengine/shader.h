@@ -8,6 +8,18 @@
 
 #include <stdint.h> //uint32
 
+
+/*! \enum
+ * Hint the upstream scene queuer which queue
+ * to store any mesh that uses this shader. defaults
+ * to the opaque queue. see how queues work in dengine-scene/queue.h
+ */
+typedef enum
+{
+    DENGINE_SHADER_SCENEQUEUER_SHADERHINT_OPAQUE,
+    DENGINE_SHADER_SCENEQUEUER_SHADERHINT_TRANSPARENT,
+    DENGINE_SHADER_SCENEQUEUER_SHADERHINT_UI,
+}SceneQueuerShaderHint;
 /*! \struct Shader
  *  Code that runs when a Primitive is drawn
  *
@@ -29,6 +41,8 @@ typedef struct
     uint32_t program_id;
 
     int linking_succeeded;
+    SceneQueuerShaderHint hint; /*!< hint the scene queuer where to place meshes with this shader. by default, all shaders are queued to 
+    MESH_OPAQUE. If you want to change it, do so before queuer runs */
 } Shader;
 
 /*! \struct StandardShader
@@ -46,6 +60,8 @@ typedef enum
     DENGINE_SHADER_DEBUG_NORMALS, /*!< 3D shader that outputs normals as color */
     DENGINE_SHADER_SKYBOXCUBE, /*!< 3D shader when using a cubemap skybox */
     DENGINE_SHADER_SKYBOX2D, /*!< 3D shader when using a 2D skybox (hdri map) */
+
+    DENGINE_SHADER_COUNT
 }StandardShader;
 
 #ifdef __cplusplus

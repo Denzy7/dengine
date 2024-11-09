@@ -39,8 +39,6 @@ int main()
     printf("press w, x, lmb or rmb\n");
     printf("drag scroll wheel\n");
 
-    dengine_input_set_window(window);
-
     while(dengine_window_isrunning(window))
     {
         if(dengine_input_gamepad_get_isconnected(DENGINE_INPUT_PAD0) && !padhint)

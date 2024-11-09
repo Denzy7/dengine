@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="VcsDirectoryMappings">
-    <mapping directory="$PROJECT_DIR$/.." vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../.." vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../deps/bullet3_src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../deps/cglm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../deps/cpython" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../deps/cpython-portable" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../deps/stb" vcs="Git" />
   </component>
 </project>

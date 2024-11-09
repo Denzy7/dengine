@@ -21,7 +21,7 @@ typedef struct
 {
     float projection_mat[16]; /*!< Projection 4x4 matrix */
     float view_mat[16]; /*!< View 4x4 matrix */
-    float uview_mat[16]; /*!< Untranslated view 4x4 matrix */
+    float uview_mat[16]; /*!< Untranslated view 4x4 matrix (its actually 3x3 but aligned for std140*/
 
     float position[3]; /*!< X, Y, Z position */
 
@@ -55,11 +55,18 @@ void dengine_camera_setup(Camera* camera);
 void dengine_camera_project_perspective(const float aspect, Camera* camera);
 
 /*!
- * \brief Generate a view matrix looking at a specific target
- * \param target An array of 3 float describing the X,Y and Z or the target
+ * \brief Generate a view matrix looking at a specific target from camera position
+ * \param target An array of 3 float describing the X,Y and Z of the target. NULL to lookat at 0,0,0
  * \param camera Camera to use
  */
 void dengine_camera_lookat(float* target, Camera* camera);
+
+/*!
+ * \brief Generate a view matrix looking from a specific direction. Doesn't use camera position
+ * \param target An array of 3 float describing the X,Y and Z of the direction. cannot be NULL
+ * \param camera Camera to use
+ */
+void dengine_camera_look(float* direction, Camera* camera);
 
 /*!
  * \brief Apply matrices to a shader

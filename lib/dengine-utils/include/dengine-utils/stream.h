@@ -2,7 +2,7 @@
 #define DENGINEUTILS_STREAM_H
 
 /*! \file stream.h
- *  File streaming
+ *  Data source streaming (files, android asset, memory, pipes etc)
  */
 
 #include <stddef.h> //size_t
@@ -19,6 +19,7 @@ typedef enum
 {
     DENGINEUTILS_STREAM_TYPE_FILE,
     DENGINEUTILS_STREAM_TYPE_ANDROIDASSET,
+    DENGINEUTILS_STREAM_TYPE_MEMORY,
 }StreamType;
 
 typedef enum
@@ -42,12 +43,14 @@ typedef struct _Stream
 {
     FILE* fp;
     char* path;
+    const void* buffer;
 #ifdef DENGINE_ANDROID
     AAsset* asset;
-    const void* buffer;
 #endif
     StreamType type;
     StreamMode mode;
+    char eof;
+    off_t pos;
     off_t size;
 }Stream;
 
@@ -55,13 +58,15 @@ typedef struct _Stream
 extern "C" {
 #endif
 
-Stream* dengineutils_stream_new(const char* path, StreamType type, StreamMode mode);
+int dengineutils_stream_new(const char* path, StreamType type, StreamMode mode, Stream* stream);
 
-size_t dengineutils_stream_read(void* dest, const size_t size, const size_t count, const Stream* stream);
+int dengineutils_stream_new_mem(const void* buffer, size_t sz, Stream* stream);
+
+size_t dengineutils_stream_read(void* dest, const size_t size, const size_t count, Stream* stream);
 
 size_t dengineutils_stream_write(const void* src, const size_t size, const size_t count, const Stream* stream);
 
-off_t dengineutils_stream_seek(const Stream* stream, const off_t offset, const int whence);
+off_t dengineutils_stream_seek(Stream* stream, const off_t offset, const int whence);
 
 void dengineutils_stream_destroy(Stream* stream);
 

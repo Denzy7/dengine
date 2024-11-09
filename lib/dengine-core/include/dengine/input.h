@@ -6,9 +6,8 @@
 #define INPUT_H
 
 #include "dengine_config.h"
-
-#include "dengine/window.h" //windowset
 #include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -17,7 +16,9 @@ typedef enum
 {
     DENGINE_INPUT_MSEBTN_PRIMARY,
     DENGINE_INPUT_MSEBTN_SECONDARY,
-    DENGINE_INPUT_MSEBTN_MIDDLE
+    DENGINE_INPUT_MSEBTN_MIDDLE,
+
+    DENGINE_INPUT_MSEBTN_COUNT
 }MouseButton;
 
 typedef enum
@@ -65,15 +66,66 @@ typedef enum
     DENGINE_INPUT_PAD_AXIS_COUNT
 }GamepadAxis;
 
-void dengine_input_set_window(DengineWindow* window);
+typedef struct
+{
+    float x;
+    float y;
+    int isdown;
+    int oneshot;
+}SoftInput;
 
-int dengine_input_get_key_once(char key);
+typedef struct
+{
+    uint32_t button;     
+    uint8_t oneshot; /*!< 1 = has been triggerd. always return 0 until 
+                       its set to one again. it alleviates some race conditions
+                       that may occur by ensuring one thread only sets oneshot, i.e
+                       window thread only touches one shot when button is released
+                       while main thread sets it when once*/
+    uint8_t state; /*!< 1 = down, 0 = not. if you set to 0 also set
+                        oneshot to 0 too othewise it won't work again */
 
-int dengine_input_get_key(char key);
+}ButtonInfo;
+
+typedef struct 
+{
+    int mouse_x; /*!< left to right of screen */
+    int mouse_y; /*!< bottom to top of screen */
+    int mouse_scroll_y; /*!< +1 wheel up, -1 wheel down */
+    ButtonInfo mouse_btns[DENGINE_INPUT_MSEBTN_COUNT];
+
+    ButtonInfo keys[5];
+    SoftInput touches[5];
+}StandardInput;
+
+/* usually you never need to set input source as this is done
+ * by default when creating a native window. this is useful for embedding*/
+void dengine_input_set_input(StandardInput* input);
+
+int dengine_input_get_key_once(uint32_t key);
+
+int dengine_input_get_key(uint32_t key);
 
 int dengine_input_get_mousebtn_once(MouseButton btn);
 
 int dengine_input_get_mousebtn(MouseButton btn);
+
+/* touches are grouped by tiny rectangles specified by width and height.
+ * and originating from x and y
+ *
+ * it makes it eaiser to group them but beware of ghost touches
+ * where two touches are very close and it counts, for example
+ * when using get_touch_once. 
+ *
+ * get_touch_once should be only used when the rectangle won't overlap such as
+ * in a touchscreen GUI. goes without saying overlapping GUI is a bad idea
+ * and won't make the user angry :(
+ *
+ * tip: you can get touch with x and y = 0, screen width and height which may be useful
+ * for rotation of a 3d camera
+ */
+int dengine_input_get_touch(int x, int y, int width, int height);
+int dengine_input_get_touch_once(int x, int y, int width, int height);
 
 //double dengine_input_get_mousescroll_x();
 
@@ -85,7 +137,7 @@ double dengine_input_get_mousepos_y();
 
 /* GAMEPAD. WORK IN PROGRESS... */
 
-char* dengine_input_gamepad_get_name(GamepadID pad);
+const char* dengine_input_gamepad_get_name(GamepadID pad);
 
 int dengine_input_gamepad_get_isconnected(GamepadID pad);
 
