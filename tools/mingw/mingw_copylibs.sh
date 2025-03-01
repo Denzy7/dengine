@@ -13,6 +13,10 @@ sedstr2="s/.*=> //g"
 
 echo "info: p:$prefix v:$ver e:$exe d:$dir x:$xcompile ldd:$ldd"
 
+touch "$exe"
+chmod +x "$exe"
+sync
+
 if [ -n "$ldd" ] && [ "$xcompile" != "TRUE" ]; then
     echo "using system ldd"
     "$ldd" "$exe" |  grep -Evi "$grepstr" | sed "$sedstr" | sed "$sedstr2" | while read -r file; do

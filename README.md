@@ -63,6 +63,8 @@ Change dir to repo:
 - **Linux**: Its actually very easy here. Just install the modules located in `<CMAKE_BUILD_DIR>/dengine-script-build/modules-build/python-modules`. Install `dengine` directory to your Python `site-packages` or add the directory to your IDE/Editor Python path (VSCode-OSS in this case) 
 - **Windows**: You'll probably have to use the stubs. Unless you managed to build everyting with MSVC, which is usually what upstream python is built on
 
-# github actions artifact releases
-now availabe on github actions! you need to be logged in  
+# github releases
+- Go to the [Releases page](https://github.com/Denzy7/dengine/releases)
+- Preview releases now availabe on github actions! you need to be logged in  
 [check out the latest succesfull build and download artifacts](https://github.com/Denzy7/dengine/actions/workflows/dengine.yml)
+- Releases are only avaiable for x86_64 windows and linux only (aside from android test apk which is available for all architectures)
