@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(dengine VERSION 0.8.0)
+project(dengine VERSION 0.8.1)
 
 #this is just a slight nuance with cmake rather than renaming the project
 set(DENGINE_VERSION "${dengine_VERSION}")
@@ -48,9 +48,11 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set(DENGINE_DEBUG 1)
 endif()
 
+message("CMAKE_SYSROOT: ${CMAKE_SYSROOT}")
 find_library(DENGINE_HAS_LIBZ z)
 find_library(DENGINE_HAS_EGL EGL)
 find_package(PkgConfig QUIET)
+
 if(PkgConfig_FOUND AND NOT ANDROID_NDK)
     #link desktop libs
     pkg_check_modules(GTK3 gtk+-3.0)

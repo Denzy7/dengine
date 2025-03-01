@@ -85,4 +85,25 @@ if(MINGW)
     configure_file(${PROJECT_SOURCE_DIR}/tools/mingw/mingw_copylibs_install.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/dengitor_install.cmake @ONLY)
     install(SCRIPT  ${CMAKE_CURRENT_BINARY_DIR}/dengitor_install.cmake)
+
+
+    foreach(pfx ${CMAKE_SYSTEM_PREFIX_PATH})
+        # assumes we have winpthread, may not be case but it's always there
+        if(EXISTS "${pfx}/bin/libwinpthread-1.dll")
+            install(DIRECTORY ${pfx}/share/glib-2.0/schemas
+                DESTINATION lib/dengitor-${DENGINE_VERSION}/share/glib-2.0
+            )
+            install(DIRECTORY
+                    ${pfx}/share/icons/hicolor
+                    ${pfx}/share/icons/Adwaita
+                DESTINATION lib/dengitor-${DENGINE_VERSION}/share/icons
+            )
+            install(DIRECTORY
+                ${pfx}/share/themes/Default
+                ${pfx}/share/themes/Emacs
+                DESTINATION lib/dengitor-${DENGINE_VERSION}/share/themes
+            )
+
+        endif()
+    endforeach()
 endif()
