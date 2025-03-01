@@ -98,4 +98,8 @@ if(MINGW)
     configure_file(${PROJECT_SOURCE_DIR}/tools/mingw/mingw_copylibs_install.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/dengine-utils.install.cmake @ONLY)
     install(SCRIPT  ${CMAKE_CURRENT_BINARY_DIR}/dengine-utils.install.cmake)
+
+    configure_file(${PROJECT_SOURCE_DIR}/tools/msys/pythonstdlib.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/pythonstdlib.cmake @ONLY)
+    install(SCRIPT  ${CMAKE_CURRENT_BINARY_DIR}/pythonstdlib.cmake)
 endif()
