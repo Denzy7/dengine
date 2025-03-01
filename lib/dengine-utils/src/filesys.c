@@ -174,20 +174,26 @@ const char* dengineutils_filesys_get_assetsdir()
      * - setting python path with a linux path on a windows build
      */
 
-    if (_dengineutils_filesys_get_assetsdir_resolve(dengineutils_filesys_get_srcdir()))
-    {
-        dengineutils_logging_log("WARNING::Using srcdir as assets dir");
-        return assetdir;
-    }
+/*    if (_dengineutils_filesys_get_assetsdir_resolve(dengineutils_filesys_get_srcdir()))*/
+    /*{*/
+        /*dengineutils_logging_log("WARNING::Using srcdir as assets dir");*/
+        /*return assetdir;*/
+    /*}*/
 
 
-    dengineutils_logging_log("ERROR::Could not find assets directory.\n"
+    char zipped_assets_dir[256];
+    //../../share/dengine-0.8.1/assets.zip
+    snprintf(zipped_assets_dir, sizeof(zipped_assets_dir), "../../share/dengine-%s/assets.zip", DENGINE_VERSION);
+    dengineutils_logging_log("WARNING::Could not find assets directory.\n"
                              "Try:\n\t"
+                             "-dengine v0.8.1 and later support zipped assets if assets.zip is copied to %s\n\t",
                              "-moving it next to the executable\n\t"
                              "-moving it to %s\n\t"
                              "-setting envvar DENGINEASSETS\n\t"
-                             "-recompiling sources on this machine",
-                             dengineutils_filesys_get_filesdir_dengine());
+                             "-recompiling sources on this machine\n\t",
+                             zipped_assets_dir,
+                             dengineutils_filesys_get_filesdir_dengine()
+            );
 
     return NULL;
 }

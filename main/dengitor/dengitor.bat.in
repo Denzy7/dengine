@@ -1,0 +1,3 @@
+@echo off
+cd /d "../lib/dengitor-@DENGINE_VERSION@"
+dengitor.exe

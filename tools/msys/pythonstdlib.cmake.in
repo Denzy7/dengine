@@ -1,0 +1,4 @@
+set(PROJECT_SOURCE_DIR @PROJECT_SOURCE_DIR@)
+execute_process(
+    COMMAND python3 ${PROJECT_SOURCE_DIR}/tools/msys/pythonstdlib.py ${CMAKE_INSTALL_PREFIX}
+)

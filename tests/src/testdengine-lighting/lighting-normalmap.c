@@ -26,29 +26,18 @@ int testdengine_lighting_normalmap(int argc, char **argv)
     diffuseTex.interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
     diffuseTex.auto_dataonload = 1;
     const char* brickfile = "textures/2d/brickwall.jpg";
-#ifdef DENGINE_ANDROID
-    f2m.file = brickfile;
-    dengineutils_android_asset2file2mem(&f2m);
+    dengine_load_asset(brickfile, &f2m.mem, &f2m.size);
     dengine_texture_load_mem(f2m.mem, f2m.size, 1, &diffuseTex);
     free(f2m.mem);
-#else
-    snprintf(prtbuf, prtbuf_sz, "%s/%s", dengineutils_filesys_get_assetsdir(), brickfile);
-    dengine_texture_load_file(prtbuf, 1, &diffuseTex);
-#endif
+
     Texture normalTex;
     memset(&normalTex, 0, sizeof(Texture));
     normalTex.interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
     normalTex.auto_dataonload = 1;
     const char* brickfile_n = "textures/2d/brickwall_normal.jpg";
-#ifdef DENGINE_ANDROID
-    f2m.file = brickfile_n;
-    dengineutils_android_asset2file2mem(&f2m);
+    dengine_load_asset(brickfile_n, &f2m.mem, &f2m.size);
     dengine_texture_load_mem(f2m.mem, f2m.size, 1, &normalTex);
     free(f2m.mem);
-#else
-    snprintf(prtbuf, prtbuf_sz, "%s/%s", dengineutils_filesys_get_assetsdir(),brickfile_n);
-    dengine_texture_load_file(prtbuf, 1, &normalTex);
-#endif
 
     dengine_material_set_texture(&diffuseTex, "diffuseTex", &plane_mat);
     dengine_material_set_texture(&normalTex, "normalTex", &plane_mat);
@@ -105,17 +94,10 @@ int testdengine_lighting_normalmap(int argc, char **argv)
     joyhand.interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
     for(int i = 0; i < 2; i++)
     {
-#ifdef DENGINE_ANDROID
-        File2Mem f2m;
-        f2m.file = joytexstrs[i];
-        dengineutils_android_asset2file2mem(&f2m);
+        dengine_load_asset(joytexstrs[i], &f2m.mem, &f2m.size);
+        dengine_texture_load_mem(f2m.mem, f2m.size, 1, &normalTex);
         dengine_texture_load_mem(f2m.mem, f2m.size, 1, texptr[i]);
-#else
-        snprintf(prtbuf, prtbuf_sz, "%s/%s", 
-                dengineutils_filesys_get_assetsdir(),
-                joytexstrs[i]);
-        dengine_texture_load_file(prtbuf, 1, texptr[i]);
-#endif
+        free(f2m.mem);
     }
 #endif
 

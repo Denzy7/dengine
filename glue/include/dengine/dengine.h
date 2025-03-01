@@ -82,7 +82,7 @@ int dengine_init();
 void dengine_terminate();
 int dengine_update();
 /*!
- * \brief load asset to memory
+ * \brief load asset to memory. mem is heap allocated, so free when done
  * \param path path to asset in android apk or file system or assetdir
  * \param mem destination of loaded asset in memory
  * \param length optional destination length of memory block 

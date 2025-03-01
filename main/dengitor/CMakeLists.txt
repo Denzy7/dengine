@@ -72,12 +72,6 @@ set_target_properties(nsl-dengitor PROPERTIES
 target_link_libraries(nsl-dengitor ${dengine})
 install(TARGETS dengitor DESTINATION lib/dengitor-${DENGINE_VERSION})
 install(TARGETS nsl-dengitor DESTINATION lib/dengitor-${DENGINE_VERSION})
-set(dengitor_deps ${dengine})
-if(PYSRC)
-    list(APPEND dengitor_deps cpython-portable)
-endif()
-
-install(TARGETS ${dengitor_deps} DESTINATION lib/dengitor-${DENGINE_VERSION})
 if(MINGW)
     set(exe dengitor)
     set(ext exe)
@@ -85,4 +79,46 @@ if(MINGW)
     configure_file(${PROJECT_SOURCE_DIR}/tools/mingw/mingw_copylibs_install.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/dengitor_install.cmake @ONLY)
     install(SCRIPT  ${CMAKE_CURRENT_BINARY_DIR}/dengitor_install.cmake)
+
+
+    foreach(pfx ${CMAKE_SYSTEM_PREFIX_PATH})
+        # assumes we have winpthread, may not be case but it's always there
+        if(EXISTS "${pfx}/bin/libwinpthread-1.dll")
+            install(DIRECTORY ${pfx}/share/glib-2.0/schemas
+                DESTINATION share/glib-2.0
+            )
+            install(DIRECTORY
+                    ${pfx}/share/icons/hicolor
+                    ${pfx}/share/icons/Adwaita
+                DESTINATION share/icons
+            )
+            install(DIRECTORY
+                ${pfx}/share/themes/Default
+                ${pfx}/share/themes/Emacs
+                DESTINATION share/themes
+            )
+
+        endif()
+    endforeach()
 endif()
+
+if(WIN32)
+    configure_file(dengitor.bat.in
+        ${CMAKE_CURRENT_BINARY_DIR}/dengitor.bat 
+        @ONLY)
+    install(
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/dengitor.bat
+        DESTINATION bin
+    )
+else()
+    configure_file(dengitor.sh.in
+        ${CMAKE_CURRENT_BINARY_DIR}/sh/dengitor
+        @ONLY)
+    install(
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/sh/dengitor
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+        DESTINATION bin 
+    )
+endif()
+
+

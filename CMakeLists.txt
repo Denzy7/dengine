@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(dengine VERSION 0.8.0)
+project(dengine VERSION 0.8.1)
 
 #this is just a slight nuance with cmake rather than renaming the project
 set(DENGINE_VERSION "${dengine_VERSION}")
@@ -51,6 +51,7 @@ endif()
 find_library(DENGINE_HAS_LIBZ z)
 find_library(DENGINE_HAS_EGL EGL)
 find_package(PkgConfig QUIET)
+
 if(PkgConfig_FOUND AND NOT ANDROID_NDK)
     #link desktop libs
     pkg_check_modules(GTK3 gtk+-3.0)
@@ -274,6 +275,28 @@ endforeach()
 
 configure_file(dengine.pc.in dengine.pc @ONLY)
 
+find_program(ZIP_EXECUTABLE zip)
+if(NOT ZIP_EXECUTABLE)
+    message(WARNING "zip not found. reading installed saved assets won't work!")
+else()
+    execute_process(
+        COMMAND git ls-files assets
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE ASSET_FILES
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    string(REPLACE "\n" ";" ASSET_FILE_LIST "${ASSET_FILES}")
+    add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/assets.zip
+        DEPENDS ${ASSET_FILE_LIST} #does mean file will have to be committed to reflect in cmake. run cmake twice on new asset??
+        COMMAND ${ZIP_EXECUTABLE} -r ${CMAKE_CURRENT_BINARY_DIR}/assets.zip . -x priv/\*
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/assets
+        COMMENT "zipping assets into dengine-utils"
+        VERBATIM
+    )
+    add_custom_target(assets_zip ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/assets.zip)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/assets.zip DESTINATION share/dengine-${DENGINE_VERSION})
+endif()
 install(FILES ${PROJECT_BINARY_DIR}/dengine_config/dengine_config.h DESTINATION include/dengine-${DENGINE_VERSION}/dengine_config)
 install(DIRECTORY deps/glad/include/glad DESTINATION include/dengine-${DENGINE_VERSION}/deps/glad)
 install(DIRECTORY deps/glad/include/KHR DESTINATION include/dengine-${DENGINE_VERSION}/deps/glad)

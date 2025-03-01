@@ -50,16 +50,6 @@ if(DENGINE_HAS_BULLET)
     )
     target_link_libraries(nsl-bulletphysics-car ${dengine} ${bullet_LIBRARIES} nsl-bulletphysics-common)
     install(TARGETS nsl-bulletphysics nsl-bulletphysics-car  DESTINATION ${tests_install_dir})
-
-    #this covers 90% engine code. good candidate for testing dependencies
-    if(MINGW)
-        set(exe nsl-bulletphysics-car)
-        set(ext nsl)
-        set(cwd ${PROJECT_SOURCE_DIR}/deps)
-        configure_file(${PROJECT_SOURCE_DIR}/tools/mingw/mingw_copylibs_install.cmake.in
-            ${CMAKE_CURRENT_BINARY_DIR}/nsl-bulletphysics-car.install.cmake @ONLY)
-        install(SCRIPT  ${CMAKE_CURRENT_BINARY_DIR}/nsl-bulletphysics-car.install.cmake)
-    endif()
 endif()
 
 if(DENGINE_HAS_LIBPULSE_SIMPLE)
@@ -120,4 +110,14 @@ set_target_properties(nsl-test PROPERTIES
 )
 target_link_libraries(nsl-test ${dengine})
 install(TARGETS nsl-test DESTINATION ${tests_install_dir})
+
+#this covers 90% engine code. good candidate for testing dependencies
+if(MINGW AND DENGINE_HAS_BULLET)
+    set(exe nsl-bulletphysics-car)
+    set(ext nsl)
+    set(cwd ${PROJECT_SOURCE_DIR}/deps)
+    configure_file(${PROJECT_SOURCE_DIR}/tools/mingw/mingw_copylibs_install.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/nsl-bulletphysics-car.install.cmake @ONLY)
+    install(SCRIPT  ${CMAKE_CURRENT_BINARY_DIR}/nsl-bulletphysics-car.install.cmake)
+endif()
 

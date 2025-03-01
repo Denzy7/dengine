@@ -19,13 +19,13 @@ Initialize and get default deps. Consider checking optional deps you might also 
 # optional deps
 **If you will be compiling for Windows or Android you might want to get all optional deps to avoid missing libraries and header files**  
 
-**If you want Python scripting, update deps/cpython (will take some time!)**  
+**If you want recompile Python for scripting(usually the case on windows), update deps/cpython (will take some time!)** 
 `... deps/cpython deps/cpython-portable`  
 
 **bullet3 sources only, for cool physics tests (needed to build android apk):**:
 `... deps/bullet3_src`
 
-**if you are cross-compiling from linux to mingw, you'll need the local linux system to have python, pip and the relevant submodules***  
+**if you are cross-compiling from linux to windows with mingw, you'll need the local linux system to have python, pip and the relevant submodules***  
 `... deps/mingw-ldd deps/ntldd`
 
 # python
@@ -50,7 +50,7 @@ On Linux, Building GTK+ 3 is really complicated. However [some really smart peop
 On Windows, you can use the [MSYS2](https://www.msys2.org) toolset to install GTK and build `dengitor`. We'll use `pacboy` to simplyfy
 ```
 pacman -S pactoys git
-pacboy -S gcc cmake gtk3
+pacboy -S gcc gtk3 bullet cmake python
 ```
 
 # others

@@ -347,16 +347,58 @@ int dengine_update()
 int dengine_load_asset(const char* path, void** mem, size_t* length)
 {
     File2Mem f2m;
+    memset(&f2m, 0, sizeof(f2m));
 #ifdef DENGINE_ANDROID
     f2m.file = path;
     dengineutils_android_asset2file2mem(&f2m);
 #else
     char buf[2048];
-    snprintf(buf, sizeof(buf),
-            "%s/%s",
-            dengineutils_filesys_get_assetsdir(), path);
-    f2m.file = buf;
-    dengineutils_filesys_file2mem_load(&f2m);
+
+    Stream assets_zip_stream;
+    ZipRead assets_zip;
+    CDFHR* cdfhr;
+    uint32_t cdfhr_sz;
+    /* hit or miss, i guess they never miss huh :( */
+    static const char* possiblepaths[] = 
+    {
+        "../../../share/dengine-%s/assets.zip",
+        "../../share/dengine-%s/assets.zip",
+        "../share/dengine-%s/assets.zip",
+        "share/dengine-%s/assets.zip",
+        "assets.zip"
+    };
+    for(int i = 0; i < DENGINE_ARY_SZ(possiblepaths); i++)
+    {
+        snprintf(buf, sizeof(buf), possiblepaths[i], DENGINE_VERSION);
+        FILE* ok = fopen(buf, "rb");
+        if(ok != NULL)
+        {
+            fclose(ok);
+            if(dengineutils_stream_new(buf, DENGINEUTILS_STREAM_TYPE_FILE, DENGINEUTILS_STREAM_MODE_READ, &assets_zip_stream))
+            {
+                dengineutils_zipread_load(&assets_zip_stream, &assets_zip);
+                if(dengineutils_zipread_find_cdfhr(path, &cdfhr, &assets_zip))
+                {
+                    dengineutils_zipread_decompress_cdfhr_mem(&assets_zip_stream, cdfhr, &f2m.mem, &cdfhr_sz);
+                    dengineutils_logging_log("TODO::load %s from assets.zip", path);
+                    f2m.size = cdfhr_sz;
+                }
+            }
+
+            dengineutils_zipread_free(&assets_zip);
+            break;
+        }
+    }
+
+    if(f2m.mem == NULL)
+    {
+        snprintf(buf, sizeof(buf),
+                "%s/%s",
+                dengineutils_filesys_get_assetsdir(), path);
+        f2m.file = buf;
+        dengineutils_filesys_file2mem_load(&f2m);
+
+    }
 #endif
     *mem = f2m.mem;
     if(length)

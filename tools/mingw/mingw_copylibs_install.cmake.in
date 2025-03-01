@@ -2,14 +2,25 @@ set(PROJECT_VERSION @PROJECT_VERSION@)
 set(PROJECT_BINARY_DIR @PROJECT_BINARY_DIR@)
 set(CMAKE_CROSSCOMPILING @CMAKE_CROSSCOMPILING@)
 set(PROJECT_SOURCE_DIR @PROJECT_SOURCE_DIR@)
+set(CMAKE_SYSTEM_PREFIX_PATH @CMAKE_SYSTEM_PREFIX_PATH@)
+
+get_filename_component(ABS_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" REALPATH)
 set(exe @exe@)
 set(ext @ext@)
 set(cwd @cwd@)
-file(GLOB_RECURSE installexe 
-    ${CMAKE_INSTALL_PREFIX}/**/${exe}.${ext})
+file(GLOB_RECURSE installexe
+    ${ABS_INSTALL_PREFIX}/**/${exe}.${ext})
 #runs as cwd in CMAKE_CURRENT_SOURCE_DIR
+
+foreach(pfx ${CMAKE_SYSTEM_PREFIX_PATH})
+    # assumes we have winpthread, may not be case but it's always there
+    if(EXISTS "${pfx}/bin/libwinpthread-1.dll")
+        set(syspfx ${pfx})
+    endif()
+endforeach()
+
 execute_process(
-    COMMAND bash "${PROJECT_SOURCE_DIR}/tools/mingw/mingw_copylibs.sh" "${CMAKE_INSTALL_PREFIX}" "${PROJECT_VERSION}" "${installexe}" "${PROJECT_BINARY_DIR}" "${CMAKE_CROSSCOMPILING}"
+    COMMAND bash "${PROJECT_SOURCE_DIR}/tools/mingw/mingw_copylibs.sh" "${ABS_INSTALL_PREFIX}" "${PROJECT_VERSION}" "${installexe}" "${PROJECT_BINARY_DIR}" "${CMAKE_CROSSCOMPILING}" "${syspfx}"
     RESULT_VARIABLE result
     WORKING_DIRECTORY ${cwd}
 )
