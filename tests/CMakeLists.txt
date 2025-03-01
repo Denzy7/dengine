@@ -27,6 +27,14 @@ foreach(subdir ${subdirs})
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
     install(TARGETS ${dir_tgts} DESTINATION ${tests_install_dir})
 endforeach()
+if(MINGW)
+    set(exe testdengine-scene-ecs)
+    set(ext exe)
+    set(cwd ${PROJECT_SOURCE_DIR}/deps)
+    configure_file(${PROJECT_SOURCE_DIR}/tools/mingw/mingw_copylibs_install.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/testdengine-scene-ecs_install.cmake @ONLY)
+    install(SCRIPT  ${CMAKE_CURRENT_BINARY_DIR}/testdengine-scene-ecs_install.cmake)
+endif()
 
 
 
