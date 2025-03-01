@@ -19,4 +19,4 @@
 	url = https://github.com/Denzy7/ntldd
 [submodule "deps/mingw-ldd"]
 	path = deps/mingw-ldd
-	url = https://github.com/xantares/mingw-ldd
+	url = https://github.com/nurupo/mingw-ldd

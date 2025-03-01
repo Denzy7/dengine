@@ -3,11 +3,39 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+def keystorePropertiesFile = rootProject.file("signing.properties")
+def keystoreProperties = new Properties()
+def isSigningConfigAvailable = false
+
+if (keystorePropertiesFile.exists()) {
+    try {
+        keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+        isSigningConfigAvailable = keystoreProperties.containsKey('storeFile') &&
+                                   keystoreProperties.containsKey('storePassword') &&
+                                   keystoreProperties.containsKey('keyAlias') &&
+                                   keystoreProperties.containsKey('keyPassword')
+    } catch (Exception e) {
+        println("Warning: Could not load signing.properties. Proceeding unsigned.")
+    }
+} else {
+    println("Warning: signing.properties file not found. Proceeding unsigned.")
+}
+
 android {
     namespace 'com.denzygames.testdengine'
     compileSdk 33
     android.ndkVersion "23.1.7779620"
 
+    signingConfigs {
+        if (isSigningConfigAvailable) {
+            release {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
     defaultConfig {
         applicationId "com.denzygames.testdengine"
         minSdk 24
@@ -36,6 +64,11 @@ android {
 
     buildTypes {
         release {
+            if (isSigningConfigAvailable) {
+                signingConfig signingConfigs.release
+            } else {
+                println("Warning: Release build will not be signed.")
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -56,6 +89,9 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+
+
 }
 
 dependencies {
