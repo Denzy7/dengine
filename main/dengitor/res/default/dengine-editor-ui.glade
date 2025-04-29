@@ -1948,6 +1948,9 @@ audio-volume-medium-symbolic</property>
                                   <object class="GtkTreeView" id="log">
                                     <property name="visible">True</property>
                                     <property name="can-focus">True</property>
+                                    <child internal-child="selection">
+                                      <object class="GtkTreeSelection"/>
+                                    </child>
                                   </object>
                                 </child>
                               </object>
@@ -2156,6 +2159,7 @@ audio-volume-medium-symbolic</property>
                 <property name="language">en-gb</property>
                 <property name="preview-text"/>
                 <signal name="font-set" handler="_dengitor_prefs_fontset" swapped="no"/>
+                <signal name="map" handler="_dengitor_prefs_fontset_onmap" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>

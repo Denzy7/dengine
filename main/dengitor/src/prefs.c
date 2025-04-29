@@ -42,6 +42,17 @@ DENGINE_EXPORT void _dengitor_prefs_fontset(GtkFontButton* btn)
     dengitor_redraw();
 }
 
+DENGINE_EXPORT void _dengitor_prefs_fontset_onmap(GtkFontButton* btn)
+{
+    GtkFontChooser* font_chooser = GTK_FONT_CHOOSER(btn);
+    char* font;
+    GtkSettings* settings = gtk_settings_get_for_screen(gdk_screen_get_default());
+
+    g_object_get(settings, "gtk-font-name", &font, NULL);
+    gtk_font_chooser_set_font(font_chooser, font);
+    free(font);
+}
+
 void dengitor_prefs_setup(GtkBuilder* builder, DengitorPrefs* prefs)
 {
     prefs->provider = gtk_css_provider_new();

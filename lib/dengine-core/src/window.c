@@ -1479,20 +1479,22 @@ int32_t _dengine_window_android_oninput(struct android_app* app, AInputEvent* ev
                     stdinput->touches[i].y = h - AMotionEvent_getY(event, i);
                 }
 
-                stdinput->mouse_btns[DENGINE_INPUT_MSEBTN_PRIMARY].state = 1;
-                stdinput->mouse_x = stdinput->touches[0].x;
-                stdinput->mouse_y = stdinput->touches[0].y;
                 if(ptrid < DENGINE_ARY_SZ(stdinput->touches)){
                     stdinput->touches[ptrid].isdown = 1;
                     if(state == AMOTION_EVENT_ACTION_UP || state == AMOTION_EVENT_ACTION_POINTER_UP){
-                        stdinput->mouse_btns[DENGINE_INPUT_MSEBTN_PRIMARY].state = 0;
                         stdinput->touches[ptrid].isdown = 0;
                         stdinput->touches[ptrid].oneshot = 0;
                     }
                 }
+
+                /*TODO: touch 0 is very naive as  other touches could be down when its 0*/
+                stdinput->mouse_x = stdinput->touches[0].x;
+                stdinput->mouse_y = stdinput->touches[0].y;
+                stdinput->mouse_btns[DENGINE_INPUT_MSEBTN_PRIMARY].state = stdinput->touches[0].isdown;
                 
 
-                /*for(size_t i = 0; i < DENGINE_ARY_SZ(stdinput->touches); i++)*/
+
+/*                for(size_t i = 0; i < DENGINE_ARY_SZ(stdinput->touches); i++)*/
                 /*{*/
                     /*dengineutils_logging_log("%f %f %d %d",*/
                             /*stdinput->touches[i].x,*/

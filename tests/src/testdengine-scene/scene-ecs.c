@@ -17,8 +17,7 @@
 
 int testdengine_scece_ecs_main(int argc, char **argv)
 {
-    int camscl = 0;
-    int usensl = 0;
+    int camscl = 0, usensl = 0, dumpscene = 0;
 
     for(int i = 0; i < argc; i++)
     {
@@ -33,10 +32,15 @@ int testdengine_scece_ecs_main(int argc, char **argv)
         {
             usensl = 1;
         }
+        if(arg && strstr("-dumpscene", arg))
+        {
+            dumpscene = 1;
+        }
     }
 
     if(!denginescript_isinit())
         usensl = 1;
+
 
     NSL nsl = NULL;
     nsl = denginescript_nsl_load("nsl-test.nsl");
@@ -92,7 +96,7 @@ int testdengine_scece_ecs_main(int argc, char **argv)
         dengineutils_logging_log("INFO::scaled to %dx%d", cam.render_width, cam.render_height);
     }else
     {
-        dengineutils_logging_log("pass a scaler 1 - 100 to scale camera aspect ratio with -camscl <scaler>");
+        dengineutils_logging_log("pass a scaler 1 - 100 to scale camera 1 aspect ratio with -camscl <scaler>. this allow rendering beyond the screen resolution. values more than 150 may greatly affect performance or exceed memory limitations!");
     }
 
     cam.clearcolor[0] = 1.0f;
@@ -142,8 +146,8 @@ int testdengine_scece_ecs_main(int argc, char **argv)
     dengine_primitive_gen_cube(&cube,&stdshdr);
     dengine_primitive_gen_plane(&plane,&stdshdr);
 
-    const int prtbf_sz=2048;
-    char* prtbf=malloc(prtbf_sz);
+    static const int prtbf_sz=2048;
+    char prtbf[prtbf_sz];
     void* mem; size_t memsz;
 
     if(!dengine_load_asset("models/duck.obj", &mem, &memsz)){
@@ -429,7 +433,15 @@ int testdengine_scece_ecs_main(int argc, char **argv)
     denginescene_add_entity(scene, ent_dlight);
     denginescene_add_entity(scene, ent_sLight);
 
-    Entity* multicam[3];
+    int activecam = 1;
+    static const int multicam_n = 3;
+    Camera* multicam_c[multicam_n + 2];
+    Camera dummyfb;
+    dengine_viewport_get(NULL, NULL, &dummyfb.render_width, &dummyfb.render_height);
+    multicam_c[0] = &dummyfb;
+    multicam_c[1] = &cam;
+
+    Entity* multicam[multicam_n];
     vec3 multicam_transf[] = 
     {
         /* pos,     rot */
@@ -437,7 +449,7 @@ int testdengine_scece_ecs_main(int argc, char **argv)
         { 0, 5.0f, -5.0f }, {-45.0f, 90.0f, 0},
         { -5.0f, 5.0f, 0 }, {-45.0f, 0, 0},
     };
-    for(int i = 0; i < 3; i++)
+    for(int i = 0; i < multicam_n; i++)
     {
         Camera c;
         memset(&c, 0, sizeof(c));
@@ -450,6 +462,7 @@ int testdengine_scece_ecs_main(int argc, char **argv)
         memcpy(multicam[i]->transform.position, multicam_transf[i * 2], sizeof(vec3));
         memcpy(multicam[i]->transform.rotation, multicam_transf[i * 2 + 1], sizeof(vec3));
         denginescene_ecs_new_cameracomponent(&c, &multicam[i]->camera_component);
+        multicam_c[i + 2] = &multicam[i]->camera_component->camera; 
         denginescene_add_entity(scene, multicam[i]);
     }
 
@@ -495,12 +508,31 @@ int testdengine_scece_ecs_main(int argc, char **argv)
     denginescene_new_skybox(&cube, &skymat, &scene->skybox);
 
     int poly = 1;
+    
+    const char* clamp_handle_assets[2] =
+    {
+        "textures/2d/clamp.png",
+        "textures/2d/handle.png",
+    };
+    Texture clamp_handle[2];
+    memset(clamp_handle, 0, sizeof(clamp_handle));
+    for(int i = 0; i < 2; i++)
+    {
+        dengine_load_asset(clamp_handle_assets[i], &mem, &memsz);
+        clamp_handle[i].interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
+        clamp_handle[i].auto_dataonload = 1;
+        dengine_texture_load_mem(mem, memsz, 1, &clamp_handle[i]);
+        free(mem);
+    }
 
     denginescene_queuer_state(scene, DENGINESCENE_QUEUER_STATE_RUNNING);
 
     denginescene_scripts_run(scene, DENGINE_SCRIPT_FUNC_START);
 
-    denginescene_dumphierachy_stdio(scene, stdout);
+    if(dumpscene)
+        denginescene_dumphierachy_stdio(scene, stdout);
+    else
+        dengineutils_logging_log("use -dumpscene to dump scene hiereachy to stdout");
     denginescene_set_debugaxis(scene, 1);
     denginescene_set_debuggrid(scene, 1);
 
@@ -523,14 +555,15 @@ int testdengine_scece_ecs_main(int argc, char **argv)
         if(dengine_input_get_key_once('F'))
             poly = !poly;
 
-        if(dengine_input_get_key_once('T'))
+        if(dengine_input_get_key_once('1'))
         {
-            Texture rd;
-            dengine_texture_make_canreadback_color(cam.render_width, cam.render_height, &rd);
-            dengine_framebuffer_readback(&rd, &cam.framebuffer);
-            if(dengine_texture_writeout("fb.jpg", 1, &rd))
-                dengineutils_os_dialog_messagebox( "screenshot successful","write to fb.jpg", 0);
-            dengine_texture_free_data(&rd);
+            activecam--;
+            activecam = glm_clamp(activecam, 0, multicam_n + 1);
+        }
+        if(dengine_input_get_key_once('2'))
+        {
+            activecam++;
+            activecam = glm_clamp(activecam, 0, multicam_n + 1);
         }
 
         if(dengine_input_get_key_once('G'))
@@ -550,49 +583,90 @@ int testdengine_scece_ecs_main(int argc, char **argv)
 
         denginescene_update(scene);
 
+        int vpx, vpy, vph, vpw;
+        dengine_viewport_get(&vpx, &vpy, &vpw, &vph);
+
         glClearColor(0.1,0.1,0.1,1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         /*glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);*/
 
-        denginegui_panel(0,0,854,480,&cam.framebuffer.color[0],NULL,viewportcol);
+        float maincamw = (vpw * 2.0f) / 3; 
+        float maincamh = (vph * 2.0f) / 3;
+        denginegui_panel(0,0, maincamw, maincamh,&cam.framebuffer.color[0],NULL,viewportcol);
+        static const char* camfmtstr = "Camera %d (fov:%.1f, w:%d, h:%d)";
         for(int i = 0; i < 3; i++)
         {
             Entity* e = multicam[i];
             CameraComponent* c = multicam[i]->camera_component;
-            int w = 1280 - 854; 
-            int h = 720 - 480; 
-            denginegui_panel(854, i * h, w, h,&c->camera.framebuffer.color[0],NULL,viewportcol);
-            char caminfo[1024];
-            snprintf(caminfo, sizeof(caminfo), "Camera %d (fov:%.1f) ", i, c->camera.fov);
-            denginegui_text(854, i * h + ( fontsz * 2), caminfo, NULL);
-            snprintf(caminfo, sizeof(caminfo), "pos: %f %f %f",
+            int availw = vpw - maincamw; 
+            int availh = vph / 3; 
+            denginegui_panel(maincamw, i * availh, availw, availh,&c->camera.framebuffer.color[0],NULL,viewportcol);
+            snprintf(prtbf, prtbf_sz, camfmtstr , i + 2, c->camera.fov, c->camera.render_width, c->camera.render_height);
+            denginegui_text(maincamw, i * availh + ( fontsz * 2), prtbf, NULL);
+            snprintf(prtbf, prtbf_sz, "pos: %f %f %f",
                     e->transform.position[0], e->transform.position[1], e->transform.position[2]);
-            denginegui_text(854, i * h + ( fontsz * 1), caminfo, NULL);
-            snprintf(caminfo, sizeof(caminfo), "rot: %f %f %f",
+            denginegui_text(maincamw, i * availh + ( fontsz * 1), prtbf, NULL);
+            snprintf(prtbf, prtbf_sz, "rot: %f %f %f",
                     e->transform.rotation[0], e->transform.rotation[1], e->transform.rotation[2]);
-            denginegui_text(854, i * h , caminfo, NULL);
+            denginegui_text(maincamw, i * availh , prtbf, NULL);
         }
 
-        denginegui_text(10,10,fpsstr, yellow);
+        denginegui_text(fontsz,fontsz,fpsstr, yellow);
 
-        denginegui_text(0, 480 - fontsz, "USE WASD, EC TO MOVE DUCKAROO!", NULL);
+        snprintf(prtbf, prtbf_sz, camfmtstr, 1, cam.fov, cam.render_width, cam.render_height);
+        denginegui_text(fontsz,2.0 * fontsz, prtbf, NULL);
 
-        denginegui_text(0, 480 - 2 * fontsz, "USE ZX TO ROTATE DUCKAROO!", NULL);
+        denginegui_text(fontsz, maincamh - fontsz, "USE WASD (or joystick), EC TO MOVE DUCKAROO!", NULL);
+
+        denginegui_text(fontsz, maincamh - 2 * fontsz, "USE ZX TO ROTATE DUCKAROO!", NULL);
 
         snprintf(prtbf, prtbf_sz, "PRESS F TO SWITCH POLYGON MODE : %d", poly);
-        denginegui_text(0, 480 - 3 * fontsz, prtbf, NULL);
+        denginegui_text(fontsz, maincamh - 3 * fontsz, prtbf, NULL);
 
         snprintf(prtbf, prtbf_sz, "PRESS G TO SWITCH FACE CULLING (Note FPS change) : %d", (int)glIsEnabled(GL_CULL_FACE));
-        denginegui_text(0, 480 - 4 * fontsz, prtbf, NULL);
+        denginegui_text(fontsz, maincamh - 4 * fontsz, prtbf, NULL);
 
-        denginegui_text(0, 480 - 5 * fontsz, "PRESS T TO TAKE A \"SCREENSHOT\"", NULL);
+        denginegui_text(fontsz, maincamh - 5 * fontsz, "PRESS T TO TAKE A \"SCREENSHOT\"", NULL);
 
-        denginegui_text(0, 480 - 6 * fontsz, "PRESS H/J TO ROTATE THE SUN", NULL);
+        snprintf(prtbf, prtbf_sz, "PRESS 1/2 to select active camera for \"SCREENSHOT\". 0 is whole screen : %d", activecam);
+        denginegui_text(fontsz, maincamh - 6 * fontsz, prtbf, NULL);
 
-        denginegui_text(0, 480 - 7 * fontsz, "HOLD RMB AND MOVE MOUSE TO MOVE MAIN CAMERA. SCROLL TO ZOOM", NULL);
+        denginegui_text(fontsz, maincamh - 7 * fontsz, "PRESS H/J TO ROTATE THE SUN", NULL);
 
-        denginegui_panel(0, 480, 720 - 480, 720 - 480, &dLight.shadow.shadow_map.depth, NULL, GLM_VEC4_ONE);
+        denginegui_text(fontsz, maincamh - 8 * fontsz, "HOLD RMB AND MOVE MOUSE TO MOVE MAIN CAMERA. SCROLL TO ZOOM", NULL);
+
+        denginegui_panel(0, maincamh, vph - maincamh, vph - maincamh, &dLight.shadow.shadow_map.depth, NULL, GLM_VEC4_ONE);
+
+        
+
+        static SWInput_Joystick sw_js;
+        vec2 input;
+        int jsdim = vph / 4;
+        float clamp_col[4] = {1, 1, 0, 1};
+        float handle_col[4] = {0, 1, 1, 1};
+        dengine_input_swinput_joystick(
+                vpw - (vpw / 3) - (vpw / 3 / 2), (vph / 3) / 2, 
+                jsdim, 0, 
+                &clamp_handle[0], clamp_col,
+                &clamp_handle[1], handle_col,
+                &input[0], &input[1], &sw_js);
+        ent3->transform.position[0] += delta_s * input[0] * 4.0f;
+        ent3->transform.position[2] -= delta_s * input[1] * 4.0f;
+
+        if(dengine_input_get_key_once('T'))
+        {
+            Texture rd;
+            Camera* act = multicam_c[activecam];
+            Framebuffer* actfb = &act->framebuffer;
+            dengine_texture_make_canreadback_color(act->render_width, act->render_height, &rd);
+            if(!activecam)
+                actfb = NULL;
+            dengine_framebuffer_readback(&rd, actfb);
+            if(dengine_texture_writeout("fb.jpg", 1, &rd))
+                dengineutils_os_dialog_messagebox( "screenshot successful","write to fb.jpg", 0);
+            dengine_texture_free_data(&rd);
+        }
     }
 
     denginescene_destroy(scene);
@@ -606,7 +680,6 @@ int testdengine_scece_ecs_main(int argc, char **argv)
     dengine_shader_destroy(&stdshdr);
     dengine_shader_destroy(&dftshdr);
 
-    free(prtbf);
     free(duck);
 
 //    if(child_sep)
@@ -629,9 +702,6 @@ int main(int argc, char *argv[])
 
     DengineInitOpts* opts = dengine_init_get_opts();
     opts->window_title = "testdengine-scene-ecs"; 
-    /* for GUI calculation */
-    opts->window_width = 1280;
-    opts->window_height = 720;
     dengine_init();
     testdengine_scece_ecs_main(argc, argv);
     dengine_terminate();

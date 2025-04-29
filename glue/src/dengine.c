@@ -406,6 +406,92 @@ int dengine_load_asset(const char* path, void** mem, size_t* length)
     return 1;
 }
 
+void dengine_input_swinput_joystick(
+        int x, int y, int dim, 
+        int snap_lim,
+        Texture* clamp, float* clamp_color_vec4,
+        Texture* handle, float* handle_color_vec4, 
+        float* outx, float* outy,
+        SWInput_Joystick* joystick)
+{
+    float hwinput_x, hwinput_y;
+    vec2 output;
+
+    /* TODO: we use mouse for now. use touches too */
+    joystick->isdown = dengine_input_get_mousebtn(DENGINE_INPUT_MSEBTN_PRIMARY);
+    hwinput_x = dengine_input_get_mousepos_x();
+    hwinput_y = dengine_input_get_mousepos_y();
+
+    int joyx = x;
+    int joyy = y;
+    int joyhanddim = dim / 2;
+    int joyhandx, joyhandy;
+
+    int sqregionoffset = 
+        snap_lim ?
+        snap_lim : dim;
+
+    /*TODO: doesn't consider the center of joystick. the user 
+     * wont notice anyway (0_-), (-_-), (0_-)
+     */
+    int inregion = hwinput_x >= x - sqregionoffset && hwinput_x <= x + sqregionoffset &&
+        hwinput_y >= y - sqregionoffset && hwinput_y <= y + sqregionoffset;
+
+    if(snap_lim)
+    {
+        joyx = hwinput_x - (dim / 2.0f);
+        joyy = hwinput_y - (dim / 2.0f);
+        if(inregion && !joystick->isregion_ondown)
+        {
+            joystick->snap_x = joyx;;
+            joystick->snap_y = joyy;
+            joystick->isregion_ondown = 1;
+        }
+
+        if(joystick->isdown)
+        {
+            joyx = joystick->snap_x;
+            joyy = joystick->snap_y;
+        }
+    }else {
+        if(joystick->isdown && inregion)
+            joystick->isregion_ondown = 1;
+    }
+    
+    if(joystick->isdown && joystick->isregion_ondown){
+        joyhandx = hwinput_x - (joyhanddim / 2.0f);
+        joyhandy = hwinput_y - (joyhanddim / 2.0f);
+        vec2 a = {joyhandx + (joyhanddim / 2.0f), joyhandy + (joyhanddim / 2.0f)}; 
+        vec2 b = {joyx + (dim / 2.0f), joyy + (dim / 2.0f)}; 
+        vec2 c;
+        glm_vec2_sub(a, b, c);
+        float mag = glm_vec2_norm(c);
+        if(mag > dim / 2.0f)
+        {
+            glm_vec2_scale_as(c, dim / 2.0f, c);
+        }
+        joyhandx = joyx + (joyhanddim / 2.0f) + c[0];
+        joyhandy = joyy + (joyhanddim / 2.0f) + c[1];
+        glm_vec2_divs(c, dim / 2.0f, output);
+;
+    }else{
+        joyx = x;
+        joyy = y;
+        joystick->isregion_ondown = 0;
+        joyhandx = joyx + (dim / 2.0f) - (joyhanddim / 2.0f);
+        joyhandy = joyy + (dim / 2.0f) - (joyhanddim / 2.0f);
+        glm_vec2_zero(output);
+    }
+
+    *outx = output[0];
+    *outy = output[1];
+
+    denginegui_set_panel_discard(1);
+    denginegui_panel(joyx, joyy, dim, dim, clamp, NULL, clamp_color_vec4);
+    denginegui_panel(joyhandx, joyhandy, joyhanddim, joyhanddim, handle, NULL, handle_color_vec4);
+    denginegui_set_panel_discard(0);
+}
+
 #ifdef DENGINE_ANDROID
 void backbutton_func(struct android_app* app)
 {

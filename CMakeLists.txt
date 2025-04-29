@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(dengine VERSION 0.8.1)
+project(dengine VERSION 0.8.2)
 
 #this is just a slight nuance with cmake rather than renaming the project
 set(DENGINE_VERSION "${dengine_VERSION}")

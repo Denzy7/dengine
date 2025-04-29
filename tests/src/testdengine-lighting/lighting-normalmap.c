@@ -105,6 +105,8 @@ int testdengine_lighting_normalmap(int argc, char **argv)
      * we set number of lights manually */
     dengine_shader_set_int(&stdshdr, "nr_pointLights", 1);
     
+    SWInput_Joystick store;
+    memset(&store, 0, sizeof(store));
     while(dengine_update())
     {
         dengine_material_use(&plane_mat);
@@ -165,47 +167,15 @@ int testdengine_lighting_normalmap(int argc, char **argv)
         int w, h;
 
         dengine_viewport_get(NULL, NULL, &w, &h);
-        float joydim = 300.0f;
+        float joydim = 300.0f; // w, h
         float joyoff = 100.0f;
-        float joyhanddim = joydim / 2.0f;
-        float msex, msey;
-        static float joyx, joyy; 
-        static float joyhandx, joyhandy;
-        static int joydown = 0;
         vec2 input = {0.0f, 0.0f};
 
-        msex = dengine_input_get_mousepos_x();
-        msey= dengine_input_get_mousepos_y();
-
-        if(dengine_input_get_mousebtn(DENGINE_INPUT_MSEBTN_PRIMARY))
-        {
-            if(!joydown)
-            {
-                joyx = msex - (joydim / 2.0f);
-                joyy = msey - (joydim / 2.0f);
-                joydown = 1;
-            }
-
-            /* extract original mouse pos */
-            vec2 a = {joyx + (joydim / 2.0f), joyy + (joydim / 2.0f)};
-            vec2 b = {msex, msey};
-            glm_vec2_sub(b, a, input);
-            glm_vec2_divs(input, (joydim / 2.0f), input);
-
-            joyhandx = msex - (joyhanddim / 2.0f);
-            joyhandy = msey - (joyhanddim / 2.0f);
-                
-        }else {
-            joyx = w  - joyoff - joydim;
-            joyy = joyoff;
-            joydown = 0;
-            joyhandx = joyx + (joydim / 2.0f) - (joyhanddim / 2.0f);
-            joyhandy = joyy + (joydim / 2.0f) - (joyhanddim / 2.0f);
-        }
-        denginegui_set_panel_discard(1);
-        denginegui_panel(joyx, joyy, joydim, joydim, &joy, NULL, red);
-        denginegui_panel(joyhandx, joyhandy, joyhanddim, joyhanddim, &joyhand, NULL, green);
-        denginegui_set_panel_discard(0);
+        dengine_input_swinput_joystick(w - joyoff - joydim , joyoff,
+                joydim, joydim,
+                &joy, red, &joyhand, green, 
+                &input[0], &input[1],
+                &store);
         
         denginegui_set_button_repeatable(1);
         if(denginegui_button(joyoff, joyoff + joydim / 2.0f, joydim / 2.0f, joydim / 2.0f, "E", NULL))
@@ -223,6 +193,10 @@ int testdengine_lighting_normalmap(int argc, char **argv)
         denginegui_text(10, 10 + fontsz, fps, yellow);
 
         denginegui_text(10, 10 + 3 * fontsz, "WASD(DPAD,JOYSTICK) = MOVE LIGHT, EC(A,X) = UP/DOWN", NULL);
+
+        snprintf(prtbuf, prtbuf_sz, "pLight.position: %.3f, %.3f, %.3f ", pLight.position[0], pLight.position[1], pLight.position[2]);
+
+        denginegui_text(10, 10 + 4 * fontsz, prtbuf, NULL);
     }
     free(prtbuf);
     dengine_material_destroy(&plane_mat);

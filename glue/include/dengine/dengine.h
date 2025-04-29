@@ -72,6 +72,15 @@ typedef struct
 
     int android_handlebackbutton;
 }DengineInitOpts;
+
+
+typedef struct
+{
+    int isdown, snap_x, snap_y;
+    int isregion_ondown;
+}SWInput_Joystick;
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -89,6 +98,26 @@ int dengine_update();
  * \return 0 on error, else success
  */
 int dengine_load_asset(const char* path, void** mem, size_t* length);
+
+/*!
+ * \brief software input joystick 
+ * \param x x screen coordinate
+ * \param y y screen coordinate
+ * \param dim width and height of joystick. it must be a square after all
+ * \param snap_lim if > 0, allows the joystick to snap if input is around x and y around the limit region specified
+ * \param clamp a texture for the clamp limiting the handle. usually a hollow circle
+ * \param handle a texture for the handle which user operates. usually a filled circle
+ * \param outx outputs -1 and 1 with how much of the handle has deviated from centre of clamp in x axis
+ * \param outy outputs -1 and 1 with how much of the handle has deviated from centre of clamp in x axis
+ * \param store static private datastore which should be init to 0 with memset
+ */
+void dengine_input_swinput_joystick(
+        int x, int y, int dim, 
+        int snap_lim,
+        Texture* clamp, float* clamp_color_vec4,
+        Texture* handle, float* handle_color_vec4, 
+        float* outx, float* outy,
+        SWInput_Joystick* joystick);
 
 #ifdef __cplusplus
 }
