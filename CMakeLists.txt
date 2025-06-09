@@ -42,11 +42,7 @@ option(DENGINE_USE_SYSTEM_PYTHON "Use system python or build custom. Custom buil
 set(DENGINE_WIN CACHE STRING "Force Window API. Possible Values: X11, WAYLAND")
 set(DENGINE_CONTEXT CACHE STRING "Force Context API. Possible Values: GLX, EGL")
 option(DENGINE_DEBUG "Enable general debug facilities. Use only in Debug builds as it has alot of overhead" OFF)
-option(DENGINE_DEBUG_GL "Enable OpenGL debug facilities. Use only in Debug builds as it has alot of overhead" OFF)
-if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    set(DENGINE_DEBUG_GL 1)
-    set(DENGINE_DEBUG 1)
-endif()
+option(DENGINE_DEBUG_GL "Enable OpenGL debug facilities. GL Debugging is decoupled from general debugging and can be enabled independently. Use only in Debug builds as it has alot of overhead" OFF)
 
 find_library(DENGINE_HAS_LIBZ z)
 find_library(DENGINE_HAS_EGL EGL)
