@@ -45,7 +45,7 @@ Change dir to repo:
 		- By default, this builds an APK which you can run on any Physical Device or Emulator in app/build/output
                 
         - Termux X11:
-                - Configure cmake with option -DDENGINE_TERMUX_X11. Builds a regular executable as Desktop
+            - Configure and build a regular executable as Desktop. Make sure you [have it setup](https://github.com/termux/termux-x11) and [configure hardware accelaration](https://github.com/LinuxDroidMaster/Termux-Desktops/blob/main/Documentation/HardwareAcceleration.md) if your device supports it
 
 	- To build the executable tests, run regular cmake. Use the toolchain in the NDK  
         `cmake -S . -B build/android -DCMAKE_TOOLCHAIN_FILE='<NDK_DIR>/build/cmake/android.toolchain.cmake' -DANDROID_API=24`
