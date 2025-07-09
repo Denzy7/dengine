@@ -292,11 +292,47 @@ int dengine_init()
     if(DENGINE_INIT_OPTS.enable_logthread)
         dengineutils_logging_init();
 
+
+
+    /* load assets.zip */
+    /*TODO: could we load assets.zip from apk assets? */
+#ifndef DENGINE_ANDROID
+    char buf[2048];
+    /* hit or miss, i guess they never miss huh :( */
+    static const char* possible_assetszip_paths[] = 
+    {
+        "../../../share/dengine-%s/assets.zip",
+        "../../share/dengine-%s/assets.zip",
+        "../share/dengine-%s/assets.zip",
+        "share/dengine-%s/assets.zip",
+        "assets.zip"
+    };
+    for(int i = 0; i < DENGINE_ARY_SZ(possible_assetszip_paths); i++)
+    {
+        snprintf(buf, sizeof(buf), possible_assetszip_paths[i], DENGINE_VERSION);
+        FILE* ok = fopen(buf, "rb");
+        if(ok != NULL)
+        {
+            fclose(ok);
+            if(dengineutils_stream_new(buf, DENGINEUTILS_STREAM_TYPE_FILE, DENGINEUTILS_STREAM_MODE_READ, &DENGINE_INIT_OPTS.assets_zip_stream) && dengineutils_zipread_load(&DENGINE_INIT_OPTS.assets_zip_stream, &DENGINE_INIT_OPTS.assets_zip))
+            {
+                dengineutils_logging_log("TODO::load assets.zip from %s. cd_records: %u, ",
+                        buf, DENGINE_INIT_OPTS.assets_zip.eocdr.cd_records);
+                ;
+
+            }
+            break;
+        }
+    }
+#endif
+
     return 1;
 }
 
 void dengine_terminate()
 {
+
+    dengineutils_zipread_free(&DENGINE_INIT_OPTS.assets_zip);
     denginegui_terminate();
     dengineutils_filesys_terminate();
 
@@ -348,46 +384,18 @@ int dengine_load_asset(const char* path, void** mem, size_t* length)
 {
     File2Mem f2m;
     memset(&f2m, 0, sizeof(f2m));
+    CDFHR* cdfhr;
+    char buf[2048];
+
 #ifdef DENGINE_ANDROID
     f2m.file = path;
     dengineutils_android_asset2file2mem(&f2m);
-#else
-    char buf[2048];
+#endif
 
-    Stream assets_zip_stream;
-    ZipRead assets_zip;
-    CDFHR* cdfhr;
-    uint32_t cdfhr_sz;
-    /* hit or miss, i guess they never miss huh :( */
-    static const char* possiblepaths[] = 
+    if(f2m.mem == NULL && DENGINE_INIT_OPTS.assets_zip.eocdr.cd_records > 0 && dengineutils_zipread_find_cdfhr(path, &cdfhr, &DENGINE_INIT_OPTS.assets_zip))
     {
-        "../../../share/dengine-%s/assets.zip",
-        "../../share/dengine-%s/assets.zip",
-        "../share/dengine-%s/assets.zip",
-        "share/dengine-%s/assets.zip",
-        "assets.zip"
-    };
-    for(int i = 0; i < DENGINE_ARY_SZ(possiblepaths); i++)
-    {
-        snprintf(buf, sizeof(buf), possiblepaths[i], DENGINE_VERSION);
-        FILE* ok = fopen(buf, "rb");
-        if(ok != NULL)
-        {
-            fclose(ok);
-            if(dengineutils_stream_new(buf, DENGINEUTILS_STREAM_TYPE_FILE, DENGINEUTILS_STREAM_MODE_READ, &assets_zip_stream))
-            {
-                dengineutils_zipread_load(&assets_zip_stream, &assets_zip);
-                if(dengineutils_zipread_find_cdfhr(path, &cdfhr, &assets_zip))
-                {
-                    dengineutils_zipread_decompress_cdfhr_mem(&assets_zip_stream, cdfhr, &f2m.mem, &cdfhr_sz);
-                    dengineutils_logging_log("TODO::load %s from assets.zip", path);
-                    f2m.size = cdfhr_sz;
-                }
-            }
-
-            dengineutils_zipread_free(&assets_zip);
-            break;
-        }
+        dengineutils_zipread_decompress_cdfhr_mem(&DENGINE_INIT_OPTS.assets_zip_stream, cdfhr, &f2m.mem, (uint32_t*)&f2m.size);
+        dengineutils_logging_log("TODO::load %s from assets.zip", path);
     }
 
     if(f2m.mem == NULL)
@@ -399,7 +407,6 @@ int dengine_load_asset(const char* path, void** mem, size_t* length)
         dengineutils_filesys_file2mem_load(&f2m);
 
     }
-#endif
     *mem = f2m.mem;
     if(length)
         *length = f2m.size;

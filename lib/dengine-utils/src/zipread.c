@@ -78,7 +78,8 @@ int dengineutils_zipread_load(Stream* stream, ZipRead* zipread)
 
     if(!find_eocdr)
     {
-        dengineutils_logging_log("ERROR::EOCDR not found. This is probably not a zip file");
+        const char* path = stream->path ? stream->path : "This";
+        dengineutils_logging_log("ERROR::EOCDR not found. %s is probably not a zip file", path);
         return 0;
     }
 

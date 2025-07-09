@@ -181,17 +181,14 @@ const char* dengineutils_filesys_get_assetsdir()
     /*}*/
 
 
-    char zipped_assets_dir[256];
-    //../../share/dengine-0.8.1/assets.zip
-    snprintf(zipped_assets_dir, sizeof(zipped_assets_dir), "../../share/dengine-%s/assets.zip", DENGINE_VERSION);
     dengineutils_logging_log("WARNING::Could not find assets directory.\n"
                              "Try:\n\t"
-                             "-dengine v0.8.1 and later support zipped assets if assets.zip is copied to %s\n\t",
                              "-moving it next to the executable\n\t"
                              "-moving it to %s\n\t"
                              "-setting envvar DENGINEASSETS\n\t"
-                             "-recompiling sources on this machine\n\t",
-                             zipped_assets_dir,
+                             "-recompiling sources on this machine\n\t"
+                             "\n"
+                             "*dengine v0.8.1 and later supports zipped assets if assets.zip is copied to current working directory*\n\t",
                              dengineutils_filesys_get_filesdir_dengine()
             );
 

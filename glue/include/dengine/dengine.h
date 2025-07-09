@@ -71,6 +71,8 @@ typedef struct
     int enable_logthread;
 
     int android_handlebackbutton;
+    Stream assets_zip_stream;
+    ZipRead assets_zip;
 }DengineInitOpts;
 
 
