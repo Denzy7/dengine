@@ -14,7 +14,7 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - os: windows-2019
+          - os: windows-2022
             shell: msys2
             name: "x86_64_windows"
           - os: ubuntu-22.04
