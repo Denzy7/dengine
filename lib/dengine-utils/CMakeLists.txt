@@ -18,6 +18,7 @@ src/stream.c
 src/zipread.c
 src/dynlib.c
 src/types.c
+src/assets.c
 )
 
 set(dengine-utils-hdr
@@ -36,6 +37,7 @@ include/dengine-utils/zipread.h
 include/dengine-utils/macros.h
 include/dengine-utils/dynlib.h
 include/dengine-utils/types.h
+include/dengine-utils/assets.h
 )
 
 if(ANDROID_NDK)

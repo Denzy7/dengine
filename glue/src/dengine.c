@@ -1,4 +1,5 @@
 #include "dengine/dengine.h"
+#include "dengine-utils/assets.h"
 #include "dengine.ini.h"
 #include <string.h> //memset
 static DengineInitOpts DENGINE_INIT_OPTS;
@@ -292,47 +293,14 @@ int dengine_init()
     if(DENGINE_INIT_OPTS.enable_logthread)
         dengineutils_logging_init();
 
-
-
-    /* load assets.zip */
-    /*TODO: could we load assets.zip from apk assets? */
-#ifndef DENGINE_ANDROID
-    char buf[2048];
-    /* hit or miss, i guess they never miss huh :( */
-    static const char* possible_assetszip_paths[] = 
-    {
-        "../../../share/dengine-%s/assets.zip",
-        "../../share/dengine-%s/assets.zip",
-        "../share/dengine-%s/assets.zip",
-        "share/dengine-%s/assets.zip",
-        "assets.zip"
-    };
-    for(int i = 0; i < DENGINE_ARY_SZ(possible_assetszip_paths); i++)
-    {
-        snprintf(buf, sizeof(buf), possible_assetszip_paths[i], DENGINE_VERSION);
-        FILE* ok = fopen(buf, "rb");
-        if(ok != NULL)
-        {
-            fclose(ok);
-            if(dengineutils_stream_new(buf, DENGINEUTILS_STREAM_TYPE_FILE, DENGINEUTILS_STREAM_MODE_READ, &DENGINE_INIT_OPTS.assets_zip_stream) && dengineutils_zipread_load(&DENGINE_INIT_OPTS.assets_zip_stream, &DENGINE_INIT_OPTS.assets_zip))
-            {
-                dengineutils_logging_log("TODO::load assets.zip from %s. cd_records: %u, ",
-                        buf, DENGINE_INIT_OPTS.assets_zip.eocdr.cd_records);
-                ;
-
-            }
-            break;
-        }
-    }
-#endif
-
+    dengineutils_assets_zip_load(NULL);
+    
     return 1;
 }
 
 void dengine_terminate()
 {
-
-    dengineutils_zipread_free(&DENGINE_INIT_OPTS.assets_zip);
+    dengineutils_assets_zip_free();
     denginegui_terminate();
     dengineutils_filesys_terminate();
 
@@ -382,35 +350,7 @@ int dengine_update()
 
 int dengine_load_asset(const char* path, void** mem, size_t* length)
 {
-    File2Mem f2m;
-    memset(&f2m, 0, sizeof(f2m));
-    CDFHR* cdfhr;
-    char buf[2048];
-
-#ifdef DENGINE_ANDROID
-    f2m.file = path;
-    dengineutils_android_asset2file2mem(&f2m);
-#endif
-
-    if(f2m.mem == NULL && DENGINE_INIT_OPTS.assets_zip.eocdr.cd_records > 0 && dengineutils_zipread_find_cdfhr(path, &cdfhr, &DENGINE_INIT_OPTS.assets_zip))
-    {
-        dengineutils_zipread_decompress_cdfhr_mem(&DENGINE_INIT_OPTS.assets_zip_stream, cdfhr, &f2m.mem, (uint32_t*)&f2m.size);
-        dengineutils_logging_log("TODO::load %s from assets.zip", path);
-    }
-
-    if(f2m.mem == NULL)
-    {
-        snprintf(buf, sizeof(buf),
-                "%s/%s",
-                dengineutils_filesys_get_assetsdir(), path);
-        f2m.file = buf;
-        dengineutils_filesys_file2mem_load(&f2m);
-
-    }
-    *mem = f2m.mem;
-    if(length)
-        *length = f2m.size;
-    return 1;
+    return dengineutils_assets_load(path, mem, length);
 }
 
 void dengine_input_swinput_joystick(

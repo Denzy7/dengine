@@ -20,9 +20,9 @@
 #include <dengine-utils/os.h>
 #include <dengine-utils/debug.h>
 #include <dengine-utils/macros.h>
+#include <dengine-utils/assets.h>
 #ifdef DENGINE_ANDROID
 #define SWBTNS
-#include <dengine-utils/platform/android.h>
 #endif
 
 #include <dengine-gui/gui.h>
@@ -55,11 +55,8 @@ int testdengine_lighting_standard(int argc, char** argv)
     dengineutils_logging_log("INFO::GL : %s", glGetString(GL_VERSION));
     dengineutils_logging_log("INFO::GLSL : %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-    const char* assets_dir = dengineutils_filesys_get_assetsdir();
-#ifdef DENGINE_ANDROID
-    File2Mem  f2m;
-#endif
-    char prtbuf[2048];
+    File2Mem f2m;
+    dengineutils_assets_zip_load(NULL);
 
     //STDSHADER
     Shader stdshader, shadow2d, shadow3d, dftshader;
@@ -125,15 +122,9 @@ int testdengine_lighting_standard(int argc, char** argv)
         Texture* tex_plane = &planeTex[i];
         dengine_texture_bind(GL_TEXTURE_2D, tex_plane);
         tex_plane->interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
-#ifdef DENGINE_ANDROID
-        f2m.file = planeTextureFile[i];
-        dengineutils_android_asset2file2mem(&f2m);
+        dengineutils_assets_load(planeTextureFile[i], &f2m.mem, &f2m.size);
         dengine_texture_load_mem(f2m.mem, f2m.size, 1, tex_plane);
         free(f2m.mem);
-#else
-        snprintf(prtbuf, sizeof (prtbuf), "%s/%s", assets_dir, planeTextureFile[i]);
-        dengine_texture_load_file(prtbuf, 1, tex_plane);
-#endif
         tex_plane->filter_min = GL_LINEAR;
         tex_plane->filter_mag = GL_LINEAR;
         uint32_t fmt = tex_plane->channels == 3 ? GL_RGB : GL_RGBA;
@@ -152,15 +143,9 @@ int testdengine_lighting_standard(int argc, char** argv)
         Texture* tex_cube = &cubeTex[i];
         dengine_texture_bind(GL_TEXTURE_2D, tex_cube);
         tex_cube->interface = DENGINE_TEXTURE_INTERFACE_8_BIT;
-#ifdef DENGINE_ANDROID
-        f2m.file = cubeTextureFile[i];
-        dengineutils_android_asset2file2mem(&f2m);
+        dengineutils_assets_load(cubeTextureFile[i], &f2m.mem, &f2m.size);
         dengine_texture_load_mem(f2m.mem, f2m.size, 1, tex_cube);
         free(f2m.mem);
-#else
-        snprintf(prtbuf, sizeof (prtbuf), "%s/%s", assets_dir, cubeTextureFile[i]);
-        dengine_texture_load_file(prtbuf, 1, tex_cube);
-#endif
         tex_cube->filter_min = GL_LINEAR;
         tex_cube->filter_mag = GL_LINEAR;
         tex_cube->wrap = GL_CLAMP_TO_EDGE;
@@ -334,7 +319,7 @@ int testdengine_lighting_standard(int argc, char** argv)
         {
             dengine_lighting_shadow_pointlight_draw(&pLight, &shadow3d, &plane, model[0]);
             dengine_lighting_shadow_spotlight_draw(&sLight, &shadow3d, &plane, model[0]);
-        }
+        ;}
 
         //Do color
         dengine_material_use(&cube_mat);
@@ -447,6 +432,8 @@ int testdengine_lighting_standard(int argc, char** argv)
     dengine_material_destroy(&cube_mat);
     dengine_material_destroy(&plane_mat);
 
+    dengineutils_assets_zip_free();
+
     return 0;
 }
 #ifndef DENGINE_ANDROID
@@ -492,6 +479,7 @@ int main(int argc, char** argv)
     /* main */
     testdengine_lighting_standard(argc, argv);
 
+    dengineutils_filesys_terminate();
     denginegui_terminate();
     dengine_window_destroy(window);
     dengine_window_terminate();

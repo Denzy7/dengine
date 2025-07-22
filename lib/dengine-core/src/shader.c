@@ -271,6 +271,7 @@ int dengine_shader_setup(Shader* shader)
                 dengineutils_logging_log("TODO::load binary %s, len:%d", shader->cached_name, (int)f2m.size);
             }
             dengineutils_filesys_file2mem_free(&f2m);
+            fclose(binfile);
         }
 
         if(binload)

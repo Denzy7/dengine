@@ -27,6 +27,7 @@
 #include <dengine-utils/confserialize.h>
 #include <dengine-utils/zipread.h>
 #include <dengine-utils/types.h>
+#include <dengine-utils/assets.h>
 #ifdef DENGINE_ANDROID
 #include <dengine-utils/platform/android.h>
 #endif
@@ -71,8 +72,6 @@ typedef struct
     int enable_logthread;
 
     int android_handlebackbutton;
-    Stream assets_zip_stream;
-    ZipRead assets_zip;
 }DengineInitOpts;
 
 
