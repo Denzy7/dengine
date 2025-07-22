@@ -1,4 +1,2 @@
 #!/bin/bash
-cd ../lib/dengitor-@DENGINE_VERSION@
-export LD_LIBRARY_PATH="../../lib/dengine-@DENGINE_VERSION@:${LD_LIBRARY_PATH:-}"
-./dengitor
+exec "$(dirname "$(readlink -f "$0")")/../lib/dengitor-@DENGINE_VERSION@/dengitor" "$@"
