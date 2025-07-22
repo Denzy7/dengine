@@ -6,14 +6,9 @@ int main(int argc, char *argv[])
     opts->window_title = "testdengine-script-python";
     dengine_init();
 
-    const size_t prtbf_sz = 2048;
-    char* prtbf = malloc(prtbf_sz);
-
     const char* script_file = "scripts/printmouse.py";
     File2Mem f2m;
-    snprintf(prtbf, prtbf_sz, "%s/%s", dengineutils_filesys_get_assetsdir(), script_file);
-    f2m.file = prtbf;
-    dengineutils_filesys_file2mem_load(&f2m);
+    dengine_load_asset(script_file, &f2m.mem, &f2m.size);
 
     Script printmouse;
     int compiled = denginescript_python_compile(f2m.mem, script_file, &printmouse);
@@ -59,7 +54,6 @@ int main(int argc, char *argv[])
         if(compiled)
             denginescript_python_call(&printmouse, DENGINE_SCRIPT_FUNC_UPDATE, NULL);
     }
-    free(prtbf);
 
     dengine_terminate();
     return 0;
