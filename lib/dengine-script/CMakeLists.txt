@@ -8,9 +8,12 @@ ${CMAKE_CURRENT_BINARY_DIR}/src/dengine-script.rc
 )
 
 set(dengine-script-hdr
-include/dengine-script/script.h
+    include/dengine-script/script.h
 )
 
+set(dengine-script_python-hdr
+    include/dengine-script/python/python.h
+)
 set(dengine-script-link)
 set(dengine-script_res)
 
@@ -55,7 +58,7 @@ if(DENGINE_HAS_PYTHON3)
     endforeach()
 
     list(APPEND dengine-script-src src/python/python.c)
-    list(APPEND dengine-script-hdr include/dengine-script/python/python.h)
+    list(APPEND dengine-script-hdr ${dengine-script_python-hdr})
     list(APPEND dengine-script_res src/python/importhook.py)
     list(APPEND dengine-script-link ${python3_LIBRARIES})
 endif()
@@ -89,7 +92,10 @@ target_link_libraries(dengine-script PRIVATE dengine-core dengine-utils ${dengin
 install(TARGETS ${dengine-script-py_modules} DESTINATION lib/dengine-${DENGINE_VERSION}/python-modules/dengine)
 install(DIRECTORY src/python/stubs DESTINATION lib/dengine-${DENGINE_VERSION}/python-stubs)
 install(TARGETS dengine-script DESTINATION lib/dengine-${DENGINE_VERSION})
+
+list(REMOVE_ITEM dengine-script-hdr ${dengine-script_python-hdr})
 install(FILES ${dengine-script-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-script)
+install(FILES ${dengine-script_python-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-script/python)
 #we need this mostly for zlib
 if(MINGW)
     set(exe dengine-utils)
