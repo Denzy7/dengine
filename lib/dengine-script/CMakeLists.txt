@@ -1,20 +1,13 @@
-set(DENGINE_DLL_FILENAME "dengine-script.dll")
-set(DENGINE_DLL_FILEDESC "Scripting with Python3")
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../dengine-lib.rc.in src/dengine-script.rc)
-
 set(dengine-script-src
 src/script.c
-${CMAKE_CURRENT_BINARY_DIR}/src/dengine-script.rc
 )
 
 set(dengine-script-hdr
     include/dengine-script/script.h
 )
 
-set(dengine-script_python-hdr
-    include/dengine-script/python/python.h
-)
-set(dengine-script-link)
+set(dengine-script-link
+    dengine-core dengine-utils)
 set(dengine-script_res)
 
 set(modules_builddir "${CMAKE_CURRENT_BINARY_DIR}/python-modules/dengine")
@@ -28,6 +21,10 @@ if(DENGINE_HAS_PYTHON3)
         scene
     )
     foreach(module ${dengine-script-py_modules})
+        set(module_hdr ${CMAKE_CURRENT_SOURCE_DIR}/include/dengine-script/python/modules/${module}module.h)
+        if(EXISTS ${module_hdr})
+            list(APPEND dengine-script-hdr ${module_hdr})
+        endif()
         add_library(${module}_obj OBJECT 
             src/python/modules/${module}module.c
         )
@@ -58,7 +55,7 @@ if(DENGINE_HAS_PYTHON3)
     endforeach()
 
     list(APPEND dengine-script-src src/python/python.c)
-    list(APPEND dengine-script-hdr ${dengine-script_python-hdr})
+    list(APPEND dengine-script-hdr include/dengine-script/python/python.h)
     list(APPEND dengine-script_res src/python/importhook.py)
     list(APPEND dengine-script-link ${python3_LIBRARIES})
 endif()
@@ -76,38 +73,15 @@ foreach(res ${dengine-script_res})
     list(APPEND dengine-script-src ${outresname})
 endforeach()
 
-add_library(dengine-script ${dengine-script-hdr} ${dengine-script-src})
-set_target_properties(dengine-script PROPERTIES
-                      VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
-                      SOVERSION ${dengine_VERSION_MAJOR}
-                      POSITION_INDEPENDENT_CODE ON
-                      C_STANDARD 99)
-#remove lib prefix
-if(WIN32)
-  set_target_properties(dengine-script PROPERTIES PREFIX "")
-endif()
 
-target_link_libraries(dengine-script PRIVATE dengine-core dengine-utils ${dengine-script-link})
+dengine_add_lib(dengine-script "Scripting")
 
 install(TARGETS ${dengine-script-py_modules} DESTINATION lib/dengine-${DENGINE_VERSION}/python-modules/dengine)
 install(DIRECTORY src/python/stubs DESTINATION lib/dengine-${DENGINE_VERSION}/python-stubs)
-install(TARGETS dengine-script DESTINATION lib/dengine-${DENGINE_VERSION})
 
-list(REMOVE_ITEM dengine-script-hdr ${dengine-script_python-hdr})
-install(FILES ${dengine-script-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-script)
-install(FILES ${dengine-script_python-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-script/python)
-#we need this mostly for zlib
-if(MINGW)
-    set(exe dengine-utils)
-    set(ext dll)
-    set(cwd ${PROJECT_SOURCE_DIR}/deps)
-    configure_file(${PROJECT_SOURCE_DIR}/tools/mingw/mingw_copylibs_install.cmake.in
-        ${CMAKE_CURRENT_BINARY_DIR}/dengine-utils.install.cmake @ONLY)
-    install(SCRIPT  ${CMAKE_CURRENT_BINARY_DIR}/dengine-utils.install.cmake)
-
-    if(DENGINE_SCRIPTING_PYTHON)
-        configure_file(${PROJECT_SOURCE_DIR}/tools/msys/pythonstdlib.cmake.in
-            ${CMAKE_CURRENT_BINARY_DIR}/pythonstdlib.cmake @ONLY)
-        install(SCRIPT  ${CMAKE_CURRENT_BINARY_DIR}/pythonstdlib.cmake)
-    endif()
+# stdlib
+if(MINGW AND DENGINE_SCRIPTING_PYTHON AND NOT PYSRC)
+    configure_file(${PROJECT_SOURCE_DIR}/tools/msys/pythonstdlib.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/pythonstdlib.cmake @ONLY)
+    install(SCRIPT  ${CMAKE_CURRENT_BINARY_DIR}/pythonstdlib.cmake)
 endif()

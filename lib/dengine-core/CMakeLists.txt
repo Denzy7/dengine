@@ -1,6 +1,3 @@
-set(DENGINE_DLL_FILENAME "dengine-core.dll")
-set(DENGINE_DLL_FILEDESC "Core")
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../dengine-lib.rc.in src/dengine-core.rc)
 set(dengine-core-src
 src/window.c
 src/shader.c
@@ -20,7 +17,6 @@ src/renderbuffer.c
 src/stb_image.c
 src/stb_image_write.c
 src/viewport.c
-${CMAKE_CURRENT_BINARY_DIR}/src/dengine-core.rc
 ${PROJECT_SOURCE_DIR}/deps/glad/src/glad.c
 #src/dgl.c
 src/entrygl.c
@@ -83,9 +79,6 @@ set(coreres_generated
     standard.frag.glsl
 )
 
-# output after compile
-set(outres)
-
 # compile
 foreach(res ${coreres})
     set(inresname ${dengine_SOURCE_DIR}/${res})
@@ -98,7 +91,7 @@ foreach(res ${coreres})
         VERBATIM
     )
 # append
-    list(APPEND outres ${outresname})
+    list(APPEND dengine-core-src ${outresname})
 endforeach()
 # compile
 foreach(res ${coreres_generated})
@@ -112,7 +105,7 @@ foreach(res ${coreres_generated})
         VERBATIM
     )
 # append
-    list(APPEND outres ${outresname})
+    list(APPEND dengine-core-src ${outresname})
 endforeach()
 
 if(DENGINE_HAS_WAYLAND_CLIENT)
@@ -138,26 +131,16 @@ if(DENGINE_HAS_WAYLAND_CLIENT)
             DEPENDS ${in}
             VERBATIM
         )
-        list(APPEND outres ${outsrc} ${outhdr})
+        list(APPEND dengine-core-src ${outsrc} ${outhdr})
     endforeach()
 endif()
 
-add_library(dengine-core ${dengine-core-hdr} ${dengine-core-src} ${outres})
-
+set(dengine-core-incl)
 if(DENGINE_HAS_WAYLAND_CLIENT)
     #wl_protos.xml.h
-    target_include_directories(dengine-core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+    list(APPEND dengine-core-incl ${CMAKE_CURRENT_BINARY_DIR})
 endif()
-set(dengine-core-link)
-set_target_properties(dengine-core PROPERTIES
-                      VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
-                      SOVERSION ${dengine_VERSION_MAJOR}
-                      POSITION_INDEPENDENT_CODE ON
-                      C_STANDARD 99)
-#remove lib prefix
-if(WIN32)
-    set_target_properties(dengine-core PROPERTIES PREFIX "")
-endif()
+set(dengine-core-link dengine-utils)
 
 if(DENGINE_HAS_X11)
     list(APPEND dengine-core-link ${x11_LIBRARIES})
@@ -193,7 +176,4 @@ if(ANDROID_NDK)
     list(APPEND dengine-core-link android)
 endif()
 
-target_link_libraries(dengine-core PRIVATE dengine-utils ${dengine-core-link})
-
-install(TARGETS dengine-core DESTINATION lib/dengine-${DENGINE_VERSION})
-install(FILES ${dengine-core-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine)
+dengine_add_lib(dengine-core "Core")

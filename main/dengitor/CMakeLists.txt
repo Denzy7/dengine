@@ -57,7 +57,6 @@ set_target_properties(dengitor PROPERTIES
     #export all. useful for connecting g_signal
     ENABLE_EXPORTS TRUE
     WINDOWS_EXPORT_ALL_SYMBOLS TRUE
-    INSTALL_RPATH "$ORIGIN/../dengine-${DENGINE_VERSION}/"
     C_STANDARD 99
 )
 

@@ -1,10 +1,5 @@
-set(DENGINE_DLL_FILENAME "dengine-gui.dll")
-set(DENGINE_DLL_FILEDESC "Native GUI")
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../dengine-lib.rc.in src/dengine-gui.rc)
-
 set(dengine-gui-src
 src/gui.c
-${CMAKE_CURRENT_BINARY_DIR}/src/dengine-gui.rc
 )
 
 set(dengine-gui-hdr
@@ -49,9 +44,6 @@ if(DENGINE_FONT_EMBED_ROBOTO_LIGHT)
     list(APPEND dengine-gui-embfonts-src src/embfonts/roboto/Roboto-Light.ttf)
 endif()
 
-# output after compile
-set(outres)
-
 # compile
 foreach(res ${dengine-gui-embfonts-src})
 # inres and outres should be absolute paths for fair measure
@@ -66,26 +58,13 @@ foreach(res ${dengine-gui-embfonts-src})
     )
 
 # append
-    list(APPEND outres ${outresname})
+    list(APPEND dengine-gui-src ${outresname})
 endforeach()
 
-add_library(dengine-gui
-    ${dengine-gui-hdr} ${dengine-gui-src} ${outres})
-set(dengine-gui-link)
-set_target_properties(dengine-gui PROPERTIES
-                      VERSION ${dengine_VERSION_MAJOR}.${dengine_VERSION_MINOR}
-                      SOVERSION ${dengine_VERSION_MAJOR}
-                      POSITION_INDEPENDENT_CODE ON
-                      C_STANDARD 99)
-#remove lib prefix
-if(WIN32)
-  set_target_properties(dengine-gui PROPERTIES PREFIX "")
-endif()
+set(dengine-gui-link dengine-core dengine-utils)
 
 if(fontconfig_LIBRARIES AND UNIX)
     list(APPEND dengine-gui-link ${fontconfig_LIBRARIES})
 endif()
-target_link_libraries(dengine-gui PRIVATE dengine-core dengine-utils ${dengine-gui-link})
 
-install(TARGETS dengine-gui DESTINATION lib/dengine-${DENGINE_VERSION})
-install(FILES ${dengine-gui-hdr} DESTINATION include/dengine-${DENGINE_VERSION}/lib/dengine-gui)
+dengine_add_lib(dengine-gui "Native GUI")

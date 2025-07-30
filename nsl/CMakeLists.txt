@@ -12,7 +12,6 @@ if(DENGINE_HAS_BULLET)
     set_target_properties(nsl-bulletphysics PROPERTIES
         PREFIX ""
         SUFFIX ".nsl"
-        INSTALL_RPATH "$ORIGIN/../"
         LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests-build/bin"
     )
     target_link_libraries(nsl-bulletphysics ${dengine} ${bullet_LIBRARIES} nsl-bulletphysics-common)
@@ -46,7 +45,6 @@ if(DENGINE_HAS_BULLET)
     )
     set_target_properties(nsl-bulletphysics-car PROPERTIES
         PREFIX ""
-        INSTALL_RPATH "$ORIGIN/../"
         SUFFIX ".nsl"
         LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests-build/bin"
     )
@@ -108,7 +106,6 @@ add_library(nsl-test SHARED
 set_target_properties(nsl-test PROPERTIES
     PREFIX ""
     SUFFIX ".nsl"
-    INSTALL_RPATH "$ORIGIN/../"
     LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests-build/bin"
 )
 target_link_libraries(nsl-test ${dengine})

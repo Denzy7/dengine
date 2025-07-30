@@ -53,7 +53,7 @@ fi
 "$pip" install pefile
 echo "using mingw-ldd"
 
-lddstr=$("$python" mingw-ldd/mingw_ldd/mingw_ldd.py "$exe" --dll-lookup-dirs "$syspfx/bin" "$prefix/lib/dengine-$ver")
+lddstr=$("$python" mingw-ldd/mingw_ldd/mingw_ldd.py "$exe" --dll-lookup-dirs "$syspfx/bin" "$prefix/lib")
 echo "${lddstr}"
 echo "${lddstr}" | grep -Evi "$grepstr" | sed "$sedstr" | sed "$sedstr2" | while read -r file; do
 if [[ -f "$file" ]]; then

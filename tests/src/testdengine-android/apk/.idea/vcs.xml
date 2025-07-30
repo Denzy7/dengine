@@ -6,6 +6,8 @@
     <mapping directory="$PROJECT_DIR$/../../../../deps/cglm" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../../../deps/cpython" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../../../deps/cpython-portable" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../deps/mingw-ldd" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../deps/ntldd" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../../../deps/stb" vcs="Git" />
   </component>
 </project>
