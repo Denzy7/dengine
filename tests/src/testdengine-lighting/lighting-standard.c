@@ -220,7 +220,7 @@ int testdengine_lighting_standard(int argc, char** argv)
     char fps[20];
     char shadowtogglestr[50];
 
-    int curpstr = 0;
+    uint32_t curpstr = 0;
     char* postrs[]=
     {
         "Cube", "Camera", "DirectionalLight (pos)'", "PointLight", "Spotlight", "Spotlight target"
@@ -410,7 +410,7 @@ int testdengine_lighting_standard(int argc, char** argv)
         denginegui_panel(0, fontsz, tex_widths,tex_widths,&dLight.shadow.shadow_map.depth, NULL, NULL);
 
         int postrs_count = DENGINE_ARY_SZ(postrs);
-        snprintf(postr, sizeof (postr), "Click to change pos mode : %s <%d of %d> , x:%.2f, y:%.2f, z:%.2f", postrs[curpstr], curpstr + 1, postrs_count, ptr[0], ptr[1], ptr[2]);
+        snprintf(postr, sizeof (postr), "Click to change pos mode : %s <%u of %d> , x:%.2f, y:%.2f, z:%.2f", postrs[curpstr], curpstr + 1, postrs_count, ptr[0], ptr[1], ptr[2]);
         if(denginegui_button(offset, h - 4 * fontsz, w - 2 * offset, 2 * fontsz, postr, NULL))
         {
             curpstr++;

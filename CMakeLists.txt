@@ -208,9 +208,8 @@ check_symbol_exists(pthread_setname_np "pthread.h" DENGINE_HAS_PTHREAD_SETNAME_N
 set(CMAKE_REQUIRED_FLAGS "")
 
 configure_file(dengine_config.h.in dengine_config/dengine_config.h)
-
-if (NOT MSVC)
-    add_compile_options(-Wall)
+if(MSYS OR UNIX OR MINGW)
+    add_compile_options("-Wall" "-Wextra" "-Wformat" "-Wno-unused-parameter")
 endif()
 
 set(dengine 

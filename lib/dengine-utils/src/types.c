@@ -5,7 +5,6 @@
 
 #include "dengine-utils/types.h"
 #include "dengine-utils/macros.h"
-#include "dengine_config.h"
 
 typedef struct
 {

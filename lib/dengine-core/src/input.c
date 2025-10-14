@@ -474,7 +474,7 @@ void _dengine_input_gamepad_linux_resetpads()
 }
 int _dengine_input_gamepad_linux_getpadfds()
 {
-    int axes = 0;
+    uint32_t axes = 0;
     DIR* dir;
     int count = 0;
     char path[PATH_MAX];

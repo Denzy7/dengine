@@ -175,7 +175,7 @@ DENGINE_EXPORT void dengitor_glarea_onrealize(GtkGLArea* area)
     Texture plane_tex;
     memset(&plane_tex, 0, sizeof(plane_tex));
 
-    for(int i = 0; i < DENGINE_ARY_SZ(plane_tex_files_tgt); i++)
+    for(uint32_t i = 0; i < DENGINE_ARY_SZ(plane_tex_files_tgt); i++)
     {
         char prtbf[512];
 
@@ -348,7 +348,7 @@ DENGINE_EXPORT void dengitor_glarea_evbox_onbtnpress(GtkEventBox* evbox, GdkEven
     }
     if(button->button == GDK_BUTTON_SECONDARY && dengitor->glarea.glarea_mode == DENGITOR_GLAREA_MODE_SCENE)
     {
-        GdkWindow* window = gtk_widget_get_window( GTK_WIDGET(dengitor->glarea.glarea) );
+        /*GdkWindow* window = gtk_widget_get_window( GTK_WIDGET(dengitor->glarea.glarea) );*/
         /*gdk_window_set_cursor(window, dengitor->cursor_blank);*/
     }
     dengitor_glearea_onevent();

@@ -268,7 +268,7 @@ void dengine_texture_make_color(const int width, const int height, const float* 
     {
         data = malloc(width * height * channels * sizeof(float));
         float* _data = data;
-        for(size_t i = 0; i < width * height; i++)
+        for(int i = 0; i < width * height; i++)
         {
             for(int j = 0; j < channels; j++)
             {
@@ -280,7 +280,7 @@ void dengine_texture_make_color(const int width, const int height, const float* 
     {
         data =  malloc(width * height * channels);
         uint8_t* _data = data;
-        for(size_t i = 0; i < width * height; i++)
+        for(int i = 0; i < width * height; i++)
         {
             for(int j = 0; j < channels; j++)
             {

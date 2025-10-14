@@ -45,6 +45,7 @@ void dengine_material_set_shader_color(const Shader* shader, Material* material)
     glGetProgramiv(shader->program_id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_uniform_ln); DENGINE_CHECKGL;
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_units); DENGINE_CHECKGL;
     char* uniform_name = malloc(max_uniform_ln);
+    uint32_t max_units_u = max_units;
 
     memset(&material->textures, 0, sizeof(material->textures));
     material->textures_count = 0;
@@ -54,7 +55,7 @@ void dengine_material_set_shader_color(const Shader* shader, Material* material)
         /*printf("active: %s\n", uniform_name);*/
         if (type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE)
         {
-            if(material->textures_count > max_units)
+            if(material->textures_count > max_units_u)
             {
                 dengineutils_logging_log("WARNING::This OpenGL driver has a maximum of %d texture units."
                                          "%s will not be activated", max_units, uniform_name);
@@ -81,7 +82,7 @@ void dengine_material_set_shader_color(const Shader* shader, Material* material)
     }
 
     //clamp to the max units
-    if(material->textures_count > max_units)
+    if(material->textures_count > max_units_u)
         material->textures_count = max_units;
 
     free(uniform_name);

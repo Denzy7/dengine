@@ -3,7 +3,6 @@
 #include "dengine-utils/logging.h"
 #include "dengine-utils/timer.h"
 #include "dengine-utils/filesys.h"
-#include "dengine-utils/thread.h" /* mutex */
 #include "dengine-utils/macros.h" /* arysz */
 
 #include "dengine_config.h"
@@ -43,7 +42,7 @@ void dengineutils_debug_init()
     }
     fmt=malloc(DENGINE_DEBUG_TRACESTRLN);
 
-    for(int i = 0; i < DENGINE_ARY_SZ(_sigtable_exit); i++)
+    for(size_t i = 0; i < DENGINE_ARY_SZ(_sigtable_exit); i++)
     {
         signal(_sigtable_exit[i].sig,_dengineutils_debug_hand_termandexit);
     }
@@ -128,7 +127,7 @@ void dengineutils_debug_enter(const char* function,const char* file,const int li
 void _dengineutils_debug_hand_termandexit(int sig)
 {
     const char* sigstr = "SIG____ (Not implemented!)";
-    for(int i = 0; i < DENGINE_ARY_SZ(_sigtable_exit); i++)
+    for(size_t i = 0; i < DENGINE_ARY_SZ(_sigtable_exit); i++)
     {
         if(sig == _sigtable_exit[i].sig)
             sigstr = _sigtable_exit[i].str;

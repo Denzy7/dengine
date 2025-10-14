@@ -7,9 +7,7 @@
 #include "dengine/input.h" //setwindow
 #include "dengine-utils/logging.h"//log
 #include "dengine-utils/dynlib.h" //getsym
-#include "dengine-utils/thread.h"
 #include "dengine-utils/macros.h" //ARY_SZ
-#include "dengine-utils/timer.h"
 #include "dengine-utils/debug.h"
 
 #include <stdio.h>  //printf
@@ -289,7 +287,6 @@ int dengine_window_init()
 
     int init = 0;
 #ifdef DENGINE_WIN_X11
-    XInitThreads();
     x_dpy = XOpenDisplay(NULL);
     if(x_dpy)
     {

@@ -1,5 +1,4 @@
 #include <dengine/dengine.h>
-#include <stdlib.h>
 #include <math.h>
 
 int pingpongposition_update(Entity* entity)

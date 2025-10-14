@@ -10,16 +10,13 @@
 #include "dengine/input.h"
 #include "dengine/entrygl.h"
 #include "dengine/viewport.h"
-#include "dengine/window.h"
 
 #include "dengine-utils/logging.h"
 #include "dengine-utils/debug.h"
-#include "dengine-utils/macros.h"
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h> //stbtt
 
-#include "dengine_config.h"
 #ifdef DENGINE_ANDROID
 #include "dengine-utils/platform/android.h"
 #endif
@@ -181,13 +178,12 @@ int denginegui_set_font(const void* ttf, const float fontsize, const uint32_t bi
     void* sysfontmem = NULL;
     if (!ttf) {
         const char* file = _denginegui_get_defaultfont();
-        FILE* f = fopen(file, "rb");
-        if (!f) {
-            dengineutils_logging_log("WARNING::cannot read default font %s", file);
+        if (file == NULL) {
+            dengineutils_logging_log("WARNING::Cannot read default font. Load embfont OpenSans_Light");
             mem = OpenSans_Light_ttf;
-            dengineutils_logging_log("WARNING::Load embfont OpenSans_Light");
         }else
         {
+            FILE* f = fopen(file, "rb");
             fseek(f, 0, SEEK_END);
             size_t sz = ftell(f);
             rewind(f);

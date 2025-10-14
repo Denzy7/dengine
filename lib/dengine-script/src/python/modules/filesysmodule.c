@@ -1,5 +1,5 @@
 #include "dengine-utils/filesys.h"
-#include "dengine-script/script.h"
+#include <Python.h>
 
 static PyObject* filesys_get_cachedir(PyObject* self, PyObject* args)
 {

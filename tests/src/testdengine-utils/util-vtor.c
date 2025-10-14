@@ -1,6 +1,4 @@
 #include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 
 #include <dengine-utils/vtor.h>
 #include <dengine-utils/logging.h>
@@ -35,7 +33,7 @@ int main(int argc, char *argv[])
         vtor_pushback(vtor1, &randomflt);
     }
     float* data1 = vtor1->data;
-    for (int i = 0; i < vtor1->count; i++) {
+    for (size_t i = 0; i < vtor1->count; i++) {
         dengineutils_logging_log("readback vtor1 %f", data1[i]);
     }
 

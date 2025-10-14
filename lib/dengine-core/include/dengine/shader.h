@@ -106,7 +106,7 @@ int dengine_shader_make_standard(StandardShader stdshader, Shader* shader);
 
 void dengine_shader_set_shadercache(int state);
 
-const uint32_t dengine_shader_sampler2target(const uint32_t sampler);
+uint32_t dengine_shader_sampler2target(const uint32_t sampler);
 
 #ifdef __cplusplus
 }

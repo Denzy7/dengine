@@ -5,7 +5,6 @@
 #include "dengine-utils/logging.h"
 #include "dengine_config.h"// DENGINE_ECS_MAXCHILDREN
 #ifdef DENGINE_SCRIPTING_PYTHON
-#include "dengine-script/python/python.h"
 #include "dengine-scene/scriptingsync/python/entity.h"
 #endif
 

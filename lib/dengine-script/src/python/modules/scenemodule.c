@@ -1,5 +1,5 @@
 #include "dengine-script/python/modules/scenemodule.h"
-#include "dengine-script/script.h"
+#include <Python.h>
 #include "dengine-script/python/modules/commonmodule.h" //Vec3Object
 #include <structmember.h>                                                        
 

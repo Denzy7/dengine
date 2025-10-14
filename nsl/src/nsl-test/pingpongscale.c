@@ -1,6 +1,5 @@
 #include <dengine/dengine.h>
 #include <math.h>
-#include <stdlib.h>
 
 int pingpongscale_update(Entity* entity)
 {

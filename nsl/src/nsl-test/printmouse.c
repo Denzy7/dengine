@@ -1,5 +1,4 @@
 #include <dengine/dengine.h>
-#include <stdlib.h>
 #include <time.h>
 int printmouse_start(void* args)
 {

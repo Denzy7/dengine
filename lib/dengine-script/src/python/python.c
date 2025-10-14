@@ -1,10 +1,13 @@
 #include "dengine-script/python/python.h"
 #include "dengine-script/script.h"
 #include "dengine-utils/logging.h"
+#include "pylifecycle.h"
+#ifndef DENGINE_USE_SYSTEM_PYTHON
 #include "dengine-utils/os.h"
 #include "dengine-utils/filesys.h"
 #include "dengine-utils/stream.h"
 #include "dengine-utils/zipread.h"
+#endif
 
 extern PyObject* PyInit_inpt(); //input_mod
 extern PyObject* PyInit_timer(); //timer_mod
@@ -107,7 +110,7 @@ int denginescript_python_isinit()
 
 void denginescript_python_terminate()
 {
-    Py_Finalize();
+    Py_FinalizeEx();
 }
 
 int denginescript_python_init()

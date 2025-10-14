@@ -31,7 +31,7 @@ int dengineutils_assets_zip_load(const char* extrapaths)
         "/usr/share/dengine-%s/assets.zip",
         "/usr/local/share/dengine-%s/assets.zip",
     };
-    for(int i = 0; i < DENGINE_ARY_SZ(possible_assetszip_paths); i++)
+    for(size_t i = 0; i < DENGINE_ARY_SZ(possible_assetszip_paths); i++)
     {
         snprintf(buf, sizeof(buf), possible_assetszip_paths[i], DENGINE_VERSION);
         FILE* ok = fopen(buf, "rb");

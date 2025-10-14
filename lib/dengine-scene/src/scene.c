@@ -14,10 +14,6 @@
 
 #include "dengine/viewport.h" //get_view
 #include "dengine-script/script.h"
-#ifdef DENGINE_SCRIPTING_PYTHON
-#include "dengine-script/python/python.h"
-#include "dengine-scene/scriptingsync/python/entity.h"
-#endif
 
 typedef struct
 {

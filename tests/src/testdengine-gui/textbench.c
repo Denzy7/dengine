@@ -4,7 +4,7 @@ int testdengine_gui_textbench(int argc, char** argv)
 {
         
     char textbuf[128];
-    for(int i = 0; i < DENGINE_ARY_SZ(textbuf); i++)
+    for(uint32_t i = 0; i < DENGINE_ARY_SZ(textbuf); i++)
     {
         textbuf[i] = dengineutils_rng_int(91) + 32;
     }

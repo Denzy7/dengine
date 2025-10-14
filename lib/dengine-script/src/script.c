@@ -1,7 +1,6 @@
 #include "dengine-script/script.h"
 
 #include <stdio.h>
-#include <stdlib.h> //free
 #include <string.h> //strdup, memset
 
 #include "dengine-utils/logging.h"

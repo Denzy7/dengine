@@ -191,7 +191,7 @@ extern "C" int basic_world_start(void*)
     }
 
     Material cube_mat_pool[4];
-    for(int i = 0; i < DENGINE_ARY_SZ(cube_mat_pool); i++)
+    for(size_t i = 0; i < DENGINE_ARY_SZ(cube_mat_pool); i++)
     {
         dengine_material_setup(&cube_mat_pool[i]);
         dengine_material_set_shader_color(&stdshdr, &cube_mat_pool[i]);

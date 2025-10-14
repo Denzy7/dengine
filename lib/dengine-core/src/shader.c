@@ -583,7 +583,7 @@ void dengine_shader_set_shadercache(int state)
     shadercache = state;
 }
 
-const uint32_t dengine_shader_sampler2target(const uint32_t sampler)
+uint32_t dengine_shader_sampler2target(const uint32_t sampler)
 {
     DENGINE_DEBUG_ENTER;
 

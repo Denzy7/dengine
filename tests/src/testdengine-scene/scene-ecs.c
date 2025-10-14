@@ -359,7 +359,7 @@ int testdengine_scece_ecs_main(int argc, char **argv)
     dengineutils_rng_set_seedwithtime();
     //feel free to increase pool
     Texture cube_tex_pool[6];
-    for(int i = 0; i < DENGINE_ARY_SZ(cube_tex_pool); i++)
+    for(size_t i = 0; i < DENGINE_ARY_SZ(cube_tex_pool); i++)
     {
         Texture* cube_tex = &cube_tex_pool[i];
         memset(cube_tex, 0, sizeof(Texture));

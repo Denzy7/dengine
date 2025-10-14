@@ -223,7 +223,7 @@ void dengineutils_logging_log(const char* message, ...)
     const LogPair* pair = NULL;
     const char* delim = "";
     LogTarget target = TARGET_NONE;
-    for(int i = 0; i < DENGINE_ARY_SZ(logpairs); i++)
+    for(size_t i = 0; i < DENGINE_ARY_SZ(logpairs); i++)
     {
         if(strstr(LOG_BUFFER, logpairs[i].triggerstr))
         {
