@@ -178,19 +178,24 @@ int denginegui_set_font(const void* ttf, const float fontsize, const uint32_t bi
     void* sysfontmem = NULL;
     if (!ttf) {
         const char* file = _denginegui_get_defaultfont();
-        if (file == NULL) {
+        FILE* file_stdio = NULL;
+
+        if(file)
+            file_stdio = fopen(file, "rb");
+
+        if(file_stdio){
+            fseek(file_stdio, 0, SEEK_END);
+            size_t sz = ftell(file_stdio);
+            rewind(file_stdio);
+            sysfontmem = malloc(sz);
+            fread(sysfontmem, sz, 1, file_stdio);
+            mem = sysfontmem;
+            fclose(file_stdio);
+        }
+
+        if (file_stdio == NULL) {
             dengineutils_logging_log("WARNING::Cannot read default font. Load embfont OpenSans_Light");
             mem = OpenSans_Light_ttf;
-        }else
-        {
-            FILE* f = fopen(file, "rb");
-            fseek(f, 0, SEEK_END);
-            size_t sz = ftell(f);
-            rewind(f);
-            sysfontmem = malloc(sz);
-            fread(sysfontmem, sz, 1, f);
-            mem = sysfontmem;
-            fclose(f);
         }
     }
 
